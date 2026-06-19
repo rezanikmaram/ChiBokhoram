@@ -1,0 +1,35 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+	<PropertyGroup>
+		<TargetFramework>net10.0</TargetFramework>
+		<ApplicationIcon />
+		<OutputType>Library</OutputType>
+		<StartupObject />
+	</PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.8" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.8">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+	<!--<Target Name="Protect" AfterTargets="AfterCompile" BeforeTargets="BeforePublish">
+		<ItemGroup>
+			<Assemblies Include="$(ProjectDir)$(IntermediateOutputPath)$(TargetFileName)" />
+		</ItemGroup>
+		<ArmDot.Engine.MSBuildTasks.ObfuscateTask Inputs="@(Assemblies)" ReferencePaths="@(_ResolveAssemblyReferenceResolvedFiles->'%(RootDir)%(Directory)')" SkipAlreadyObfuscatedAssemblies="true" />
+	</Target>-->
+
+  <!--<PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>-->
+
+  <ItemGroup>
+    <Compile Remove="DbContext\DbContextFactory.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Entities\Entities.csproj" />
+  </ItemGroup>
+</Project>

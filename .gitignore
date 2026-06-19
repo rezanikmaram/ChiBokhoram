@@ -1,0 +1,17 @@
+/**/packages
+/**/bin
+/**/obj
+/**/*.user
+/**/.vs
+.idea/
+.env
+.opencode/
+
+
+
+
+
+/WebPanel/Properties/launchSettings.json
+/APIservice/Properties/launchSettings.json
+/APIservice/Properties/launchSettings.json
+/WebPanel/Error_log
