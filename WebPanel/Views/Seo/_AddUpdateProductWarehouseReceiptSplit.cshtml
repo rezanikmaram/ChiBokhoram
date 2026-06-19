@@ -1,0 +1,74 @@
+﻿@model WarehouseReceiptSplitPageDto
+
+<form asp-action="AddUpdateProductWarehouseReceiptSplit" method="post">
+	<input asp-for="AddUpdateProduct.MasterSeoWarehouseReceiptId" type="hidden" />
+	<div class="row gy-4">
+		<div class="col-sm-6">
+			<div class="form-group">
+				<label> کالا</label>
+				<div class="input-group">
+					<select class="form-control"
+							asp-for="AddUpdateProduct.MasterSeoWarehouseReceiptProductId"
+							asp-items="Model.MasterProducts">
+					</select>
+				</div>
+			</div>
+		</div>
+
+		<div class="col-sm-6">
+			<div class="form-group">
+				<label>صاحب کالا</label>
+				<div class="input-group">
+					<select class="form-control select2" style="width:100%!important;"
+							asp-for="AddUpdateProduct.CompanyOwnerId"
+							asp-items="Model.OwnerCompanies">
+					</select>
+				</div>
+			</div>
+		</div>
+
+		<div class="col-md-2">
+			<label> تعداد</label>
+			<div class="input-group">
+				<input asp-for="AddUpdateProduct.Count" min="1" max="@int.MaxValue" type="number" class="form-control w-100 ">
+				<span asp-validation-for="AddUpdateProduct.Count" class="w-100 text-danger"></span>
+			</div>
+		</div>
+
+		<div class="col-md-2">
+			<label> وزن ناخالص</label>
+			<div class="input-group">
+				<input asp-for="AddUpdateProduct.WeightGross" min="0" max="@int.MaxValue" type="number" class="form-control w-100 ">
+				<span asp-validation-for="AddUpdateProduct.WeightGross" class="w-100 text-danger"></span>
+			</div>
+		</div>
+
+		<div class="col-md-2">
+			<label> وزن خالص</label>
+			<div class="input-group">
+				<input asp-for="AddUpdateProduct.WeightNet" min="0" max="@int.MaxValue" type="number" class="form-control w-100 ">
+				<span asp-validation-for="AddUpdateProduct.WeightNet" class="w-100 text-danger"></span>
+			</div>
+		</div>
+
+
+		<div class="col-md-2">
+			<label> حجم  </label>
+			<div class="input-group">
+				<input asp-for="AddUpdateProduct.Volume" min="0" max="@int.MaxValue" type="number" class="form-control w-100 ">
+				<span asp-validation-for="AddUpdateProduct.Volume" class="w-100 text-danger"></span>
+			</div>
+		</div>
+
+	</div>
+
+
+	<div class="modal-footer px-0 pb-0 border-0 mt-3">
+		<button type="submit" class="btn btn-success btn-round"> ذخیره </button>
+		<button type="button" class="btn btn-danger btn-round" data-bs-dismiss="modal">بازگشت</button>
+	</div>
+
+</form>
+
+<script src="~/assets/js/validation/jquery.validate.min.js"></script>
+<script src="~/assets/js/validation/jquery.validate.unobtrusive.min.js"></script>

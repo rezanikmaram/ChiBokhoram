@@ -1,0 +1,255 @@
+﻿@model VoyageFactorServicePageDto
+@{
+    int j = 1;
+}
+
+
+<div class="card-header">
+    
+    <h3 class="title">
+        <a asp-action="Details"
+           asp-route-factorId="@Model.SeoFactorId">
+            <i class="fa-solid fa-right-to-bracket me-2 align-middle"></i>
+        </a>
+        لیست سرویس/خدمات این صورتحساب
+    </h3>
+    
+    <div class="bg-primary rounded-3 mt-4 p-3">
+        <div class="row gy-3 align-items-center">
+            <div class="col-1">
+                <img src="~/assets/images/rial.png" alt="" class="img-fluid">
+            </div>
+            <div class="col-2">
+                <a asp-action="VoyageSeo" asp-controller="Voyage" asp-route-VoyageId="@Model.VoyageInfo.Id">
+                    <p class="fs-6 fw-bold">شناور: @Model.VoyageInfo.ShipShipName</p>
+                </a>
+                <p class="fs-6 fw-bold"> </p>
+            </div>
+            <div class="col-3">
+                <p class="fs-6 fw-bold">شماره فاکتور : @(Model.Details.NumberFactor ?? "---") </p>
+                <p class="fs-6 fw-bold">تاریخ : @Model.Details.DateFa</p>
+            </div>
+            <div class="col-3">
+                <p class="fs-6 fw-bold">شماره سفر: @Model.VoyageInfo.VoyageNumber</p>
+                <p class="fs-6 fw-bold">شماره دریایی: @Model.VoyageInfo.PmoNumber</p>
+            </div>
+            <div class="col-2">
+                <p class="fs-6 fw-bold">تناژ: @(Model.VoyageInfo.Tonnage?.ToPrice() ?? "0")</p>
+                <p class="fs-6 fw-bold"> تعداد بارنامه: @(Model.VoyageInfo?.CountOfSeo?.ToPrice() ?? "0")</p>
+            </div>
+
+            @* white devider start *@
+            <div class="col-12 border-top border-white"></div>
+            @* white divider end *@
+
+
+            @* @if (User.IsInRole("admin") || User.IsInRole("adminOnePort")) *@
+
+
+
+        </div>
+    </div>
+    <div class="d-flex justify-content-between align-items-end mt-4">
+        <div>
+
+            <div class="input-group d-flex align-items-center">
+                @if (Model?.State != null
+                     && Model?.State == SeoFactorState.Pending)
+                {
+                    <form asp-action="SaveCreditorPrice" method="post">
+                        <input asp-for="SeoFactorId" hidden/>
+                        <div class="d-flex align-items-center">
+                            <p dir="rtl" class="m-0 pe-2">بستانکاری صاحب کالا (ريال) </p>
+                            <div class="d-flex">
+                                <input name="RedirectPage" type="number" value="0" hidden/>
+                                <price-input asp-for="CreditorPrice" placeholder="به ریال"></price-input>
+                                <button class="btn btn-primary rounded px-2 mx-2 w-50" type="submit"> ثبت </button>
+                            </div>
+                        </div>
+
+                    </form>
+                }
+                else
+                {
+                    <p class="m-0 pe-2 ms-1"> بستانکاری صاحب کالا: <span class="fw-bold mx-2 text-success">@Model.CreditorPriceTitle ریال</span> </p>
+                }
+
+
+            </div>
+        </div>
+        <div class=" text-md-end text-center px-0">
+            @if (Model.SeoFactorId != Guid.Empty
+                 && Model?.List?.Any() == true
+                 && Model?.State != null)
+            {
+                if (Model?.Details.State == SeoFactorState.Factor)
+                {
+                    <span id="ReportLinkId" class="">
+                        <a class="btn mx-1 px-2 btn-primary rounded"
+                           asp-action="GetFactorFile"
+                           asp-route-factorId="@Model?.SeoFactorId"
+                           asp-route-type="@AllocationEquFileType.FactorCompany">
+                            <i class="fa-solid fa-download align-middle mx-1"></i> صورتحساب شرکت
+                        </a>
+                        <a class="btn mx-1 px-2 btn-primary rounded"
+                           asp-action="GetFactorFile"
+                           asp-route-factorId="@Model?.SeoFactorId"
+                           asp-route-type="@AllocationEquFileType.FactorOrg">
+                            <i class="fa-solid fa-download align-middle mx-1"></i> صورتحساب سازمان
+                        </a>
+                    </span>
+                }
+
+                else if (Model?.Details.State == SeoFactorState.Pending)
+                {
+                    <span class="">
+                        <a onclick="DeleteAllServices(event)" class="btn btn-sm px-2 btn-danger rounded"
+                           data-bs-toggle="tooltip" data-bs-title="حذف همه">
+                            <i class="icon-trash align-middle fa-flip-horizontal"></i>
+                        </a>
+                        <a class="btn mx-1 px-2 btn-primary rounded"
+                           asp-action="GetPreviewFactor"
+                           asp-route-SeoFactorId="@Model?.SeoFactorId"
+                           asp-route-PreviewFactor="@PreviewFactor.FactorCompany">
+                            <i class="fa-solid fa-download align-middle mx-1"></i> پیش نمایش شرکت
+                        </a>
+                        <a class="btn mx-1 px-2 btn-primary rounded"
+                           asp-action="GetPreviewFactor"
+                           asp-route-SeoFactorId="@Model?.SeoFactorId"
+                           asp-route-PreviewFactor="@PreviewFactor.FactorOrganization">
+                            <i class="fa-solid fa-download align-middle mx-1"></i> پیش نمایش سازمان
+                        </a>
+                    </span>
+                }
+
+            }
+
+
+
+            @if (Model.CanChangeService)
+            {
+                <a style="border-radius:5px; margin:0px 10px" class="btn mx-1 btn-primary" onclick="AddService();">
+                    <i class="icon-plus"></i>
+                    ثبت سرویس/خدمات
+                </a>
+            }
+
+            @if (Model.CanChangeService && Model.List?.Any() == true)
+            {
+                @* <a id="DeleteAllService" onclick="ShowQAlert(event,'DeleteAllService');" class="btn btn-danger px-2 btn-sm btn-icon curve btn-questions"
+                   asp-action="DeleteAllService" asp-route-SeoFactorId="@Model.SeoFactorId">
+                    <i class="icon-trash fs-6 align-middle fa-flip-horizontal"></i>
+                </a> *@
+
+                <a id="EndFactorId"
+                   style="border-radius:5px; margin:0px 10px" class="btn mx-1 btn-success"
+                   onclick="EndFactor(event, '@Model.SeoFactorId');">اتمام صورتحساب </a>
+
+
+            }
+            else if (Model?.CanChangeService == false && Model?.List?.Any() == true
+                                                      && (Model.Details.State == SeoFactorState.Factor))
+            {
+                <a id="BackToPendingStateId" style="border-radius:5px; margin:0px 10px" class="btn btn-success" onclick="BackToPendingState(event, '@Model.SeoFactorId');"> ویرایش صورتحساب </a>
+            }
+
+            <!-- /.portlet-title -->
+            <div class="buttons-box">
+
+                <i class="icon-size-fullscreen"></i>
+                <div class="paper-ripple">
+                    <div class="paper-ripple__background"></div>
+                    <div class="paper-ripple__waves"></div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <!-- /.portlet-heading -->
+</div>
+
+
+<div class="card-body pt-0">
+    <div class="table-responsive">
+        <table class="table table-sm table-bordered table-hover table-striped" id="data-table">
+            <thead class="bg-primary">
+                <tr>
+                    <th class="align-middle" style="width: 5%">ردیف</th>
+
+                    <th class="align-middle">شرح کالا/خدمات</th>
+                    <th class="align-middle">تعداد/مقدار</th>
+                    <th class="align-middle">ضریب</th>
+                    <th class="align-middle">حجم/وزن/روز</th>
+                    <th class="align-middle">قیمت واحد-ريال</th>
+                    <th class="align-middle">جمع</th>
+                    <th class="align-middle">درصد سهم شرکت</th>
+
+                    <th class="align-middle">مبلغ شرکت</th>
+                    <th class="align-middle">مبلغ سازمان</th>
+                    <th>جمع تعرفه مشارکت</th>
+                    @if (Model.CanChangeService)
+                    {
+                        <td class="align-middle">عملیات</td>
+                    }
+
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model?.List?.Any() == true)
+                {
+                    foreach (var item in Model?.List)
+                    {
+                        <tr>
+                            <td class="align-middle">@(j++)</td>
+                            <td class="align-middle">@item.Description </td>
+                            <td class="align-middle">@item.Count.ToPrice()</td>
+                            <td class="align-middle">@item.Zarib.ToPrice()</td>
+                            <td class="align-middle">@item.LargerWeightOrVolume.ToPrice()</td>
+
+                            <td class="align-middle">@item.PriceOne.ToPrice()</td>
+                            <td class="align-middle">@item.SumPrice.ToPrice()</td>
+                            <td class="align-middle">@item.PercentCompany</td>
+
+
+                            <td class="align-middle">@item.TotalPriceCompany.ToPrice()</td>
+                            <td class="align-middle">@item.TotalPriceOrg.ToPrice()</td>
+                            <td class="align-middle">@item.TotalPriceMosharekat.ToPrice()</td>
+
+                            @if (Model.CanChangeService)
+                            {
+                                <td class="align-middle px-2 text-center">
+                                  
+                                    @* <a class="btn btn-warning px-2 btn-sm btn-icon curve" onclick="editService('@item.Id');"><i class="icon-pencil fs-6 align-middle"></i></a> *@
+
+                                    <a onclick="DeleteService(event, '@item.Id');" class="btn btn-danger btn-sm btn-icon curve px-2 btn-questions">
+                                        <i class="icon-trash fs-6 align-middle active fa-flip-horizontal"></i>
+                                    </a>
+
+                                </td>
+                            }
+                        </tr>
+                    }
+                }
+
+
+
+
+            </tbody>
+        </table>
+
+    </div>
+</div>
+
+
+@if (Model?.Details.State == SeoFactorState.Factor)
+{
+    <p class="m-4">
+        <span class="label fw-bold rounded px-2 py-1 label-warning">وضعیت فاکتور اجازه ویرایش سرویس ها را نمی دهد. وضعیت فعلی : @Model.Details.State.ToDisplay()</span>
+    </p>
+}
+
+<script>
+	$('[data-bs-toggle="tooltip"]').tooltip('dispose').tooltip();
+</script>
+
+

@@ -1,0 +1,202 @@
+@model Entities.DTOs.Web.Hirman.AllVoyageWeightReportPageDto
+@{
+    ViewData["Title"] = "گزارش تناژ همه سفرها";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+    int i = 1;
+}
+
+@* <div class="card p-2 mb-4"> *@
+@*     <div class="row"> *@
+@*         <div class="col-md-1 align-middle align-content-center px-4"> *@
+@*             <i class="fa-solid fa-circle-info fs-4 align-middle"></i> *@
+@*         </div> *@
+@*         <div class="col-md-11 px-5"> *@
+@*             <div class="d-flex justify-content-between align-items-center"> *@
+@*                 <div class="glass-bg px-2 py-1"> *@
+@*                     <p class="fs-6 m-0"> گزارش تناژ همه سفرها @(string.IsNullOrWhiteSpace(Model.Filter?.DateFromFa) && string.IsNullOrWhiteSpace(Model.Filter?.DateToFa) ? "" : "بر اساس بازه زمانی")</p> *@
+@*                 </div> *@
+@*                 @if (!string.IsNullOrWhiteSpace(Model.Filter?.DateFromFa)) *@
+@*                 { *@
+@*                     <div> *@
+@*                         <p class="fs-6 m-0">از تاریخ: @Model.Filter?.DateFromFa</p> *@
+@*                     </div> *@
+@*                 } *@
+@*                 @if (!string.IsNullOrWhiteSpace(Model.Filter?.DateToFa)) *@
+@*                 { *@
+@*                     <div> *@
+@*                         <p class="fs-6 m-0">تا تاریخ: @Model.Filter?.DateToFa</p> *@
+@*                     </div> *@
+@*                 } *@
+@*             </div> *@
+@*         </div> *@
+@*     </div> *@
+@* </div> *@
+
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center pb-3">
+        <div class="d-flex">
+            <a asp-action="Index" class="text-dark fs-6">
+                <i class="fa-solid fa-right-to-bracket me-2 text-primary"></i>
+            </a>
+            <h3 class="title m-0"> گزارش تناژ همه سفرها</h3>
+        </div>
+        <div class="d-flex gap-2">
+            <a asp-action="ExportAllVoyageWeightReportExcel"
+               asp-route-dateFromFa="@Model.Filter?.DateFromFa"
+               asp-route-dateToFa="@Model.Filter?.DateToFa"
+               class="btn btn-success">
+                <i class="fa-solid fa-download me-2"></i>دانلود خروجی اکسل
+            </a>
+        </div>
+    </div>
+
+    <div class="card-body pt-0">
+        <form id="formFilter" asp-action="AllVoyageWeightReport" method="get">
+            <div class="form-body">
+                <div class="row gy-4">
+                    <div class="col-md-3 col-sm-12">
+                        <div class="form-group">
+                            <label><i class="fa-solid fa-calendar me-2 text-primary"></i> از تاریخ:</label>
+                            <div class="input-group d-flex flex-column">
+                                <input type="text" class="form-control" name="Filter.DateFromFa" id="DateFromFa" autocomplete="off" placeholder="از تاریخ" value="@Model.Filter?.DateFromFa">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-sm-12">
+                        <div class="form-group">
+                            <label><i class="fa-solid fa-calendar me-2 text-primary"></i> تا تاریخ:</label>
+                            <div class="input-group d-flex flex-column">
+                                <input type="text" class="form-control" name="Filter.DateToFa" id="DateToFa" autocomplete="off" placeholder="تا تاریخ" value="@Model.Filter?.DateToFa">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group col-md-2">
+                        <button style="border-radius:5px; margin-top:30px" class="alert-icon px-3 btn btn-success" type="submit">
+                            فیلتر
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+        <div class="table-responsive mt-3">
+            <table class="table table-sm table-bordered table-hover table-striped" id="data-table">
+                <thead class="bg-primary">
+                    <tr>
+                        <th class="px-1 text-center">#</th>
+                        <th class="px-1 text-center">شماره سفر</th>
+                        <th class="px-1 text-center">نوع کالا</th>        @* ✅ NEW *@
+                        <th class="px-1 text-center">صاحب کالا</th>      @* ✅ NEW *@
+                        <th class="px-1 text-center">شماره بارنامه (B/L)</th>
+                        <th class="px-1 text-center">نام شناور</th>
+                        <th class="px-1 text-center">تاریخ اولین تالی</th>
+                        <th class="px-1 text-center">تناژ کل شناور</th>
+                        <th class="px-1 text-center">تناژ کل بارنامه</th>
+                        <th class="px-1 text-center">تناژ باسکول (کیلوگرم)</th>
+                        <th class="px-1 text-center">اختلاف (کیلوگرم)</th>
+                        <th class="px-1 text-center">از تاریخ</th>
+                        <th class="px-1 text-center">تا تاریخ</th>
+                       
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Items != null)
+                    {
+                        foreach (var item in Model.Items)
+                        {
+                            <tr>
+                                <td class="align-middle px-2 text-center">@(i++)</td>
+                                <td class="align-middle px-2 text-center">@item.VoyageNumber</td>
+                                <td class="align-middle px-2 text-center">@item.ProductCategory</td>  @* ✅ NEW *@
+                                <td class="align-middle px-2 text-center">@item.ProductOwner</td>     @* ✅ NEW *@
+                                <td class="align-middle px-2 text-center">@item.BlNumber</td>
+                                <td class="align-middle px-2 text-center">@item.ShipName</td>
+                                <td class="align-middle px-2 text-center">@item.DateFirstTaliPersian</td>
+                                <td class="align-middle px-2 text-center">@((item.VoyageTonnage)?.ToString("N0") ?? "-")</td>
+                                <td class="align-middle px-2 text-center">@item.ShipTonnage.ToString("N0")</td>
+                                <td class="align-middle px-2 text-center">@item.BaskoolTonnage.ToString("N0")</td>
+                                <td class="align-middle px-2 text-center">@item.Difference.ToString("N0")</td>
+                                <td class="align-middle px-2 text-center">@item.DateFromFa</td>
+                                <td class="align-middle px-2 text-center">@item.DateToFa</td>
+                               
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+
+            <div id="pager" class="d-flex justify-content-between align-items-center mt-2">
+                <div class="d-flex align-items-center gap-2">
+                    <label class="m-0">نمایش:</label>
+                    <select id="pageSize" class="form-select form-select-sm" style="width:auto">
+                        <option value="10">10</option>
+                        <option value="25" selected>25</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                        <option value="0">همه</option>
+                    </select>
+                    <span id="pageInfo" class="ms-2 small text-muted"></span>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <button type="button" id="prevPage" class="btn btn-primary btn-sm"><i class="fa-solid fa-right me-2"></i> قبلی</button>
+                    <button type="button" id="nextPage" class="btn btn-primary btn-sm"> بعدی <i class="fa-solid fa-left ms-2"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section script {
+    <script src="~/assets/js/validation/jquery.validate.min.js"></script>
+    <script src="~/assets/js/validation/jquery.validate.unobtrusive.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            kamaDatepicker('DateFromFa', customOptions);
+            kamaDatepicker('DateToFa', customOptions);
+
+            (function () {
+                const $table = $('#data-table');
+                const $rows = $table.find('tbody tr');
+                const $pager = $('#pager');
+                if ($rows.length === 0) { $pager.hide(); return; }
+
+                let currentPage = 1;
+                let pageSize = parseInt($('#pageSize').val(), 10);
+
+                function render() {
+                    const total = $rows.length;
+                    if (pageSize === 0) {
+                        $rows.show();
+                        $('#prevPage, #nextPage').prop('disabled', true);
+                        $('#pageInfo').text(`نمایش 1–${total} از ${total}`);
+                        return;
+                    }
+                    const totalPages = Math.max(1, Math.ceil(total / pageSize));
+                    if (currentPage > totalPages) currentPage = totalPages;
+                    const startIdx = (currentPage - 1) * pageSize;
+                    const endIdx = Math.min(startIdx + pageSize, total);
+                    $rows.hide().slice(startIdx, endIdx).show();
+                    $('#prevPage').prop('disabled', currentPage === 1);
+                    $('#nextPage').prop('disabled', currentPage === totalPages);
+                    $('#pageInfo').text(`صفحه ${currentPage} از ${totalPages} — نمایش ${startIdx + 1}–${endIdx} از ${total}`);
+                }
+
+                $('#pageSize').on('change', function () {
+                    pageSize = parseInt($(this).val(), 10);
+                    currentPage = 1;
+                    render();
+                });
+                $('#prevPage').on('click', function () {
+                    if (currentPage > 1) { currentPage--; render(); }
+                });
+                $('#nextPage').on('click', function () {
+                    const total = $rows.length;
+                    const totalPages = pageSize === 0 ? 1 : Math.max(1, Math.ceil(total / pageSize));
+                    if (currentPage < totalPages) { currentPage++; render(); }
+                });
+
+                render();
+            })();
+        });
+    </script>
+}

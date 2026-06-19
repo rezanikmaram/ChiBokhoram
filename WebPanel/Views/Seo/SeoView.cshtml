@@ -1,0 +1,227 @@
+﻿@model SeoDetailDto
+@{
+    ViewData["Title"] = "نمای عملیات CHO";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-5 ">
+            <div class="card">
+                <div class="card-header pb-0 ">
+                    <div class="row">
+                        <h5 class="title">
+                            <a asp-action="SeoAccessPage" asp-controller="seo" asp-route-seoId="@Model?.SeoInfo?.Id"><i class="fa-solid fa-right-to-bracket me-2"></i></a>
+
+                            جزئیات @Model.SeoInfo.SeoCode
+                        </h5>
+            @*             <a class="btn btn-lg" data-bs-original-title="کوچک کردن" data-bs-toggle="collapse" href="#collapseSeoInfo" role="button" aria-expanded="false" aria-controls="collapseSeoInfo">
+                            <span class="icon-angle-down"></span>
+                        </a> *@
+                    </div>
+                </div><!-- /.portlet-title -->
+                <div class="card-body px-0">
+                @*     <div class="collapse" id="collapseSeoInfo">
+                        <div class="card card-body"> *@
+                            <partial name="_SeoDetails" model="Model.SeoInfo" />
+                     @*    </div>
+                    </div> *@
+                </div><!-- /.buttons-box -->
+                @*جزئیات CHO*@
+            </div>
+        </div>
+        <div class="col-md-7 debit-card">
+            <div class="card">
+                <div class="card-header pb-0">
+                    <h5 class="title">
+
+                        مشخصات
+                    </h5>
+                    <!-- /.buttons-box -->
+                </div><!-- /.portlet-heading -->
+                <div class="card-body">
+                    <ul class="nav nav-tabs">
+                        <li class="nav-item">
+                            <a class="nav-link active" data-bs-toggle="tab" href="#tab1">کامیون ها</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link " data-bs-toggle="tab" href="#tab2">راننده ها</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#tab3">تجهیزات</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#tab4">انبارها</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#tab5">گزارش سرویس ها</a>
+                        </li>
+                        @*<li class="pull-left">
+                        <a class="pull-left p-b-0" href="#">همه دیدگاه ها</a>
+                        </li>*@
+                    </ul>
+
+                    <div class="tab-content mt-4 pt-1">
+                        <div id="tab1" class="tab-pane active fade show">
+                            <div class="comments-box ">
+                                <div class="mt-1 mb-3">
+                                    <a asp-action="GetSeoTruckExcelFile" asp-controller="Report" asp-route-seoId="@Model.SeoInfo.Id" class="btn btn-success rounded label mb-2">خروجی اکسل</a>
+
+                                </div>
+                                <table class="table-hover table-bordered table-stripedtable-hover table-striped w-100">
+                                    <thead class="bg-primary">
+                                        <tr>
+                                            <th class="px-3" >کامیون</th>
+                                            <th class="py-2 px-2" >متعلق به شرکت</th>
+                                            <th class="px-3" >شناسه</th>
+                                            <th class="px-3" >Rfid</th>
+                                            <th class="px-2" >سرویس بارشمار</th>
+                                            <th class="px-2" >سرویس تکمیل شده</th>
+                                            <th class="px-3" >وضعیت</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in Model.Trucks)
+                                        {
+                                            <tr>
+
+                                                <td>@item.TruckName</td>
+                                                <td>@item.CompanyCompanyName</td>
+                                                <td>
+                                                    <label class="label-success label text-center" style="width:100%"> @item.TruckNumberId</label>
+                                                </td>
+                                                <td>@item.RfId</td>
+                                                <td>@item.CountServiceBarshomar</td>
+                                                <td>@item.CountServiceComplited</td>
+                                                <td>
+                                                    <span class="label label-@(item.IsActive?"success":"danger")">@(item.IsActive ? "فعال" : "غیر فعال")</span>
+                                                </td>
+
+
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div><!-- /.comments-box -->
+                        </div><!-- /.tab-pane -->
+
+                        <div id="tab2" class="tab-pane  fade show">
+                            <div class="comments-box ">
+                                <div class="mt-1 mb-3">
+                                    <a asp-action="GetSeoDriverExcelFile" asp-controller="Report" asp-route-seoId="@Model.SeoInfo.Id" class="btn label btn-success mb-2">خروجی اکسل</a>
+                                    <br />
+                                </div>
+                                <table class="table table-bordered table-hover table-striped">
+                                    <thead class="bg-primary">
+                                        <tr>
+                                            <th>راننده</th>
+                                            <th>شماره تلفن</th>
+                                            <th>کد ملی</th>
+                                            <th>شرکت</th>
+
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in Model.Drivers)
+                                        {
+                                            <tr>
+                                                <td>@item.Name</td>
+                                                <td>@item.Phone</td>
+                                                <td>
+                                                    @item.CodeMeli
+                                                </td>
+                                                <td>@item.CompanyName</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div><!-- /.comments-box -->
+                        </div><!-- /.tab-pane -->
+
+                        <div id="tab3" class="tab-pane fade">
+                            <div class="comments-box">
+                                <table class="table table-bordered table-hover table-striped">
+                                    <thead class="bg-primary">
+                                        <tr>
+                                            <th>تجهیز</th>
+                                            <th>نوع تجهیز</th>
+
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in Model.Equipments)
+                                        {
+                                            <tr>
+
+                                                <td>@item.Name</td>
+                                                <td>@item.EquipmentType.ToDisplay()</td>
+
+
+
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div><!-- /.comments-box -->
+                        </div><!-- /.tab-pane -->
+
+                        <div id="tab4" class="tab-pane fade">
+                            <div class="comments-box">
+                                <table class="table table-bordered table-hover table-striped">
+                                    <thead class="bg-primary">
+                                        <tr>
+                                            <th>انبار</th>
+
+
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in Model.SeoWareHouses)
+                                        {
+                                            <tr>
+
+                                                <td>@item.Name</td>
+
+
+
+
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div><!-- /.comments-box -->
+                        </div><!-- /.tab-pane -->
+
+                        <div id="tab5" class="tab-pane fade">
+                            <div class="comments-box">
+                                <table class="table table-bordered table-hover table-striped">
+                                    <thead class="">
+                                        <tr>
+                                            <th>بارشمار </th>
+                                            <th>@Model.SeoTransport.Barshomar</th>
+                                        </tr>
+                                        <tr>
+                                            <th>انباردار</th>
+                                            <th>@Model.SeoTransport.Warehous</th>
+                                        </tr>
+                                        <tr>
+                                            <th>حمل یکسره</th>
+                                            <th>@Model.SeoTransport.UnloadOneTime</th>
+                                        </tr>
+                                        <tr>
+                                            <th>تکمیل شده</th>
+                                            <th>@Model.SeoTransport.Completed</th>
+                                        </tr>
+                                    </thead>
+
+                                </table>
+                            </div><!-- /.comments-box -->
+                        </div>
+
+                    </div><!-- /.tab-content -->
+                </div><!-- /.portlet-body -->
+            </div>
+        </div>
+    </div>
+</div>
+

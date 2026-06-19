@@ -1,0 +1,301 @@
+﻿@model WarehouseReceiptOutboundMangerPageDto
+@{
+	ViewData["Title"] = "مجوزهای خروجی گمرک";
+	Layout = "~/Views/Shared/AdminLayout.cshtml";
+	int i = ((Model.WarehouseReceiptOutbounds.PageNumber - 1) * Model.WarehouseReceiptOutbounds.PageSize) + 1;
+}
+
+<div class="col-lg-12">
+	<div class="card">
+		<div class="card-header pb-0">
+			<div class="d-flex justify-content-between mb-4">
+
+				<h3 class="title">
+					<i class="icon-frane"></i>
+					مجوزهای خروجی گمرک
+				</h3>
+
+				@* @if (User.IsInRole("admin") || User.IsInRole("adminOnePort")) *@
+
+				<a style="border-radius:5px; margin:0px 10px" onclick="showCreateWarehouseReceiptOutboundModal()"
+				   class="btn btn-primary d-md-block d-none">
+					<i class="icon-plus"></i>
+					ثبت پرونده گمرک
+				</a>
+				
+			</div>
+			<form id="formFilter" asp-action="List" asp-route-p="" method="post">
+				<input name="p" id="pageNumber" hidden />
+				<div class="form-body ">
+					<div class="row gy-4">
+
+						<div class="form-group col-xxl-4 col-md-6">
+							<label>شرکت</label>
+							<div class="input-group">
+								<select class="form-control select2"
+								        asp-for="Filter.CompanyId"
+								        asp-items="Model.OwnerCompanies">
+									<option value="">همه شرکت ها</option>
+								</select>
+							</div>
+						</div>
+
+						<div class="form-group col-xxl-2 col-md-3 ">
+							<label>از تاریخ:</label>
+							<div class="input-group d-flex flex-column">
+								<input asp-for="Filter.DateFrom" type="text" class=" form-control " autocomplete="off">
+								<span asp-validation-for="Filter.DateFrom" class="text-danger"></span>
+							</div>
+						</div>
+
+						<div class="form-group col-xxl-2 col-md-3">
+							<label>تا تاریخ:</label>
+							<div class="input-group d-flex flex-column">
+								<input asp-for="Filter.DateTo" type="text" class=" form-control" autocomplete="off">
+								<span asp-validation-for="Filter.DateTo" class="text-danger"></span>
+							</div>
+						</div>
+
+						<div class="form-group col-xxl-2 col-md-6">
+							<label>جستجو:</label>
+							<div class="input-group ">
+								<input asp-for="Filter.Search" type="text" class=" form-control rounded" placeholder="شماره پرونده/شماره کارت">
+								<span asp-validation-for="Filter.Search" class="text-danger"></span>
+							</div>
+						</div>
+
+						<div class="col-md-1">
+							<button style="margin-top:30px; border-radius:5px" class="alert-icon btn btn-success " type="submit">
+								<p class="px-3 m-0">فیلتر</p>
+							</button>
+						</div>
+
+					</div>
+				</div>
+			</form>
+		</div>	
+		<div class="card-body">
+			<div class="table-responsive">
+		<table class="table table-bordered table-hover table-striped" id="data-table">
+			<thead class="bg-primary">
+				<tr>
+					<th>ردیف</th>
+					<th>شماره پرونده</th>
+					<th>شماره کارت</th>
+					<th>شرکت تحویل گیرنده / قبض انبار</th>
+					<th>مبدا حمل</th>
+					<th>شماره گواهی مبدا</th>
+					<th>مقصد حمل</th>
+					<th>تاریخ صدور</th>
+					<th>روش خروج</th>
+					<th>وضعیت</th>
+					<th>عملیات</th>
+				</tr>
+			</thead>
+			<tbody>
+				@foreach (var item in Model.WarehouseReceiptOutbounds.Data)
+				{
+					<tr>
+						<td class="align-middle">@(i++)</td>
+						<td class="align-middle">@item.CaseNumber</td>
+						<td class="align-middle">@item.CardNumber</td>
+						<td class="align-middle">@item.CompanyAndSwrNumber</td>
+						<td class="align-middle">@item.Origin</td>
+						<td class="align-middle">@item.OriginCertificateNumber</td>
+					<td class="align-middle">@item.Destination</td>
+					<td class="align-middle">@item.IssueDateFa</td>
+					<td class="align-middle">@item.OutboundMethodTypeTitle</td>
+					<td class="align-middle">@item.StatusTitle</td>
+						<td class="align-middle">
+							<a asp-action="Details" asp-route-wroId="@item.Id" class="btn btn-primary px-2 my-2 rounded">
+								<i class="fa-solid fa-boxes"></i> مدیریت
+							</a>
+
+							@* <a href="~/WarehouseReceiptOutbound/GetWarehouseReceiptOutboundProducts?warehouseReceiptOutboundId=@item.Id" class="btn btn-primary px-2 my-2 rounded">
+								<i class="fa-solid fa-boxes"></i> لیست کالاها
+							</a> *@
+							<a onclick="editWarehouseReceiptOutbound('@item.Id')" class="btn btn-warning px-2 my-2 rounded">
+								<i class="fa-solid fa-edit"></i> ویرایش
+							</a>
+						</td>
+					</tr>
+				}
+			</tbody>
+		</table>
+		<div class="mt-4">
+			<cs-pager cs-paging-pagesize="@Model.WarehouseReceiptOutbounds.PageSize"
+					  cs-paging-pagenumber="@Model.WarehouseReceiptOutbounds.PageNumber"
+					  cs-paging-totalitems="@Model.WarehouseReceiptOutbounds.TotalItems"
+					  cs-paging-maxpageritems="10"
+					  cs-pagenumber-param="p"
+					  cs-show-first-last="true"
+					  cs-suppress-empty-nextprev="true"
+					  cs-suppress-inactive-firstlast="true"
+					  cs-show-numbered="true"
+					  cs-first-page-text="ابتدا"
+					  cs-last-page-text="انتها"
+					  cs-next-page-title="بعدی"
+					  cs-previous-page-title="قبلی"
+					  cs-first-page-title="ابتدا"
+					  cs-last-page-title="انتها"
+					  cs-next-page-text="بعدی"
+					  cs-previous-page-text="قبلی"
+					  cs-pager-li-current-class="page-item active"
+					  cs-pager-li-other-class="page-item"
+					  cs-pager-li-non-active-class="page-item disabled"
+					  cs-pager-link-current-class="page-link"
+					  cs-pager-link-other-class="page-link"
+					  asp-controller="WarehouseReceiptOutbound"
+					  asp-action="List">
+			</cs-pager>
+		</div>
+	</div>
+			<!-- /.table-responsive -->
+		</div>
+
+	</div>
+
+	<!-- Products Modal -->
+
+</div>
+
+
+
+
+<div id="generalmodal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" tabindex="-1">
+	<div class="modal-dialog modal-dialog-centered modal-xl">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h4 class="modal-title">مجوز خروج کالا</h4>
+				<button type="button" class="close btn-close rounded border" data-bs-dismiss="modal"></button>
+			</div>
+			<div class="modal-body" id="modalbody">
+				<partial name="_CreateWarehouseReceiptOutbound" model="@Model.CreateDto" />
+
+			</div>
+		</div>
+	</div>
+</div>
+
+@section script {
+	<script>
+
+
+		$(document).ready(function () {
+			// $('body').on('shown.bs.modal', '.modal', function() {
+			//   var $modal = $(this);
+			//   $modal.find('select').each(function() {
+			// 	if (!$(this).hasClass('select2-hidden-accessible')) { // اگر قبلاً Select2 نشده
+			// 	  $(this).select2({
+			// 		dropdownParent: $modal, // استفاده از modal به عنوان parent
+			// 		// options دیگر...
+			// 	  });
+			// 	}
+			//   });
+			// });
+
+			configSelect2();
+
+			kamaDatepicker('Filter_DateFrom', customOptions);
+			kamaDatepicker('Filter_DateTo', customOptions);
+
+			$(".page-link").click(function (event) {
+				event.preventDefault();
+				var hrefValue = $(this).attr("href");
+				$("#pageNumber").val(hrefValue.split("p=")[1]);
+				$("#formFilter").submit();
+			});
+
+		});
+
+		function configSelect2()
+		{
+			$('.select2').select2();
+
+			$('select[class*="generalmodal"].select2').select2({
+				dropdownParent: $('#generalmodal')
+			});
+		}
+
+		function showCreateWarehouseReceiptOutboundModal() {
+			if($("#Id").val())
+			{
+				$.post("@Url.Action("GetWarehouseReceiptOutboundId", "WarehouseReceiptOutbound")", { warehouseReceiptOutboundId: '' })
+				.done(function (res) {
+					$("#modalbody").html(res);
+				});
+			}
+			 
+			$("#ReceiverCompanyId").prop("disabled", false);
+			$("#ReceiverCompanyId").removeClass("disabled");
+			$("#SeoWarehouseReceiptId").prop("disabled", false);
+			$("#SeoWarehouseReceiptId").removeClass("disabled");
+
+			$('#generalmodal').modal('show')
+		}
+
+		function editWarehouseReceiptOutbound(id) {
+
+			$.post("@Url.Action("GetWarehouseReceiptOutboundId", "WarehouseReceiptOutbound")", { warehouseReceiptOutboundId: id })
+				.done(function (res) {
+					$("#modalbody").html(res);
+					 
+					$("#ReceiverCompanyId").trigger('change');
+					$("#ReceiverCompanyId").prop("disabled", true);
+					$("#ReceiverCompanyId").addClass("disabled");
+
+					const savedValue = $("#SeoWarehouseReceiptIdForEdit").val();
+					if (savedValue && savedValue !== '00000000-0000-0000-0000-000000000000') {
+						$("#SeoWarehouseReceiptId").prop("disabled", true);
+						$("#SeoWarehouseReceiptId").addClass("disabled");
+					}
+					
+					 
+					$("#generalmodal").modal('show');
+				});
+				 
+		}
+
+
+		async function getSwr() {
+			try {
+				const url = "@Url.Action("GetSeoWarehouseReceiptByCompanyIdAsJson", "WarehouseReceiptOutbound")";
+				const companyId = $("#ReceiverCompanyId").val();
+
+				const data = await $.getJSON(url, { companyId });
+
+				let options = '<option value="">انتخاب کنید</option>';
+				data.forEach(val => {
+					if (val) {
+						options += `<option value="${val.id}">${val.title}</option>`;
+					}
+				});
+
+				$("#SeoWarehouseReceiptId").html(options);
+
+				 
+				const savedValue = $("#SeoWarehouseReceiptIdForEdit").val();
+				if (savedValue) {
+					$('#SeoWarehouseReceiptId').val(savedValue).trigger('change');
+				}
+
+				return true;  
+
+			} catch (error) {
+				console.error("Error fetching warehouse receipts:", error);
+				$("#SeoWarehouseReceiptId").html('<option value="">انتخاب کنید</option>');
+				return false;
+			}
+		}
+
+		$('#generalmodal').on('change', '#ReceiverCompanyId', async function () {
+			await getSwr();
+			configSelect2();
+		});
+
+		// $(document).on('change', '#ReceiverCompanyId', function () {
+		// 	getSwr();
+		// });
+
+	</script>
+}

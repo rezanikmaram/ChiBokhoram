@@ -1,0 +1,101 @@
+﻿@model CreateDistanceWaterfrontPageDto
+
+<link href="~/assets/plugins/select2/dist/css/select2.min.css" rel="stylesheet">
+
+<form asp-action="Distanc" method="post">
+    <input asp-for="CreateDto.Id" type="hidden" />
+
+    <div class="card-body py-0">
+
+        <div class="form-body">
+            <div class="row">
+
+                <div class="col-sm-12">
+                    <div class="form-group ">
+                        <label> انبار</label>
+                        <div class="input-group">
+                            <select class="form-control select2" asp-for="CreateDto.WarehouseId"
+                                    asp-items="Model.Warehouses" style="width:100%!important;">
+                            </select>
+                            <span asp-validation-for="CreateDto.WarehouseId" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-12">
+                    <div class="form-group my-3">
+                        <label>اسکله</label>
+                        <div class="input-group">
+                            <select class="form-control select2" asp-for="CreateDto.WaterfrontId"
+                                    asp-items="Model.Waterfronts"
+                                    style="width:100%!important;">
+                            </select>
+                            <span asp-validation-for="CreateDto.WaterfrontId" class="text-danger"></span>
+
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-sm-6">
+                    <div class="form-group  ">
+                        <label>حداقل فاصله</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" asp-for="CreateDto.MinDistance" required>
+                            <span asp-validation-for="CreateDto.MinDistance" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label>حداکثر فاصله</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" asp-for="CreateDto.MaxDistance">
+                            <span asp-validation-for="CreateDto.MaxDistance" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+
+
+
+            </div>
+
+            <div class="modal-footer border-0 px-0 mt-3">
+                <button type="submit" class="btn btn-success btn-round">ذخیره</button>
+                <button type="button" class="btn btn-danger btn-round" data-bs-dismiss="modal">بازگشت</button>
+            </div>
+        </div>
+
+
+
+
+    </div>
+
+</form>
+
+  <script src="~/assets/js/validation/jquery.validate.min.js"></script>
+ <script src="~/assets/js/validation/jquery.validate.unobtrusive.min.js"></script>
+
+
+<script>
+    $(document).ready(function () {
+
+        selectRefresh();
+
+    });
+
+
+    function selectRefresh() {
+
+        $("#CreateDto_WarehouseId").select2({
+            dropdownParent: $('#generalmodal')
+        });
+        $("#CreateDto_WaterfrontId").select2({
+            dropdownParent: $('#generalmodal')
+        });
+
+        $("#CreateDto_WarehouseId").trigger('change');
+        $("#CreateDto_WaterfrontId").trigger('change');
+    }
+</script>

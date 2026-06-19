@@ -1,0 +1,70 @@
+﻿@model SiteViewModel
+@{
+    ViewData["Title"] = "سایت ها";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+    int i = 1;
+    //var c = (Guid)ViewBag.CompanyId;
+    //SiteDto newDto = new SiteDto() { CompanyId = c };
+}
+
+
+<div class="col-lg-12">
+    <div class="card">
+        <div class="card-header pb-0">
+            <div class="d-flex">
+                <div class="d-flex justify-content-between">
+                    <h3 class="title">
+                        @* <a asp-controller="Company" asp-action="Details" asp-route-companyId="@ViewBag.companyId"><i class="fa-solid fa-right-to-bracket me-2"></i></a> *@
+                        <i class="icon-frane"></i> سایت های شرکت: @ViewBag.CompanyName
+                    </h3>
+                </div>
+            </div>
+        </div>
+        <div class="card-body pt-0">
+            <div id="createsite">
+                <partial model="Model.SiteDto" name="_CreateSite" />
+            </div>
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover table-striped" id="data-table">
+                    <thead class="bg-primary">
+                        <tr>
+                            <th>ردیف</th>
+                            <th>نام سایت</th>
+                            <td>عملیات</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.Sites)
+                        {
+                            <tr>
+                                <td>@(i++)</td>
+                                <td>@item.Name</td>
+                                <td>
+                                    <a class="btn btn-warning btn-sm btn-icon curve px-2" onclick="loadsite('@item.Id');"><i class="icon-pencil fs-6 align-middle"></i></a>
+                                    <a id="DeleteSite@(i)" onclick="ShowQAlert(event,'DeleteSite@(i)');" class="btn btn-danger btn-sm btn-icon curve btn-questions px-2"
+                                       asp-action="DeleteSite" asp-route-siteId="@item.Id">
+                                        <i class="icon-trash fa-flip-horizontal fs-6 align-middle"></i>
+                                    </a>
+                                </td>
+                            </tr>
+
+                        }
+                    </tbody>
+                </table>
+
+            </div>
+            <!-- /.table-responsive -->
+        </div>
+        <!-- /.portlet -->
+    </div>
+</div>
+<script>
+    function loadsite(id) {
+        
+        $.post("@Url.Action("GetSiteDto","Warehouse")", { siteId: id }).done(function (res) {
+            $("#createsite").html(res);
+
+        });
+    }
+</script>
+

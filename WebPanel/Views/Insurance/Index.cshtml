@@ -1,0 +1,150 @@
+@{
+    ViewData["Title"] = "Insurance";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+<div class="card">
+    <div class="card-header pb-0">
+        <div class="d-flex justify-content-between">
+            <div>
+                <h3>
+                    <span> <i class="far fa-shield text-success2 align-middle"></i> </span>پورتال بیمه البرز 
+                </h3>
+            </div>
+            <div>
+                <button class="btn btn-primary">
+                    فاکتور های صادر شده
+                </button>
+                <button class="btn btn-success"  data-bs-toggle="modal" data-bs-target="#NewINS">
+                      +  صدور فاکتور جدید
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="d-flex justify-content-between w-50">
+            <input type="search" class="border me-3 p-2 rounded w-100" placeholder="جستجو: شماره پروانه، قبض، صاحب کالا و ..">
+            <div>
+                <button class="btn btn-success h-100"> <i class="far fa-search"></i> </button>
+            </div>
+        </div>
+        <div class="p-2 mt-4">
+            <table class="table table-striped">
+                <thead>
+                <tr class="bg-success2 text-center">
+                    <th scope="col"> ردیف </th>
+                    <th scope="col"> شماره پروانه گمرکی	 </th>
+                    <th scope="col">شماره قبض انبار	</th>
+                    <th scope="col"> ارزش گمرکی (تومان)	 </th>
+                    <th scope="col"> مبلغ بیمه (تومان)	 </th>
+                    <th scope="col"> تاریخ شروع	 </th>
+                    <th scope="col"> تاریخ پایان	 </th>
+                    <th scope="col"> وضعیت </th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr class="text-center">
+                    <th scope="row">1</th>
+                    <td>Mark</td>
+                    <td>Otto</td>
+                    <td>000</td>
+                    <td>000</td>
+                    <td>000</td>
+                    <td>000</td>
+                    <td>
+                        <div class="bg-warning p-1 rounded-pill text-center px-0">
+                            در انتظار پرداخت
+                        </div>
+                    </td>
+                </tr>
+                <tr class="text-center">
+                    <th scope="row">2</th>
+                    <td>Jacob</td>
+                    <td>Otto</td>
+                    <td>000</td>
+                    <td>000</td>
+                    <td>000</td>
+                    <td>000</td>
+                    <td>
+                        <div class="bg-warning p-1 rounded-pill text-center px-0">
+                            در انتظار پرداخت
+                        </div>
+                    </td>
+                </tr>
+                <tr class="text-center">
+                    <th scope="row">3</th>
+                    <td>John</td>
+                    <td>Otto</td>
+                    <td>000</td>
+                    <td>000</td>
+                    <td>000</td>
+                    <td>000</td>
+                    <td>
+                        <div class="bg-success p-1 rounded-pill text-center px-0">
+                           پرداخت شده
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<!-- Modal -->
+<div class="modal fade" id="NewINS" data-bs-backdrop="static"  tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exampleModalLabel">  <span> <i class="far fa-clipboard text-success2 align-middle me-2"></i> </span> صدور فاکتور بیمه جدید    </h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div>
+                    <div class="row gy-4">
+                        <div class="col-md-4">
+                            <lable> شماره پروانه گمرکی </lable>
+                            <input type="text" placeholder="مثال: c25-6464-123468" class="border mt-2 p-2 rounded w-100">
+                        </div>
+                        <div class="col-md-4">
+                            <lable> شماره قبض انبار</lable>
+                            <input type="text" placeholder="مثال: c25-6464-123468" class="border mt-2 p-2 rounded w-100">
+                        </div>
+                        <div class="col-md-4 align-content-end">
+                            <button class="btn btn-success px-2 w-100 mb-1">
+                                جستجو و لود اطلاعات صاحب کالا
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-5">
+                    <div class="row gy-4 border-top">
+                        <div class="col-md-6">
+                            <lable> شرکت نمونه تجاری </lable>
+                            <input type="text" placeholder=" نام شرکت" class="border mt-2 p-2 rounded w-100">
+                        </div>
+                        <div class="col-md-6">
+                            <lable> تاریخ شروع بیمه نامه </lable>
+                            <input type="text" placeholder="1404/02/12" class="border mt-2 p-2 rounded w-100">
+                        </div>
+                        <div class="col-md-6">
+                            <lable> ارزش گمرکی ( تومان ) </lable>
+                            <input type="text" placeholder=" 5000000 تومان " class="border mt-2 p-2 rounded w-100">
+                        </div>
+                        <div class="col-md-6">
+                            <lable> تاریخ پایان بیمه نامه </lable>
+                            <input type="text" placeholder="1404/02/12" class="border mt-2 p-2 rounded w-100">
+                        </div>
+                        <div class="col-md-6">
+                            <lable> مبلغ بیمه به تومن  </lable>
+                            <input type="text" placeholder="مبلغ بیمه را وارد کنید" class="border mt-2 p-2 rounded w-100">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success w-100" data-bs-dismiss="modal"><span> <i class="far fa-clipboard-check"></i> </span> ثبت و صدور بیمه  </button>
+            </div>
+        </div>
+    </div>
+</div>
+

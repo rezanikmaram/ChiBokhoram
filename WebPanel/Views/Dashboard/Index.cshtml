@@ -1,0 +1,165 @@
+﻿@model DashboardAdminPageDto
+
+@{
+	ViewData["Title"] = "داشبورد مدیریت";
+	Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+<div class="col-lg-12 pt-4">
+	<div class="row gy-4">
+		<div class="col-12 m-0">
+			<div class="card mb-0">
+				<div class="card-body p-2">
+					<div class="row mx-0 p-2 gy-4">
+						<div class="col-12 border-bottom">
+							<div class="d-flex align-items-center">
+								<i class="fas fa-money-bill me-2 text-success"></i>مالی
+							</div>
+						</div>
+						<div class="col-md-3">
+							<div class="card shadow-none border p-3 mb-2">
+								<span class="d-flex"><i class="fa-solid align-middle fa-cash-register me-2 text-primary"></i> <h4> مبلغ کل (ريال) </h4></span>
+								<h3 class="border-bottom border-primary">@(Model.SeoFactorInfo?.TotalPrice.ToPrice() ?? "0")</h3>
+							</div>
+						</div>
+						<div class="col-md-3">
+							<div class="card shadow-none border p-3 mb-2">
+								<span class="d-flex"><i class="fa-solid fa-building me-2 text-info"></i><h4> سهم شرکت </h4></span>
+								<h3 class="border-bottom border-info">@(Model.SeoFactorInfo?.CompanyPrice.ToPrice() ?? "0")</h3>
+							</div>
+						</div>
+						<div class="col-md-3">
+							<div class="card shadow-none border p-3 mb-2">
+								<span class="d-flex"><i class="fa-solid fa-scroll me-2 text-success"></i><h4>  تعداد صورتحساب ها </h4></span>
+								<h3 class="border-bottom border-success">@(Model.SeoFactorInfo?.FactorCount.ToPrice() ?? "0")</h3>
+							</div>
+						</div>
+						<div class="col-md-3">
+							<div class="card shadow-none border p-3 mb-2">
+								<span class="d-flex"><i class="fa-solid fa-list-check me-2 text-warning"></i><h4> مجموع واریزی شرکت </h4></span>
+								<h3 class="border-bottom border-warning">@(Model.SeoFactorInfo?.IncomeCompanyPrice.ToPrice() ?? "0")</h3>
+							</div>
+						</div>
+					</div>
+					<div class="card-footer px-3 py-0 border-0">
+						<div class="row gy-4">
+							<div class="col-12 border-bottom">
+								<div class="d-flex align-items-center">
+									<i class="fas fa-chart-pie me-2 text-danger"></i> وضعیت کل
+								</div>
+							</div>
+							<div class="col-md-3">
+								<div class="card bg-primary p-3">
+									<div class="card-header bg-primary p-0 my-2">
+										<p class="h4"><i class="fas fa-ship me-2"></i> تعداد شناور ها </p>
+									</div>
+									<h3 class="fw-bold">@Model.VoyageCount.ToPrice()</h3>
+								</div>
+							</div>
+							<div class="col-md-3">
+								<div class="card bg-info p-3">
+									<div class="card-header bg-info p-0 my-2">
+										<p class="h4"><i class="fas fa-cogs me-2"></i> تعداد تجهیزات </p>
+									</div>
+									<h3 class="fw-bold">@Model.GearCount.ToPrice()</h3>
+								</div>
+							</div>
+							<div class="col-md-3">
+								<div class="card bg-success p-3">
+									<div class="card-header bg-success p-0 my-2">
+										<p class="h4"><i class="fas fa-weight-hanging me-2"></i> وزن تخلیه شده </p>
+									</div>
+									<h3 class="fw-bold">@Model.WeightTali.ToPrice() کیلوگرم</h3>
+								</div>
+							</div>
+							<div class="col-md-3">
+								<div class="card bg-warning p-3">
+									<div class="card-header bg-warning p-0 my-2">
+										<p class="h4"><i class="fa-solid fa-clipboard-list me-2"></i> مجموع بارنامه ها </p>
+									</div>
+									<h3 class="fw-bold">@Model.SeoCount.ToPrice()</h3>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-6">
+			<div class="card p-3 m-0">
+				<div class="d-flex align-items-center mb-2">
+					<i class="fas fa-bridge-water me-2 align-middle text-danger"></i><span> اسکله های فعال </span>
+				</div>
+				<table class="table">
+					<thead>
+						<tr>
+							<th class="bg-primary rounded-end " scope="col">#</th>
+							<th class="bg-primary" scope="col">نام اسکله</th>
+							<th class="bg-primary" scope="col">شماره</th>
+							 
+						</tr>
+					</thead>
+					<tbody>
+						@{
+							int i = 1;
+						}
+						@foreach (var item in Model.Waterfronts)
+						{
+							<tr>
+								<th scope="row">@(i++)</th>
+								<td>@item.WaterfrontName</td>
+								<td>@item.WaterfrontNumber</td>
+							</tr>
+						}
+					</tbody>
+				</table>
+			</div>
+		</div>
+		<div class="col-md-6">
+			<div class="card p-3 m-0">
+				<div class="d-flex align-items-center mb-2">
+					<i class="fas fa-warehouse align-middle me-2 text-danger"></i><span> وضعیت انبار ها</span>
+				</div>
+				<table class="table">
+					<thead>
+						<tr>
+							<th class="bg-primary rounded-end " scope="col">#</th>
+							<th class="bg-primary" scope="col">نام انبار</th>
+							<th class="bg-primary" scope="col">تناژ کالا موجود</th>
+							 
+						</tr>
+					</thead>
+					<tbody>
+						@{
+							i = 1;
+						}
+						@foreach (var item in Model.Warehouses)
+						{
+							<tr>
+								<th scope="row">@(i++)</th>
+								<td>@item.Name</td>
+								<td>@item.WeightTonTitle</td>
+								 
+							</tr>
+						}
+						
+						 
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+
+
+
+@section script {
+
+	<script>
+
+
+	</script>
+}
+

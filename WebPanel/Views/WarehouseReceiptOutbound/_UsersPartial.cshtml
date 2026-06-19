@@ -1,0 +1,105 @@
+@model WroMobileUsersManagerDto
+@using Common.enumeration
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card rounded-3 h-100">
+            <div class="card-header">
+                <div class="d-flex justify-content-between">
+                    <h5 class="m-0">
+                        <i class="icon-user"></i>
+                        انتخاب کاربر
+                    </h5>
+                    <button class="btn btn-success btn-sm" onclick="setUsersForWro()">
+                        <i class="fa-solid fa-plus"></i> اضافه کردن انتخاب شده ها
+                    </button>
+                </div>
+                <div class="mt-3">
+                    <div class="row">
+                        <div class="col-md-5">
+                            <input type="text" id="userSearch" class="form-control" placeholder="نام/شماره تلفن" 
+                                   value="@Model.FilterDto.Search" onkeypress="if(event.keyCode==13) filterUsers()">
+                        </div>
+                        <div class="col-md-4">
+                            <select id="userTypeFilter" class="form-control select2">
+                                <option value="">همه کاربرها</option>
+                                <option value="2" selected="@(Model.FilterDto.UserMobileType == UserMobileType.BarshomarMohavate ? "selected" : null)">@(UserMobileType.BarshomarMohavate.ToDisplay())</option>
+                                <option value="6" selected="@(Model.FilterDto.UserMobileType == UserMobileType.Barshomar ? "selected" : null)">@(UserMobileType.Barshomar.ToDisplay())</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <button class="btn btn-primary w-100" onclick="filterUsers()">
+                                <i class="fa-solid fa-filter"></i> فیلتر
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body pt-0 mb-5">
+                <table class="table table-bordered">
+                    <thead class="bg-primary">
+                        <tr>
+                            <th><input type="checkbox" id="selectAllAvailable" /></th>
+                            <th>نام و نام خانوادگی</th>
+                            <th>نوع</th>
+                            <th>موبایل</th>
+                            <th>کد ملی</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.Users)
+                        {
+                            <tr>
+                                <td style="width:30px;"><input type="checkbox" value="@item.Id" name="availableUserId" /></td>
+                                <td>@item.UserFullName</td>
+                                <td>@item.TypeTitle</td>
+                                <td>@item.Phone</td>
+                                <td>@item.MeliCode</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card rounded-3 h-100">
+            <div class="card-header">
+                <div class="d-flex justify-content-between">
+                    <h5 class="m-0">
+                        <i class="icon-speech"></i>
+                        کاربران انتخاب شده (@Model.SelectedUsers.Count)
+                    </h5>
+                    <button class="btn btn-danger btn-sm" onclick="removeUsersFromWro()">
+                        <i class="fa-solid fa-trash"></i> حذف انتخاب شده ها
+                    </button>
+                </div>
+            </div>
+            <div class="card-body pt-0">
+                <table class="table table-bordered">
+                    <thead class="bg-primary">
+                        <tr>
+                            <th><input type="checkbox" id="selectAllSelected" /></th>
+                            <th>نام و نام خانوادگی</th>
+                            <th>نوع</th>
+                            <th>موبایل</th>
+                            <th>کد ملی</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.SelectedUsers)
+                        {
+                            <tr>
+                                <td style="width:30px;"><input type="checkbox" value="@item.Id" name="selectedUserId" /></td>
+                                <td>@item.UserFullName</td>
+                                <td>@item.TypeTitle</td>
+                                <td>@item.Phone</td>
+                                <td>@item.MeliCode</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

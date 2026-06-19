@@ -1,0 +1,190 @@
+﻿@model CreateVesselDto
+
+<link href="~/assets/plugins/select2/dist/css/select2.min.css" rel="stylesheet">
+
+<form asp-action="CreateVessel" method="post">
+    <input asp-for="Id" type="hidden" />
+    <div class="card-body">
+
+        <div class="col-md-12">
+            <div class="form-body row gy-3">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>نام شناور</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control rounded" asp-for="Name">
+                                <span asp-validation-for="Name" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>قرارداد </label>
+                            <div class="input-group">
+                            <input type="text" class="form-control rounded" asp-for="Contract">
+                                <span asp-validation-for="Contract" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label>بندر ثبت</label>
+                            <div class="input-group">
+                                <select class="form-control" asp-for="PortId" asp-items="@ViewBag.Ports">
+                                </select>
+                                <span asp-validation-for="PortId" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label>شماره آیمو </label>
+                            <div class="input-group">
+                            <input type="text" class="form-control rounded" asp-for="IMONo">
+                                <span asp-validation-for="IMONo" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label>علامت خطاب</label>
+                            <div class="input-group">
+                            <input type="text" class="form-control rounded" asp-for="CallSign">
+                                <span asp-validation-for="CallSign" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label>نوع شناور فارسی </label>
+                            <div class="input-group">
+                            <input type="text" class="form-control rounded" asp-for="PersianTypeOfVessel">
+                                <span asp-validation-for="PersianTypeOfVessel" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label>نوع شناور</label>
+                            <div class="input-group">
+                            <input type="text" class="form-control rounded" asp-for="TypeOfVessel">
+                                <span asp-validation-for="TypeOfVessel" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label>شرکت سازنده </label>
+                            <div class="input-group">
+                            <input type="text" class="form-control rounded" asp-for="CompanyOfBuilt">
+                                <span asp-validation-for="CompanyOfBuilt" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label>محل ساخت شناور فارسی</label>
+                            <div class="input-group">
+                            <input type="text" class="form-control rounded" asp-for="PersianPlaceOfBuilt">
+                                <span asp-validation-for="PersianPlaceOfBuilt" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label>محل ساخت شناور </label>
+                            <div class="input-group">
+                            <input type="text" class="form-control rounded" asp-for="PlaceOfBuilt">
+                                <span asp-validation-for="PlaceOfBuilt" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label>تحت کلاس فارسی</label>
+                            <div class="input-group">
+                            <input type="text" class="form-control rounded" asp-for="PersianClassedBy">
+                                <span asp-validation-for="PersianClassedBy" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label>تحت کلاس </label>
+                            <div class="input-group">
+                            <input type="text" class="form-control rounded" asp-for="ClassedBy">
+                                <span asp-validation-for="ClassedBy" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>  
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label>ظرفیت ناخالص</label>
+                            <div class="input-group">
+                            <input type="text" class="form-control rounded" asp-for="GT">
+                                <span asp-validation-for="GT" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label>ظرفیت خالص </label>
+                            <div class="input-group">
+                            <input type="text" class="form-control rounded" asp-for="NT">
+                                <span asp-validation-for="NT" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label>طول سرتاسری</label>
+                            <div class="input-group">
+                            <input type="text" class="form-control rounded" asp-for="LengthOveral">
+                                <span asp-validation-for="LengthOveral" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label>عرض میانی </label>
+                            <div class="input-group">
+                            <input type="text" class="form-control rounded" asp-for="MouldedBreadth">
+                                <span asp-validation-for="MouldedBreadth" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label>عمق</label>
+                            <div class="input-group">
+                            <input type="text" class="form-control rounded" asp-for="MouldedDepth">
+                                <span asp-validation-for="MouldedDepth" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="form-group">
+                            <label>مالک</label>
+                            <div class="input-group">
+                            <input type="text" class="form-control rounded" asp-for="Owner">
+                                <span asp-validation-for="Owner" class="text-danger"></span>
+                            </div>
+                        </div>
+                </div>
+            </div>
+            <div class="card-footer bg-white px-0 border-0 align-content-end text-end">
+                <button type="submit" class="btn btn-success btn-round">ذخیره</button>
+                <button type="button" class="btn btn-danger btn-round" data-bs-dismiss="modal">بازگشت</button>
+            </div>
+        </div>
+    </div>
+
+</form>
+
+
+  <script src="~/assets/js/validation/jquery.validate.min.js"></script>
+ <script src="~/assets/js/validation/jquery.validate.unobtrusive.min.js"></script>
+

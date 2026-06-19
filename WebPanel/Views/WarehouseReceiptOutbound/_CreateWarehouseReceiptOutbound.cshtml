@@ -1,0 +1,185 @@
+﻿@model CreateWarehouseReceiptOutboundDto
+@using Common.enumeration.Hirman
+
+<div class="col-lg-12">
+    <div class="card">
+
+        <form asp-action="CreateWarehouseReceiptOutbound" method="post">
+            <input type="hidden" asp-for="Id" />
+            <input type="hidden" id="SeoWarehouseReceiptIdForEdit" value="@Model.SeoWarehouseReceiptId" />
+            <div class="card-body py-0">
+                <div class="form-body">
+                    <div class="row gy-4">
+                        <!-- First Row -->
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label>شماره پرونده</label>
+                                <div class="input-group">
+                                    <input type="text" asp-for="CaseNumber" class="form-control rounded" required>
+                                </div>
+                                <span asp-validation-for="CaseNumber" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label>شماره کارت</label>
+                                <div class="input-group">
+                                    <input asp-for="CardNumber" class="form-control rounded">
+                                </div>
+                                <span asp-validation-for="CardNumber" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label>شرکت تحویل گیرنده</label>
+                                <div class="input-group d-flex flex-nowrap">
+                                    <select class="form-control rounded select2 generalmodal" asp-for="ReceiverCompanyId" asp-items="@Model.OwnerCompanies">
+                                        <option value="">انتخاب کنید</option>
+                                    </select>
+                                </div>
+                                <span asp-validation-for="ReceiverCompanyId" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label>قبض انبار</label>
+                                <div class="input-group d-flex flex-nowrap">
+                                    <select class="form-control rounded select2 generalmodal" asp-for="SeoWarehouseReceiptId">
+                                        <option value="">انتخاب کنید</option>
+                                    </select>
+                                </div>
+                                <span asp-validation-for="SeoWarehouseReceiptId" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label>روش خروج @(Model.HasActivity ? "(" + Model.ActivityTypeText + ")" : "")</label>
+                                <div class="input-group">
+                                    <select class="form-control select2 generalmodal" asp-for="OutboundMethodType"
+                                            asp-items="@Html.GetEnumSelectList<OutboundMethodType>()" disabled="@Model.HasActivity">
+                                    </select>
+                                </div>
+                                <span asp-validation-for="OutboundMethodType" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label>تاریخ صدور</label>
+                                <div class="input-group d-flex flex-column">
+                                    <input asp-for="IssueDateFa" class="form-control rounded persian-datepicker" autocomplete="off">
+                                </div>
+                                <span asp-validation-for="IssueDateFa" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label>نماینده قانونی</label>
+                                <div class="input-group">
+                                    <input type="text" asp-for="Agent" class="form-control rounded">
+                                </div>
+                                <span asp-validation-for="Agent" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label>مبدا حمل</label>
+                                <div class="input-group">
+                                    <input type="text" asp-for="Origin" class="form-control rounded">
+                                </div>
+                                <span asp-validation-for="Origin" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label>شماره گواهی مبدا</label>
+                                <div class="input-group">
+                                    <input type="text" asp-for="OriginCertificateNumber" class="form-control rounded">
+                                </div>
+                                <span asp-validation-for="OriginCertificateNumber" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label>مقصد حمل</label>
+                                <div class="input-group">
+                                    <input type="text" asp-for="Destination" class="form-control rounded">
+                                </div>
+                                <span asp-validation-for="Destination" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label>مقدار ارزش</label>
+                                <div class="input-group">
+                                    <price-input asp-for="TotalValue"></price-input>
+                                </div>
+                                <span asp-validation-for="TotalValue" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label>نرخ تبدیل ارز</label>
+                                <div class="input-group">
+                                    <price-input asp-for="ExchangeRate"></price-input>
+                                </div>
+                                <span asp-validation-for="ExchangeRate" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label>نوع ارز</label>
+                                <div class="input-group">
+                                    <select class="form-control select2 generalmodal" asp-for="CurrencyType"
+                                            asp-items="@Html.GetEnumSelectList<CurrencyType>()"
+                                            style="width:100%!important;">
+                                    </select>
+                                    <span asp-validation-for="CurrencyType"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label>حمل کننده کالا</label>
+                                <div class="input-group">
+                                    <input type="text" asp-for="Consignor" class="form-control rounded">
+                                </div>
+                                <span asp-validation-for="Consignor" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="form-actions text-end m-4 my-0">
+                <button type="submit" class="btn btn-info btn-round">
+                    <i class="icon-check"></i>
+                    ذخیره
+                    <div class="paper-ripple"><div class="paper-ripple__background"></div><div class="paper-ripple__waves"></div></div>
+                </button>
+
+            </div>
+        </form>
+        <section class="fix"></section>
+    </div>
+</div>
+
+
+<script src="~/assets/js/validation/jquery.validate.min.js"></script>
+<script src="~/assets/js/validation/jquery.validate.unobtrusive.min.js"></script>
+
+<script>
+
+    $(document).ready(function () {
+        $('select[class*="generalmodal"].select2').select2({
+            dropdownParent: $('#generalmodal')
+        });
+
+        kamaDatepicker('IssueDateFa', customOptions);
+
+    });
+
+
+</script>
+

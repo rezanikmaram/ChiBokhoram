@@ -1,0 +1,160 @@
+﻿@model DistanceWaterfrontPageDto
+@{
+    ViewData["Title"] = "لیست فاصله انبار تا اسکله";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+    int i =  1;
+}
+
+<div class="col-lg-12">
+    <div class="card">
+        <div class="card-header pb-0 mb-4">
+            <div class="d-flex justify-content-between">
+
+                    <h3 class="title">
+                        <i class="icon-frane"></i> فاصله انبار تا اسکله
+                    </h3>
+
+                    <div>
+
+                    <a class="alert-icon btn btn-success round" asp-controller="Waterfront" asp-action="GetExcellDistance">خروجی اکسل</a>
+
+                    <a style="border-radius:5px; margin:0px 10px"
+                           class="btn btn-primary"
+                           onclick="createDistance();"><i class="fa-solid fa-plus me-2"></i>ثبت فاصله جدید</a>   
+                        
+                    </div>
+            </div>
+            <!-- /.portlet-heading -->
+           
+            <!-- /.portlet-body -->
+        </div>
+        <div class="card-body pt-0">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover table-striped" id="data-table">
+                    <thead class="bg-primary">
+                        <tr>
+                            <th>#</th>
+                            <th>انبار</th>
+                            <th>اسکله</th>
+                            <th>حداقل زمان(دقیقه)</th>
+                            <th>حداکثر زمان(دقیقه)</th>
+                            <td>عملیات</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+
+                        @foreach (var item in Model.DistanceList)
+                        {
+                            <tr class="second-row">
+                                <td class="align-middle">@(i++)</td>
+                                <td class="align-middle">@item.Warehouse</td>
+                                <td class="align-middle">@item.Waterfront</td>
+                                <td class="align-middle">@item.MinDistance</td>
+                                <td class="align-middle">@item.MaxDistance</td>
+
+                                <td class="align-middle">
+                                    <a class="btn btn-warning btn-sm btn-icon px-2 curve" onclick="editDistance('@item.Id');"><i class="icon-pencil fs-6 align-middle"></i></a>
+ 
+                                  </td>
+                            </tr>
+
+                        }
+
+
+
+                    </tbody>
+                </table>
+
+
+            </div>
+            <!-- /.table-responsive -->
+        </div>
+        <!-- /.portlet -->
+    </div>
+</div>
+
+
+
+<div id="generalmodal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title mx-3">ثبت فاصله</h4>
+                <button type="button" class="close btn-close rounded border" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="modalbody">
+                <partial name="_CreateDistanc" model="Model.CreateDistancePage" />
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section script {
+    <script src="~/assets/plugins/select2/dist/js/select2.full.min.js"></script>
+    <script src="~/assets/plugins/select2/dist/js/i18n/fa.js"></script>
+    <script src="~/assets/js/pages/select2.js"></script>
+
+
+    <script>
+
+        $(document).ready(function () {
+             
+            $("#CreateDto_WarehouseId").select2({
+                dropdownParent: $('#generalmodal')
+            });
+            $("#CreateDto_WaterfrontId").select2({
+                dropdownParent: $('#generalmodal')
+            });
+             
+        });
+
+
+        function createDistance() {
+            $("#CreateDto_Id").val('');
+            $("#CreateDto_WarehouseId").val('');
+            $("#CreateDto_WaterfrontId").val('');
+            $("#CreateDto_MinDistance").val('');
+            $("#CreateDto_MaxDistance").val('');
+             
+            $("#CreateDto_WarehouseId").select2({
+                dropdownParent: $('#generalmodal')
+            });
+            $("#CreateDto_WaterfrontId").select2({
+                dropdownParent: $('#generalmodal')
+            });
+
+            $("#CreateDto_WarehouseId").trigger('change');
+            $("#CreateDto_WaterfrontId").trigger('change');
+
+            $("#generalmodal").modal('show');
+
+        }
+
+        function editDistance(id) {
+
+            $.post("@Url.Action("GetDistancePageById", "Waterfront")", { distanceId: id })
+                .done(function (res) {
+                    $("#modalbody").html(res);
+
+                    // document.getElementById("CreateDto_WarehouseId").classList.add("disabled");
+                    // document.getElementById("CreateDto_WaterfrontId").classList.add("disabled");
+
+                    $("#generalmodal").modal('show');
+                })
+                .fail(function (xhr, status, error) {
+                    location.reload();
+                });
+        }
+
+
+        $(".page-link").click(function (event) {
+            event.preventDefault(); // غیرفعال کردن عملکرد پیشفرض href
+
+            var hrefValue = $(this).attr("href");
+            $("#pageNumber").val(hrefValue.split("p=")[1]);
+            $("#formFilter").submit();
+        });
+    </script>
+}

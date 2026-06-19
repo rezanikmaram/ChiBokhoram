@@ -1,0 +1,721 @@
+﻿@model WarehouseReceiptMangerPageDto
+@{
+    ViewData["Title"] = "مدیریت قبض انبار";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+    int row = 1;
+    int swrRow = ((Model.WarehouseReceipts.PageNumber - 1) * Model.WarehouseReceipts.PageSize) + 1 ;
+}
+
+
+<div class="">
+    <div class="card mb-3">
+        <div class="card-body py-3">
+            <div class="row gy-4 ">
+                <div class="col-md-4 d-flex align-items-center">
+                    <h3 class="title">
+                        <i class="icon-frane"></i>    لیست قبض انبار
+                    </h3>
+                    <a class="mx-3 filter-collapse" data-bs-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false" aria-controls="collapseExample">
+                        فیلتر ها <i class="fa-solid fa-angle-down mx-2 align-middle"></i>
+                    </a>
+                </div>
+                <div class="col-12 d-md-none d-block">
+                    <div class="dropdown w-100">
+                        <button class="dropbtn w-100 btn btn-info rounded" type="submit">
+                            <i class="icon-printer"></i>
+                            دریافت گزارش <i class="icofont icofont-arrow-down align-middle"></i>
+                        </button>
+                        <div class="dropdown-content">
+                            <button onclick="ShowModalReportGroupingByCompany(event)" class="btn w-100 mx-0 px-2 my-2 btn-outline-primary-2x rounded-0">
+                                رسوب کالا براساس شرکت
+                            </button>
+
+                            <button onclick="ShowModalReportGroupingByProductCategory(event)" class="btn w-100 mx-0 px-2 my-2 btn-outline-primary-2x rounded-0">
+                                رسوب کالا براساس دسته بندی کالا
+                            </button>
+
+                            <button onclick="ShowModalReportGroupingByWarehouse(event)" class="btn w-100 mx-0 px-2 my-2 btn-outline-primary-2x rounded-0">
+                                رسوب کالا براساس انبار
+                            </button>
+
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex col-md-8 col-12 justify-content-end d-none d-md-flex">
+                    <div class="dropdown">
+                        <button class="dropbtn btn btn-info rounded" type="submit">
+                            <i class="icon-printer"></i>
+                            دریافت گزارش <i class="icofont icofont-arrow-down align-middle"></i>
+                        </button>
+                        <div class="dropdown-content">
+                            <button onclick="ShowModalReportGroupingByCompany(event)" class="btn w-100 mx-0 px-2 my-2 btn-outline-primary-2x rounded-0">
+                                رسوب کالا براساس شرکت
+                            </button>
+                            <button onclick="ShowModalReportGroupingByProductCategory(event)" class="btn w-100 mx-0 px-2 my-2 btn-outline-primary-2x rounded-0">
+                                رسوب کالا براساس دسته بندی کالا
+                            </button>
+
+                            <button onclick="ShowModalReportGroupingByWarehouse(event)" class="btn w-100 mx-0 px-2 my-2 btn-outline-primary-2x rounded-0">
+                                رسوب کالا براساس انبار
+                            </button>
+                        </div>
+                    </div>
+                    <div class="buttons-box">
+                        <i class="icon-size-fullscreen"></i>
+                        <div class="paper-ripple">
+                            <div class="paper-ripple__background"></div>
+                            <div class="paper-ripple__waves"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="collapse" id="collapseExample">
+            <div class="card-body">
+                <form id="formFilter" asp-action="List" asp-route-p="" method="post">
+                    <input name="p" id="pageNumber" hidden />
+                    <div class="form-body ">
+                        <div class="row">
+
+                            <div class="form-group col-md-5">
+                                <label>شرکت</label>
+                                <div class="input-group">
+                                    <select class="form-control select2"
+                                            asp-for="Filter.CompanyId"
+                                            asp-items="Model.OwnerCompanies">
+                                        <option value="">همه شرکت ها</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group col-md-3">
+                                <label>انبار</label>
+                                <div class="input-group">
+                                    <select class="form-control select2"
+                                            asp-for="Filter.WarehouseId"
+                                            asp-items="Model.Warehouses">
+                                        <option value="">همه انبارها</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group col-md-4">
+                                <label>ورود دریایی/خشکی</label>
+                                <div class="input-group">
+                                    <select class="form-control select2"
+                                            asp-for="Filter.EntryRouteType"
+                                            asp-items="@Html.GetEnumSelectList<EntryRouteType>()">
+                                        <option value="">دریا و خشکی</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="row mt-3">
+                                <div class="form-group col-md-2">
+                                    <label>از تاریخ:</label>
+                                    <div class="input-group">
+                                        <input asp-for="Filter.DateFrom" type="text" class=" form-control" autocomplete="off">
+                                        <span asp-validation-for="Filter.DateFrom" class="text-danger"></span>
+                                    </div>
+                                </div>
+
+                                <div class="form-group col-md-2 ">
+                                    <label>تا تاریخ:</label>
+                                    <div class="input-group">
+                                        <input asp-for="Filter.DateTo" type="text" class=" form-control" autocomplete="off">
+                                        <span asp-validation-for="Filter.DateTo" class="text-danger"></span>
+                                    </div>
+                                </div>
+
+                                <div class="form-group col-md-2">
+                                    <label>  جستجو:</label>
+                                    <div class="input-group">
+                                        <input asp-for="Filter.Search" type="text" class=" form-control rounded" placeholder="شماره قبض انبار/شماره بارنامه">
+                                        <span asp-validation-for="Filter.Search" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-2 d-flex justify-content-start flex-wrap align-content-center">
+                                    <div class="">
+                                        <button style="margin-top:26px; border-radius:5px" class="alert-icon btn btn-success " type="submit"><p class="px-3">فیلتر</p></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-12 px-2 mx-0">
+        <div class="card">
+            <div class="card-body">
+                <div class="accordion" id="accordionExample">
+                    @if (Model?.WarehouseReceipts != null && Model.WarehouseReceipts.Data?.Any() == true) {
+                        foreach (var item in Model.WarehouseReceipts.Data)
+                        {
+                            <div class="accordion-item">
+                                <h2 class="accordion-header ">
+                                    <button class="accordion-button collapsed @(row % 2 == 0 ? "bg-white" : "bg-light")" type="button" data-bs-toggle="collapse" data-bs-target="#collapse@(row)" aria-expanded="false" aria-controls="collapse@(row)">
+                                        <div class="align-middle bg-info p-1 px-2 rounded-circle text-info text-white">
+                                            <span>
+                                                @(swrRow++) 
+                                            </span>
+                                        </div>
+                                        <div class="responsive-accordion-btn">
+                                             <div class="d-flex justify-content-between gap-4 align-items-center px-3">
+                                            <div class="text-dark">
+                                                <span class="text-secondary"> شماره قبض: </span> @item.Number
+                                            </div>
+                                            <div class="text-dark">
+                                                <span class="text-secondary"> شماره بارنامه/مجوز: </span>
+                                                @if (item.EntryRouteType == EntryRouteType.EntryFromSea)
+                                                {
+                                                    <a target="_blank" asp-action="seoAccessPage" asp-controller="Seo" class="text-dark px-2 "
+                                                       asp-route-seoId="@item.SeoId">
+                                                        @item.BillOfLadingNumber
+                                                    </a>
+                                                }
+                                                else
+                                                {
+                                                    <a target="_blank" asp-action="Details" asp-controller="InlandExportManifest" class="text-dark px-2 "
+                                                       asp-route-Id="@item.InlandExportManifestId">
+                                                        @item.BillOfLadingNumber
+                                                    </a>
+                                                }
+                                            </div>
+                                            <div class="text-dark">
+                                                <span class="text-secondary"> کشتی: </span> @item.SeoShipShipName
+                                            </div>
+                                            <div class="text-dark">
+                                                <span class="text-secondary"> تعداد کالا: </span> @(item.Products?.Count ?? 0)
+                                            </div>
+                                        </div>
+                                            <div class="d-flex justify-content-between gap-4 align-items-center px-3 responsive-mt3 mt-3">
+                                            <div class="text-dark">
+                                                <span class="text-secondary"> نوع ورود: </span> @item.EntryRouteTypeTitle
+                                            </div>
+                                            <div class="text-dark">
+                                                <span class="text-secondary"> صاحب کالا: </span> @item.CompanyOwnerCompanyName
+                                            </div>
+                                            <div class="text-dark">
+                                                <span class="text-secondary"> تاریخ صدور: </span> @item.CreatedDateFa
+                                            </div>
+                                        </div>
+                                        </div>
+                                    </button>
+                                </h2>
+                                <div id="collapse@(row++)" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
+                                    <div class="accordion-body p-1">
+                                        <div class="table-responsive" style="min-height: 24rem"> 
+                                            <table class="table table-bordered table-hover table-striped" id="data-table"> 
+                                                <thead class="bg-primary">  
+                                                <tr> 
+                                                    <th class="align-middle">کالا</th> 
+                                                    <th class="px-0"><div class="px-3">تعداد</div> <hr class="my-1" /> <div class="px-3">باقیمانده</div></th> 
+                                                    <th class="px-0"><div class="px-1"> وزن ناخالص </div> <hr class="my-1" /> <div class="px-3">باقیمانده</div></th> 
+                                                    <th class="px-0"><div class="px-1"> وزن خالص </div> <hr class="my-1" /> <div class="px-3">باقیمانده</div></th> 
+                                                    <th class="px-0"><div class="px-3"> حجم </div> <hr class="my-1" /> <div class="px-3">باقیمانده</div></th> 
+                                                    <td class="align-middle">انبار</td> 
+                                                    <td class="align-middle">روز مانده در انبار</td> 
+                                                    <th class="align-middle">حق بیمه</th> 
+                                                    <th class="align-middle">ارزش گمرکی</th> 
+                                                    <th class="align-middle">تایید توسط بیمه</th> 
+                                                    <td class="align-middle">عملیات</td> 
+                                                </tr> 
+                                                </thead> 
+                                                <tbody> 
+                                                   
+                                                <tr> 
+                                                    <td class="align-middle"> <a class="btn btn-outline-info px-2" onclick="ShowModalSwrProductFullInfo('@item.Products[0].Id')"> @item.Products[0].ProductFullTitle</a> </td> 
+                                                    <td class="align-middle px-0 py-4"> 
+                                                        <div class="mb-1 px-3">@item.Products[0].Count.ToPrice()</div> 
+                                                        <hr class="my-1" /> 
+                                                        <div class="px-3">@item.Products[0].RemainingCount.ToPrice()</div> 
+                                                    </td> 
+                                                    <td class="align-middle px-0 py-4"> 
+                                                        <div class="mb-1 px-3">@item.Products[0].WeightGross.ToPrice()</div> 
+                                                        <hr class="my-1" /> 
+                                                        <div class="px-3">@item.Products[0].RemainingWeightGross.ToPrice()</div> 
+                                                    </td> 
+                                                    <td class="align-middle px-0 py-4"> 
+                                                        <div class="mb-1 px-3">@item.Products[0].WeightNet.ToPrice()</div> 
+                                                        <hr class="my-1" /> 
+                                                        <div class="px-3">@item.Products[0].RemainingWeightNet.ToPrice()</div> 
+                                                    </td> 
+                                                    <td class="align-middle px-0 py-4"> 
+                                                        <div class="mb-1 px-3">@item.Products[0].Volume.ToPrice()</div> 
+                                                        <hr class="my-1" /> 
+                                                        <div class="px-3">@item.Products[0].RemainingVolume.ToPrice()</div> 
+                                                    </td> 
+                                         
+                                                    <td class="align-middle"> 
+                                                        <div class="px-3">@item.Products[0].Warehouse?.Name - @item.Products[0].WarehouseSegment?.Name</div> 
+                                                    </td> 
+                                         
+                                                    <td rowspan="@item.Products.Count" class="align-top ">@item.StockDayInWarehouse</td> 
+                                         
+                                                    <td rowspan="@item.Products.Count" class="align-top ">@item.InsuranceValue.ToPrice()</td> 
+                                                    <td rowspan="@item.Products.Count" class="align-top ">@item.InsuranceCustomsValue.ToPrice()</td> 
+                                                    <td rowspan="@item.Products.Count" class="align-top ">@(item.IsAcceptInsurance ? "بله" : "خیر")</td> 
+                                         
+                                                    <td rowspan="@item.Products.Count" class="align-top"> 
+                                         
+                                                        <div class="dropdown w-100"> 
+                                                            <button class="dropbtn w-100 btn btn-info rounded" type="submit"> 
+                                                                <div class="d-flex align-items-center"> 
+                                                                    <span> منو </span><i class="icofont icofont-arrow-down align-middle"></i> 
+                                                                </div> 
+                                                            </button> 
+                                                            <div class="dropdown-content"> 
+                                                                <ul> 
+                                                                    <li> 
+                                                                        <a class="dropdown-item" onclick="showWarehouseReceiptOutbounds('@item.Id')"> <i class="fa-solid fa-receipt"></i>  نمایش پروانه ها </a> 
+                                                                    </li> 
+                                                                    <li> 
+                                                                        <a target="_blank" class="dropdown-item" 
+                                                                           asp-action="GetFileWarehouseReceiptById" asp-controller="Seo" 
+                                                                           asp-route-seoWarehouseReceiptId="@item.Id"> 
+                                                                            <i class="fa-solid fa-download"></i> دانلود 
+                                                                        </a> 
+                                                                    </li> 
+                                                                    
+                                                                    <li>
+                                                                            @if (item.EntryRouteType == EntryRouteType.EntryFromSea)
+                                                                            {
+                                                                                <a target="_blank" asp-action="seoAccessPage" asp-controller="Seo" class="text-dark"
+                                                                                   asp-route-seoId="@item.SeoId">
+                                                                                  
+                                                                                    <i class="fa-solid fa-receipt"></i>
+                                                                                    مشاهده بارنامه
+                                                                                </a>
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                <a target="_blank" asp-action="Details" asp-controller="InlandExportManifest" class="text-dark"
+                                                                                   asp-route-Id="@item.InlandExportManifestId">
+                                                                                   
+                                                                                    <i class="fa-solid fa-receipt"></i>
+                                                                                    مشاهده مجوز
+                                                                                </a>
+                                                                            }
+                                                                    </li>
+
+                                                                    @if (item.Products.Any(x => x.RemainingCount > 1)) 
+                                                                    { 
+                                                                        <li> 
+                                                                            <a asp-action="Split" class="dropdown-item" 
+                                                                               asp-route-seoWarehouseReceiptId="@item.Id"> 
+                                                                                <i class="fa-solid fa-adjust"></i> تفکیک 
+                                                                            </a> 
+                                                                        </li> 
+                                                                    } 
+                                         
+                                                                    @if (item.Products.Any(x => x.RemainingCount > 0)) 
+                                                                    { 
+                                                                        <li> 
+                                                                            <a asp-action="Merge" class="dropdown-item" 
+                                                                               asp-route-seoWarehouseReceiptId="@item.Id"> 
+                                                                                <i class="fa-solid fa-bag-seedling"></i> تجمیع 
+                                                                            </a> 
+                                                                        </li> 
+                                                                    } 
+                                         
+                                                                    @if (item.Products.Any(x => x.RemainingCount > 0)) 
+                                                                    { 
+                                                                        <li> 
+                                                                            <a asp-action="ChangeOwnership" class="dropdown-item" 
+                                                                               asp-route-seoWarehouseReceiptId="@item.Id"> 
+                                                                                <i class="fa-solid fa-bag-seedling"></i> تغییر مالکیت 
+                                                                            </a> 
+                                                                        </li> 
+                                                                    } 
+                                         
+                                                                    @if (item.HasFullContainerForStrip) 
+                                                                    { 
+                                                                        <li> 
+                                                                            <a asp-action="StripContainerList" class="dropdown-item" 
+                                                                               asp-route-swrId="@item.Id"> 
+                                                                                <i class="fa-solid fa-bag-seedling"></i> استریپ کانتینر 
+                                                                            </a> 
+                                                                        </li> 
+                                                                    } 
+                                                                </ul> 
+                                                            </div> 
+                                                        </div> 
+                                         
+                                                    </td> 
+                                                </tr> 
+                                         
+                                                <!-- سطرهای بعدی برای آیتم‌های باقی‌مانده --> 
+                                                @if (item.Products?.Any() == true) {  
+                                                    for (int p = 1; p < item.Products?.Count; p++) {   
+                                                        <tr> 
+                                                            <td class="align-middle"> <a class="btn btn-outline-info" onclick="ShowModalSwrProductFullInfo('@item.Products[p].Id')"> @item.Products[p].ProductFullTitle </a></td> 
+                                                            <td class="align-middle px-0 py-4"> 
+                                                                <div class="px-3">@item.Products[p].Count.ToPrice()</div> 
+                                                                <hr class="my-1" /> 
+                                                                <div class="px-3">@item.Products[p].RemainingCount.ToPrice()</div> 
+                                                            </td> 
+                                                            <td class="align-middle px-0 py-4"> 
+                                                                <div class="px-3">@item.Products[p].WeightGross.ToPrice()</div> 
+                                                                <hr class="my-1" /> 
+                                                                <div class="px-3">@item.Products[p].RemainingWeightGross.ToPrice()</div> 
+                                                            </td> 
+                                                            <td class="align-middle px-0 py-4"> 
+                                                                <div class="px-3">@item.Products[p].WeightNet.ToPrice()</div> 
+                                                                <hr class="my-1" /> 
+                                                                <div class="px-3">@item.Products[p].RemainingWeightNet.ToPrice()</div> 
+                                                            </td> 
+                                                            <td class="align-middle px-0 py-4"> 
+                                                                <div class="px-3">@item.Products[p].Volume.ToPrice()</div> 
+                                                                <hr class="my-1" /> 
+                                                                <div class="px-3">@item.Products[p].RemainingVolume.ToPrice()</div> 
+                                                            </td> 
+                                                     
+                                                            <td class="align-middle px-0 py-4"> 
+                                                                <div class="px-3">@item.Products[p].Warehouse?.Name - @item.Products[p].WarehouseSegment?.Name</div> 
+                                                            </td> 
+                                                        </tr> 
+                                                    } 
+                                                }
+                                               
+                                                  
+                                                
+                                                </tbody> 
+                                            </table> 
+               
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            
+                        }
+                    }
+                    
+                    <div class="mt-4"> 
+                            <cs-pager cs-paging-pagesize="@Model.WarehouseReceipts.PageSize"
+                                      cs-paging-pagenumber="@Model.WarehouseReceipts.PageNumber"
+                                      cs-paging-totalitems="@Model.WarehouseReceipts.TotalItems"
+                                      cs-paging-maxpageritems="10"
+                                      cs-pagenumber-param="p"
+                                      cs-show-first-last="true"
+                                      cs-suppress-empty-nextprev="true"
+                                      cs-suppress-inactive-firstlast="true"
+                                      cs-show-numbered="true"
+                                      cs-first-page-text="ابتدا"
+                                      cs-last-page-text="انتها"
+                                      cs-next-page-title="بعدی"
+                                      cs-previous-page-title="قبلی"
+                                      cs-first-page-title="ابتدا"
+                                      cs-last-page-title="انتها"
+                                      cs-next-page-text="بعدی"
+                                      cs-previous-page-text="قبلی"
+                                      cs-pager-li-current-class="page-item active"
+                                      cs-pager-li-other-class="page-item"
+                                      cs-pager-li-non-active-class="page-item disabled"
+                                      cs-pager-link-current-class="page-link"
+                                      cs-pager-link-other-class="page-link"
+                                      asp-controller="WarehouseReceipt"
+                                      asp-action="List">
+                            </cs-pager>
+                        </div>
+                </div>
+            </div>
+        </div>    
+    </div>
+</div>
+
+        <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="myModalLabel">جزئیات</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <p id="modalInfo"></p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">بستن</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div id="generalModal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title">پروانه ها</h4>
+                        <button type="button" class="close btn-close rounded border" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body" id="generalModalBodyId">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div id="ReportGroupingByCompanyModal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+
+                        <h4 class="modal-title">گزارش رسوب کالا براساس شرکت</h4>
+                        <button type="button" class="close btn-close rounded border" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body" id="modalbody">
+
+                        <div class="card-body pt-0">
+
+                            <div class="form-body">
+
+                                <div class="row">
+                                    <div class="col-sm-12">
+                                        <div class="form-group">
+                                            <label>نوع گزارش</label>
+                                            <div class="input-group">
+                                                <select class="form-control"
+                                                        id="listGroupingByCompanyReportType"
+                                                        name="reportType"
+                                                        asp-items="Html.GetEnumSelectList<ReportType>()">
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <div class="modal-footer px-0 pb-0 border-0">
+                                    <button type="button" class="btn btn-success btn-round" onclick="GetReportGroupingByCompany(event)"> دریافت گزارش </button>
+                                    <button type="button" class="btn btn-danger btn-round" data-bs-dismiss="modal">بازگشت</button>
+
+                                    <button id="excel1" type="submit" form="formFilter" formaction="/WarehouseReceipt/GetProductDepositGroupingByCompany?reportType=1"
+                                            class="btn w-100 mx-0 d-none my-2 px-2 btn-outline-primary-2x rounded-0">
+                                        گزارش اکسل
+                                    </button>
+                                    <button id="pdf1" type="submit" form="formFilter" formaction="/WarehouseReceipt/GetProductDepositGroupingByCompany?reportType=0"
+                                            class="btn d-none w-100 mx-0 my-2 px-2 btn-outline-primary-2x rounded-0">
+                                        تخصیص Pdf
+                                    </button>
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="ReportGroupingByProductCategoryModal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+
+                        <h4 class="modal-title">گزارش رسوب کالا براساس دسته بندی کالا</h4>
+                        <button type="button" class="close btn-close rounded border" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body" id="modalbodyProductCategory">
+
+                        <div class="card-body pt-0">
+
+                            <div class="form-body">
+
+                                <div class="row">
+                                    <div class="col-sm-12">
+                                        <div class="form-group">
+                                            <label>نوع گزارش</label>
+                                            <div class="input-group">
+                                                <select class="form-control"
+                                                        id="listGroupingByProductCategoryReportType"
+                                                        name="reportType"
+                                                        asp-items="Html.GetEnumSelectList<ReportType>()">
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="modal-footer px-0 pb-0 border-0">
+                                    <button type="button" class="btn btn-success btn-round" onclick="GetReportGroupingByProductCategory(event)"> دریافت گزارش </button>
+                                    <button type="button" class="btn btn-danger btn-round" data-bs-dismiss="modal">بازگشت</button>
+
+                                    <button id="excel2" type="submit" form="formFilter" formaction="/WarehouseReceipt/GetProductDepositGroupingByProductCategory?reportType=1"
+                                            class="btn w-100 mx-0 d-none my-2 px-2 btn-outline-primary-2x rounded-0">
+                                        گزارش اکسل
+                                    </button>
+                                    <button id="pdf2" type="submit" form="formFilter" formaction="/WarehouseReceipt/GetProductDepositGroupingByProductCategory?reportType=0"
+                                            class="btn d-none w-100 mx-0 my-2 px-2 btn-outline-primary-2x rounded-0">
+                                        تخصیص Pdf
+                                    </button>
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+        <div id="ReportGroupingByWarehouseModal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+
+                        <h4 class="modal-title">گزارش رسوب کالا براساس انبار</h4>
+                        <button type="button" class="close btn-close rounded border" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body" id="modalbodyWarehouse">
+
+                        <div class="card-body pt-0">
+
+                            <div class="form-body">
+
+                                <div class="row">
+                                    <div class="col-sm-12">
+                                        <div class="form-group">
+                                            <label>نوع گزارش</label>
+                                            <div class="input-group">
+                                                <select class="form-control"
+                                                        id="listGroupingByWarehouseReportType"
+                                                        name="reportType"
+                                                        asp-items="Html.GetEnumSelectList<ReportType>()">
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <div class="modal-footer px-0 pb-0 border-0">
+                                    <button type="button" class="btn btn-success btn-round" onclick="GetReportGroupingByWarehouse(event)"> دریافت گزارش </button>
+                                    <button type="button" class="btn btn-danger btn-round" data-bs-dismiss="modal">بازگشت</button>
+
+                                    <button id="excel3" type="submit" form="formFilter" formaction="/WarehouseReceipt/GetProductDepositGroupingByWarehouse?reportType=1"
+                                            class="btn w-100 mx-0 d-none my-2 px-2 btn-outline-primary-2x rounded-0">
+                                        گزارش اکسل
+                                    </button>
+                                    <button id="pdf3" type="submit" form="formFilter" formaction="/WarehouseReceipt/GetProductDepositGroupingByWarehouse?reportType=0"
+                                            class="btn d-none w-100 mx-0 my-2 px-2 btn-outline-primary-2x rounded-0">
+                                        تخصیص Pdf
+                                    </button>
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+<div id="modalSwrFullInfo">
+</div>
+
+@section script {
+
+    <script>
+        $(document).ready(function () {
+            $('.select2').select2();
+        });
+
+
+        kamaDatepicker('Filter_DateFrom', customOptions);
+        kamaDatepicker('Filter_DateTo', customOptions);
+
+
+        $(".page-link").click(function (event) {
+            event.preventDefault(); // غیرفعال کردن عملکرد پیشفرض href
+
+            var hrefValue = $(this).attr("href");
+            $("#pageNumber").val(hrefValue.split("p=")[1]);
+            $("#formFilter").submit();
+        });
+
+
+        function showWarehouseReceiptOutbounds(warehouseReceiptId) {
+            console.log("warehouseReceiptId")
+            $.post("@Url.Action("GetReceiptOutboundsByWarehouseReceiptId", "WarehouseReceipt")", { warehouseReceiptId: warehouseReceiptId })
+                .done(function (res) {
+                    $("#generalModalBodyId").html(res);
+                    $("#generalModal").modal('show');
+                });
+        }
+
+        function ShowModalReportGroupingByCompany(event) {
+            event.preventDefault();
+
+            $("#ReportGroupingByCompanyModal").modal('show');
+        }
+
+        function GetReportGroupingByCompany(event) {
+            $("#ReportGroupingByCompanyModal").modal('hide');
+            let selectValue = document.getElementById("listGroupingByCompanyReportType").value;
+
+            if(selectValue == 0)
+                $("#pdf1").click();
+            else if(selectValue == 1)
+                $("#excel1").click();
+        }
+
+        function ShowModalReportGroupingByProductCategory(event) {
+            event.preventDefault();
+
+            $("#ReportGroupingByProductCategoryModal").modal('show');
+        }
+
+        function GetReportGroupingByProductCategory(event) {
+            $("#ReportGroupingByProductCategoryModal").modal('hide');
+            let selectValue = document.getElementById("listGroupingByProductCategoryReportType").value;
+
+            if(selectValue == 0)
+                $("#pdf2").click();
+            else if(selectValue == 1)
+                $("#excel2").click();
+        }
+
+            function ShowModalReportGroupingByWarehouse(event) {
+                event.preventDefault();
+
+                    $("#ReportGroupingByWarehouseModal").modal('show');
+            }
+
+                function GetReportGroupingByWarehouse(event) {
+                    $("#ReportGroupingByWarehouseModal").modal('hide');
+                    let selectValue = document.getElementById("listGroupingByWarehouseReportType").value;
+
+                if(selectValue == 0)
+                    $("#pdf3").click();
+                else if(selectValue == 1)
+                    $("#excel3").click();
+            }
+
+        function ShowModalSwrProductFullInfo(swrProductId)
+        {
+            $.post("@Url.Action("GetswrProductFullInfo", "WarehouseReceipt")",
+                {
+                    swrProductId
+                })
+                .done(function (res) {
+                    $("#modalSwrFullInfo").html(res);
+                    $("#swrProductFullInfoModal").modal('show');
+                })
+                .fail(function (xhr, status, error) {
+                    location.reload();
+                });
+        }
+
+    </script>
+}
+
+

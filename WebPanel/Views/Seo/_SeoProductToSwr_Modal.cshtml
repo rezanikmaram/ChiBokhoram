@@ -1,0 +1,41 @@
+@model SeoProductToSwrModalDto
+@{
+    int i = 1;
+    // bool hasVIN = Model.Products?.Any(x => !string.IsNullOrWhiteSpace(x.VehicleIdentificationNumber)) ?? false;
+}
+
+@if (Model.Products != null && Model.Products.Any())
+{
+    foreach (var item in Model.Products)
+    {
+        <tr>
+            <td class="align-middle bg-light" style="width:30px;"><input type="checkbox" value="@item.Id" class="multiProduct-checkbox" /></td>
+             
+            <td>@(i++)</td>
+            <td>@item.ProductTitle</td>
+            <td>@item.ProductHSCodeTitle</td>
+            @if (Model.TrafficType == TrafficType.Container)
+            {
+                <td>@item.ContainerTitle</td>
+            }
+            else @* if (hasVIN) *@
+            {
+                <td>@item.VehicleIdentificationNumber</td>
+            }
+            <td>@item.CountTitle</td>
+            <td>@item.WeightGrossTitle</td>
+            <td>@item.WeightNetTitle</td>
+            <td>@item.VolumeTitle</td>
+            
+            <td class="align-middle text-center">
+                <span class="label rounded px-2 py-1 label-@(!item.IsDangerous ? "success" : "danger")">@(item.IsDangerous ? "خطرناک" : "معمولی")</span>
+            </td>
+        </tr>
+    }
+}
+else
+{
+    <tr>
+        <td colspan="13" class="text-center">کالایی یافت نشد</td>
+    </tr>
+}

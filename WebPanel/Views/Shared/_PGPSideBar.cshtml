@@ -1,0 +1,130 @@
+﻿@using Common.enumeration.Log
+<div class="sidebar-wrapper">
+    <div>
+        <div class="logo-wrapper">
+            <a href="#">
+                <img class="img-fluid for-light" src="~/assets/images/logo/light.png" alt="">
+                <img class="img-fluid for-dark" src="~/assets/images/logo/dark.png" alt="">
+            </a>
+            <div class="back-btn"><i class="fa fa-angle-right"></i></div>
+        </div>
+        <div class="logo-icon-wrapper">
+            <a href="#">
+                <img class="img-fluid"
+                     src="~/assets/images/logo-icon.png" alt="">
+            </a>
+        </div>
+        <nav class="sidebar-main">
+            <div class="left-arrow" id="left-arrow"><i data-feather="arrow-left"></i></div>
+            <div id="sidebar-menu">
+                <ul class="sidebar-links" id="simple-bar">
+                    <li class="back-btn">
+                        <a href="#">
+                            @*  <img class="img-fluid" src="~/assets/images/logo-icon.png"
+                            alt=""> *@
+                        </a>
+                        @*  <div class="mobile-back text-end">
+                        <span>بازگشت</span><i class="fa fa-angle-left ps-2"
+                        aria-hidden="true"></i>
+                        </div> *@
+                    </li>
+                    <li id="Equipment"> 
+                        <a href="#" class="sidebar-link sidebar-title d-flex align-items-center" id="mVessel">
+                            <i class="fa fa-list-alt ms-1"></i>
+                            <span class="d-inline-block w-75 mx-1"> مدیریت تجهیزات </span>
+                        </a>
+                        <ul id="uVessel" class="sidebar-submenu">
+                            <li>
+                                <a href="~/Vessel/Index" class="" mm="Vessel" id="VesselIndex">
+                                    <i class="fa fa-th-list"></i>
+                                    <span>شناور ها </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li id="EquipmentLog">
+                        <a href="#" class="sidebar-link sidebar-title" id="mEquipmentLog">
+                            <i class="fa fa-list-alt"></i>
+                            عملیات تخلیه کشتی
+                        </a>
+                        <ul id="uEquipmentLog" class="sidebar-submenu">
+                            <li>
+                                <a asp-controller="EquipmentLog" asp-action="DashboardEquipmentStatus" asp-route-Type="@EquipmentLogType.Vessel">
+                                    <i class="fa fa-th-list"></i>
+                                    <span>داشبورد تعیین وضعیت روزانه تجهیزات </span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="~/EquipmentLog/Index" class="" mm="EquipmentLog" id="EquipmentLogIndex">
+                                    <i class="fa fa-th-list"></i>
+                                    <span>رویداد های تغییر وضعیت تجهیزات </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+
+                    @if (User.IsInRole("admin") || User.IsInRole("adminOnePort"))
+                    {
+                        <li id="Ship">
+                            <a href="#" class="sidebar-link sidebar-title" id="mShip">
+                                <i class="fa fa-ship"></i>
+                                <span> کشتی ها</span>
+                            </a>
+                            <ul id="uShip" class="sidebar-submenu">
+
+                                <li>
+                                    <a href="~/Ship/Index" class="" mm="Ship" id="ShipIndex">
+                                        <i class="fa fa-bars"></i>
+                                        <span>لیست کشتی ها</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                    }
+
+                    @if (User.IsInRole("admin") || User.IsInRole("adminOnePort"))
+                    {
+                        <li id="Base" class="sidebar-list">
+                            <a href="#" class="sidebar-link sidebar-title" id="mBase">
+                                <i class="icon-info"></i>
+                                اطلاعات پایه
+                            </a>
+                            <ul id="uBase" class="sidebar-submenu">
+                                @if (User.IsInRole("admin"))
+                                {
+                                    <li>
+                                        <a href="~/Port/Ports" mm="Base" id="PortPorts">
+                                            <i class="fa fa-anchor"></i>
+                                            لیست بنادر
+                                        </a>
+                                    </li>
+                                }
+                            </ul>
+                        </li>
+                    }
+
+                    @if (User.IsInRole("admin"))
+                    {
+                        <li id="PanelUser" class="sidebar-list">
+                            <a href="#" class="sidebar-link sidebar-title" id="mPanelUser">
+                                <i class="fa fa-exclamation-triangle"></i>
+                                کاربران پورتال
+                            </a>
+                            <ul id="uPanelUser" class="sidebar-submenu">
+                                <li>
+                                    <a href="~/Account/PanelUsers" mm="PanelUser" id="AccountPanelUsers">
+                                        <i class="fa fa-gear"></i>
+                                        لیست کاربران
+                                    </a>
+                                </li>
+
+                            </ul>
+                        </li>
+                    }
+                </ul>
+
+                <!-- /#side-menu -->
+            </div>
+        </nav>
+    </div>
+</div>

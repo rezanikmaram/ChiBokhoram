@@ -1,0 +1,59 @@
+@model CreateSeoWarehouseReceiptOutboundProductDto
+
+<form onsubmit="return submitProductForm(this);">
+    <input type="hidden" asp-for="Id" />
+    <input type="hidden" asp-for="SeoWarehouseReceiptOutboundId" />
+
+    <div class="row gy-3">
+        <div class="form-group col-md-12">
+            <label>محصول</label>
+            <select class="form-control select2" asp-for="SeoWarehouseReceiptProductId" asp-items="Model.SeoWarehouseReceiptProducts" required>
+                <option value="">انتخاب کنید</option>
+            </select>
+        </div>
+
+        <div class="form-group col-md-12">
+            <label>تعداد</label>
+            <input type="number" class="form-control" asp-for="Count" min="1" required oninput="this.value = this.value.replace(/^0+/, '') || this.value" />
+            <small class="text-muted">مقدار صفر مجاز نیست</small>
+            <span asp-validation-for="Count" class="text-danger"></span>
+        </div>
+
+        <div class="form-group col-md-6">
+            <label>وزن خالص (کیلوگرم)</label>
+            <input type="number" step="0.001" class="form-control" asp-for="Weight" />
+            <small class="text-muted">اختیاری - اگر وارد نشود به صورت خودکار محاسبه می‌شود</small>
+        </div>
+
+        <div class="form-group col-md-6">
+            <label>حجم (متر مکعب)</label>
+            <input type="number" step="0.001" class="form-control" asp-for="Volume" />
+            <small class="text-muted">اختیاری - اگر وارد نشود به صورت خودکار محاسبه می‌شود</small>
+        </div>
+    </div>
+    
+</form>
+
+<script src="~/assets/js/validation/jquery.validate.min.js"></script>
+<script src="~/assets/js/validation/jquery.validate.unobtrusive.min.js"></script>
+
+<script>
+    $(document).ready(function () {
+        $('#generalModal .select2').select2({
+            dropdownParent: $('#generalModal')
+        });
+        
+        // Prevent form submission if count is zero or empty
+        $('form').on('submit', function(e) {
+            var countInput = $('#Count');
+            var countValue = parseInt(countInput.val());
+            
+            if (isNaN(countValue) || countValue <= 0) {
+                e.preventDefault();
+                showAlert2('مقدار تعداد باید بزرگتر از صفر باشد', 1);
+                countInput.focus();
+                return false;
+            }
+        });
+    });
+</script>

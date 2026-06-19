@@ -1,0 +1,51 @@
+﻿@model List<TaliWeightArchiveDto>
+
+@{
+	int number = 1;
+}
+
+<div id="WeightTaliListModal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" tabindex="-1">
+	<div class="modal-dialog modal-lg modal-dialog-centered">
+		<div class="modal-content">
+			<div class="modal-header">
+				<p class="m-0"> جزییات </p>
+				<button type="button" class="close btn-close rounded border" data-bs-dismiss="modal"></button>
+			</div>
+			<div class="modal-body" id="modalbody">
+
+				<div class="table-responsive">
+					<table class="table table-sm table-bordered table-hover table-striped" id="data-table">
+						<thead class="bg-primary">
+							<tr>
+								<th class="px-1 text-center">#</th>
+								<th class="px-1 text-center">تاریخ</th>
+
+								<th class="px-1 text-center">کاربر</th>
+								<th class="px-1 text-center">وزن خالی</th>
+								<th class="px-1 text-center">وزن پر</th>
+								<th class="px-1 text-center">وزن بار</th>
+							</tr>
+						</thead>
+						<tbody>
+
+
+							@foreach (var item in Model)
+							{
+								<tr>
+									<td class="align-middle px-2 text-center">@(number++)</td>
+									<td class="align-middle px-2 text-center" dir="ltr">  @item.Date.ToShortPersianDateTimeString() </td>
+									<td class="align-middle px-2 text-center"> @(item.UserBaskol?.FirstName + " " + item.UserBaskol?.LastName) </td>
+									<td class="align-middle px-2 text-center"> @item.WeightFree.ToPrice() </td>
+									<td class="align-middle px-2 text-center"> @item.Weight.ToPrice() </td>
+									<td class="align-middle px-2 text-center"> @item.WeightLoad.ToPrice() </td>
+								</tr>
+							}
+						</tbody>
+					</table>
+
+				</div>
+
+			</div>
+		</div>
+	</div>
+</div>

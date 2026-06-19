@@ -1,0 +1,163 @@
+﻿@model ShipTaliPageDto
+@{
+    ViewData["Title"] = "وضعیت انبارهای کشتی";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+    int i = 1;
+}
+
+@* <div class="card p-2 mb-4"> *@
+@*     <div class="row"> *@
+@*         <div class="col-md-1 align-middle align-content-center px-4"> *@
+@*             <i class="fa-solid fa-circle-info fs-4 align-middle"></i> *@
+@*         </div> *@
+@*         <div class="col-md-11 px-5"> *@
+@*             <div class="d-flex justify-content-between align-items-center"> *@
+@*                 <div class="glass-bg px-2 py-1"> *@
+@*                     <p class="fs-6 m-0">@Model.VogageInfo?.ShipShipName</p> *@
+@*                 </div> *@
+@*                 <div> *@
+@*                     <p class="fs-6 m-0">@Model.VogageInfo?.CompanyShippingCompanyName</p> *@
+@*                 </div> *@
+@*                 <div> *@
+@*                     <p class="fs-6 m-0">@Model.VogageInfo?.TransportTypeTitle</p> *@
+@*                 </div> *@
+@*                 <div> *@
+@*                     <p class="fs-6 m-0">شماره سفر: @Model.VogageInfo?.VoyageNumber</p> *@
+@*                 </div> *@
+@*                 <div> *@
+@*                     <p class="fs-6 m-0">شماره دریایی: @Model.VogageInfo?.PmoNumber</p> *@
+@*                 </div> *@
+@*             </div> *@
+@*         </div> *@
+@*     </div> *@
+@* </div> *@
+
+<div class="col-lg-12">
+    <div class="card">
+        <div class="card-header pb-0">
+            <div class="row gy-4">
+                <div class="col-md-4 d-flex align-items-center">
+                    <h3 class="title">
+                        <a asp-controller="Voyage" asp-action="VoyageSeo" asp-route-VoyageId="@Model.VogageInfo?.Id">
+                            <i class="fa-solid fa-right-to-bracket me-2"></i>
+                        </a>
+                        <i class="icon-frane"></i> وضعیت انبارهای کشتی - @Model.VogageInfo?.ShipShipName
+                    </h3>
+                </div>
+                <div class="d-block d-lg-flex col-md-8 col-12 justify-content-end">
+                    <div class="buttons-box">
+                        <i class="icon-size-fullscreen"></i>
+                        <div class="paper-ripple">
+                            <div class="paper-ripple__background"></div>
+                            <div class="paper-ripple__waves"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-body pt-0">
+            <form id="formFilter" asp-action="DetailShipTali" asp-route-p="" method="post">
+                <input name="p" id="pageNumber" hidden />
+                <input asp-for="VogageInfo.Id" name="filter.VoyageId" hidden />
+                <div class="form-body">
+                    <div class="row gy-4">
+                        <div class="col-md-3 col-sm-12">
+                            <div class="form-group">
+                                <label>جستجو:</label>
+                                <div class="input-group">
+                                    <input asp-for="Filter.Search" type="text" class="rounded form-control" placeholder="شماره انبار">
+                                    <span asp-validation-for="Filter.Search" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group col-md-2">
+                            <button style="border-radius:5px; margin-top:30px" class="alert-icon px-3 btn btn-success" type="submit">
+                                فیلتر
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+            <div class="table-responsive mt-3">
+                <table class="table table-sm table-bordered table-hover table-striped" id="data-table">
+                    <thead class="bg-primary">
+                        <tr>
+                            <th class="px-1 text-center">#</th>
+                            <th class="px-1 text-center">شماره انبار کشتی</th>
+                            <th class="px-1 text-center">کالا</th>
+                            <th class="px-1 text-center">تعداد کل شمارش‌شده</th>
+                            @* <th class="px-1 text-center">عملیات</th> *@
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if(Model?.List.Any() == true)
+                        {
+                            foreach (var tali in Model.List)
+                            {
+                                foreach (var taliProduct in tali.TaliProducts)
+                                {
+                                    <tr>
+                                        <td class="align-middle px-2 text-center">@(i++)</td>
+                                        <td class="align-middle px-2 text-center">@taliProduct.ShipWarehouseNumber</td>
+                                        <td class="align-middle px-2 text-center">
+                                            <a onclick="ShowModalSeoProductInfo('@taliProduct.SeoProduct.Id')" class="cursor-pointer">
+                                                @taliProduct.SeoProduct.ProductTitle
+                                            </a>
+                                        </td>
+                                        <td class="align-middle px-2 text-center">@taliProduct.Count.ToPrice() @taliProduct.SeoProduct.SeoProductPackingName</td>
+                                        @*  <td class="align-middle px-2 text-center">
+                                        <a onclick="ShowModalTaliDetails('@taliProduct.Id')" class="cursor-pointer">
+                                            <i class="fa-solid fa-eye fs-5"></i>
+                                        </a>
+                                    </td> *@
+                                    </tr>
+                                }
+                            }
+                        }
+                        
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="TaliDetailsBody"></div>
+<div id="SeoProductInfoModalId"></div>
+
+@section script {
+    <script>
+        $(document).ready(function () {
+            // $('.select2').select2();
+        });
+
+        function ShowModalTaliDetails(taliProductId) {
+            $.post("@Url.Action("GetTaliProductDetails", "Voyage")", { taliProductId })
+                .done(function (res) {
+                    $("#TaliDetailsBody").html(res);
+                    $("#TaliDetailsModal").modal('show');
+                });
+        }
+
+        function ShowModalSeoProductInfo(seoProductId) {
+            if (seoProductId == null) return;
+
+            $.post("@Url.Action("GetSeoProductInfo", "Voyage")", { seoProductId })
+                .done(function (res) {
+                    $("#SeoProductInfoModalId").html(res);
+                    $("#SeoProductInfoModal").modal('show');
+                }).fail(function (xhr) {
+                    var err = JSON.parse(xhr.responseText);
+                    console.error("Error:", JSON.stringify(err));
+                });
+        }
+
+        $(".page-link").click(function (event) {
+            event.preventDefault();
+            var hrefValue = $(this).attr("href");
+            $("#pageNumber").val(hrefValue.split("p=")[1]);
+            $("#formFilter").submit();
+        });
+    </script>
+}

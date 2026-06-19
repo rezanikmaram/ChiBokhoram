@@ -1,0 +1,100 @@
+@model CreateNonContainerWarehouseProductTariffDto
+
+<form asp-action="CreateTariff" method="post">
+	<input asp-for="NonContainerWarehouseProductId" type="hidden" />
+	<input asp-for="Id" type="hidden" />
+	<div class="row gy-4 px-3">
+		<div class="col-md-12">
+			<div class="form-group">
+				<label>دوره تعرفه</label>
+				<div class="input-group">
+					<select class="form-control select2 tariffModal" asp-for="ContractPeriodId" asp-items="Model.ContractPeriods?.ToSelectList()">
+						<option value="">انتخاب دوره تعرفه</option>
+					</select>
+				</div>
+			</div>
+		</div>
+
+		<div class="col-md-6">
+			<div class="form-group">
+				<label>ارز</label>
+				<div class="input-group">
+					<select class="form-control select2 tariffModal" asp-for="CurrencyType"
+							asp-items="Html.GetEnumSelectList<CurrencyType>()">
+					</select>
+					<span asp-validation-for="CurrencyType" class="text-danger"></span>
+				</div>
+			</div>
+		</div>
+
+		<div class="col-md-6">
+			<div class="form-group">
+				<label>روش محاسبه</label>
+				<div class="input-group">
+					<select class="form-control select2 tariffModal" asp-for="TariffCalculationType"
+							asp-items="Html.GetEnumSelectList<TariffCalculationType>()">
+					</select>
+					<span asp-validation-for="TariffCalculationType" class="text-danger"></span>
+				</div>
+			</div>
+		</div>
+
+		<div class="col-md-4">
+			<label>۱-۵ روز</label>
+			<price-input asp-for="From1To5DayPrice"></price-input>
+			<span asp-validation-for="From1To5DayPrice" class="text-danger"></span>
+		</div>
+
+		<div class="col-md-4">
+			<label>۱-۱۰ روز</label>
+			<price-input asp-for="From1To10DayPrice"></price-input>
+			<span asp-validation-for="From1To10DayPrice" class="text-danger"></span>
+		</div>
+
+		<div class="col-md-4">
+			<label>۱-۲۰ روز</label>
+			<price-input asp-for="From1To20DayPrice"></price-input>
+			<span asp-validation-for="From1To20DayPrice" class="text-danger"></span>
+		</div>
+
+		<div class="col-md-4">
+			<label>۱-۳۰ روز</label>
+			<price-input asp-for="From1To30DayPrice"></price-input>
+			<span asp-validation-for="From1To30DayPrice" class="text-danger"></span>
+		</div>
+
+		<div class="col-md-4">
+			<label>۱-۴۰ روز</label>
+			<price-input asp-for="From1To40DayPrice"></price-input>
+			<span asp-validation-for="From1To40DayPrice" class="text-danger"></span>
+		</div>
+
+		<div class="col-md-4">
+			<label>۱-۵۰ روز</label>
+			<price-input asp-for="From1To50DayPrice"></price-input>
+			<span asp-validation-for="From1To50DayPrice" class="text-danger"></span>
+		</div>
+
+		<div class="col-md-12">
+			<label>بیشتر از ۵۰ روز</label>
+			<price-input asp-for="LargerThan50DayPrice"></price-input>
+			<span asp-validation-for="LargerThan50DayPrice" class="text-danger"></span>
+		</div>
+	</div>
+
+	<div class="modal-footer mt-4 px-3">
+		<button type="submit" class="btn btn-success">ثبت</button>
+		<button type="button" class="btn btn-danger" data-bs-dismiss="modal">بستن</button>
+	</div>
+</form>
+
+<script src="~/assets/js/validation/jquery.validate.min.js"></script>
+<script src="~/assets/js/validation/jquery.validate.unobtrusive.min.js"></script>
+
+<script>
+	$(document).ready(function () {
+	});
+	$('select[class*="tariffModal"].select2').select2({
+		dropdownParent: $('#tariffModal')
+	});
+</script>

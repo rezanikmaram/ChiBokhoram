@@ -1,0 +1,190 @@
+﻿@model DriverManageDto
+@{
+    ViewData["Title"] = "مدیریت راننده ها";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+    int i = 1;
+}
+
+<div class="col-md-12">
+    <div class="bg-white rounded-3 p-3 border shadow">
+        <div class="d-flex justify-content-between">
+            <div>
+                <span class="fs-6">
+                    <i class="icon-frane"></i>
+                    <a asp-controller="Seo" asp-action="SeoPortOperatorPage" asp-route-seoId="@((Guid)ViewBag.seoId)"><i class="fa-solid fa-right-to-bracket me-2"></i></a>
+                    مدیریت راننده ها
+                </span>
+                <span class="label p-2 mx-2 rounded label-primary">@ViewBag.seocode</span>
+                <span class="label p-2 mx-2 rounded label-info">@(((TransportType)ViewBag.seotype).ToDisplay(DisplayProperty.Name))</span>
+
+            </div>
+            <div class="d-flex align-items-center">
+                @DateTimeOffset.Now.ToLongPersianDateString()
+                <i class="icon-calendar ms-2"></i>
+            </div>
+        </div>
+
+    </div>
+</div>
+<div class="row mt-5">
+    <div class="col-md-6">
+        <div class="card rounded-3 min-height-600">
+            <div class="card-header">
+                <div class="d-flex justify-content-between">
+                    <h3 class="title m-0">
+                        <i class="icon-speech"></i>
+                        انتخاب راننده
+                    </h3>
+                    <form asp-action="SetDriverForSeo" method="post" id="postDriver">
+
+                        <a class="btn btn-success rounded float-end  btn-sm text-white label " onclick="setDriverForSeo();"> + اضافه کردن انتخاب شده ها</a>
+                        <input id="selectDriveId" name="ids" type="hidden" />
+                        <input asp-for="FilterDto.SeoId" name="seoId" type="hidden" />
+                    </form>
+                </div><!-- /.portlet-title -->
+
+            </div><!-- /.portlet-heading -->
+            <div class="card-body pt-0">
+                <div class="table-responsive ">
+                    <table class="table table-bordered ">
+                        <tbody>
+                            <form id="formFilter" asp-action="DriverManage" asp-route-seoId="@Model.FilterDto.SeoId" method="post">
+                                <input asp-for="FilterDto.SeoId" type="hidden" />
+                                <div class="form-body d-flex mb-5  justify-content-between">
+
+                                    <div class="form-group col-md-4 ">
+                                        <label>جستجو</label>
+                                        <div class="input-group">
+                                            <input asp-for="FilterDto.Search" type="text" placeholder="نام/کدملی/تلفن" class="form-control">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group col-md-4 m-r-10">
+                                        <label>شرکت</label>
+                                        <div class="input-group">
+                                            <select class="form-control select2"
+                                                    asp-for="FilterDto.CompanyId" asp-items="Model.Companies">
+                                                <option value="">همه شرکت ها</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+
+                                    <div class="col-md-2">
+                                        <div style="margin-top:32px;" class="d-flex justify-content-around">
+                                            <button class="alert-icon btn btn-success label rounded" type="submit"><p class="px-2">فیلتر</p></button>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </form>
+
+
+                            @foreach (var item in Model.Drivers)
+                            {
+                                <tr>
+                                    <td style="width:30px;"><input type="checkbox" value="@item.Id" name="driveId" /></td>
+                                    <td>@item.Name</td>
+                                    <td>@item.Phone</td>
+                                    <td>@item.CodeMeli</td>
+                                    @*<td>@item.CompanyName</td>*@
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- /.tab-content -->
+
+            </div><!-- /.portlet-body -->
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card rounded-3 ">
+            <div class="card-header">
+                <div class="d-flex justify-content-between d-flex">
+                    <h3 class="title m-0">
+                        <i class="icon-speech"></i>
+                        راننده های انتخاب شده
+                    </h3>
+                    <form asp-action="RemoveDriverFormSeo" method="post" id="deleteDriver">
+
+                        <a class="btn btn-danger btn-sm text-white label rounded" onclick="deleteDriverF();">  <i class="fa fa-trash me-2"></i> حذف انتخاب شده ها  </a>
+                        <input id="removeIds" name="ids" type="hidden" />
+                        <input asp-for="FilterDto.SeoId" name="seoId" type="hidden" />
+
+                    </form>
+                </div><!-- /.portlet-title -->
+                <!-- /.buttons-box -->
+            </div><!-- /.portlet-heading -->
+            <div class="card-body pt-0">
+                <div class="table-responsive">
+                    <table class="table table-bordered ">
+                        <tbody>
+                            @foreach (var item in Model.SelectedDrivers)
+                            {
+                                <tr>
+                                    <td style="width:30px;"><input type="checkbox" value="@item.Id" name="selectedDriverId" /></td>
+                                    <td>@item.Name</td>
+                                    <td>@item.Phone</td>
+                                    <td>@item.CompanyName</td>
+                                    <td><a id="activeDriver@(i)" onclick="ShowQAlert(event,'activeDriver@(i)');" asp-action="ActivationDriver" asp-route-seoId="@Model.FilterDto.SeoId" asp-route-driverId="@item.Id"><span class="label px-2 py-1 rounded label-@(item.IsActive?"success":"danger")">@(item.IsActive ? "فعال" : "غیر فعال")</span></a></td>
+
+
+                                </tr>
+                                i++;
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- /.tab-content -->
+
+            </div><!-- /.portlet-body -->
+        </div>
+    </div>
+</div>
+@section script {
+    <script>
+        function setDriverForSeo() {
+            var ids = "";
+            $("#selectDriveId").val('');
+            $("input:checkbox[name=driveId]:checked").each(function () {
+                if (ids) {
+                    ids += ',' + $(this).val();
+                }
+                else {
+                    ids = $(this).val();
+                }
+            });
+            $("#selectDriveId").val(ids);
+            if (ids) {
+                $("#postDriver").submit();
+            }
+            else {
+                showAlert2('راننده ای انتخاب نشده است', 1);
+                return;
+            }
+        }
+        function deleteDriverF() {
+            var ids = "";
+            $("#removeIds").val('');
+            $("input:checkbox[name=selectedDriverId]:checked").each(function () {
+                if (ids) {
+                    ids += ',' + $(this).val();
+                }
+                else {
+                    ids = $(this).val();
+                }
+            });
+            $("#removeIds").val(ids);
+            if (ids) {
+                $("#deleteDriver").submit();
+            }
+            else {
+                showAlert2('راننده ای انتخاب نشده است', 1);
+                return;
+            }
+        }
+    </script>
+}

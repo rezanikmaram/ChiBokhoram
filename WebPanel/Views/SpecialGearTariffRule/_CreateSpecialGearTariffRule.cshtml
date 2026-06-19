@@ -1,0 +1,81 @@
+﻿@model CreateSpecialGearTariffRuleDto
+
+<form asp-action="CreateTariffRule" method="post">
+    <input asp-for="Id" type="hidden" />
+    <div class="card-body pt-0">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="form-body">
+                    <div class="justify-content-between row gy-4">
+
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>عنوان قانون</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control rounded" asp-for="Title">
+                                    <span asp-validation-for="Title" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label>حداقل تناژ</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control rounded" asp-for="MinTonnage">
+                                    <span asp-validation-for="MinTonnage" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label>حداکثر تناژ</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control rounded" asp-for="MaxTonnage">
+                                    <span asp-validation-for="MaxTonnage" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>آیا محصول ترافیکی یا ویژه است؟</label>
+                                <div class="input-group">
+                                    <select class="form-control rounded select2 generalmodal" asp-for="IsSpecialProduct">
+                                        <option value="true">بله</option>
+                                        <option value="false">خیر</option>
+                                    </select>
+                                    <span asp-validation-for="IsSpecialProduct" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="modal-footer border-0 px-0 mt-4">
+                        <button type="submit" class="btn btn-success btn-round">ذخیره</button>
+                        <button type="button" class="btn btn-danger btn-round" data-bs-dismiss="modal">بازگشت</button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <script src="~/assets/js/validation/jquery.validate.min.js"></script>
+    <script src="~/assets/js/validation/jquery.validate.unobtrusive.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('select.generalmodal.select2').select2({
+                dropdownParent: $('#tariffRuleModal') // نام مودال اصلی
+            });
+
+           
+        });
+
+
+    </script>
+}

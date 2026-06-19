@@ -1,0 +1,131 @@
+﻿@model NonContainerWarehouseProductTariffPageDto
+
+@{
+    ViewData["Title"] = "تعرفه انبارداری کالای غیر کانتینری";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+    int i = 1;
+}
+
+<div class="col-lg-12">
+    <div class="card">
+        <div class="card-header pb-0">
+            <div class="d-flex justify-content-between mb-3">
+                <h3 class="title">
+                    <a href="/NonContainerWarehouseProduct/List">
+                        <i class="fa-solid fa-right-to-bracket me-2"></i>
+                    </a>
+                    تعرفه انبارداری کالای غیر کانتینری
+                </h3>
+
+                <a class="btn btn-success d-md-block d-none" style="border-radius:5px; margin:0px 10px"
+                   onclick="showCreateTariffModal()">
+                    <i class="icon-plus"></i>
+                    ثبت تعرفه جدید
+                </a>
+            </div>
+        </div>
+
+        <div class="card-body pt-0">
+            <div class="d-flex align-items-center">
+                <h4 class="m-0">اطلاعات کالا:</h4>
+                <ul class="list-unstyled d-flex">
+                    <li class="bg-primary mx-1 p-2 rounded-3">
+                        <strong>عنوان:</strong> @Model.NonContainerWarehouseProduct.Title
+                    </li>
+                    <li class="bg-primary mx-1 p-2 rounded-3">
+                        <strong>نوع
+                            کالا:</strong> @Model.NonContainerWarehouseProduct.GeneralCargoProductType.ToDisplay()
+                    </li>
+                </ul>
+            </div>
+            <div class="mt-3">
+                <div class="table-responsive vh-100">
+                    <table class="table table-bordered table-hover table-striped">
+                        <thead class="bg-primary text-white">
+                        <tr>
+                            <th>ردیف</th>
+                            <th>از تاریخ</th>
+                            <th>تا تاریخ</th>
+                            <th>دوره تعرفه</th>
+                            <th>ارز</th>
+                            <th>روش محاسبه</th>
+                            <th>۱-۵ روز</th>
+                            <th>۱-۱۰ روز</th>
+                            <th>۱-۲۰ روز</th>
+                            <th>۱-۳۰ روز</th>
+                            <th>۱-۴۰ روز</th>
+                            <th>۱-۵۰ روز</th>
+                            <th>بیشتر از ۵۰ روز</th>
+                            <th>عملیات</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        @foreach (var item in Model.Data)
+                        {
+                            <tr>
+                                <td>@(i++)</td>
+                                <td>@item.StartDateFa</td>
+                                <td>@item.EndDateFa</td>
+                                <td>@item.ContractPeriodTitle</td>
+                                <td>@item.CurrencyTypeTitle</td>
+                                <td>@item.TariffCalculationTypeTitle</td>
+                                <td>@item.From1To5DayPrice.ToPrice()</td>
+                                <td>@item.From1To10DayPrice.ToPrice()</td>
+                                <td>@item.From1To20DayPrice.ToPrice()</td>
+                                <td>@item.From1To30DayPrice.ToPrice()</td>
+                                <td>@item.From1To40DayPrice.ToPrice()</td>
+                                <td>@item.From1To50DayPrice.ToPrice()</td>
+                                <td>@item.LargerThan50DayPrice.ToPrice()</td>
+                                <td class="px-1">
+                                    <a class="btn btn-warning px-2 btn-sm btn-icon curve"
+                                       onclick="editTariff('@item.Id');"><i
+                                            class="icon-pencil align-middle fs-7"></i></a>
+
+                                    <a id="DeleteTariff@(i)" onclick="ShowQAlert(event,'DeleteTariff@(i)');"
+                                       asp-action="DeleteTariff"
+                                       asp-route-nonContainerWarehouseProductTariffId="@item.Id"
+                                       class="btn btn-danger btn-sm btn-icon px-2 ms-1">
+                                        <i class="icon-trash fs-6 align-middle fa-flip-horizontal"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div id="tariffModal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered ">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">تعرفه جدید</h4>
+                <button type="button" class="close btn-close rounded border" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <partial name="_CreateNonContainerWarehouseProductTariff" model="@Model.Create"/>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section script {
+    <script>
+        function showCreateTariffModal() {
+            $("#Id").val('');
+            $("#tariffModal").modal('show');
+        }
+
+        function editTariff(id) {
+            $.post("@Url.Action("GetTariffById", "NonContainerWarehouseProductTariff")", {tariffId: id})
+                .done(function (res) {
+                    $("#modalBody").html(res);
+                    $("#tariffModal").modal('show');
+                });
+        }
+    </script>
+}

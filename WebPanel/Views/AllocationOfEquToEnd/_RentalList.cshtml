@@ -1,0 +1,87 @@
+﻿@model List<AllocationEquRentalDto>
+
+@{
+    int rowRental = 1;
+}
+
+<div class="table-responsive">
+    <table class="table table-sm table-bordered table-hover table-striped" id="data-table">
+        <thead>
+            <tr>
+                <th style="width: 5%">ردیف</th>
+
+                <th> نوع تجهیز </th>
+                <th>محل عملیات</th>
+                <th>اجاره ساعتی / مرحله ای</th>
+                <th> تناژ تنظیف </th>
+                <th> تناژ دپو </th>
+                <th> تناژ عملیات </th>
+                <td>تاریخ</td>
+
+                <td>عملیات</td>
+            </tr>
+        </thead>
+        <tbody>
+
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td class="align-middle px-2">@(rowRental)</td>
+                    <td class="align-middle px-2" style="display:none" id="rental_id@(rowRental)">@item.Id </td>
+                    <td class="align-middle px-2" style="display:none" id="rental_SeoEquipmentId@(rowRental)">@item.SeoEquipmentId</td>
+                    <td class="align-middle px-2">@item.Title </td>
+                    <td class="align-middle px-2" id="rental_Location@(rowRental)">@item.Location</td>
+                    <td class="align-middle px-2" id="rental_Rental@(rowRental)">@item.Rental</td>
+
+                    <td class="align-middle px-2" id="rental_TonnageTanzif@(rowRental)">@item.TonnageTanzif</td>
+                    <td class="align-middle px-2" id="rental_TonnageDepo@(rowRental)">@item.TonnageDepo</td>
+                    <td class="align-middle px-2" id="rental_Tonnage@(rowRental)">@item.Tonnage</td>
+                    <td class="align-middle px-2" id="rental_DateFa@(rowRental)">@item.DateFa</td>
+
+                    <td class="align-middle px-2">
+                        <a class="btn btn-warning px-2 btn-sm btn-icon curve" onclick="editRental('@rowRental');"><i class="icon-pencil align-middle fs-6"></i></a>
+
+                        <a onclick="DeleteRental(event, '@item.Id');" class="btn btn-danger px-2 btn-sm btn-icon curve btn-questions">
+                            <i class="icon-trash fa-flip-horizontal fs-6 align-middle"></i>
+                        </a>
+                    </td>
+                    @{
+                        rowRental++;
+                    }
+                </tr>
+
+            }
+
+
+            @if (Model?.Any() == true)
+            {
+                <tr style=" background-color: #3fbb7630;">
+                    <td>--</td>
+
+                    <th>جمع کل </th>
+                    <th>---</th>
+                    <th> @(Model?.Sum(x => x.Rental).ToPrice(ToPriceExtention.PriceType.NoType) ?? "0")</th>
+
+                    <th> @(Model?.Sum(x => x.TonnageTanzif).ToPrice(ToPriceExtention.PriceType.NoType) ?? "0")</th>
+                    <th> @(Model?.Sum(x => x.TonnageDepo).ToPrice(ToPriceExtention.PriceType.NoType) ?? "0")</th>
+                    <th> @(Model?.Sum(x => x.Tonnage).ToPrice(ToPriceExtention.PriceType.NoType) ?? "0")</th>
+                    <th>--</th>
+                    <th>--</th>
+                </tr>
+            }
+
+        </tbody>
+    </table>
+
+</div>
+
+
+
+
+
+
+
+
+
+
+

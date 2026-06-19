@@ -1,0 +1,47 @@
+@model Entities.DTOs.Web.Common.ProvinceDto
+@using Entities.DTOs.Web.Common
+
+@{
+    var countries = ViewBag.Countries as List<CountryDto> ?? new List<CountryDto>();
+}
+
+<form asp-action="SaveProvince" method="post" class="needs-validation" novalidate>
+    @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="Id" />
+    
+    <div class="row gy-4">
+        <div class="col-md-12">
+            <div class="form-group">
+                <label for="CountryId">کشور <span class="text-danger">*</span></label>
+                <select asp-for="CountryId" class="form-control select2 provincemodal" required>
+                    <option value="">-- انتخاب کشور --</option>
+                    @foreach (var country in countries)
+                    {
+                        <option value="@country.Id">@country.CountryNameFa</option>
+                    }
+                </select>
+                <span asp-validation-for="CountryId" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="form-group">
+                <label for="NameFa">نام استان (فارسی) <span class="text-danger">*</span></label>
+                <input asp-for="NameFa" class="form-control" placeholder="نام استان را به فارسی وارد کنید" required/>
+                <span asp-validation-for="NameFa" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="form-group">
+                <label for="NameEn">نام استان (انگلیسی) <span class="text-danger">*</span></label>
+                <input asp-for="NameEn" class="form-control" placeholder="نام استان را به انگلیسی وارد کنید" required/>
+                <span asp-validation-for="NameEn" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-md-12 text-end">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">انصراف</button>
+            <button type="submit" class="btn btn-primary" id="btnSaveProvince">
+                <i class="icon-check"></i> ذخیره
+            </button>
+        </div>
+    </div>
+</form>

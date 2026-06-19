@@ -1,0 +1,756 @@
+@model Entities.DTOs.Web.Hirman.VoyageSeoDetail.VoyageSeoDetailPageDto
+@{
+    ViewData["Title"] = "جزئیات بارنامه ها و کالاهای سفر";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+    
+    var voyageInfo = Model?.VoyageInfo;
+}
+
+@section style {
+    <link rel="stylesheet" href="~/assets/css/voyage-seo-detail.css" asp-append-version="true" />
+}
+
+<!-- Voyage Header -->
+<div class="voyage-header">
+    <div class="row g-3 align-items-center">
+        <div class="col-md-1 text-center">
+            <i class="fa-solid fa-ship fa-2x opacity-75"></i>
+        </div>
+        <div class="col-md-11">
+            <div class="row g-3">
+                <div class="col-lg-2 col-md-4 col-6">
+                    <div class="info-item">
+                        <div class="info-label">شناور</div>
+                        <div class="info-value">
+                            @if (!string.IsNullOrEmpty(voyageInfo?.ShipShipName))
+                            {
+                                @voyageInfo.ShipShipName
+                            }
+                            else
+                            {
+                                <span class="text-white-50"><i class="fa-solid fa-minus"></i> تکمیل نشده</span>
+                            }
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-4 col-6">
+                    <div class="info-item">
+                        <div class="info-label">شرکت کشتیرانی</div>
+                        <div class="info-value">
+                            @if (!string.IsNullOrEmpty(voyageInfo?.CompanyShippingCompanyName))
+                            {
+                                @voyageInfo.CompanyShippingCompanyName
+                            }
+                            else
+                            {
+                                <span class="text-white-50"><i class="fa-solid fa-minus"></i> تکمیل نشده</span>
+                            }
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-4 col-6">
+                    <div class="info-item">
+                        <div class="info-label">شماره سفر</div>
+                        <div class="info-value">
+                            @if (!string.IsNullOrEmpty(voyageInfo?.VoyageNumber))
+                            {
+                                @voyageInfo.VoyageNumber
+                            }
+                            else
+                            {
+                                <span class="text-white-50"><i class="fa-solid fa-minus"></i> تکمیل نشده</span>
+                            }
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-4 col-6">
+                    <div class="info-item">
+                        <div class="info-label">PMO</div>
+                        <div class="info-value">
+                            @if (!string.IsNullOrEmpty(voyageInfo?.PmoNumber))
+                            {
+                                @voyageInfo.PmoNumber
+                            }
+                            else
+                            {
+                                <span class="text-white-50"><i class="fa-solid fa-minus"></i> تکمیل نشده</span>
+                            }
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-4 col-6">
+                    <div class="info-item">
+                        <div class="info-label">وضعیت</div>
+                        <div class="info-value">
+                            @if (!string.IsNullOrEmpty(voyageInfo?.VoyageStateTitle))
+                            {
+                                <span class="badge @(voyageInfo?.VoyageState == VoyageState.Open ? "bg-success" : "bg-secondary")">
+                                    @voyageInfo.VoyageStateTitle
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="text-white-50"><i class="fa-solid fa-minus"></i> نامشخص</span>
+                            }
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-4 col-6">
+                    <div class="info-item">
+                        <div class="info-label">تاریخ ورود</div>
+                        <div class="info-value">
+                            @if (!string.IsNullOrEmpty(voyageInfo?.EntryDateFa))
+                            {
+                                @voyageInfo.EntryDateFa
+                            }
+                            else
+                            {
+                                <span class="text-white-50"><i class="fa-solid fa-minus"></i> تکمیل نشده</span>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <!-- SEO List Section with Selection -->
+    @if (Model?.SeoList?.Any() == true)
+    {
+        <div class="col-12">
+            <div class="voyage-card">
+                <div class="voyage-card__header d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                        <h5 class="mb-0 section-title">
+                            <i class="fa-solid fa-file-invoice text-primary"></i>
+                            انتخاب بارنامه
+                        </h5>
+                        <span class="text-muted small">(برای فیلتر کردن کالاها، بارنامه را انتخاب کنید)</span>
+                        <span id="selectedSeoIndicator" class="selected-seo-indicator is-hidden">
+                            <i class="fa-solid fa-filter"></i>
+                            <span id="selectedSeoText"></span>
+                            <button type="button" class="btn btn-link btn-sm p-0 ms-2 text-danger" onclick="clearSeoSelection()">
+                                <i class="fa-solid fa-times"></i>
+                            </button>
+                        </span>
+                    </div>
+                    <a asp-action="VoyageSeo" asp-route-voyageId="@Model.VoyageId" class="btn btn-sm btn-outline-primary">
+                        <i class="fa-solid fa-arrow-right me-1"></i>بازگشت
+                    </a>
+                </div>
+                <div class="voyage-card__body">
+                    <div class="row g-2">
+                        @foreach (var seo in Model.SeoList)
+                        {
+                            var seoCardClass = seo.State switch
+                            {
+                                SeoState.Active => "seo-card--active",
+                                SeoState.Stoped => "seo-card--stopped", 
+                                SeoState.Finish => "seo-card--finished",
+                                _ => ""
+                            };
+                            
+                            <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
+                                <div class="seo-card @seoCardClass" 
+                                     data-seo-id="@seo.SeoId"
+                                     onclick="selectSeo('@seo.SeoId', '@seo.BillOfLadingNumber')">
+                                    <div class="d-flex justify-content-between align-items-start mb-1">
+                                        <h6 class="seo-card__title text-truncate-custom" style="max-width: 100px;" title="@seo.BillOfLadingNumber">
+                                            @seo.BillOfLadingNumber
+                                        </h6>
+                                        <span class="voyage-badge @(seo.State == SeoState.Active ? "voyage-badge--info" : seo.State == SeoState.Stoped ? "voyage-badge--warning" : "voyage-badge--success")" style="font-size: 0.625rem;">
+                                            @seo.StateTitle
+                                        </span>
+                                    </div>
+                                    
+                                    <div class="seo-card__info text-truncate-custom mb-1">
+                                        <i class="fa-solid fa-box me-1 text-primary"></i>@seo.ProductName
+                                    </div>
+                                    
+                                    <div class="seo-card__info seo-card__info--small text-truncate-custom mb-1">
+                                        <i class="fa-solid fa-building me-1 text-success"></i>@seo.OwnerCompanyName
+                                    </div>
+                                    
+                                    @if (!string.IsNullOrEmpty(seo.ProductCategoryName))
+                                    {
+                                        <div class="seo-card__info seo-card__info--small text-truncate-custom mb-1">
+                                            <i class="fa-solid fa-layer-group me-1 text-warning"></i>@seo.ProductCategoryName
+                                        </div>
+                                    }
+                                      
+                                    <div class="d-flex justify-content-between align-items-center small mb-1 mt-2">
+                                        <span class="seo-card__info--tiny">@seo.ProgressPercent.ToString("F0")%</span>
+                                        <span class="text-muted seo-card__info--tiny">@seo.TotalCounted/@seo.TotalProductCounts</span>
+                                    </div>
+                                    <div class="voyage-progress">
+                                        <div class="voyage-progress__bar @(seo.ProgressPercent >= 100 ? "voyage-progress__bar--success" : seo.ProgressPercent >= 50 ? "voyage-progress__bar--info" : "voyage-progress__bar--warning")" 
+                                             style="width: @seo.ProgressPercent%"></div>
+                                    </div>
+                                    
+                                    <div class="mt-2 row g-1">
+                                        <div class="col-6">
+                                            <span class="text-muted seo-card__info--tiny">
+                                                <i class="fa-solid fa-cubes me-1"></i>@seo.TotalProductCounts.ToPrice() کالا
+                                            </span>
+                                        </div>
+                                        <div class="col-6 text-end">
+                                            <span class="voyage-badge voyage-badge--secondary" style="font-size: 0.625rem;">
+                                                @seo.TransportTypeTitle
+                                            </span>
+                                        </div>
+                                        <div class="col-6">
+                                            <span class="text-muted seo-card__info--tiny">
+                                                <i class="fa-solid fa-weight-scale me-1"></i>@seo.ShipTonnage.ToString("N0") kg
+                                            </span>
+                                        </div>
+                                        <div class="col-6 text-end">
+                                            <span class="text-muted seo-card__info--tiny">
+                                                <i class="fa-solid fa-dolly me-1"></i>@seo.DischargedTonnage.ToString("N0") kg
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- User Performance Section -->
+    @if (Model?.UserPerformanceList?.Any() == true)
+    {
+        <div class="col-12">
+            <div class="voyage-card">
+                <div class="voyage-card__header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 section-title">
+                        <i class="fa-solid fa-users text-primary"></i>
+                        عملکرد کاربران
+                        <span class="badge bg-secondary" id="userCountBadge">@Model.UserPerformanceList.Count</span>
+                    </h5>
+                    <span class="text-muted small" id="userPerformanceNote">مربوط به کالاهای نمایش داده شده</span>
+                </div>
+                <div class="voyage-card__body">
+                    <div class="row g-2" id="userPerformanceContainer">
+                        @foreach (var user in Model.UserPerformanceList)
+                        {
+                            <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 user-performance-card" data-user-name="@user.PersonelName">
+                                <div class="performance-card">
+                                    <div class="performance-card__header">
+                                        <div class="performance-card__avatar performance-card__avatar--primary">
+                                            <i class="fa-solid fa-user"></i>
+                                        </div>
+                                        <div class="performance-card__title text-truncate-custom" style="max-width: 100px;" title="@user.PersonelName">
+                                            @user.PersonelName
+                                        </div>
+                                    </div>
+
+                                    <div class="performance-card__body">
+                                        <div class="performance-card__section">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <span class="performance-card__label performance-card__label--primary">
+                                                    <i class="fa-solid fa-water me-1"></i>اسکله
+                                                </span>
+                                                <span class="badge bg-primary dock-tali" style="font-size: 0.625rem;">@user.DockTaliCount</span>
+                                            </div>
+                                            <div class="d-flex justify-content-between mt-1">
+                                                <span class="text-muted">شمارش: <strong class="dock-count">@user.DockCount.ToPrice()</strong></span>
+                                                <span class="badge bg-warning text-dark dock-problem" style="font-size: 0.625rem; @(user.DockCountProblem == 0 ? "display: none;" : "")">@user.DockCountProblem</span>
+                                            </div>
+                                            <div class="d-flex gap-2 mt-1">
+                                                <span class="text-muted"><i class="fa-solid fa-file text-success me-1"></i><span class="dock-file">@user.DockFileCount</span></span>
+                                                <span class="text-muted"><i class="fa-solid fa-list-check text-primary me-1"></i><span class="dock-check">@user.DockCheckListCount</span></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="performance-card__section">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <span class="performance-card__label performance-card__label--success">
+                                                    <i class="fa-solid fa-warehouse me-1"></i>محوطه
+                                                </span>
+                                                <span class="badge bg-success area-tali" style="font-size: 0.625rem;">@user.AreaTaliCount</span>
+                                            </div>
+                                            <div class="d-flex justify-content-between mt-1">
+                                                <span class="text-muted">شمارش: <strong class="area-count">@user.AreaCount.ToPrice()</strong></span>
+                                                <span class="badge bg-warning text-dark area-problem" style="font-size: 0.625rem; @(user.AreaCountProblem == 0 ? "display: none;" : "")">@user.AreaCountProblem</span>
+                                            </div>
+                                            <div class="d-flex gap-2 mt-1">
+                                                <span class="text-muted"><i class="fa-solid fa-file text-success me-1"></i><span class="area-file">@user.AreaFileCount</span></span>
+                                                <span class="text-muted"><i class="fa-solid fa-list-check text-primary me-1"></i><span class="area-check">@user.AreaCheckListCount</span></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="performance-card__section">
+                                            <div class="d-flex justify-content-between align-items-center bg-light rounded p-1">
+                                                <span class="fw-bold">جمع:</span>
+                                                <span class="badge bg-dark total-count" style="font-size: 0.625rem;">@user.TotalCount.ToPrice()</span>
+                                            </div>
+                                            <div class="d-flex justify-content-between mt-1 text-muted">
+                                                <span>تالی: <span class="total-tali">@user.TotalTaliCount</span></span>
+                                                <span class="text-warning total-problem" style="@(user.TotalCountProblem == 0 ? "display: none;" : "")"><i class="fa-solid fa-triangle-exclamation me-1"></i><span class="problem-value">@user.TotalCountProblem</span></span>
+                                            </div>
+                                            <div class="d-flex gap-2 mt-1 text-muted">
+                                                <span><i class="fa-solid fa-file text-success me-1"></i><span class="total-file">@user.TotalFileCount</span></span>
+                                                <span><i class="fa-solid fa-list-check text-primary me-1"></i><span class="total-check">@user.TotalCheckListCount</span></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Equipment Performance Section -->
+    @if (Model?.EquipmentPerformanceList?.Any() == true)
+    {
+        <div class="col-12">
+            <div class="voyage-card">
+                <div class="voyage-card__header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 section-title">
+                        <i class="fa-solid fa-truck-monster text-primary"></i>
+                        عملکرد تجهیزات
+                        <span class="badge bg-secondary" id="equipmentCountBadge">@Model.EquipmentPerformanceList.Count</span>
+                    </h5>
+                    <span class="text-muted small" id="equipmentPerformanceNote">مربوط به تمام کالاها</span>
+                </div>
+                <div class="voyage-card__body">
+                    <div class="row g-2" id="equipmentPerformanceContainer">
+                        @foreach (var equip in Model.EquipmentPerformanceList)
+                        {
+                            <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 equipment-performance-card" 
+                                 data-gear-id="@equip.GearId" 
+                                 data-seo-ids="@string.Join(",", equip.RelatedSeoIds)">
+                                <div class="performance-card">
+                                    <div class="performance-card__header">
+                                        <div class="performance-card__avatar performance-card__avatar--warning">
+                                            <i class="fa-solid fa-truck-monster"></i>
+                                        </div>
+                                        <div class="performance-card__title" title="@equip.GearName">
+                                            @equip.GearName
+                                        </div>
+                                    </div>
+
+                                    <div class="performance-card__body">
+                                        <div class="performance-card__section">
+                                            <span class="voyage-badge voyage-badge--secondary" style="font-size: 0.625rem;">@equip.GearType</span>
+                                            @if (!string.IsNullOrEmpty(equip.Plaque))
+                                            {
+                                                <span class="voyage-badge voyage-badge--info" style="font-size: 0.625rem;">@equip.Plaque</span>
+                                            }
+                                        </div>
+
+                                        <div class="performance-card__section">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <span class="performance-card__label performance-card__label--primary">
+                                                    <i class="fa-solid fa-water me-1"></i>اسکله
+                                                </span>
+                                                <span class="badge bg-primary equip-dock-count" style="font-size: 0.625rem;">@equip.DockUsageCount</span>
+                                            </div>
+                                            <div class="d-flex justify-content-between mt-1">
+                                                <span class="text-muted">وزن بار:</span>
+                                                <span class="fw-bold equip-dock-weight">@equip.DockTotalWeightLoad.ToString("N0") kg</span>
+                                            </div>
+                                        </div>
+
+                                        <div class="performance-card__section">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <span class="performance-card__label performance-card__label--success">
+                                                    <i class="fa-solid fa-warehouse me-1"></i>محوطه
+                                                </span>
+                                                <span class="badge bg-success equip-area-count" style="font-size: 0.625rem;">@equip.AreaUsageCount</span>
+                                            </div>
+                                            <div class="d-flex justify-content-between mt-1">
+                                                <span class="text-muted">وزن بار:</span>
+                                                <span class="fw-bold equip-area-weight">@equip.AreaTotalWeightLoad.ToString("N0") kg</span>
+                                            </div>
+                                        </div>
+
+                                        <div class="performance-card__section">
+                                            <div class="d-flex justify-content-between align-items-center bg-light rounded p-1">
+                                                <span class="fw-bold text-dark">جمع وزن:</span>
+                                                <span class="badge bg-dark equip-total-weight" style="font-size: 0.625rem;">@equip.TotalWeightLoad.ToString("N0") kg</span>
+                                            </div>
+                                            <div class="d-flex justify-content-between mt-1 text-muted">
+                                                <span>تعداد استفاده: <span class="equip-total-count">@equip.TotalUsageCount</span></span>
+                                            </div>
+                                            <div class="d-flex justify-content-between mt-1 text-muted">
+                                                <span>میانگین: <span class="equip-avg-weight">@equip.AverageWeightLoad.ToString("N0") kg</span></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Truck Performance Section -->
+    @if (Model?.TruckPerformanceList?.Any() == true)
+    {
+        <div class="col-12">
+            <div class="voyage-card">
+                <div class="voyage-card__header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 section-title">
+                        <i class="fa-solid fa-truck text-primary"></i>
+                        عملکرد کامیون ها
+                        <span class="badge bg-secondary" id="truckCountBadge">@Model.TruckPerformanceList.Count</span>
+                    </h5>
+                    <span class="text-muted small" id="truckPerformanceNote">وزن بار قبل از تجهیز - اسکله</span>
+                </div>
+                <div class="voyage-card__body">
+                    <div class="row g-2" id="truckPerformanceContainer">
+                        @foreach (var truck in Model.TruckPerformanceList)
+                        {
+                            <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 truck-performance-card" 
+                                 data-truck-plates="@truck.TruckCarPlates"
+                                 data-seo-ids="@string.Join(",", truck.RelatedSeoIds)"
+                                 data-original-count="@truck.DockVisitCount"
+                                 data-original-weight="@truck.DockTotalWeightLoad">
+                                <div class="performance-card">
+                                    <div class="performance-card__header">
+                                        <div class="performance-card__avatar performance-card__avatar--info">
+                                            <i class="fa-solid fa-truck"></i>
+                                        </div>
+                                        <div class="performance-card__title" title="@truck.TruckCarPlates">
+                                            @truck.TruckCarPlates
+                                        </div>
+                                    </div>
+
+                                    <div class="performance-card__body">
+                                        <div class="performance-card__section">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <span class="performance-card__label performance-card__label--primary">
+                                                    <i class="fa-solid fa-water me-1"></i>اسکله
+                                                </span>
+                                                <span class="badge bg-primary truck-dock-count" style="font-size: 0.625rem;">@truck.DockVisitCount</span>
+                                            </div>
+                                            <div class="d-flex justify-content-between mt-1">
+                                                <span class="text-muted">تعداد تردد:</span>
+                                                <span class="fw-bold truck-visit-count">@truck.DockVisitCount</span>
+                                            </div>
+                                        </div>
+
+                                        <div class="performance-card__section">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <span class="performance-card__label performance-card__label--info">
+                                                    <i class="fa-solid fa-weight-scale me-1"></i>وزن بار
+                                                </span>
+                                            </div>
+                                            <div class="d-flex justify-content-between mt-1">
+                                                <span class="text-dark fw-bold">جمع:</span>
+                                                <span class="fw-bold truck-total-weight">@truck.DockTotalWeightLoad.ToString("N0") kg</span>
+                                            </div>
+                                            <div class="d-flex justify-content-between mt-1">
+                                                <span class="text-muted">میانگین:</span>
+                                                <span class="fw-bold truck-avg-weight">@truck.DockAverageWeightLoad.ToString("N0") kg</span>
+                                            </div>
+                                        </div>
+
+                                        <div class="performance-card__section">
+                                            <div class="bg-light rounded p-1">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <span class="text-muted">حداکثر:</span>
+                                                    <span class="badge bg-dark text-white truck-max-weight" style="font-size: 0.625rem;">@truck.MaxWeightLoad.ToString("N0") kg</span>
+                                                </div>
+                                                <div class="d-flex justify-content-between align-items-center mt-1">
+                                                    <span class="text-muted">حداقل:</span>
+                                                    <span class="badge bg-dark text-white truck-min-weight" style="font-size: 0.625rem;">@truck.MinWeightLoad.ToString("N0") kg</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Products Section with Filters -->
+    @if (Model?.ProductList?.Any() == true)
+    {
+        <div class="col-12">
+            <div class="voyage-card">
+                <div class="voyage-card__header">
+                    <div class="row align-items-center g-2">
+                        <div class="col-lg-3 col-md-12">
+                            <h5 class="mb-0 section-title">
+                                <i class="fa-solid fa-boxes-stacked text-primary"></i>
+                                کالاها
+                                <span class="badge bg-secondary" id="productCountBadge">@Model.ProductList.Count</span>
+                            </h5>
+                        </div>
+                        <div class="col-lg-9 col-md-12">
+                            <div class="filter-bar d-flex gap-2 flex-wrap align-items-center">
+                                <span class="small text-muted">فیلترها:</span>
+                                
+                                <label class="filter-checkbox" id="filterConflictLabel">
+                                    <input type="checkbox" id="filterConflict" onchange="applyFilters()">
+                                    <span>عدم تطابق</span>
+                                    <span class="badge bg-warning text-dark" style="font-size: 0.625rem;">@Model.ProductList.Count(p => p.HasConflict)</span>
+                                </label>
+                                
+                                <label class="filter-checkbox" id="filterIncompleteLabel">
+                                    <input type="checkbox" id="filterIncomplete" onchange="applyFilters()">
+                                    <span>اسکله ناقص</span>
+                                    <span class="badge bg-danger" style="font-size: 0.625rem;">@Model.ProductList.Count(p => !p.IsCompleted)</span>
+                                </label>
+                                
+                                <label class="filter-checkbox" id="filterNoTaliLabel">
+                                    <input type="checkbox" id="filterNoTali" onchange="applyFilters()">
+                                    <span>بدون تالی</span>
+                                    <span class="badge bg-secondary" style="font-size: 0.625rem;">@Model.ProductList.Count(p => p.TruckInfos?.Count == 0)</span>
+                                </label>
+                                
+                                <button type="button" class="btn btn-outline-secondary btn-sm" onclick="clearAllFilters()">
+                                    <i class="fa-solid fa-eraser me-1"></i>پاک کردن فیلترها
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="voyage-card__body voyage-card__body--no-padding">
+                    <div class="table-responsive">
+                        <table class="voyage-table" id="productsTable">
+                            <thead>
+                                <tr>
+                                    <th style="width: 35px;">#</th>
+                                    <th style="width: 50px;">بارنامه</th>
+                                    <th style="width: 180px;">کالا</th>
+                                    <th style="width: 50px;">تعداد</th>
+                                    <th style="width: 50px;">اسکله</th>
+                                    <th style="width: 50px;">وضعیت</th>
+                                    <th style="width: 50px;">کانتینر</th>
+                                    <th style="width: 50px;">پلاک/شاسی</th>
+                                    <th style="width: 400px;">اطلاعات تالی</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{
+                                    int productIndex = 1;
+                                }
+                                @foreach (var product in Model.ProductList)
+                                {
+                                    var rowClass = "";
+                                    if (product.HasConflict) rowClass += "has-conflict ";
+                                    if (!product.IsCompleted) rowClass += "is-incomplete ";
+                                      
+                                    <tr class="@rowClass" 
+                                        data-seo-id="@product.SeoId"
+                                        data-conflict="@product.HasConflict.ToString().ToLower()"
+                                        data-incomplete="@((!product.IsCompleted).ToString().ToLower())"
+                                        data-notali="@((product.TruckInfos?.Count == 0).ToString().ToLower())">
+                                          
+                                        <td class="text-center fw-bold text-muted" style="font-size: 0.75rem;">@(productIndex++)</td>
+                                          
+                                        <td>
+                                            <span class="voyage-badge voyage-badge--secondary" style="font-size: 0.625rem;">
+                                                @product.SeoBillOfLadingNumber
+                                            </span>
+                                        </td>
+                                          
+                                        <td>
+                                            <div class="fw-medium text-truncate-custom" style="max-width: 130px; font-size: 0.8125rem;" title="@product.ProductName">
+                                                @product.ProductName
+                                            </div>
+                                            @if (!string.IsNullOrEmpty(product.Description))
+                                            {
+                                                <small class="text-muted text-truncate-custom d-block" style="max-width: 130px; font-size: 0.6875rem;">
+                                                    @product.Description
+                                                </small>
+                                            }
+                                        </td>
+                                          
+                                        <td class="text-center">
+                                            <span class="fw-bold" style="font-size: 0.8125rem;">@product.Count.ToPrice()</span>
+                                        </td>
+                                          
+                                        <td class="text-center">
+                                            <span class="fw-bold @(product.TotalDockCount >= product.Count ? "text-success" : "text-warning")" style="font-size: 0.8125rem;">
+                                                @product.TotalDockCount.ToPrice()
+                                            </span>
+                                            @if (product.TotalAreaCount > 0)
+                                            {
+                                                <small class="d-block text-muted" style="font-size: 0.625rem;">
+                                                    <i class="fa-solid fa-warehouse me-1"></i>@product.TotalAreaCount.ToPrice()
+                                                </small>
+                                            }
+                                        </td>
+                                          
+                                        <td class="text-center">
+                                            @if (product.IsCompleted)
+                                            {
+                                                <span class="completion-status completion-status--complete">
+                                                    <i class="fa-solid fa-check-circle"></i>
+                                                    تکمیل
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="completion-status completion-status--incomplete">
+                                                    <i class="fa-solid fa-hourglass-half"></i>
+                                                    ناقص
+                                                </span>
+                                            }
+                                        </td>
+                                          
+                                        <td>
+                                            @if (!string.IsNullOrEmpty(product.ContainerNumber))
+                                            {
+                                                <div style="font-size: 0.75rem;">
+                                                    <span class="fw-medium">@product.ContainerNumber</span>
+                                                    @if (product.ContainerSize.HasValue)
+                                                    {
+                                                        <span class="voyage-badge voyage-badge--info" style="font-size: 0.625rem;">@product.ContainerSize فوت</span>
+                                                    }
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted" style="font-size: 0.75rem;">-</span>
+                                            }
+                                        </td>
+                                          
+                                        <td>
+                                            @if (product.IsSelfTransported)
+                                            {
+                                                <div style="font-size: 0.6875rem;">
+                                                    <span class="text-muted">شاسی:</span>
+                                                    <span class="text-info fw-medium">@product.VehicleIdentificationNumber</span>
+                                                </div>
+                                            }
+                                            else if (product.TruckInfos?.Any() == true)
+                                            {
+                                                <div class="d-flex flex-column gap-1">
+                                                    @foreach (var truckPlate in product.TruckInfos.Where(t => !string.IsNullOrEmpty(t.TruckCarPlates)).Select(t => t.TruckCarPlates).Distinct())
+                                                    {
+                                                        <span class="voyage-badge voyage-badge--secondary" style="font-size: 0.625rem;">
+                                                            <i class="fa-solid fa-truck me-1"></i>@truckPlate
+                                                        </span>
+                                                    }
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted" style="font-size: 0.75rem;">-</span>
+                                            }
+                                        </td>
+                                          
+                                        <td style="min-width: 280px;">
+                                            @if (product.TruckInfos?.Any() == true)
+                                            {
+                                                foreach (var truck in product.TruckInfos)
+                                                {
+                                                    <div class="tali-block tali-block--dock">
+                                                        <div class="tali-block__header">
+                                                            <span class="tali-block__count tali-block__count--dock">
+                                                                <i class="fa-solid fa-water me-1"></i>اسکله: @truck.DockCount.ToPrice()
+                                                            </span>
+                                                            <span class="d-flex gap-1">
+                                                                <i class="fa-solid fa-file @(truck.HasDockTaliFile == true ? "icon-file" : "icon-file is-missing")" title="@(truck.HasDockTaliFile == true ? "فایل دارد" : "فایل ندارد")"></i>
+                                                                <i class="fa-solid fa-list-check @(truck.HasDockTaliProductCheckList == true ? "icon-checklist" : "icon-checklist is-missing")" title="@(truck.HasDockTaliProductCheckList == true ? "چک لیست دارد" : "چک لیست ندارد")"></i>
+                                                            </span>
+                                                        </div>
+                                                        @if (!string.IsNullOrEmpty(truck.TruckCarPlates))
+                                                        {
+                                                            <div class="mt-1">
+                                                                <span class="voyage-badge voyage-badge--info" style="font-size: 0.625rem;">
+                                                                    <i class="fa-solid fa-truck me-1"></i>@truck.TruckCarPlates
+                                                                </span>
+                                                            </div>
+                                                        }
+                                                        <div class="tali-block__meta">
+                                                            @truck.DockPersonnelName | @truck.TaliDateFa
+                                                        </div>
+                                                        @if (truck.DockCountProblem > 0)
+                                                        {
+                                                            <span class="voyage-badge voyage-badge--warning mt-1" style="font-size: 0.625rem;">
+                                                                مشکل: @truck.DockCountProblem
+                                                            </span>
+                                                        }
+                                                    </div>
+
+                                                    @if (truck.AreaTalies?.Any() == true)
+                                                    {
+                                                        var totalAreaCount = truck.TotalAreaCount ?? 0;
+                                                        var hasConflict = truck.DockCount != totalAreaCount;
+                                                          
+                                                        @if (hasConflict)
+                                                        {
+                                                            <div class="conflict-alert">
+                                                                <i class="fa-solid fa-triangle-exclamation"></i>
+                                                                <span>تطابق: @truck.DockCount ≠ @totalAreaCount</span>
+                                                            </div>
+                                                        }
+
+                                                        @foreach (var area in truck.AreaTalies)
+                                                        {
+                                                            <div class="tali-block tali-block--area mt-1">
+                                                                <div class="tali-block__header">
+                                                                    <span class="tali-block__count tali-block__count--area">
+                                                                        <i class="fa-solid fa-warehouse me-1"></i>محوطه: @area.AreaCount.ToPrice()
+                                                                    </span>
+                                                                    <span class="d-flex gap-1">
+                                                                        <i class="fa-solid fa-file @(area.HasAreaTaliFile == true ? "icon-file" : "icon-file is-missing")" title="@(area.HasAreaTaliFile == true ? "فایل دارد" : "فایل ندارد")"></i>
+                                                                        <i class="fa-solid fa-list-check @(area.HasAreaTaliProductCheckList == true ? "icon-checklist" : "icon-checklist is-missing")" title="@(area.HasAreaTaliProductCheckList == true ? "چک لیست دارد" : "چک لیست ندارد")"></i>
+                                                                    </span>
+                                                                </div>
+                                                                <div class="d-flex justify-content-between align-items-center mt-1">
+                                                                    <span class="text-muted" style="font-size: 0.6875rem;">@area.AreaPersonnelName</span>
+                                                                    @if (!string.IsNullOrEmpty(area.WarehouseName))
+                                                                    {
+                                                                        <span class="voyage-badge voyage-badge--info" style="font-size: 0.625rem;">@area.WarehouseName</span>
+                                                                    }
+                                                                </div>
+                                                                @if (area.AreaCountProblem > 0)
+                                                                {
+                                                                    <span class="voyage-badge voyage-badge--warning mt-1" style="font-size: 0.625rem;">
+                                                                        مشکل: @area.AreaCountProblem
+                                                                    </span>
+                                                                }
+                                                            </div>
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        <div class="text-muted ps-2 mt-1" style="font-size: 0.6875rem;">
+                                                            <i class="fa-solid fa-warehouse me-1"></i>بدون محوطه
+                                                        </div>
+                                                    }
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <span class="voyage-badge voyage-badge--secondary" style="font-size: 0.625rem;">بدون تالی</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="noResultsMessage" class="empty-state is-hidden">
+                        <i class="fa-solid fa-inbox fa-2x mb-2"></i>
+                        <p>موردی یافت نشد</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@section script {
+    <script src="~/assets/js/voyage-seo-detail.js" asp-append-version="true"></script>
+}

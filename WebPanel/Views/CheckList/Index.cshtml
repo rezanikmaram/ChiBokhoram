@@ -1,0 +1,204 @@
+﻿@model CheckListPageResultDto
+@{
+    ViewData["Title"] = "چک لیست ها";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+    int i = ((Model.Result.PageNumber - 1) * Model.Result.PageSize) + 1;
+}
+
+<div class="col-lg-12">
+    <div class="card">
+        <div class="card-header">
+            <div class="d-flex justify-content-between">
+                
+                    <h3 class="title">
+                        <i class="icon-frane"></i> چک لیست ها
+                    </h3>
+
+               <div>
+
+                    <a class="btn rounded btn-primary" onclick="createCheckList();">  +  چک لیست جدید   </a>
+
+
+                    <!-- /.portlet-title -->
+                    <div class="buttons-box">
+
+                        <i class="icon-size-fullscreen"></i>
+                        <div class="paper-ripple">
+                            <div class="paper-ripple__background"></div>
+                            <div class="paper-ripple__waves"></div>
+                        </div>
+                    </div>
+
+               </div>
+                <!-- /.buttons-box -->
+            </div>
+            <!-- /.portlet-heading -->
+            <!-- /.portlet-body -->
+        </div>
+        <div class="card-body pt-0">
+
+            @* <form id="formFilter" asp-action="Index" asp-route-p="" method="post">
+                <input name="p" id="pageNumber" hidden />
+                <div class="form-body">
+                    <div class="row">
+                        <div class="row col-md-8 gy-4">
+                            
+
+                           
+
+                            <div class="col-sm-2 d-flex justify-content-center align-content-center flex-wrap">
+                                <div class="">
+                                    <button style="margin-top:30px; border-radius:5px" class="alert-icon btn btn-success " type="submit"><p class="px-3">فیلتر</p></button>
+                                </div>
+                            </div>
+                            
+
+                        </div>
+                       
+                    </div>
+                </div>
+            </form> *@
+
+
+            <!-- /.portlet-title -->
+            <div class="buttons-box">
+
+                <i class="icon-size-fullscreen"></i>
+                <div class="paper-ripple">
+                    <div class="paper-ripple__background"></div>
+                    <div class="paper-ripple__waves"></div>
+                </div>
+            </div>
+            <!-- /.buttons-box -->
+
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover table-striped" id="data-table">
+                    <thead class="bg-primary">
+                        <tr>
+                            <th>ردیف</th>
+                            <th>نام جک لیست</th>
+                            <th>نوع چک لیست</th>
+                            <td>عملیات</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+
+                        @foreach (var item in Model.Result.Data)
+                        {
+                            <tr>
+                                <td class="align-middle" >@(i++)</td>
+                                <td class="align-middle" >@item.CheckListTitle</td>
+                                <td class="align-middle">@item.CheckListType.ToDisplay(DisplayProperty.Name)</td>
+                                
+
+                                <td class="justify-content-between align-items-center">
+
+                                    <a class="btn btn-warning px-2 btn-sm btn-icon curve" onclick="editCheckList('@item.Id');"><i class="icon-pencil align-middle fs-6"></i></a>
+                                    <a id="DeleteCheckList@(i)" onclick="ShowQAlert(event,'DeleteCheckList@(i)');" class="btn btn-danger px-2 btn-sm btn-icon curve btn-questions ms-1"
+                                        asp-action="DeleteCheckList" asp-route-checkListId="@item.Id">
+                                        <i class="icon-trash fs-6 align-middle fa-flip-horizontal"></i>
+                                    </a>
+
+                                    <a  class="btn btn-info px-2 btn-sm btn-icon curve btn-questions ms-1"
+                                       asp-action="GetAssignedCheckListFactor" asp-route-checkListId="@item.Id">
+                                        شاخص ها
+                                    </a>
+                                </td>
+
+                            </tr>
+
+                        }
+
+
+
+                    </tbody>
+                </table>
+                <div>
+                    <cs-pager cs-paging-pagesize="@Model.Result.PageSize"
+                              cs-paging-pagenumber="@Model.Result.PageNumber"
+                              cs-paging-totalitems="@Model.Result.TotalItems"
+                              cs-paging-maxpageritems="10"
+                              cs-pagenumber-param="p"
+                              cs-show-first-last="true"
+                              cs-suppress-empty-nextprev="true"
+                              cs-suppress-inactive-firstlast="true"
+                              cs-show-numbered="true"
+                              cs-first-page-text="ابتدا"
+                              cs-last-page-text="انتها"
+                              cs-next-page-title="بعدی"
+                              cs-previous-page-title="قبلی"
+                              cs-first-page-title="ابتدا"
+                              cs-last-page-title="انتها"
+                              cs-next-page-text="بعدی"
+                              cs-previous-page-text="قبلی"
+                              cs-pager-li-current-class="page-item active"
+                              cs-pager-li-other-class="page-item"
+                              cs-pager-li-non-active-class="page-item disabled"
+                              cs-pager-link-current-class="page-link"
+                              cs-pager-link-other-class="page-link"
+                              asp-controller="Gear"
+                              asp-action="Index">
+                    </cs-pager>
+                </div>
+
+            </div>
+            <!-- /.table-responsive -->
+        </div>
+        <!-- /.portlet -->
+    </div>
+</div>
+
+
+
+
+<div id="generalmodal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">ثبت چک لیست</h4>
+                <button type="button" class="close btn-close rounded border" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="modalbody">
+
+                <partial name="_CreateCheckList" model="new CreateCheckListDto{}" />
+
+            </div>
+        </div>
+    </div>
+</div>
+
+@section script {
+
+    <script>
+        $(document).ready(function () {
+
+            $('.select2').select2();
+
+            $('select[class*="generalmodal"].select2').select2({
+                dropdownParent: $('#generalmodal')
+        });
+        });
+
+
+
+
+        function createCheckList() {
+            $("#Name").val('');
+            $("#Id").val('');
+            $("#generalmodal").modal('show');
+        }
+
+        function editCheckList(id) {
+
+            $.post("@Url.Action("GetCheckListById", "CheckList")", { checkListId: id })
+                .done(function (res) {
+                    $("#modalbody").html(res);
+                    $("#generalmodal").modal('show');
+                });
+        }
+
+
+    </script>
+}
+

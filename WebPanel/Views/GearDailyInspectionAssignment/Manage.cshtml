@@ -1,0 +1,89 @@
+@model Entities.DTOs.Web.GearDailyInspectionAssignmentPageDto
+@using Common.enumeration
+@using Common.Utilities
+@{
+    ViewData["Title"] = "اتصال چک لیست‌های بازدید روزانه به تجهیز";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+<div class="col-lg-12">
+    <div class="card">
+        <div class="card-header pb-0 d-flex justify-content-between align-items-center">
+            <h3 class="title">
+                مدیریت چک لیست‌های بازدید روزانه - تجهیز: @Model.GearTitle
+            </h3>
+            <a class="btn btn-secondary" asp-controller="Gear" asp-action="Index">بازگشت</a>
+        </div>
+        <div class="card-body pt-0">
+
+            <form class="row gy-3" method="get" asp-action="Manage">
+                <input type="hidden" name="gearId" value="@Model.GearId" />
+                <div class="col-md-4">
+                    <label>جستجوی عنوان چک لیست</label>
+                    <input class="form-control" name="search" value="@Model?.Filter?.Search" />
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button class="btn btn-primary" type="submit">اعمال فیلتر</button>
+                </div>
+            </form>
+
+            <div class="row mt-4">
+                <div class="col-md-5">
+                    <h5>چک لیست‌های قابل اتصال</h5>
+                    <select id="unassigned" class="form-control" size="15">
+                        @foreach (var c in Model.UnAssignedCheckLists)
+                        {
+                            <option value="@c.CheckListId">@c.Title</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-2 d-flex flex-column align-items-center justify-content-center gap-3">
+                    <form id="assignForm" asp-action="Assign" method="post" class="w-100 text-center">
+                        <input type="hidden" name="GearId" value="@Model.GearId" />
+                        <input type="hidden" name="CheckListId" id="assignCheckListId" />
+                        <div class="mb-2">
+                            <label class="form-label">نوع کار</label>
+                            <select class="form-select" name="GearTaskType">
+                                @foreach (GearTaskType t in Enum.GetValues(typeof(GearTaskType)))
+                                {
+                                    <option value="@t">@t.ToDisplay()</option>
+                                }
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-success w-100">افزودن »</button>
+                    </form>
+                    <form id="removeForm" asp-action="Remove" method="post" class="w-100 text-center">
+                        <input type="hidden" name="GearId" value="@Model.GearId" />
+                        <input type="hidden" name="Ids" id="removeIds" />
+                        <button type="submit" class="btn btn-danger w-100">« حذف</button>
+                    </form>
+                </div>
+                <div class="col-md-5">
+                    <h5>چک لیست‌های متصل</h5>
+                    <select id="assigned" class="form-control" multiple size="15">
+                        @foreach (var c in Model.AssignedCheckLists)
+                        {
+                            var tt = c.GearTaskType.HasValue ? c.GearTaskType.Value.ToDisplay() : "";
+                            <option value="@c.CheckListId|@((int)c.GearTaskType.Value)">@c.Title (@tt)</option>
+                        }
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section script {
+    <script>
+        // gather selected ID into hidden input before submit (single selection)
+        document.getElementById('assignForm').addEventListener('submit', function (e) {
+            const sel = document.getElementById('unassigned');
+            const val = sel && sel.value ? sel.value : '';
+            document.getElementById('assignCheckListId').value = val;
+        });
+        document.getElementById('removeForm').addEventListener('submit', function (e) {
+            const ids = Array.from(document.getElementById('assigned').selectedOptions).map(o => o.value);
+            document.getElementById('removeIds').value = ids.join(',');
+        });
+    </script>
+}

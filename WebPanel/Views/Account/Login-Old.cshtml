@@ -1,0 +1,97 @@
+﻿@using Microsoft.Extensions.Options;
+@inject IOptionsSnapshot<SiteSettings> settings;
+
+
+@model UserLoginDto
+@{
+    Layout = null;
+    var returnUrl = @Context.Request.Query["returnurl"];
+    var appType = settings.Value.OrganizationInfo.Type;
+
+    var styleVersion = 2;
+}
+
+
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="~/login/css/bootstrap.rtl.css" rel="stylesheet" />
+    <link href="~/login/css/style.css?v=@styleVersion" rel="stylesheet" />
+    <link href="~/login/fonts/all.min.css" rel="stylesheet" />
+    <link href="~/login/css/bootstrap.min.css" rel="stylesheet" />
+    <script src="~/login/js/jquery-3.7.1.min.js"></script>
+    @if (appType == EnumOrganizationInfo.HedayatPGP)
+    {
+        <title>شرکت خدمات دریایی هدایت کشتی</title>
+    }
+    else
+    {
+        <title>ورود به سامانه تخلیه و بارگیری</title>
+    }
+</head>
+<body>
+    <div class="container d-flex justify-content-center align-items-center position-relative">
+        <div class="bg-white rounded-5 px-5 py-4 text-center main-bg-white z-3 shadow-lg">
+            <div class="mb-4">
+                <img class="img-fluid w-50" src="~/login/images/logo-update.png" alt="">
+            </div>
+            <div class="d-flex flex-column justify-content-around align-items-center">
+                <form asp-action="Login" asp-controller="Account" method="post" asp-route-returnurl="@returnUrl">
+                    <input type="text" placeholder="  نام کاربری " class="my-2 border p-3" asp-for="UserName">
+                    <input type="password" placeholder=" رمز عبور " class="my-2 border p-3" asp-for="Password">
+                    <div asp-validation-summary="All" class="text-danger" style="text-align:right;direction:rtl;">
+                    </div>
+                    <button type="submit" class="main-cta mt-3 ">ورود به سامانه</button>
+
+                    <div class="mt-5">
+                        <a data-bs-toggle="modal" data-bs-target="#exampleModal" class="first-modal text-decoration-none" href=""><i class="fa-regular fa-circle-question mx-2 align-middle"></i>راهنمای ورود</a>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+        <div class="position-absolute top-shelf px-4 pt-1 text-center shadow">
+            <div>
+                <span class="text-white fw-bold mx-2">Future Per Networks : AI</span>
+                <img src="~/login/images/fpnlogo.png" alt="" class="img-fluid w-12 mx-2">
+            </div>
+        </div>
+        <div class="position-absolute bottom-shelf px-4 pt-1 text-center shadow">
+            <div>
+                @* <p class="text-white fw-bold mx-2 mt-4 fs-6"> آینده مدیریت پروژه بر روی شبکه برپایه هوش مصنوعی</p> *@
+                <p class="text-white fw-bold mx-2 mt-4 fs-6"> پروژه آینده ای به ازای شبکه ها </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header d-flex justify-content-between">
+                    <h5 class="modal-title" id="exampleModalLabel">راهنمای ورود</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="btn-close"></button>
+                </div>
+                <div class="modal-body my-2">
+                    - هرگونه نرم افزار پروکسی یا فی.لترش.کن را خاموش و غیرفعال کنید.
+                    <br />
+                    <br />
+                    - از مرورگر به روز مانند گوگل کروم یا فایرفاکس استفاده نمایید.
+                    <br />
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+        <script src="~/login/fonts/all.min.js"></script>
+        <script src="~/login/js/bootstrap.bundle.js"></script>
+        <script src="~/login/js/bootstrap.bundle.min.js"></script>
+        <script src="~/login/js/jquery.validate.min.js"></script>
+        <script src="~/login/js/jquery.validate.unobtrusive.min.js"></script>
+        <script src="~/login/js/slider.js"></script>
+        <script src="~/login/js/script.js"></script>
+</body>
+</html>

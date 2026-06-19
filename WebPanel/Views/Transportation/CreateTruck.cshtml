@@ -1,0 +1,242 @@
+﻿@model CreateTruckDto
+@{
+    ViewData["Title"] = "ثبت کامیون";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+ 
+<div class="col-lg-12">
+    <div class="card px-5">
+        <div class="card-header pb-0">
+            <div class="d-flex justify-content-between">
+                <h3 class="title">
+                    <a asp-action="Details" asp-controller="Company" asp-route-companyId="@Model.CompanyId"><i class="fa-solid fa-right-to-bracket me-2"></i></a>
+                    <i class="icon-anchor"></i> افزودن کامیون
+                </h3>
+            </div>
+        </div>
+        <form asp-action="CreateTruck" method="post">
+         
+            <input asp-for="Id" type="hidden" />
+            <div class="card-body pt-0">
+                  <div class="form-body">
+
+                    <div class="col-md-12 my-3">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label> شرکت</label>
+                                <div class="input-group">
+                                    <select style="width:500px !important" class="form-control  select2" asp-for="CompanyId"
+                                            asp-items="@ViewBag.Companies">
+                                        <option value="">نامشخص</option>
+                                    </select>
+                                    <span asp-validation-for="CompanyId" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="row gy-4">
+
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>نام کامیون</label>
+                                <div class="input-group">
+                                    <input type="text" asp-for="TruckName" class="form-control rounded" required>
+                                    <span asp-validation-for="TruckName" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>شناسه کامیون</label>
+                                <div class="input-group">
+                                    <input asp-for="TruckNumberId" class="form-control rounded" required>
+                                    <span asp-validation-for="TruckNumberId" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>RFID</label>
+                                <div class="input-group">
+                                    <input type="text" asp-for="RfId" class="form-control rounded">
+                                    <span asp-validation-for="RfId" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-group ">
+                                <label>تلفن</label>
+                                <div class="input-group">
+                                    <input type="text" asp-for="Telephone" class="form-control rounded">
+                                    <span asp-validation-for="Telephone" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+                
+                    
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>نوع پلاک</label>
+                                <div class="input-group">
+                                    <select class="form-control select2" asp-for="CarPlatesType">
+                                        <option value="1">پلاک ملی</option>
+                                        <option value="2">پلاک بندری</option>
+                                    </select>
+                                    <span asp-validation-for="CarPlatesType" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="CarPlatesTypeMeli" class="@(Model.CarPlatesType == CarPlatesType.Number ? "d-none" : "") form-group col-md-6 justify-content-between d-flex  ">
+                            <div class="col-md-2">
+                                <label>ایران</label>
+                                <div class="input-group ">
+                                    <input asp-for="CarPlatesAreaCode" type="text" class="form-control m-l-10">
+                                    <span asp-validation-for="CarPlatesAreaCode" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <label>عدد 3 رقمی</label>
+                                <div class="input-group ">
+                                    <input asp-for="CarPlatesRight" type="text" class="form-control m-l-10">
+                                    <span asp-validation-for="CarPlatesRight" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group ">
+                                    <label>حرف</label>
+                                    <div class="input-group">
+                                        <select class="form-control select2" asp-for="CarPlatesMiddle">
+                                            <option value="ع">ع</option>
+                                            <option value="ک">ک</option>
+                                            <option value="الف">الف</option>
+                                            <option value="ب">ب</option>
+                                            <option value="ت">ت</option>
+                                            <option value="ج">ج</option>
+                                            <option value="د">د</option>
+                                            <option value="س">س</option>
+                                            <option value="ص">ص</option>
+                                            <option value="ط">ط</option>
+                                            <option value="ق">ق</option>
+                                            <option value="ل">ل</option>
+                                            <option value="م">م</option>
+                                            <option value="ن">ن</option>
+                                            <option value="و">و</option>
+                                            <option value="ه">ه</option>
+                                            <option value="ی">ی</option>
+                                            <option value="پ">پ</option>
+                                            <option value="گ">گ</option>
+                                            <option value="ف">ف</option>
+                                            <option value="ش">ش</option>
+                                            <option value="ث">ث</option>
+                                            <option value="ز">ز</option>
+                                        </select>
+                                        <span asp-validation-for="CarPlatesMiddle" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <label>عدد 2 رقمی</label>
+                                <div class="input-group ">
+                                    <input type="text" asp-for="CarPlatesLeft" class="form-control">
+                                    <span asp-validation-for="CarPlatesLeft" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="CarPlatesTypeBandari" class="col-md-4 @(Model.CarPlatesType != CarPlatesType.Number  ? "d-none" : ""  ) ">
+                            <div class="form-group m-l-60 ">
+                                <label>پلاک بندری</label>
+                                <div class="input-group">
+                                    <input type="text" asp-for="CarPlates" class="form-control">
+                                    <span asp-validation-for="CarPlates" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-group m-l-60 ">
+                                <label>GPS</label>
+                                <div class="input-group">
+                                    <input type="text" asp-for="GpsId" class="form-control roundeds">
+                                    <span asp-validation-for="GpsId" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>ظرفیت</label>
+                                <div class="input-group">
+                                    <input asp-for="PortableCapacity" type="number" class="form-control rounded">
+                                    <span asp-validation-for="PortableCapacity" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row align-items-end mt-3">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>وزن خالی</label>
+                                <div class="input-group">
+                                    <input asp-for="WeightFree" type="number" class="form-control">
+                                    <span asp-validation-for="WeightFree" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group ">
+                                <label>
+                                    <input asp-for="Status" class="normal">
+                                    وضعیت
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="form-actions mb-4" style="float: left;">
+                <a asp-controller="Company" asp-action="Details" asp-route-companyId="@Model.CompanyId" class="btn btn-warning btn-round"> <i class="icon-close"> </i> برگشت</a>
+                <button type="submit" class="btn btn-info btn-round">
+                    <i class="icon-check"></i>
+                    ذخیره
+                    <div class="paper-ripple"><div class="paper-ripple__background"></div><div class="paper-ripple__waves"></div></div>
+                </button>
+            </div>
+        </form>
+        <section class="fix"></section>
+    </div>
+</div>
+
+@section script{
+    
+
+    <script>
+
+        
+
+        $(document).ready(function () {
+            $("#CarPlatesType").select2().trigger('change');
+            $("#CompanyId").select2();
+            $("#CarPlatesMiddle").select2();
+
+            $("#CarPlatesType").change(function () {
+                var selectedValue = $(this).val();
+
+                if (selectedValue === "1") {
+                    $("#CarPlatesTypeMeli").removeClass("d-none");
+                    $("#CarPlatesTypeBandari").addClass("d-none");
+                } else {
+                    $("#CarPlatesTypeMeli").addClass("d-none");
+                    $("#CarPlatesTypeBandari").removeClass("d-none");
+                }
+            });
+        });
+    </script>
+}
+
+

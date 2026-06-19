@@ -1,0 +1,97 @@
+@model SelectContractViewModel
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="~/login-v2/css/bootstrap.rtl.css">
+    <link rel="stylesheet" href="~/login-v2/css/style.css?v=3">
+    <link rel="stylesheet" href="~/login-v2/font/all.min.css">
+    <title>انتخاب قرارداد</title>
+    <style>
+        .contract-option { text-align:right; }
+        .contract-option .form-check-input { margin-top: 0.6rem; margin-right: 0.3rem; }
+        .contract-card { max-width: 640px; }
+    </style>
+</head>
+<body>
+    <div class="container d-flex justify-content-center align-items-center position-relative min-vh-100">
+        <div class="bg-white rounded-5 px-5 py-4 text-center main-bg-white z-3 shadow-lg contract-card">
+            <div class="mb-4">
+                <h2 class="fw-bold mb-1">انتخاب قرارداد فعال</h2>
+                <div class="text-muted small">@Model.FullName (@Model.UserName)</div>
+            </div>
+
+            <form asp-action="SelectContract" method="post" class="contract-option">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="UserId" />
+                <input type="hidden" asp-for="ReturnUrl" />
+
+                <div asp-validation-summary="All" class="text-danger text-start"></div>
+
+                @if (Model.Contracts?.Any() == true)
+                {
+                    for (var i = 0; i < Model.Contracts.Count; i++)
+                    {
+                        var contract = Model.Contracts[i];
+                        var inputId = $"contract_{i}";
+                        <div class="form-check border rounded p-3 mb-3 text-start">
+                            <input class="form-check-input" type="radio" asp-for="SelectedContractId" value="@contract.ContractId" id="@inputId" checked="@((Model.SelectedContractId == contract.ContractId) || (Model.SelectedContractId == null && i == 0))" />
+                            <label class="form-check-label w-100" for="@inputId">
+                                <div class="d-flex justify-content-between flex-wrap">
+                                    <span class="fw-bold">@(!string.IsNullOrEmpty(contract.ContractNumber) ? contract.ContractNumber : "-")</span>
+                                    <span class="text-muted">@contract.CompanyName</span>
+                                </div>
+                                @if (!string.IsNullOrWhiteSpace(contract.Title))
+                                {
+                                    <div class="text-secondary small mt-1">@contract.Title</div>
+                                }
+                                @* <div class="small mt-2 text-muted">
+                                    حجم نهایی: @string.Format("{0:#,0}", contract.FinallVolume)
+                                    | وزن نهایی: @string.Format("{0:#,0}", contract.FinallWeight)
+                                    | سفر: @contract.FinallVoyage
+                                    | کانتینر: @contract.FinallContainer
+                                </div>
+                                <div class="small mt-1 text-muted">
+                                    درصد سهم شرکت: @contract.CompanySharePercentage
+                                    | درصد سهم کارفرما: @contract.EmployerSharePercentage
+                                </div> *@
+                                @* @if (contract.AccountNumbers?.Any() == true)
+                                {
+                                    <div class="mt-2">
+                                        <span class="text-muted small">شماره حساب‌ها:</span>
+                                        <ul class="mb-0 small ps-4">
+                                            @foreach (var acc in contract.AccountNumbers)
+                                            {
+                                                <li>@acc.AccountNumber @if (!string.IsNullOrWhiteSpace(acc.Description)) { <text>- @acc.Description</text> }</li>
+                                            }
+                                        </ul>
+                                    </div>
+                                } *@
+                            </label>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="alert alert-warning text-start">قراردادی برای این کاربر یافت نشد.</div>
+                }
+
+                <span asp-validation-for="SelectedContractId" class="text-danger d-block mb-3"></span>
+
+                <div class="d-flex justify-content-between">
+                    <a class="btn btn-outline-secondary" asp-action="Login">بازگشت</a>
+                    <button type="submit" class="btn btn-primary">تأیید و ادامه</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="~/login-v2/font/all.min.js"></script>
+    <script src="~/login-v2/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

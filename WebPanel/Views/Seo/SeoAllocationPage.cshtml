@@ -1,0 +1,430 @@
+﻿@model SeoAllocationPage
+@{
+	ViewData["Title"] = "اجاره تجهیزات ویژه";
+	Layout = "~/Views/Shared/AdminLayout.cshtml";
+
+	var EditPreFactorTitle = "";
+
+	var color = "";
+	var imageSrc = "";
+	switch (Model.SeoInfoDto.State)
+	{
+		case SeoState.Active:
+			color = "bg-primary";
+			imageSrc = "craneShip.png";
+			break;
+		case SeoState.Stoped:
+			color = "bg-warning";
+			imageSrc = "ship.png";
+			break;
+		case SeoState.Finish:
+			color = "bg-success2";
+			imageSrc = "Eship.png";
+			break;
+		default:
+			color = "bg-primary";
+			imageSrc = "craneShip.png";
+			break;
+	}
+}
+<div class="row">
+	<div class="card">
+		<div class="card-header pb-0 px-3">
+			<div class="d-flex justify-content-between align-items-center">
+				<h3 class="title">
+					<i class="icon-frane"></i>
+					<a asp-action="SeoAccessPage" asp-route-seoId="@Model.SeoInfoDto.Id">
+						<i class="fa-solid fa-right-to-bracket me-2"></i>
+					</a>
+					اجاره تجهیزات ویژه
+				</h3>
+				<div class="d-flex align-items-center">
+					@if (User.IsInRole("admin") || User.IsInRole("adminOnePort"))
+					{
+						<a asp-action="SeoView" asp-route-seoId="@Model.SeoInfoDto.Id" class=" btn btn-primary mx-2"><i class="fa-regular fa-circle-info me-2 align-middle"></i> نمای کلی </a>
+					}
+
+
+				</div>
+			</div>
+			<div class="row">
+			</div>
+		</div>
+		<div class="card-body pt-0 px-2">
+			<div class="bg-primary rounded-3 mt-4 p-3">
+				<div class="row gy-3 align-items-center">
+					<div class="col-1">
+						<img src="~/assets/images/@imageSrc" alt="" class="img-fluid">
+					</div>
+					<div class="col-3">
+						<p class="fs-6 fw-bold">@Model.SeoInfoDto.ShipShipName (@Model.SeoInfoDto.BillOfLadingNumber)</p>
+						<p class="fs-6 fw-bold">تاریخ شروع: @Model.SeoInfoDto.StartFa</p>
+					</div>
+					<div class="col-3">
+						<p class="fs-6 fw-bold">اسکله: @Model.SeoInfoDto.WaterfrontWaterfrontName</p>
+						<p class="fs-6 fw-bold">کالا: @Model.SeoInfoDto.ProductProductName</p>
+					</div>
+					<div class="col-3">
+						<p class="fs-6 fw-bold">تناژ: @Model.SeoInfoDto.TonnageTitle</p>
+						<p class="fs-6 fw-bold">صاحب کالا: @Model.SeoInfoDto.ProductOwnerCompanyCompanyName</p>
+					</div>
+					<div class="col-2">
+						<p class="fs-6 fw-bold">نوع بارنامه: @Model.SeoInfoDto.TransportTypeTitle</p>
+						@* <p class="fs-6 fw-bold">وضعیت: @Model.AllocationEquipmentStateTitle</p> *@
+					</div>
+					<div class="col-3">
+						<a class="px-4 bg-white text-dark rounded filter-collapse py-1" data-bs-toggle="collapse" href="#collapseExample" role="button" aria-expanded="@(ViewBag.IsEmpty)" aria-controls="collapseExample">
+							تکمیل مشخصات <i class="fa-solid fa-angle-down mx-2 align-middle"></i>
+						</a>
+					</div>
+					<div class="collapse @(ViewBag.IsEmpty == true ? "show" : "")" id="collapseExample">
+						<div class="card-body">
+							<form id="formFilter" asp-action="SetSecondStepSeo" method="post">
+								<input name="p" id="pageNumber" hidden />
+								<input type="hidden" asp-for="SecondStepSeo.Id" value="@Model.SeoInfoDto.Id" />
+								<div class="form-body ">
+									<div class="row gy-4">
+
+
+										<div class="col-md-4 col-sm-12">
+											<div class="form-group">
+												<label>شرکت پورت اپراتور</label>
+												<div class="input-group d-flex flex-nowrap">
+													<select class="form-control select2 rounded" asp-for="SecondStepSeo.CompanyPortOperatorId"
+															asp-items="Model.Companies">
+
+														@if (Model.SecondStepSeo.CompanyPortOperatorId == null)
+														{
+															<option value="">نامشخص</option>
+														}
+
+													</select>
+													<a class="btn btn-success px-2 ms-2 rounded" target="_blank"
+													   asp-action="CreateCompany" asp-controller="Company">
+														<i class="icon-plus align-bottom"></i>
+													</a>
+												</div>
+												<span asp-validation-for="SecondStepSeo.CompanyPortOperatorId" class="text-danger"></span>
+											</div>
+										</div>
+
+										<div class="col-md-4 col-sm-12">
+											<div class="form-group">
+												<label>شرکت خن کار</label>
+												<div class="input-group d-flex flex-nowrap">
+													<select class="form-control select2 rounded" asp-for="SecondStepSeo.CompanyKhankarId"
+															asp-items="Model.Companies">
+														@if (Model.SecondStepSeo.CompanyKhankarId == null)
+														{
+															<option value="">نامشخص</option>
+														}
+													</select>
+													<a class="btn btn-success px-2 ms-2 rounded" target="_blank"
+													   asp-action="CreateCompany" asp-controller="Company">
+														<i class="icon-plus align-bottom"></i>
+													</a>
+												</div>
+												<span asp-validation-for="SecondStepSeo.CompanyKhankarId" class="text-danger"></span>
+											</div>
+										</div>
+
+										<div class="col-md-2 col-sm-12">
+											<div class="  form-group ">
+												<label>شروع عملیات</label>
+												<div class="input-group">
+													<input asp-for="SecondStepSeo.StartFa" type="text" class=" form-control rounded" autocomplete="off">
+													<span asp-validation-for="SecondStepSeo.StartFa" class="text-danger"></span>
+												</div>
+											</div>
+										</div>
+										<div class="col-md-2 col-sm-12">
+											<div class="  form-group ">
+												<label>ساعت شروع</label>
+												<div class="input-group clockpicker">
+													<input asp-for="SecondStepSeo.StartTime" type="text" class="form-control rounded" autocomplete="off">
+													<span asp-validation-for="SecondStepSeo.StartTime" class="text-danger"></span>
+												</div>
+											</div>
+										</div>
+
+
+										<div class="col-md-2 col-sm-12">
+											<div class="  form-group ">
+												<label>پایان عملیات</label>
+												<div class="input-group">
+													<input asp-for="SecondStepSeo.EndFa" type="text" class=" form-control rounded" autocomplete="off">
+													<span asp-validation-for="SecondStepSeo.EndFa" class="text-danger"></span>
+												</div>
+											</div>
+										</div>
+										<div class="col-md-2 col-sm-12">
+											<div class="  form-group ">
+												<label>ساعت پایان</label>
+												<div class="input-group clockpicker">
+													<input asp-for="SecondStepSeo.EndTime" type="text" class="form-control rounded" autocomplete="off">
+													<span asp-validation-for="SecondStepSeo.EndTime" class="text-danger"></span>
+												</div>
+											</div>
+										</div>
+
+
+										<div class="col-md-2 col-sm-12">
+											<div class="  form-group ">
+												<label>روز</label>
+												<div class="input-group">
+													<input asp-for="SecondStepSeo.Day" type="number" class=" form-control rounded" min="0">
+													<span asp-validation-for="SecondStepSeo.Day" class="text-danger"></span>
+												</div>
+											</div>
+										</div>
+										<div class="col-md-2 col-sm-12">
+											<div class="form-group ">
+												<label>ساعت </label>
+												<div class="input-group">
+													<input asp-for="SecondStepSeo.Hour" type="number" class="form-control rounded" min="0">
+													<span asp-validation-for="SecondStepSeo.Hour" class="text-danger"></span>
+												</div>
+											</div>
+										</div>
+										<div class="col-md-2 col-sm-12">
+											<div class="form-group ">
+												<label>دقیقه </label>
+												<div class="input-group">
+													<input asp-for="SecondStepSeo.Minutes" type="number" class="form-control rounded" min="0">
+													<span asp-validation-for="SecondStepSeo.Minutes" class="text-danger"></span>
+												</div>
+											</div>
+										</div>
+
+
+										<div class="col-md-2 col-sm-12">
+											<div class="  form-group ">
+												<label>شماره فرعی</label>
+												<div class="input-group">
+													<input asp-for="SecondStepSeo.NumberFaree" type="text" class="rounded form-control" autocomplete="off">
+													<span asp-validation-for="SecondStepSeo.NumberFaree" class="text-danger"></span>
+												</div>
+											</div>
+										</div>
+
+										<div class="col-md-12 mt-4">
+											<div class="form-group align-content-center mb-3 text-end">
+												<button style="border-radius:5px; margin-top:30px" class="alert-icon px-5 btn btn-success "
+														type="submit">
+													ذخیره
+												</button>
+											</div>
+										</div>
+									</div>
+
+								</div>
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="row mt-4 gy-3">
+
+
+				<div class="col-md-3">
+					<div class="bg-light-dark p-3 rounded-3 h-100">
+
+						<a asp-action="EquipmentManage" asp-controller="Seo" asp-route-seoId="@Model.SeoInfoDto.Id" asp-route-returnPage="1"
+						   class="btn btn-light w-100 btn-air-light my-2 text-start fs-6 py-2">
+							<i class="fa-solid fa-users align-middle mx-2"></i>
+							مدیریت تجهیزات
+						</a>
+
+					</div>
+				</div>
+
+				@if (User.IsInRole("admin") || User.IsInRole("adminOnePort"))
+				{
+					<div class="col-md-3">
+						<div class="bg-light-dark p-3 rounded-3 h-100">
+							<a asp-action="PreFactor" asp-controller="AllocationOfEquipment" asp-route-allocationEquId="@Model.AllocationEquId"
+							   class="btn btn-light w-100 btn-air-light my-2 text-start fs-6 py-2">
+								<i class="fa-solid fa-magnifying-glass align-middle mx-2"></i>
+								صدور پیش فاکتور
+							</a>
+						</div>
+					</div>
+
+				}
+
+				<div class="col-md-3">
+					<div class="bg-light-dark p-3 rounded-3 h-100">
+						<a asp-action="DocFiles" asp-controller="AllocationOfEquipment" asp-route-allocationEquId="@Model.AllocationEquId" asp-route-reternPage="1"
+						   class="btn btn-light w-100 btn-air-light my-2 text-start fs-6 py-2">
+							<i class="fa-solid fa-users align-middle mx-2"></i>
+							مستندات
+						</a>
+					</div>
+				</div>
+
+				@*  @if (Model.AllocationEquipmentState == AllocationEquipmentState.WaitingToStart
+                && (User.IsInRole("admin") || User.IsInRole("adminOnePort") || User.IsInRole("AllocationEquToEnd")))
+                {
+                    <div class="col-md-3">
+                        <div class="bg-light-dark p-3 rounded-3 h-100">
+                            <a onclick="ShowModalStart(event, '@Model.AllocationEquId')"
+                               class="btn btn-light w-100 btn-air-light my-2 text-start fs-6 py-2">
+                                <i class="fa-solid fa-sitemap mx-2"></i>
+                                شروع عملیات
+                            </a>
+                        </div>
+                    </div>
+                } *@
+
+
+
+				@*  @if (Model.AllocationEquipmentState >= AllocationEquipmentState.InOperation) *@
+
+				<div class="col-md-3">
+					<div class="bg-light-dark p-3 rounded-3 h-100">
+
+						@if (Model.SecondStepSeo.Start == null || string.IsNullOrWhiteSpace(Model.SecondStepSeo.StartTime))
+						{
+							<a class="btn btn-light w-100 btn-air-light my-2 text-start fs-6 py-2" onclick="ErrorStartEmpty()">
+								<i class="fa-solid fa-sitemap mx-2"></i>
+								مدیریت عملیات
+							</a>
+						}
+						else
+						{
+
+							<a asp-action="ToEnd" asp-controller="AllocationOfEquToEnd"
+							   asp-route-allocationEquId="@Model.AllocationEquId"
+							   class="btn btn-light w-100 btn-air-light my-2 text-start fs-6 py-2">
+								<i class="fa-solid fa-sitemap mx-2"></i>
+								مدیریت عملیات
+							</a>
+
+						}
+
+					</div>
+				</div>
+
+
+
+				@if ((User.IsInRole("admin") || User.IsInRole("adminOnePort"))
+								&& (Model.AllocationEquipmentState >= AllocationEquipmentState.CompletingEnd))
+
+				{
+					<div class="col-md-3">
+						<div class="bg-light-dark p-3 rounded-3 h-100">
+
+							@if (ViewBag.IsEmpty == true)
+							{
+								<a class="btn btn-light w-100 btn-air-light my-2 text-start fs-6 py-2" onclick="ErrorEmptyForm()">
+									<i class="fa-solid fa-money-check-dollar mx-2"></i>
+									صدور صورتحساب
+								</a>
+							}
+							else
+							{
+
+
+								<a asp-action="Factor" asp-controller="AllocationOfEquipmentFactor"
+								   asp-route-allocationEquId="@Model.AllocationEquId"
+								   class="btn btn-light w-100 btn-air-light my-2 text-start fs-6 py-2">
+									<i class="fa-solid fa-money-check-dollar mx-2"></i>
+									صدور صورتحساب
+								</a>
+
+							}
+						</div>
+					</div>
+				}
+
+			</div>
+		</div>
+	</div>
+</div>
+
+
+<div id="generalmodal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" tabindex="-1">
+	<div class="modal-dialog modal-dialog-centered">
+		<div class="modal-content">
+			<div class="modal-header">
+
+				<h4 class="modal-title">شروع عملیات</h4>
+				<button type="button" class="close btn-close rounded border" data-bs-dismiss="modal"></button>
+			</div>
+			<div class="modal-body" id="modalbody">
+
+				<div class="card-body pt-0">
+
+					<div class="form-body">
+						<form asp-action="GoToStart" asp-controller="AllocationOfEquipment" method="post">
+
+							<input id="allocationEquIdForStart" name="allocationEquId" hidden />
+							<div class="row">
+								<div class="col-sm-6">
+									<div class="form-group">
+										<label>درصد تخلیه/بارگیری جهت شروع</label>
+										<div class="input-group">
+											<input type="number" class="form-control" id="PercentToStartId"
+												   name="Percent" min="0" max="100" step="1" required>
+										</div>
+									</div>
+								</div>
+
+							</div>
+
+
+							<div class="modal-footer px-0 pb-0 border-0">
+								<button type="submit" class="btn btn-success btn-round">شروع عملیات</button>
+								<button type="button" class="btn btn-danger btn-round" data-bs-dismiss="modal">بازگشت</button>
+							</div>
+						</form>
+					</div>
+				</div>
+
+
+			</div>
+		</div>
+	</div>
+</div>
+
+
+@section script {
+
+	<script>
+		$(document).ready(function () {
+			$("#SecondStepSeo_CompanyPortOperatorId").select2().trigger('change');
+			$("#SecondStepSeo_CompanyKhankarId").select2().trigger('change');
+
+			kamaDatepicker('SecondStepSeo_StartFa', customOptions);
+			kamaDatepicker('SecondStepSeo_EndFa', customOptions);
+		});
+		function ShowModalStart(event, allocationEquId) {
+			event.preventDefault();
+
+			$('#allocationEquIdForStart').val(allocationEquId);
+			$('#PercentToStartId').val('100');
+
+			$("#generalmodal").modal('show');
+		}
+
+
+		function ErrorEmptyForm() {
+
+			Toast.fire({
+				icon: 'error',
+				title: 'بخش تکمیل مشخصات را پر کنید'
+			});
+		}
+
+
+		function ErrorStartEmpty() {
+
+			Toast.fire({
+				icon: 'error',
+				title: 'شروع عملیات و ساعت شروع در بخش تکمیل مشخصات را پر کنید'
+			});
+		}
+
+	</script>
+
+}

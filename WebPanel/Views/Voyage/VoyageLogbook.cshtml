@@ -1,0 +1,108 @@
+@model Entities.DTOs.Web.Hirman.Logbook.VoyageLogbookPageDto
+@{
+    ViewData["Title"] = "لاگ بوک سفر";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+@* <div class="card p-2 mb-4"> *@
+@*     <div class="row"> *@
+@*         <div class="col-md-1 align-middle align-content-center px-4"> *@
+@*             <div class="btn btn-outline-info px-1"> *@
+@*                 <i class="fa-solid fa-circle-info fs-4 align-middle"></i> *@
+@*             </div> *@
+@*         </div> *@
+@*         <div class="col-md-11 px-5"> *@
+@*             <div class="d-flex justify-content-between align-items-center"> *@
+@*                 <div class=""> *@
+@*                     <p class="fs-6 m-0 px-3 btn btn-outline-info">@Model.ShipName</p> *@
+@*                 </div> *@
+@*                 <div> *@
+@*                     <p class="fs-6 m-0">شماره سفر: @Model.VoyageNumber</p> *@
+@*                 </div> *@
+@*                 <div> *@
+@*                     @if (Model.HasLogbook) *@
+@*                     { *@
+@*                     <span class="badge bg-info fs-6"> *@
+@*                         آخرین وضعیت: @Model.LatestLogbook?.StatusTypeTitle *@
+@*                             <small class="text-light ms-2">@Model.LatestLogbook?.SubmittedDateFa</small> *@
+@*                         </span> *@
+@*                     } *@
+@*                     else *@
+@*                     { *@
+@*                         <span class="badge bg-secondary fs-6">بدون لاگ بوک</span> *@
+@*                     } *@
+@*                 </div> *@
+@*             </div> *@
+@*         </div> *@
+@*     </div> *@
+@* </div> *@
+
+<div class="row">
+    <div class="card">
+        <div class="card-header py-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <h3 class="title mb-0">
+                    <a asp-action="VoyageSeo" asp-route-voyageId="@Model.VoyageId" class="">
+                        <i class="fa-solid fa-right-to-bracket fs-4 align-middle text-primary fs-6"></i>
+                    </a>
+                    <i class="fa-solid fa-book me-2"></i>
+                    لاگ بوک سفر
+                </h3>
+                <div class="d-flex align-items-center">
+                    <span class="badge bg-primary mx-2">@Model.Logbooks.Count رکورد</span>
+                    <div class="d-flex align-items-center">
+                        <a asp-action="ExportVoyageLogbookExcel"
+                           asp-route-voyageId="@Model.VoyageId"
+                           class="btn btn-sm btn-success d-flex align-items-center">
+                            <i class="fa-solid fa-file-excel me-2"></i>
+                            خروجی اکسل
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-body pt-1">
+            @if (Model.Logbooks != null && Model.Logbooks.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-striped table-bordered">
+                        <thead>
+                            <tr>
+                                <th>ردیف</th>
+                                <th>وضعیت</th>
+                                <th>توضیحات</th>
+                                <th>ثبت کننده</th>
+                                <th>تاریخ ثبت</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                                int index = 1;
+                            }
+                            @foreach (var item in Model.Logbooks)
+                            {
+                                var statusClass = item.StatusType == Common.enumeration.Hirman.LogbookStatusType.StartOperation ? "bg-info" : "bg-danger";
+                                <tr>
+                                    <td>@(index++)</td>
+                                    <td>
+                                        <span class="badge @statusClass">@item.StatusTypeTitle</span>
+                                    </td>
+                                    <td>@item.Description</td>
+                                    <td>@item.PersonelName</td>
+                                    <td>@item.SubmittedDateFa</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info text-center">
+                    <i class="fa-solid fa-info-circle me-2"></i>
+                    هیچ لاگبوکی برای این سفر ثبت نشده است
+                </div>
+            }
+        </div>
+    </div>
+</div>

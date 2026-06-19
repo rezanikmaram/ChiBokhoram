@@ -1,0 +1,211 @@
+﻿@model WarehouseReceiptMergePageDto
+@{
+	ViewData["Title"] = "تجمیع قبض انبار";
+	Layout = "~/Views/Shared/AdminLayout.cshtml";
+	int i = 1;
+}
+
+
+<div class="col-lg-12">
+	<div class="card">
+		<div class="card-header pb-0">
+			<div class="d-flex justify-content-between">
+
+				<h3 class="title mb-4">
+					<i class="icon-frane"></i>
+					<partial name="Partials/_BackButtonTolistSwr" />
+					لیست قبض انبار ها برای تجمیع - شرکت (@Model.CompanyOwnerName)
+				</h3>
+
+				<form asp-action="MergeSeoWarehouseReceipt" method="post" id="postMerge">
+					<input asp-for="SeoWarehouseReceiptId" type="hidden" />
+					<input name="seoId" value="@((Guid?)ViewBag.seoId)" type="hidden" />
+					<input name="exportId" value="@((Guid?)ViewBag.exportId)" type="hidden" />
+					<a class="btn mb-2 float-end btn-success text-white label rounded" id="finalizeButton" onclick="MergeSeoWarehouseReceipt(event);">تجمیع کردن</a>
+					<input id="seoWarehouseReceiptId" name="ids" type="hidden" />
+				</form>
+			</div>
+		</div>
+
+		<div class="table-responsive vh-100 px-3">
+			<table class="table table-bordered table-hover table-striped" id="data-table">
+				<thead class="bg-primary">
+					<tr>
+						<th> </th>
+						<th class="align-middle">ردیف</th>
+						<th class="align-middle"> شماره قبض  </th>
+						<td class="align-middle">شماره بارنامه/مجوز</td>
+						<th class="align-middle">کشتی</th>
+						<th class="align-middle">صاحب کالا</th>
+						<td class="align-middle">تاریخ صدور  </td>
+
+						<th class="align-middle">کالا</th>
+						<th class="px-0"><div class="px-3">تعداد</div> <hr class="my-1" /> <div class="px-3">باقیمانده</div></th>
+						<th class="px-0"><div class="px-3"> وزن ناخالص </div> <hr class="my-1" /> <div class="px-3">باقیمانده</div></th>
+						<th class="px-0"><div class="px-3"> وزن خالص </div> <hr class="my-1" /> <div class="px-3">باقیمانده</div></th>
+						<th class="px-0"><div class="px-3"> حجم </div> <hr class="my-1" /> <div class="px-3">باقیمانده</div></th>
+
+						<td class="align-middle">انبار</td>
+						<td class="align-middle">بخش انبار</td>
+
+
+					</tr>
+				</thead>
+				<tbody>
+					@if (Model?.WarehouseReceipts != null && Model.WarehouseReceipts?.Any() == true)
+					{
+						foreach (var item in Model.WarehouseReceipts)
+						{
+							<tr>
+								<td rowspan="@item.Products.Count" class="align-middle " style="width:30px;"><input type="checkbox" value="@item.Id" name="warehouseReceiptId" /></td>
+								<td rowspan="@item.Products.Count" class="align-middle ">@(i++)</td>
+								<td rowspan="@item.Products.Count" class="align-middle ">@item.Number</td>
+								<td rowspan="@item.Products.Count" class="align-middle ">
+									 
+									@if (item.EntryRouteType == EntryRouteType.EntryFromSea)
+									{
+										<a target="_blank" asp-action="seoAccessPage" asp-controller="Seo" class="btn btn-outline-info px-2 "
+										   asp-route-seoId="@item.SeoId">
+											@item.BillOfLadingNumber
+										</a>
+									}
+									else
+									{
+										<a target="_blank" asp-action="Details" asp-controller="InlandExportManifest" class="btn btn-outline-info px-2 "
+										   asp-route-Id="@item.InlandExportManifestId">
+											@item.BillOfLadingNumber
+										</a>
+									}
+								</td>
+								<td rowspan="@item.Products.Count" class="align-middle ">@item.SeoShipShipName</td>
+								<td rowspan="@item.Products.Count" class="align-middle ">@item.CompanyOwnerCompanyName</td>
+								<td rowspan="@item.Products.Count" class="align-middle ">@item.CreatedDateFa</td>
+
+								<!-- سلول‌های بدون rowspan -->
+								<td class="align-middle">@item.Products[0].ProductFullTitle</td>
+								<td class="align-middle px-0 py-4">
+									<div class="mb-1 px-3">@item.Products[0].Count.ToPrice()</div>
+									<hr class="my-1" />
+									<div class="px-3">@item.Products[0].RemainingCount.ToPrice()</div>
+								</td>
+								<td class="align-middle px-0 py-4">
+									<div class="mb-1 px-3">@item.Products[0].WeightGross.ToPrice()</div>
+									<hr class="my-1" />
+									<div class="px-3">@item.Products[0].RemainingWeightGross.ToPrice()</div>
+								</td>
+								<td class="align-middle px-0 py-4">
+									<div class="mb-1 px-3">@item.Products[0].WeightNet.ToPrice()</div>
+									<hr class="my-1" />
+									<div class="px-3">@item.Products[0].RemainingWeightNet.ToPrice()</div>
+								</td>
+								<td class="align-middle px-0 py-4">
+									<div class="mb-1 px-3">@item.Products[0].Volume.ToPrice()</div>
+									<hr class="my-1" />
+									<div class="px-3">@item.Products[0].RemainingVolume.ToPrice()</div>
+								</td>
+
+								<td class="align-middle">
+									<div class="px-3">@item.Products[0].Warehouse?.Name</div>
+								</td>
+
+								<td class="align-middle">
+									<div class="px-3">@item.Products[0].WarehouseSegment?.Name</div>
+								</td>
+							</tr>
+
+							<!-- سطرهای بعدی برای آیتم‌های باقی‌مانده -->
+							if (item.Products?.Any() == true)
+							{
+								for (int p = 1; p < item.Products?.Count; p++)
+								{
+									<tr>
+										<td class="align-middle">@item.Products[p].ProductFullTitle</td>
+										<td class="align-middle px-0 py-4">
+											<div class="px-3">@item.Products[p].Count.ToPrice()</div>
+											<hr class="my-1" />
+											<div class="px-3">@item.Products[p].RemainingCount.ToPrice()</div>
+										</td>
+										<td class="align-middle px-0 py-4">
+											<div class="px-3">@item.Products[p].WeightGross.ToPrice()</div>
+											<hr class="my-1" />
+											<div class="px-3">@item.Products[p].RemainingWeightGross.ToPrice()</div>
+										</td>
+										<td class="align-middle px-0 py-4">
+											<div class="px-3">@item.Products[p].WeightNet.ToPrice()</div>
+											<hr class="my-1" />
+											<div class="px-3">@item.Products[p].RemainingWeightNet.ToPrice()</div>
+										</td>
+										<td class="align-middle px-0 py-4">
+											<div class="px-3">@item.Products[p].Volume.ToPrice()</div>
+											<hr class="my-1" />
+											<div class="px-3">@item.Products[p].RemainingVolume.ToPrice()</div>
+										</td>
+
+										<td class="align-middle px-0 py-4">
+											<div class="px-3">@item.Products[p].Warehouse?.Name</div>
+										</td>
+
+										<td class="align-middle px-0 py-4">
+											<div class="px-3">@item.Products[p].WarehouseSegment?.Name</div>
+										</td>
+
+									</tr>
+								}
+							}
+
+						}
+
+					}
+
+				</tbody>
+			</table>
+
+		</div>
+		<!-- /.portlet -->
+	</div>
+
+</div>
+
+
+
+@section script {
+
+	<script>
+		$(document).ready(function () {
+			$('.select2').select2();
+		});
+
+		async function MergeSeoWarehouseReceipt(event) {
+			event.preventDefault();
+			var ids = "";
+			$("#seoWarehouseReceiptId").val('');
+
+			var selectedItems = $("input:checkbox[name=warehouseReceiptId]:checked");
+
+			if (selectedItems.length < 2) {
+				showAlert2('حداقل باید ۲ قبض انبار را انتخاب کنید', 1);
+				return;
+			}
+
+			selectedItems.each(function () {
+				if (ids) {
+					ids += ',' + $(this).val();
+				}
+				else {
+					ids = $(this).val();
+				}
+			});
+
+			$("#seoWarehouseReceiptId").val(ids);
+
+			let result = await ShowQAlert2(event, 'بعد از تایید نهایی امکان ویرایش وجود ندارد', 'تایید نهایی');
+
+			if (result === true) {
+				document.getElementById("finalizeButton").classList.add("disabled");
+				$("#postMerge").submit();
+			}
+		}
+	</script>
+}
+
+

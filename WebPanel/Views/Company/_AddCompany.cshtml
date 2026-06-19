@@ -1,0 +1,158 @@
+﻿@model CreateCompanyDto
+
+<div class="modal fade" id="addCompanyModal"
+     tabindex="-1"
+     aria-labelledby="addCompanyModalLabel"
+     aria-hidden="true"
+     data-bs-backdrop="static"
+     data-bs-keyboard="false">
+
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title" id="addCompanyModalLabel">افزودن شرکت</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <form id="addCompanyForm" asp-action="AddCompany" asp-controller="Company" method="post">
+                <input type="hidden" asp-for="Id" />
+
+                <div class="modal-body">
+                    <div class="row gy-4">
+
+                        <div class="col-md-4">
+                            <label>نام شرکت فارسی</label>
+                            <input asp-for="CompanyName" class="form-control">
+                            <span asp-validation-for="CompanyName"></span>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label>نام شرکت انگلیسی</label>
+                            <input asp-for="CompanyNameEn" class="form-control">
+                            <span asp-validation-for="CompanyNameEn"></span>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label>کد اقتصادی</label>
+                            <input asp-for="EconomicCode" class="form-control">
+                            <span asp-validation-for="EconomicCode"></span>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label>شناسه ملی</label>
+                            <input asp-for="MeliCode" class="form-control">
+                            <span asp-validation-for="MeliCode"></span>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label>نوع مشتری</label>
+                            <select asp-for="CustomerType" class="form-control" asp-items="Html.GetEnumSelectList<Common.enumeration.Hirman.CustomerType>()"></select>
+                            <span asp-validation-for="CustomerType"></span>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label>نام مدیر عامل</label>
+                            <input asp-for="CeoName" class="form-control">
+                            <span asp-validation-for="CeoName"></span>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label>شماره مدیر عامل</label>
+                            <input asp-for="CeoNumber" class="form-control">
+                            <span asp-validation-for="CeoNumber"></span>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label>نام نماینده</label>
+                            <input asp-for="RepresentativeName" class="form-control">
+                            <span asp-validation-for="RepresentativeName"></span>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label>شماره نماینده</label>
+                            <input asp-for="RepresentativeNumber" class="form-control">
+                            <span asp-validation-for="RepresentativeNumber"></span>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label>آدرس</label>
+                            <input asp-for="Address" class="form-control">
+                            <span asp-validation-for="Address"></span>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label>کد پستی</label>
+                            <input asp-for="PostalCode" class="form-control">
+                            <span asp-validation-for="PostalCode"></span>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label>شماره تماس دفتر</label>
+                            <input asp-for="OfficeNumber" class="form-control">
+                            <span asp-validation-for="OfficeNumber"></span>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label>تفصیلی 1</label>
+                            <input asp-for="SubsidiaryAccountNumber1" class="form-control">
+                        </div>
+
+                        <div class="col-md-4">
+                            <label>تفصیلی 2</label>
+                            <input asp-for="SubsidiaryAccountNumber2" class="form-control">
+                        </div>
+
+                        <div class="col-md-12">
+                            <label>
+                                <input asp-for="IsActive" class="form-check-input">
+                                فعال
+                            </label>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">انصراف</button>
+                    <button type="submit" class="btn btn-success">ذخیره</button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+
+
+
+<script src="~/assets/js/validation/jquery.validate.min.js"></script>
+<script src="~/assets/js/validation/jquery.validate.unobtrusive.min.js"></script>
+
+<script>
+    $.validator.unobtrusive.parse('#addCompanyForm');
+
+    $(document).on("submit", "#addCompanyForm", function (e) {
+        e.preventDefault();
+
+        const form = $(this);
+
+        if (!form.valid()) {
+            return;
+        }
+
+        $.ajax({
+            url: form.attr('action'),
+            type: 'POST',
+            data: form.serialize(),
+            success: function (modelId) {
+
+                // جلوگیری از خطای aria-hidden
+                document.activeElement?.blur();
+
+                $("#addCompanyModal").modal("hide");
+
+                addCompanyToMainSelect(modelId);
+            }
+        });
+    });
+</script>

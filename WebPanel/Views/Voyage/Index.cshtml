@@ -1,0 +1,529 @@
+﻿@model VoyagePageDto
+@{
+    ViewData["Title"] = "لیست سفرها";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+    int i = ((Model.List.PageNumber - 1) * Model.List.PageSize) + 1;
+    
+    
+}
+
+<div class="row">
+    <div class="card">
+        <div class="card-header pb-0 px-3">
+            <div class="d-flex justify-content-between">
+                <div class="d-flex align-items-center">
+                    <h3 class="title">
+                        <i class="icon-frane"></i>    لیست سفر ها
+                    </h3>
+                    <a class="mx-3 filter-collapse" data-bs-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false" aria-controls="collapseExample">
+                        فیلتر ها <i class="fa-solid fa-angle-down mx-2 align-middle"></i>
+                    </a>
+                </div>
+
+                <div class="d-flex align-items-center">
+                    <div class="d-flex ">
+                        <div class="mx-2">
+                            <input type="radio" name="tripType" id="discharge" class="btn-check" autocomplete="off">
+                            <label class="btn px-2 py-1 btn-outline-info d-flex align-items-center mb-0" for="discharge">
+                                <span class="text-white fw-bold bg-primary d-flex justify-content-center p-1 px-2 align-items-center rounded-circle me-2" style="width: 30px;">@Model.VoyagelistCount.UnloadingCount.ToPrice()</span>
+                                تخلیه
+                            </label>
+                        </div>
+
+                        <div class="mx-2">
+                            <input type="radio" name="tripType" id="loading" class="btn-check" autocomplete="off">
+                            <label class="btn px-2 py-1 btn-outline-info d-flex align-items-center mb-0" for="loading">
+                                <span class="text-white fw-bold bg-info d-flex justify-content-center p-1 px-2 align-items-center rounded-circle me-2" style="width: 30px;">@Model.VoyagelistCount.LoadingCount.ToPrice()</span>
+                                بارگیری
+                            </label>
+                        </div>
+
+                        <div class="mx-2">
+                            <input type="radio" name="tripType" id="total" class="btn-check" autocomplete="off">
+                            <label class="btn px-2 py-1 btn-outline-info d-flex align-items-center mb-0" for="total">
+                                <span class="text-white fw-bold bg-secondary d-flex justify-content-center p-1 px-2 align-items-center rounded-circle me-2" style="width: 30px;">@Model.VoyagelistCount.All.ToPrice()</span>
+                                مجموع سفر
+                            </label>
+                        </div>
+
+                        @* <span class="mx-2 d-flex align-items-center"><span class="text-white fw-bold bg-primary d-flex justify-content-center p-1 px-2 align-items-center rounded-circle me-2" style="width: 30px;"> 19 </span> تخلیه </span> *@
+                        @* <span class="mx-2 d-flex align-items-center"><span class="text-white fw-bold bg-info d-flex justify-content-center p-1 px-2 align-items-center rounded-circle me-2" style="width: 30px;"> 29 </span> بارگیری </span> *@
+                        @* <span class="mx-2 d-flex align-items-center"><span class="text-white fw-bold bg-secondary d-flex justify-content-center p-1 px-2 align-items-center rounded-circle me-2" style="width: 30px;"> 49 </span> مجموع سفر </span> *@
+
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <button type="submit"
+                                class="btn btn-success d-flex align-items-center"
+                                form="formFilter"
+                                formaction="@Url.Action("ExportVoyageListExcel", "Voyage")"
+                                formmethod="post">
+                            <i class="fa-solid fa-file-excel me-2"></i>
+                            خروجی اکسل
+                        </button>
+                    </div>
+
+                    <a style="border-radius:5px; margin:0 10px 0 0"
+                       class="btn btn-primary d-md-block d-none js-open-create-voyage" asp-action="CreateVoyage" asp-route-reternPage="@CreateVoyageReturnPage.VoyageIndex" onclick="ShowCreateVoyageModal(event)">
+                        <i class="icon-plus"></i>
+                        تعریف سفر
+                    </a>
+                    <a style="border-radius:5px; margin:0px 10px"
+                       class="btn btn-primary w-100 d-md-none d-block js-open-create-voyage" asp-action="CreateVoyage" asp-route-reternPage="@CreateVoyageReturnPage.VoyageIndex" onclick="ShowCreateVoyageModal(event)">
+                        <i class="icon-plus"></i>
+                        تعریف سفر
+                    </a>
+                    @* <a style="border-radius:5px; margin:0px 10px" *@
+                    @*    class="btn btn-primary d-md-block d-none" data-bs-toggle="modal" data-bs-target="#newVoyage"> *@
+                    @* 	<i class="icon-plus"></i> *@
+                    @* 	تعریف سفر *@
+                    @* </a> *@
+                    @* <a style="border-radius:5px; margin:0px 10px" *@
+                    @*    class="btn btn-primary w-100 d-md-none d-block" data-bs-toggle="modal" data-bs-target="#newVoyage"> *@
+                    @* 	<i class="icon-plus"></i> *@
+                    @* 	تعریف سفر *@
+                    @* </a> *@
+                </div>
+            </div>
+            <div class="collapse" id="collapseExample">
+                <div class="card-body">
+                    <form id="formFilter" asp-action="Index" asp-route-p="" method="post">
+                        <input name="p" id="pageNumber" hidden />
+                        <div class="form-body ">
+                            <div class="row gy-4">
+
+                                <div class="col-md-2 col-sm-12">
+                                    <div class="form-group">
+                                        <label>  جستجو:</label>
+                                        <div class="input-group">
+                                            <input asp-for="Filter.Search" type="text" placeholder="شماره دریایی/شماره سفر" class="rounded form-control">
+                                            <span asp-validation-for="Filter.Search" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-2 col-sm-12">
+                                    <div class="form-group ">
+                                        <label>نوع عملیات</label>
+                                        <div class="input-group">
+                                            <select class="form-control select2" style="width:100%!important;"
+                                                    asp-for="Filter.TransportType"
+                                                    asp-items="@Html.GetEnumSelectList<TransportType>()">
+                                                <option value=""> تخلیه / بارگیری</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4 col-sm-12">
+                                    <div class="form-group ">
+                                        <label>شرکت کشتیرانی</label>
+                                        <div class="input-group">
+                                            <select class="form-control select2" style="width:100%!important;"
+                                                    asp-for="Filter.CompanyShippingId"
+                                                    asp-items="Model.Companies">
+                                                <option value="">همه شرکت ها</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4 col-sm-12">
+                                    <div class="form-group ">
+                                        <label>کشتی</label>
+                                        <div class="input-group">
+                                            <select class="form-control select2" style="width:100%!important;"
+                                                    asp-for="Filter.ShipId"
+                                                    asp-items="Model.Ships">
+                                                <option value="">همه کشتی ها</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-2 col-sm-12">
+                                    <div class="form-group ">
+                                        <label>وضعیت</label>
+                                        <div class="input-group">
+                                            <select class="form-control select2" style="width:100%!important;"
+                                                    asp-for="Filter.VoyageState"
+                                                    asp-items="@Html.GetEnumSelectList<VoyageState>()">
+                                                <option value="">همه وضعیت ها</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-2 col-sm-12">
+                                    <div class="form-group ">
+                                        <label>موقعیت کشتی</label>
+                                        <div class="input-group">
+                                            <select class="form-control select2" style="width:100%!important;"
+                                                    asp-for="Filter.SeoShipState"
+                                                    asp-items="Html.GetEnumSelectList<SeoShipState>()">
+                                                <option value="">همه موقعیت ها</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-2 col-sm-12">
+                                    <div class="form-group ">
+                                        <label>نوع محموله</label>
+                                        <div class="input-group">
+                                            <select class="form-control select2" style="width:100%!important;"
+                                                    asp-for="Filter.TrafficType"
+                                                    asp-items="Html.GetEnumSelectList<TrafficType>()">
+                                                <option value="">همه محموله ها</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-2 col-sm-12 mt-4">
+                                    <div class="form-group">
+                                        <label>از تاریخ:</label>
+                                        <div class="input-group">
+                                            <input asp-for="Filter.DateFrom" type="text" class=" form-control" autocomplete="off">
+                                            <span asp-validation-for="Filter.DateFrom" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-2 col-sm-12 mt-4">
+                                    <div class="form-group">
+                                        <label>تا تاریخ:</label>
+                                        <div class="input-group">
+                                            <input asp-for="Filter.DateTo" type="text" class=" form-control" autocomplete="off">
+                                            <span asp-validation-for="Filter.DateTo" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-group col-md-2 col-sm-12">
+                                    <label>   </label>
+                                    <div class="input-group activeor">
+                                        <label>
+                                            <input type="checkbox" asp-for="Filter.IsBerthedAtAnotherPort" class="normal">
+                                            پهلوگیری در بندر دیگر باشد
+                                        </label>
+                                    </div>
+                                </div>
+
+
+                                <div class="col-md-12 mt-4">
+                                    <div class="form-group align-content-center mb-3 text-end">
+                                        <button style="border-radius:5px;" class="alert-icon px-5 btn btn-success "
+                                                type="submit">
+                                            فیلتر
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-body px-2">
+            <div class="row gy-3">
+                @foreach (var item in Model.List.Data)
+                {
+                    var color = "bg-primary";
+                    if (item.VoyageState == VoyageState.Close)
+                        color = "bg-success2";
+                    else if(item.TransportType == TransportType.Loading)
+                            color = "bg-info";
+                      
+                   
+                    var progressPercent = item.ProgressPercent ?? 0;
+                    var progressDisplay = item.ProgressPercent.HasValue ? item.ProgressPercent.Value.ToString("N0") + "%" : "0%";
+
+                    <a asp-action="VoyageSeo" asp-route-voyageId="@item.Id" class="col-xxl-2 col-xl-3 col-md-4 col-6  text-white" data-bs-toggle="tooltip" data-bs-html="true" data-bs-placement="bottom">
+                        <div class="@color rounded-3 p-3 py-2 safar-card">
+                            <div class="row">
+                                <div class="col-4 align-content-center px-2">
+                                    <img src="~/assets/images/craneShip.png" alt="" class="img-fluid w-75">
+                                    <span class="fs-11px"> @item.TransportTypeTitle </span> 
+                                </div>
+                                <div class="col-8 align-content-center">
+                                    <div class=" gy-3 text-end">
+                                        <div class="my-1 text-truncate text-white fw-bold"> @item.ShipShipName </div>
+
+                                        <div class="mt-2 text-truncate text-white"> @item.CreatedDateFa </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="text-end">
+                                <p style="direction: ltr" ; class="m-0"># @item.VoyageNumber</p>
+                                <p style="direction: ltr" ; class="m-0">( @item.PmoNumber )</p>
+                            </div>
+                            <div class="row gy-2 mt-2 justify-content-end border-top ">
+                                <div class="col-3 px-0">
+                                    <div class="w-100 text-center" data-bs-toggle="tooltip" data-bs-title=" اسناد بارگذاری شده ">
+                                        <span> <i class="far fa-receipt"></i> @item.DocCount.ToPrice() </span>
+                                    </div>
+                                </div>
+                                <div class="col-3 px-0">
+                                    <div class="w-100 text-center" data-bs-toggle="tooltip" data-bs-title="تعداد تالی">
+                                        <span>  @item.TaliCount.ToPrice() T </span>
+                                    </div>
+                                </div>
+                                <div class="col-3  px-0">
+                                    <div class="w-100 text-center" data-bs-toggle="tooltip" data-bs-title=" تعداد بارنامه ها ">
+                                        <span> <i class="far fa-clipboard"></i> @item.SeoCount.ToPrice() </span>
+                                    </div>
+                                </div>
+                                <div class="col-3 px-0">
+                                    <div class="w-100 text-center" data-bs-toggle="tooltip" data-bs-title="درصد پیشرفت عملیات">
+                                        <span> @progressDisplay </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                }
+
+            </div>
+
+
+            <div class="mt-4">
+                <cs-pager cs-paging-pagesize="@Model.List.PageSize"
+                          cs-paging-pagenumber="@Model.List.PageNumber"
+                          cs-paging-totalitems="@Model.List.TotalItems"
+                          cs-paging-maxpageritems="10"
+                          cs-pagenumber-param="p"
+                          cs-show-first-last="true"
+                          cs-suppress-empty-nextprev="true"
+                          cs-suppress-inactive-firstlast="true"
+                          cs-show-numbered="true"
+                          cs-first-page-text="ابتدا"
+                          cs-last-page-text="انتها"
+                          cs-next-page-title="بعدی"
+                          cs-previous-page-title="قبلی"
+                          cs-first-page-title="ابتدا"
+                          cs-last-page-title="انتها"
+                          cs-next-page-text="بعدی"
+                          cs-previous-page-text="قبلی"
+                          cs-pager-li-current-class="page-item active"
+                          cs-pager-li-other-class="page-item"
+                          cs-pager-li-non-active-class="page-item disabled"
+                          cs-pager-link-current-class="page-link"
+                          cs-pager-link-other-class="page-link"
+                          asp-controller="Voyage"
+                          asp-action="Index">
+                </cs-pager>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+
+
+
+<div id="CreateVoyageModal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">تعریف/ویرایش سفر</h4>
+                <button type="button" class="close btn-close rounded border" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="CreateVoyageModalBody"></div>
+        </div>
+    </div>
+</div>
+
+@section script {
+    <script>
+        $(document).ready(function () {
+             $('.select2').select2();
+
+        });
+
+        kamaDatepicker('Filter_DateFrom', customOptions);
+        kamaDatepicker('Filter_DateTo', customOptions);
+
+        $(document).ready(function () {
+            const $dischargeRadio = $('#discharge');
+            const $loadingRadio = $('#loading');
+            const $totalRadio = $('#total');
+            const $transportTypeSelect = $('select[name="Filter.TransportType"]');
+            const $formFilter = $('#formFilter');
+
+            // تابع برای گرفتن مقدار اولیه
+            function getInitialTransportType() {
+                // 1. از select در فرم
+                const selectValue = $transportTypeSelect.val();
+                if (selectValue) {
+                    return selectValue;
+                }
+
+                // 2. از URL (اگر POST نیست و از QueryString میاد)
+                const urlParams = new URLSearchParams(window.location.search);
+                const urlValue = urlParams.get('Filter.TransportType');
+                if (urlValue) {
+                    return urlValue;
+                }
+
+                return '';
+            }
+
+            // ست کردن مقدار اولیه
+            const initialTransportType = getInitialTransportType();
+
+            // اگر select خالی بود ولی در URL مقدار داشت، پر کن
+            if (initialTransportType && !$transportTypeSelect.val()) {
+                $transportTypeSelect.val(initialTransportType);
+            }
+
+            // فعال کردن رادیوی مناسب
+            setActiveRadioByTransportType(initialTransportType);
+
+            // رویداد کلیک روی رادیوهای بالایی
+            $dischargeRadio.change(function() {
+                if($(this).is(':checked')) {
+                    $transportTypeSelect.val('2');
+                    $('#pageNumber').val('1');
+                    $formFilter.submit();
+                }
+            });
+
+            $loadingRadio.change(function() {
+                if($(this).is(':checked')) {
+                    $transportTypeSelect.val('1');
+                    $('#pageNumber').val('1');
+                    $formFilter.submit();
+                }
+            });
+
+            $totalRadio.change(function() {
+                if($(this).is(':checked')) {
+                    $transportTypeSelect.val('');
+                    $('#pageNumber').val('1');
+                    $formFilter.submit();
+                }
+            });
+
+            // تغییر select در فرم - فقط رادیوها آپدیت شوند
+            $transportTypeSelect.change(function() {
+                setActiveRadioByTransportType($(this).val());
+            });
+
+            // تابع تنظیم رادیو
+            function setActiveRadioByTransportType(value) {
+                // پاک کردن حالت قبلی
+                $('label[for="discharge"], label[for="loading"], label[for="total"]').removeClass('active');
+                $dischargeRadio.prop('checked', false);
+                $loadingRadio.prop('checked', false);
+                $totalRadio.prop('checked', false);
+
+                const strValue = String(value);
+
+                if (strValue === '2') {
+                    $dischargeRadio.prop('checked', true);
+                    $('label[for="discharge"]').addClass('active');
+                } else if (strValue === '1') {
+                    $loadingRadio.prop('checked', true);
+                    $('label[for="loading"]').addClass('active');
+                } else {
+                    $totalRadio.prop('checked', true);
+                    $('label[for="total"]').addClass('active');
+                }
+            }
+
+
+        });
+
+    </script>
+
+
+    <script>
+        $(".page-link").click(function (event) {
+            event.preventDefault(); // غیرفعال کردن عملکرد پیشفرض href
+
+            var hrefValue = $(this).attr("href");
+            $("#pageNumber").val(hrefValue.split("p=")[1]);
+            $("#formFilter").submit();
+        });
+    </script>
+
+
+    <script>
+        function ShowCreateVoyageModal(event) {
+            if (event) event.preventDefault();
+            var $link = $(event && event.currentTarget ? event.currentTarget : this);
+            var url = $($link).attr('href');
+            if (!url) return;
+            if (url.indexOf('isModal=true') === -1) {
+                url += (url.indexOf('?') > -1 ? '&' : '?') + 'isModal=true';
+            }
+            $.ajax({
+                url: url,
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                success: function (html) {
+                    $('#CreateVoyageModal .modal-body').html(html);
+                    $('#CreateVoyageModal').modal('show');
+                    initCreateVoyageModal();
+                    bindCreateVoyageForm();
+                }
+            });
+        }
+
+        function initCreateVoyageModal() {
+            try {
+                $('select[class*="CreateVoyageModal"].select2').select2({
+                 dropdownParent: $('#CreateVoyageModal')
+             });
+
+            } catch (e) { }
+            try { kamaDatepicker('CreateDto_EntryDateFa', customOptions); } catch (e) { }
+            try { kamaDatepicker('CreateDto_BerthingDateFa', customOptions); } catch (e) { }
+            try {
+                $('#CreateVoyageModal .clockpicker').clockpicker({
+                    placement: 'bottom',
+                    align: 'left',
+                    donetext: 'تایید',
+                    autoclose: true
+                });
+            } catch (e) { }
+        }
+
+        function bindCreateVoyageForm() {
+            var form = $('#CreateVoyageForm');
+            if (!form.length) return;
+            form.off('submit').on('submit', function (e) {
+                e.preventDefault();
+                $.ajax({
+                    url: form.attr('action'),
+                    type: 'POST',
+                    data: form.serialize(),
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    success: function (resp) {
+                        if (resp && resp.success) {
+                            window.location.href = '/Voyage/VoyageSeo?voyageId=' + resp.voyageId;
+                        } else {
+                            showVoyageError(resp && resp.message);
+                        }
+                    },
+                    error: function (xhr) {
+                        var msg = (xhr.responseJSON && xhr.responseJSON.message) || xhr.responseText;
+                        try { var obj = JSON.parse(msg); msg = obj && obj.Message ? obj.Message : msg; } catch (_) { }
+                        showVoyageError(msg);
+                    }
+                });
+            });
+        }
+
+        function showVoyageError(message) {
+            if (typeof Toast !== 'undefined' && Toast.fire) {
+                Toast.fire({ icon: 'error', title: message || 'خطا در ثبت' });
+            } else {
+                alert(message || 'خطا در ثبت');
+            }
+        }
+    </script>
+}

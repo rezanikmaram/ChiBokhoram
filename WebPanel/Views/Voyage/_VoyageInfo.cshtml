@@ -1,0 +1,68 @@
+﻿@model VoyagelistDto
+
+<div class="modal fade" id="voyageInfoModal" tabindex="-1" aria-labelledby="voyageInfoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="voyageInfoModalLabel"> اطلاعات سفر </h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body">
+                <div class="row gy-4">
+                    <div class="col-md-4">
+                        <div class="border btn btn-outline-info d-flex justify-content-center mx-2">
+                            <p class="fs-6 m-0">اسم کشتی:  @Model.ShipShipName </p>
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <div class="border rounded mx-2 p-2">
+                            <p class="fs-6 m-0">کشتیرانی: @Model.CompanyShippingCompanyName </p>
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <div class="border rounded mx-2 p-2">
+                            <p class="fs-6 m-0"> عملیات: @Model.TransportTypeTitle</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <div class="border rounded mx-2 p-2">
+                           <p class="fs-6 m-0">شماره سفر: @Model.VoyageNumber</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <div class="border rounded mx-2 p-2">
+                            <p class="fs-6 m-0">شماره دریایی: @Model.PmoNumber</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <div class="border rounded mx-2 p-2">
+                            <p class="fs-6 m-0"> موقعیت : @Model.VoyageStateTitle </p>
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <div class="border rounded mx-2 p-2">
+                          <p class="fs-6 m-0"> اسکله : @(Model.WaterfrontWaterfrontName ?? "اسکله نامشخص") </p>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4 text-center">
+                        <div class="border rounded mx-2 p-2">
+                            <p class="fs-6 m-0"> تاریخ ورود : @Model.EntryDateFa </p>
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <div class="border rounded mx-2 p-2">
+                            <p class="fs-6 m-0"> تاریخ و ساعت پهلوگیری : @Model.BerthingDateFa @(Model.BerthingTime ?? "---") </p>
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <div class="border rounded mx-2 p-2">
+                            <p class="fs-6 m-0"> تناژ : @Model.Tonnage.ToPrice() </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

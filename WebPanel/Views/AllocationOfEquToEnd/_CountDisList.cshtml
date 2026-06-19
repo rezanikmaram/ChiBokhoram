@@ -1,0 +1,74 @@
+﻿@model List<AllocationEquCountDisDto>
+
+@{
+    int rowCount = 1;
+}
+
+<div class="table-responsive">
+    <table class="table table-sm table-bordered table-hover table-striped" id="data-table">
+        <thead class="bg-primary">
+            <tr>
+                <th style="width: 5%">ردیف</th>
+
+                <th> نوع تجهیز </th>
+                <th>تعداد جابجایی</th>
+                <td>تاریخ</td>
+
+                <td>عملیات</td>
+            </tr>
+        </thead>
+        <tbody>
+
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td class="align-middle" >@(rowCount)</td>
+                    <td class="align-middle"  style="display:none" id="cd_id@(rowCount)">@item.Id </td>
+                    <td class="align-middle" style="display:none" id="cd_SeoEquipmentId@(rowCount)">@item.SeoEquipmentId</td>
+                    <td class="align-middle"  >@item.Title </td>
+                    <td class="align-middle"  id="cd_CountDis@(rowCount)">@item.CountDisplacements</td>
+                    <td class="align-middle"  id="cd_DateFa@(rowCount)">@item.DateFa</td>
+                       
+                    <td class="align-middle" >
+                        <a class="btn px-2 btn-warning btn-sm btn-icon curve" onclick="editCountDis('@rowCount');"><i class="icon-pencil fs-6 align-middle"></i></a>
+
+                        <a onclick="DeleteCountDis(event, '@item.Id');" class="btn btn-danger px-2 btn-sm btn-icon curve btn-questions">
+                            <i class="icon-trash fs-6 align-middle fa-flip-horizontal"></i>
+                        </a>
+                    </td>
+                    @{
+                        rowCount++;
+                    }
+                </tr>
+            }
+
+
+            @if (Model?.Any() == true)
+            {
+                <tr style=" background-color: #3fbb7630;">
+                    <td>--</td>
+
+                    <th>جمع کل </th>
+                    <th> @(Model?.Sum(x => x.CountDisplacements).ToPrice(ToPriceExtention.PriceType.NoType) ?? "0")</th>
+
+                    <th>---</th>
+                    <th>--</th>
+                   
+                </tr>
+            }
+
+        </tbody>
+    </table>
+
+</div>
+
+
+
+
+
+
+
+
+
+
+

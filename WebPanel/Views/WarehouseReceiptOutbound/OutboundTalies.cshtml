@@ -1,0 +1,116 @@
+﻿@model WroOutboundTaliPageDto
+@{
+	ViewData["Title"] = "بیجک خروج";
+	Layout = "~/Views/Shared/AdminLayout.cshtml";
+	int i = 1;
+}
+
+<partial name="_WroInfo" model="Model.PageInfo" />
+
+<div class="col-lg-12">
+	<div class="card">
+		<div class="card-header">
+			<div class="row gy-4">
+				<div class="col-md-12 d-flex align-items-center justify-content-between">
+					<h3 class="title">
+						<a asp-action="Details" asp-route-wroId="@Model.PageInfo.Id">
+							<i class="fa-solid fa-right-to-bracket me-2 align-middle"></i>
+						</a>
+						<i class="icon-frane"></i> بیجک خروج
+					</h3>
+					<div> <a asp-action="DownloadListBijak" asp-route-outboundId="@Model.PageInfo.Id" class="btn btn-primary"> دانلود لیست بیجک ها </a> </div>
+				</div>
+			</div>
+		</div>
+		<div class="card-body pt-0">
+			<div class="table-responsive mt-5">
+				<table class="table table-sm table-bordered table-hover table-striped" id="data-table">
+					<thead class="bg-primary text-white">
+						<tr>
+							<th class="px-1 align-middle">#</th>
+							<th class="px-1 align-middle">نام کالا</th>
+							<th class="px-1 align-middle">تعداد / باقیمانده</th>
+							<th class="px-1 align-middle">وزن / باقیمانده</th>
+							<th class="px-1 align-middle">حجم</th>
+							<th class="px-1 align-middle">نام شمارنده</th>
+							<th class="px-1 align-middle">نوع شمارنده</th>
+							<th class="px-1 align-middle">پلاک خودرو</th>
+							<th class="px-1 align-middle">کد ملی راننده</th>
+							<th class="px-1 align-middle">تلفن راننده</th>
+							<th class="px-1 align-middle">زمان ثبت</th>
+							<th class="px-1 align-middle">عملیات</th>
+						</tr>
+					</thead>
+					<tbody>
+						@foreach (var item in Model.Data)
+						{
+							int productIndex = 0;
+							foreach (var product in item.Products)
+							{
+								<tr>
+									@if (productIndex == 0)
+									{
+										<td rowspan="@item.Products.Count" class="align-middle text-center">@i</td>
+									}
+									<td class="align-middle text-center">@product.GetProductNameForWarehouseReceipt</td>
+									<td class="align-middle text-center">
+										<div>@product.Count</div>
+										<small class="text-muted">باقیمانده: @product.RemainingCount.ToPrice()</small>
+									</td>
+									<td class="align-middle text-center">
+										<div>@product.Weight</div>
+										<small class="text-muted">باقیمانده: @product.RemainingWeight.ToPrice()</small>
+									</td>
+									<td class="align-middle text-center">@product.Volume</td>
+
+									@if (productIndex == 0)
+									{
+										<td rowspan="@item.Products.Count" class="align-middle text-center">@item.FirstName @item.LastName</td>
+										<td rowspan="@item.Products.Count" class="align-middle text-center">@item.Type.ToDisplay(DisplayProperty.Name)</td>
+										<td rowspan="@item.Products.Count" class="align-middle text-center">
+											@if (item.CarPlates != null)
+											{
+												@item.CarPlates
+											}
+											else
+											{
+												<text>نامشخص</text>
+											}
+										</td>
+										<td rowspan="@item.Products.Count" class="align-middle text-center">@item.DriverNationalCode</td>
+										<td rowspan="@item.Products.Count" class="align-middle text-center">@item.DriverPhoneNumber</td>
+										<td rowspan="@item.Products.Count" class="align-middle text-center">@item.DateFa</td>
+										<td rowspan="@item.Products.Count" class="align-middle text-center">
+											<a class="btn btn-primary px-2 my-2 rounded"
+											   asp-action="DownloadBijak" asp-route-OutboundTaliId="@item.Id">
+												<i class="fa-solid fa-download"></i>
+											</a>
+										</td>
+									}
+								</tr>
+								productIndex++;
+							}
+							i++;
+						}
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+</div>
+
+@section script {
+	<script>
+		$(document).ready(function () {
+			// Initialize any required scripts here
+		});
+	</script>
+}
+
+<style>
+	.table td small {
+		display: block;
+		font-size: 0.75rem;
+		color: #6c757d;
+	}
+</style>

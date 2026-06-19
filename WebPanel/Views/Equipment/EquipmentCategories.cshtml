@@ -1,0 +1,87 @@
+﻿@model EquipmentCategoryViewModel
+@{
+    ViewData["Title"] = "دسته بندی تجهیزات";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+    int i = 1;
+}
+<div class="col-lg-12">
+    <div class="card">
+        <div class="card-header pb-0">
+            <div class="d-flex">
+                <div class="d-flex justify-content-between">
+                    <h3 class="title">
+                        <i class="icon-frane"></i>  انواع تجهیزات
+                    </h3>
+                </div>
+
+                <!-- /.portlet-title -->
+                <div class="buttons-box">
+                    
+                        <i class="icon-size-fullscreen"></i>
+                        <div class="paper-ripple">
+                            <div class="paper-ripple__background"></div>
+                            <div class="paper-ripple__waves"></div>
+                        </div>
+                </div>
+                <!-- /.buttons-box -->
+            </div>
+            <!-- /.portlet-heading -->
+            <!-- /.portlet-body -->
+        </div>
+        <div class="card-body pt-0">
+            <div id="CreateCategory">
+                <partial name="_CreateEquipmentCategory" model="Model.EquipmentCategoryDto" />
+            </div>
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover table-striped" id="data-table">
+                    <thead class="bg-primary">
+                        <tr>
+                            <th>ردیف</th>
+                            <th>نوع تجهیز</th>
+                            <td>عملیات</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+
+                        @foreach (var item in Model.EquipmentCategories)
+                        {
+                            <tr>
+                                <td class="align-middle">@(i++)</td>
+                                <td class="align-middle">@item.Name</td>
+
+                                <td class="align-middle">
+                                    <a class="btn btn-warning btn-sm btn-icon curve px-2" onclick="createCategory('@item.Id');"><i class="icon-pencil align-middle fs-6"></i></a>
+
+                                    <a id="DeleteEquipmentCategory@(i)" onclick="ShowQAlert(event,'DeleteEquipmentCategory@(i)');" class="btn btn-danger btn-sm btn-icon curve btn-questions px-2" asp-action="DeleteEquipmentCategory" asp-route-equipmentCategoryId="@item.Id"><i class="icon-trash fa-flip-horizontal fs-6 align-middle"></i></a>
+                                </td>
+                            </tr>
+
+                        }
+
+
+
+                    </tbody>
+                </table>
+
+
+            </div>
+            <!-- /.table-responsive -->
+        </div>
+        <!-- /.portlet -->
+    </div>
+</div>
+
+@section script {
+    <script>
+        function createCategory(id) {
+            
+            $.post("@Url.Action("GetEquipmentCategoryById","Equipment")", { equipmentCategoryId : id })
+                .done(function (res) {
+                    $("#CreateCategory").html(res);
+                });
+        }
+    </script>
+}
+
+

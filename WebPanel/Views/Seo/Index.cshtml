@@ -1,0 +1,935 @@
+﻿@model SeoPageDto
+@{
+    ViewData["Title"] = "لیست بارنامه ها";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+    int i = ((Model.List.PageNumber - 1) * Model.List.PageSize) + 1;
+}
+
+<div class="row">
+    <div class="card mb-3">
+        <div class="card-header p-3">
+            <div class="row gy-4 ">
+
+                <div class="col-md-4 d-flex align-items-center">
+                    <h3 class="title">
+                        <i class="icon-frane"></i>    لیست بارنامه ها
+                    </h3>
+                    <a class="mx-3 filter-collapse" data-bs-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false" aria-controls="collapseExample">
+                        فیلتر ها <i class="fa-solid fa-angle-down mx-2 align-middle"></i>
+                    </a>
+                </div>
+
+                <div class="col-12 d-md-none d-block">
+                    <div class="dropdown w-100">
+                        <button class="dropbtn w-100 btn btn-info rounded" type="submit">
+                            <i class="icon-printer"></i>
+                            دریافت گزارش <i class="icofont icofont-arrow-down align-middle"></i>
+                        </button>
+                        <div class="dropdown-content" style="z-index: 9999">
+                            <button onclick="ShowModalReportListAllocation(event)" class="btn w-100 mx-0 px-2 my-2 btn-outline-primary-2x rounded-0">
+                                گزارش لیست تخصیص
+                            </button>
+
+                            <button onclick="ShowModalReportDaily(event)" class="btn w-100 mx-0 my-2 px-2 btn-outline-primary-2x rounded-0">
+                                گزارش روزانه عمليات اسكله ها
+                            </button>
+
+                            <button onclick="ShowModalReportMonthly(event)" class="btn w-100 mx-0 my-2 px-2 btn-outline-primary-2x rounded-0">
+                                گزارش ماهانه
+                            </button>
+
+                            <button onclick="ShowModalReportShipInLangargah(event)" class="btn w-100 mx-0 px-2 my-2 btn-outline-primary-2x rounded-0">
+                                گزارش کشتی های در لنگرگاه
+                            </button>
+
+                            @if (User.IsInRole("admin") || User.IsInRole("adminOnePort"))
+                            {
+                                <button onclick="ShowModalReportMonthlyComparison(event)" class="btn w-100 mx-0 px-2 my-2 btn-outline-primary-2x rounded-0">
+                                    گزارش مقایسه ای ماهانه و فصلی
+                                </button>
+                            }
+
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 d-md-none d-block">
+                    <a style="border-radius:5px;"
+                       class="btn btn-primary w-100" onclick="ShowModalAddSeo(event)">
+                        <i class="icon-plus"></i>
+                        تعریف بارنامه
+                    </a>
+                </div>
+                <div class="col-12 d-md-none d-block">
+                    <a style="border-radius:5px;"
+                       class="btn btn-success w-100" asp-action="CreateVoyage"
+                       asp-controller="Voyage" asp-route-reternPage="@CreateVoyageReturnPage.SeoIndex">
+
+                        <i class="icon-plus"></i>
+                        تعریف سفر
+                    </a>
+                </div>
+                <div class="col-12 d-md-none d-block">
+                    <button type="submit"
+                            class="btn btn-success w-100 d-flex align-items-center justify-content-center"
+                            form="formFilter"
+                            formaction="@Url.Action("ExportSeoListExcel", "Seo")"
+                            formmethod="post">
+                        <i class="fa-solid fa-file-excel me-2"></i>
+                        خروجی اکسل
+                    </button>
+                </div>
+
+
+                <div class="d-flex col-md-8 col-12 justify-content-end d-none d-md-flex">
+                    <div class="dropdown">
+                        <button class="dropbtn btn btn-info rounded" type="submit">
+                            <i class="icon-printer"></i>
+                            دریافت گزارش <i class="icofont icofont-arrow-down align-middle"></i>
+                        </button>
+                        <div class="dropdown-content" style="z-index: 9999">
+                            <button onclick="ShowModalReportListAllocation(event)" class="btn w-100 mx-0 px-2 my-2 btn-outline-primary-2x rounded-0">
+                                گزارش لیست تخصیص
+                            </button>
+
+                            <button onclick="ShowModalReportDaily(event)" class="btn w-100 mx-0 my-2 px-2 btn-outline-primary-2x rounded-0">
+                                گزارش روزانه عمليات اسكله ها
+                            </button>
+
+                            <button onclick="ShowModalReportMonthly(event)" class="btn w-100 mx-0 my-2 px-2 btn-outline-primary-2x rounded-0">
+                                گزارش ماهانه
+                            </button>
+
+                            <button onclick="ShowModalReportShipInLangargah(event)" class="btn w-100 mx-0 px-2 my-2 btn-outline-primary-2x rounded-0">
+                                گزارش کشتی های در لنگرگاه
+                            </button>
+
+                            @if (User.IsInRole("admin") || User.IsInRole("adminOnePort"))
+                            {
+                                <button onclick="ShowModalReportMonthlyComparison(event)" class="btn w-100 mx-0 px-2 my-2 btn-outline-primary-2x rounded-0">
+                                    گزارش مقایسه ای ماهانه و فصلی
+                                </button>
+                            }
+
+                        </div>
+                    </div>
+
+                    <a style="border-radius:5px; margin:0px 10px"
+                       class="btn btn-primary" onclick="ShowModalAddSeo(event)">
+                        <i class="icon-plus"></i>
+                        تعریف بارنامه
+                    </a>
+
+
+                    @* @if (User.IsInRole("admin") || User.IsInRole("adminOnePort")) *@
+
+                    <a style="border-radius:5px;"
+                       class="btn btn-success" asp-action="CreateVoyage"
+                       asp-controller="Voyage" asp-route-reternPage="@CreateVoyageReturnPage.SeoIndex">
+
+                        <i class="icon-plus"></i>
+                        تعریف سفر
+                    </a>
+
+                    <button type="submit"
+                            style="border-radius:5px; margin:0px 10px"
+                            class="btn btn-success d-flex align-items-center"
+                            form="formFilter"
+                            formaction="@Url.Action("ExportSeoListExcel", "Seo")"
+                            formmethod="post">
+                        <i class="fa-solid fa-file-excel me-2"></i>
+                        خروجی اکسل
+                    </button>
+
+
+                    <!-- /.portlet-title -->
+                    <div class="buttons-box">
+
+                        <i class="icon-size-fullscreen"></i>
+                        <div class="paper-ripple">
+                            <div class="paper-ripple__background"></div>
+                            <div class="paper-ripple__waves"></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <!-- /.portlet-heading -->
+            <!-- /.portlet-body -->
+        </div>
+        <div class="collapse" id="collapseExample">
+            <div class="card-body">
+                <form id="formFilter" asp-action="Index" asp-route-p="" method="post">
+                    <input name="p" id="pageNumber" hidden />
+                    <div class="form-body ">
+                        <div class="row gy-4">
+
+                            <div class="col-md-3 col-sm-12">
+                                <div class="form-group">
+                                    <label>  جستجو:</label>
+                                    <div class="input-group">
+                                        <input asp-for="Filter.Search" type="text" placeholder="شماره بارنامه/شماره دریایی/شماره سفر" class="rounded form-control">
+                                        <span asp-validation-for="Filter.Search" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-3 col-sm-12">
+                                <div class="form-group ">
+                                    <label>شرکت کشتیرانی</label>
+                                    <div class="input-group">
+                                        <select class="form-control select2" style="width:100%!important;"
+                                                asp-for="Filter.CompanyId"
+                                                asp-items="Model.Companies">
+                                            <option value="">همه شرکت ها</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-3 col-sm-12">
+                                <div class="form-group ">
+                                    <label>صاحب کالا</label>
+                                    <div class="input-group">
+                                        <select class="form-control select2" style="width:100%!important;"
+                                                asp-for="Filter.CompanyOwenerId"
+                                                asp-items="Model.Companies">
+                                            <option value="">همه شرکت ها</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-3 col-sm-12">
+                                <div class="form-group ">
+                                    <label>کشتی</label>
+                                    <div class="input-group">
+                                        <select class="form-control select2" style="width:100%!important;"
+                                                asp-for="Filter.ShipId"
+                                                asp-items="Model.Ships">
+                                            <option value="">همه کشتی ها</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-3 col-sm-12">
+                                <div class="form-group ">
+                                    <label>اسکله</label>
+                                    <div class="input-group">
+                                        <select class="form-control select2" style="width:100%!important;"
+                                                asp-for="Filter.WaterFrontId"
+                                                asp-items="Model.WaterFronts">
+                                            <option value="">همه اسکله ها</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-3 col-sm-12">
+                                <div class="form-group ">
+                                    <label>نوع عملیات</label>
+                                    <div class="input-group">
+                                        <select class="form-control select2" style="width:100%!important;"
+                                                asp-for="Filter.TransportType"
+                                                asp-items="Model.TransportTypes">
+                                            <option value=""> تخلیه / بارگیری</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-3 col-sm-12">
+                                <div class="form-group ">
+                                    <label>نوع محموله</label>
+                                    <div class="input-group">
+                                        <select class="form-control select2" style="width:100%!important;"
+                                                asp-for="Filter.TrafficType"
+                                                asp-items="Html.GetEnumSelectList<TrafficType>()">
+                                            <option value="">همه محموله ها</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-3 col-sm-12">
+                                <div class="form-group ">
+                                    <label>نوع ورود به بندر</label>
+                                    <div class="input-group">
+                                        <select class="form-control select2" style="width:100%!important;"
+                                                asp-for="Filter.EntryType"
+                                                asp-items="Html.GetEnumSelectList<EntryProductType>()">
+                                            <option value="">دریا / خشکی</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-3 col-sm-12">
+                                <div class="form-group ">
+                                    <label>وضعیت</label>
+                                    <div class="input-group">
+                                        <select class="form-control select2" style="width:100%!important;"
+                                                asp-for="Filter.StateInt"
+                                                asp-items="Model.SeoStates">
+                                            <option value="0">همه وضعیت ها</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+
+
+                            <div class="col-md-3 col-sm-12">
+                                <div class="form-group ">
+                                    <label>موقعیت کشتی</label>
+                                    <div class="input-group">
+                                        <select class="form-control select2" style="width:100%!important;"
+                                                asp-for="Filter.SeoShipState"
+                                                asp-items="Html.GetEnumSelectList<SeoShipState>()">
+                                            <option value="">همه موقعیت ها</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-2 col-sm-12 mt-4">
+                                <div class="form-group">
+                                    <label>از تاریخ:</label>
+                                    <div class="input-group">
+                                        <input asp-for="Filter.DateFrom" type="text" class=" form-control" autocomplete="off">
+                                        <span asp-validation-for="Filter.DateFrom" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-2 col-sm-12 mt-4">
+                                <div class="form-group">
+                                    <label>تا تاریخ:</label>
+                                    <div class="input-group">
+                                        <input asp-for="Filter.DateTo" type="text" class=" form-control" autocomplete="off">
+                                        <span asp-validation-for="Filter.DateTo" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-2 col-sm-12 align-content-end">
+                                <div class="form-check form-switch">
+                                    <input type="checkbox" asp-for="Filter.IsInCompleted" class="form-check-input" role="switch" />
+                                    <label class="form-check-label ms-2" for="Filter.IsInCompleted">فیلتر تکمیل نشده </label>
+                                    <span asp-validation-for="Filter.IsInCompleted" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-12 mt-4">
+                                <div class="form-group align-content-center mb-3 text-end">
+                                    <button style="border-radius:5px;" class="alert-icon px-5 btn mt-0 btn-success "
+                                            type="submit">
+                                        فیلتر
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row ">
+    <div class="card">
+        <div class="card-header pt-3 pb-0 px-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="d-flex">
+                    <div class="mx-2">
+                        <input type="radio" name="tripType" id="loading" class="btn-check" autocomplete="off" checked>
+                        <label class="btn btn-outline-info px-2 d-flex align-items-center" for="loading">
+                            <i class="far fa-list me-2"></i><span class=" fw-bold"> نمایش لیستی </span>
+                        </label>
+                    </div>
+                    <div class="mx-2">
+                        <input type="radio" name="tripType" id="discharge" class="btn-check" autocomplete="off">
+                        <label class="btn btn-outline-primary px-2 d-flex align-items-center" for="discharge">
+                            <i class="far fa-box me-2"></i><span class=" fw-bold"> نمایش کاردی </span>
+                        </label>
+                    </div>
+                </div>
+                <div class="d-flex">
+                    <span class="mx-2"><i class="fa-solid fa-circle text-primary mx-1 align-middle"></i>درحال عملیات</span>
+                    <span class="mx-2"><i class="fa-solid fa-circle text-warning mx-1 align-middle"></i>متوقف شده</span>
+                    <span class="mx-2"><i class="fa-solid fa-circle text-success2 mx-1 align-middle"></i>پایان یافته</span>
+                </div>
+            </div>
+        </div>
+        <div class="card-body pt-2 px-2">
+            <!-- نمایش کاردی -->
+            <div id="cardView" style="display: none;">
+                <div class="row gy-3">
+                    @foreach (var item in Model.List.Data)
+                    {
+                        var color = "";
+                        var imageSrc = "";
+                        switch (item.State)
+                        {
+                            case SeoState.Active:
+                                color = "bg-primary";
+                                imageSrc = "craneShip.png";
+                                break;
+                            case SeoState.Stoped:
+                                color = "bg-warning";
+                                imageSrc = "ship.png";
+                                break;
+                            case SeoState.Finish:
+                                color = "bg-success2";
+                                imageSrc = "Eship.png";
+                                break;
+                            default:
+                                color = "bg-primary";
+                                imageSrc = "craneShip.png";
+                                break;
+
+                        }
+                        <a asp-action="seoAccessPage" asp-route-seoId="@item.Id" class="col-xxl-2 col-xl-3 col-md-4 col-6 text-white" data-bs-toggle="tooltip" data-bs-html="true" data-bs-placement="bottom"
+                           title="کشتی :  @item.ShipShipName </br>
+                                                      اسکله :@item.WaterfrontWaterfrontName </br>
+                                                      کالا : @item.ProductProductName </br>
+                                                          تناژ :@item.ShipTonnage.ToString("N0") </br>
+                                                          کشتیرانی : @item.ShippingCompanyName </br>
+                                                          صاحب کالا : @item.ProductCompanyName </br>
+                                                          تاریخ شروع :@item.Start </br>
+                                                          تاریخ ورود :@item.ShipEntranceDate </br>
+                                                          نوع عملیات :@item.TransportTypeTitle">
+                   <div class="@color rounded-3 p-3 pb-2 ship-view-hover min-h-177px">
+                    <div class="row">
+                     <div class="col-4 align-content-center px-2 ">
+                      <img src="~/assets/images/@imageSrc" alt="" class="img-fluid">
+                      <div class=" text-truncate mt-2 text-center
+                                          @(item.AllocationEquipmentState <= AllocationEquipmentState.InOperation ? "glass-bg" : "bg-success rounded")">
+                       <span class="fw-bold"></span> @item.TransportTypeTitle </div>
+                     </div>
+                     <div class="col-8 align-content-center">
+                      <div class=" gy-3">
+                       <div class="my-1 text-truncate text-white"><span class="fw-bold"></span> @item.ShipShipName </div>
+                       <div class=" text-truncate text-white"><span class="fw-bold"></span> @item.ProductProductName </div>
+                       <div class="my-1 text-truncate text-white"><span class="fw-bold"></span> @item.Start </div>
+                      </div>
+                     </div>
+                    </div>
+                    <div class="d-flex justify-content-end">
+                     <p style="direction: ltr";># @item.Number</p>
+                    </div>
+                    <div class="d-flex">
+                     <p class="text-truncate">  @item.ProductCompanyName</p>
+                    </div>
+                    <div class="row mt-2 justify-content-end">
+                     <div class="col-3">
+                      <i class="fa-solid fa-anchor rounded-circle @(item.SeoShipInLangargah ? "" : "text-trans") "></i>
+                     </div>
+                    </div>
+                   </div>
+                  </a>
+                    }
+                </div>
+            </div>
+
+            <!-- نمایش لیستی -->
+            <div id="tableView">
+                <table class="table table-striped table-bordered">
+                    <thead class=" sticky-top z-1 bg-primary text-dark">
+                        <tr>
+                            <th>ردیف</th>
+                            <th>شماره بارنامه</th>
+                            <th>نام کشتی</th>
+                            <th> اسکله </th>
+                            <th>نام کالا</th>
+                            <th> تناژ </th>
+                            <th>شرکت کشتیرانی</th>
+                            <th>صاحب کالا</th>
+                            <th> تعداد تالی </th>
+                            <th> کالای ثبت شده </th>
+                            @* <th>تاریخ شروع</th> *@
+                            <th>تاریخ ورود</th>
+                            <th>نوع عملیات</th>
+                            <th>اخرین قبض انبار</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            int tableIndex = ((Model.List.PageNumber - 1) * Model.List.PageSize) + 1;
+                        }
+                        @foreach (var item in Model.List.Data)
+                        {
+                            <tr style="cursor: pointer;">
+                                <td onclick="window.location.href='@Url.Action("seoAccessPage", "Seo", new { seoId = item.Id })'">@(tableIndex++)</td>
+                                <td onclick="window.location.href='@Url.Action("seoAccessPage", "Seo", new { seoId = item.Id })'">@item.Number</td>
+                                <td onclick="window.location.href='@Url.Action("seoAccessPage", "Seo", new { seoId = item.Id })'">@item.ShipShipName</td>
+                                <td onclick="window.location.href='@Url.Action("seoAccessPage", "Seo", new { seoId = item.Id })'">@item.WaterfrontWaterfrontName</td>
+                                <td onclick="window.location.href='@Url.Action("seoAccessPage", "Seo", new { seoId = item.Id })'">@item.ProductProductName</td>
+                                <td onclick="window.location.href='@Url.Action("seoAccessPage", "Seo", new { seoId = item.Id })'">@item.ShipTonnage.ToString("N0")</td>
+                                <td onclick="window.location.href='@Url.Action("seoAccessPage", "Seo", new { seoId = item.Id })'">@item.ShippingCompanyName</td>
+                                <td onclick="window.location.href='@Url.Action("seoAccessPage", "Seo", new { seoId = item.Id })'">@item.ProductCompanyName</td>
+                                <td onclick="window.location.href='@Url.Action("seoAccessPage", "Seo", new { seoId = item.Id })'">@item.TaliCount.ToPrice()</td>
+                                <td onclick="window.location.href='@Url.Action("seoAccessPage", "Seo", new { seoId = item.Id })'">@item.SeoProductCount.ToPrice()</td>
+                                @*<td onclick="window.location.href='@Url.Action("seoAccessPage", "Seo", new { seoId = item.Id })'">@item.Start</td>*@                                <td onclick="window.location.href='@Url.Action("seoAccessPage", "Seo", new { seoId = item.Id })'">@item.ShipEntranceDate</td>
+                                <td onclick="window.location.href='@Url.Action("seoAccessPage", "Seo", new { seoId = item.Id })'">@item.TransportTypeTitle</td>
+                                <td onclick="window.location.href='@Url.Action("seoAccessPage", "Seo", new { seoId = item.Id })'">
+                                    @item.LastSwrNumber
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="mt-4">
+                <cs-pager cs-paging-pagesize="@Model.List.PageSize"
+                          cs-paging-pagenumber="@Model.List.PageNumber"
+                          cs-paging-totalitems="@Model.List.TotalItems"
+                          cs-paging-maxpageritems="10"
+                          cs-pagenumber-param="p"
+                          cs-show-first-last="true"
+                          cs-suppress-empty-nextprev="true"
+                          cs-suppress-inactive-firstlast="true"
+                          cs-show-numbered="true"
+                          cs-first-page-text="ابتدا"
+                          cs-last-page-text="انتها"
+                          cs-next-page-title="بعدی"
+                          cs-previous-page-title="قبلی"
+                          cs-first-page-title="ابتدا"
+                          cs-last-page-title="انتها"
+                          cs-next-page-text="بعدی"
+                          cs-previous-page-text="قبلی"
+                          cs-pager-li-current-class="page-item active"
+                          cs-pager-li-other-class="page-item"
+                          cs-pager-li-non-active-class="page-item disabled"
+                          cs-pager-link-current-class="page-link"
+                          cs-pager-link-other-class="page-link"
+                          asp-controller="Seo"
+                          asp-action="Index">
+                </cs-pager>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div id="ReportDailyModal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+
+                <h4 class="modal-title">گزارش روزانه عمليات اسكله ها</h4>
+                <button type="button" class="close btn-close rounded border" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="modalbody">
+
+                <div class="card-body pt-0">
+
+                    <div class="form-body">
+                        <form asp-action="GetDailyReportPierOperationsExcel" asp-controller="AllocationOfEquipment" id="GetDailyReportPierOperationsExcelId" method="post">
+
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label>تاریخ گزارش</label>
+                                        <div class="input-group">
+                                            <input type="text" class="form-control" id="DateReportDailyId"
+                                                   name="DateReport" value="@DateTimeOffset.Now.ToShortPersianDateString()"
+                                                   autocomplete="off" required>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-sm-12 mt-4">
+                                    <div class="form-group">
+                                        <label> توضیحات  </label>
+                                        <div class="input-group">
+                                            <textarea rows="5" name="Description"
+                                                      class="form-control"></textarea>
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                            </div>
+
+
+                            <div class="modal-footer px-0 pb-0 border-0">
+                                <button type="button" class="btn btn-success btn-round z-1" onclick="GetReportDaily(event)"> دریافت گزارش </button>
+                                <button type="button" class="btn btn-danger btn-round" data-bs-dismiss="modal">بازگشت</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div id="ReportMonthlyModal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+
+                <h4 class="modal-title">گزارش ماهانه تخلیه و بارگیری</h4>
+                <button type="button" class="close btn-close rounded border" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="modalbody">
+
+                <div class="card-body pt-0">
+
+                    <div class="form-body">
+                        <form asp-action="GetEquipmentUsageExcel" asp-controller="Report" id="GetReportMonthlyExcelId" method="post">
+
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label>سال</label>
+                                        <div class="input-group">
+                                            <select class="form-control select2 MonthlyReport"
+                                                    name="Filter.Years" asp-for="MonthlyReport.Filter.Years"
+                                                    asp-items="Model.MonthlyReport.Years">
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label>ماه</label>
+                                        <div class="input-group">
+                                            <select class="form-control select2 MonthlyReport" style="width:100%!important;"
+                                                    name="filter.Month" asp-for="MonthlyReport.Filter.Month"
+                                                    asp-items="Model.MonthlyReport.Month">
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+
+
+                            <div class="modal-footer px-0 pb-0 border-0">
+                                <button type="button" class="btn btn-success btn-round" onclick="GetReportMonthly(event)"> دریافت گزارش </button>
+                                <button type="button" class="btn btn-danger btn-round" data-bs-dismiss="modal">بازگشت</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="ReportShipInLangargahModal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+
+                <h4 class="modal-title">گزارش کشتی های در لنگرگاه</h4>
+                <button type="button" class="close btn-close rounded border" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="modalbody">
+
+                <div class="card-body pt-0">
+
+                    <div class="form-body">
+                        <form asp-action="GetReportShipInLangargah" asp-controller="Report" id="GetReportShipInLangargahId" method="post">
+
+                            <div class="row">
+
+                                <div class="col-sm-12">
+                                    <div class="form-group">
+                                        <label>نوع گزارش</label>
+                                        <div class="input-group">
+                                            <select class="form-control select2 ReportShipInLangargah"
+                                                    name="reportType"
+                                                    asp-items="Html.GetEnumSelectList<ReportType>()">
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-sm-12 mt-4">
+                                    <div class="form-group">
+                                        <label> توضیحات  </label>
+                                        <div class="input-group">
+                                            <textarea rows="5" name="ShipInLangargahDescription"
+                                                      id="ShipInLangargahDescriptionId" class="form-control" required></textarea>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <div class="modal-footer px-0 pb-0 border-0">
+                                <button type="button" class="btn btn-success btn-round" onclick="GetReportShipInLangargah(event)"> دریافت گزارش </button>
+                                <button type="button" class="btn btn-danger btn-round" data-bs-dismiss="modal">بازگشت</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div id="ReportListAllocationModal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+
+                <h4 class="modal-title">گزارش لیست تخصیص</h4>
+                <button type="button" class="close btn-close rounded border" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="modalbody">
+
+                <div class="card-body pt-0">
+
+                    <div class="form-body">
+
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <div class="form-group">
+                                    <label>نوع گزارش</label>
+                                    <div class="input-group">
+                                        <select class="form-control select2 ReportListAllocation"
+                                                id="listAllocationReportType"
+                                                name="reportType"
+                                                asp-items="Html.GetEnumSelectList<ReportType>()">
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+
+
+                        </div>
+
+
+                        <div class="modal-footer px-0 pb-0 border-0">
+                            <button type="button" class="btn btn-success btn-round" onclick="GetReportListAllocation(event)"> دریافت گزارش </button>
+                            <button type="button" class="btn btn-danger btn-round" data-bs-dismiss="modal">بازگشت</button>
+
+                            <button id="excel1" type="submit" form="formFilter" formaction="/AllocationOfEquipment/GetReportListAllocationOfEqu?reportType=1"
+                                    class="btn w-100 mx-0 d-none my-2 px-2 btn-outline-primary-2x rounded-0">
+                                گزارش لیست تخصیص اکسل
+                            </button>
+                            <button id="pdf1" type="submit" form="formFilter" formaction="/AllocationOfEquipment/GetReportListAllocationOfEqu?reportType=0"
+                                    class="btn d-none w-100 mx-0 my-2 px-2 btn-outline-primary-2x rounded-0">
+                                گزارش لیست تخصیص Pdf
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<partial name="_ModalReportMonthlyComparison" model="Model.ReportMonthlyComparisonPage" />
+
+
+<div id="AddSeoModal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+
+                <h4 class="modal-title">افزودن عملیات</h4>
+                <button type="button" class="close btn-close rounded border" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="modalbody">
+
+                <div class="card-body pt-0">
+                    <form asp-action="CreateSeo" asp-controller="Seo" method="post">
+                        <div class="form-body">
+
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div class="form-group">
+                                        <label>انتخاب سفر دریایی</label>
+                                        <div class="input-group">
+                                            <select class="form-control"
+                                                    id="VoyageIdForCreateSeo"
+                                                    name="VoyageId"
+                                                    asp-items="Model.VoyageList">
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+
+                            </div>
+
+
+                            <div class="modal-footer px-0 pb-0 border-0">
+                                <button type="submit" class="btn btn-success btn-round"> ایجاد </button>
+                                <button type="button" class="btn btn-danger btn-round" data-bs-dismiss="modal">بازگشت</button>
+
+
+                            </div>
+
+                        </div>
+                    </form>
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section script {
+    <script>
+                $(document).ready(function () {
+
+                    $('.select2').select2();
+
+                    $('select[class*="ReportMonthlyComparison"].select2').select2({
+                        dropdownParent: $('#ReportMonthlyComparisonModalId')
+                    });
+
+                    $('select[class*="MonthlyReport"].select2').select2({
+                        dropdownParent: $('#ReportMonthlyModal')
+                    });
+
+                    $('select[class*="ReportListAllocation"].select2').select2({
+                        dropdownParent: $('#ReportListAllocationModal')
+                    });
+
+                    $('select[class*="ReportShipInLangargah"].select2').select2({
+                        dropdownParent: $('#ReportShipInLangargahModal')
+                    });
+
+                    $("#VoyageIdForCreateSeo").select2({
+                        dropdownParent: $('#AddSeoModal')
+                    });
+
+                    // کد جدید برای تغییر حالت نمایش
+                    $('#cardView').hide();
+                    $('#tableView').show();
+
+                    $('#discharge').change(function() {
+                        if ($(this).is(':checked')) {
+                            $('#cardView').show();
+                            $('#tableView').hide();
+                        }
+        });
+
+                    $('#loading').change(function() {
+                        if ($(this).is(':checked')) {
+                            $('#cardView').hide();
+                            $('#tableView').show();
+                        }
+        });
+
+                });
+
+                kamaDatepicker('Filter_DateFrom', customOptions);
+                kamaDatepicker('Filter_DateTo', customOptions);
+                kamaDatepicker('DateReportDailyId', customOptions);
+    </script>
+
+
+    <script>
+        $(".page-link").click(function (event) {
+            event.preventDefault(); // غیرفعال کردن عملکرد پیشفرض href
+
+            var hrefValue = $(this).attr("href");
+            $("#pageNumber").val(hrefValue.split("p=")[1]);
+            $("#formFilter").submit();
+        });
+    </script>
+
+
+    <script>
+        function ShowModalAddSeo(event) {
+            event.preventDefault();
+
+            $("#AddSeoModal").modal('show');
+        }
+
+        function ShowModalReportDaily(event) {
+            event.preventDefault();
+
+            $("#ReportDailyModal").modal('show');
+        }
+
+        function GetReportDaily(event) {
+            $("#ReportDailyModal").modal('hide');
+            $("#GetDailyReportPierOperationsExcelId").submit();
+        }
+
+        function ShowModalReportMonthly(event) {
+            event.preventDefault();
+
+            $("#ReportMonthlyModal").modal('show');
+        }
+
+        function GetReportMonthly(event) {
+            $("#ReportMonthlyModal").modal('hide');
+            $("#GetReportMonthlyExcelId").submit();
+        }
+
+
+        function ShowModalReportShipInLangargah(event) {
+            event.preventDefault();
+
+            $("#ReportShipInLangargahModal").modal('show');
+        }
+
+        function GetReportShipInLangargah(event) {
+            $("#ReportShipInLangargahModal").modal('hide');
+            $("#GetReportShipInLangargahId").submit();
+        }
+
+
+         function ShowModalReportListAllocation(event) {
+            event.preventDefault();
+
+            $("#ReportListAllocationModal").modal('show');
+        }
+
+        function GetReportListAllocation(event) {
+            $("#ReportListAllocationModal").modal('hide');
+            let selectValue = document.getElementById("listAllocationReportType").value;
+
+            if(selectValue == 0)
+                $("#pdf1").click();
+            else if(selectValue == 1)
+                $("#excel1").click();
+
+        }
+
+         function ShowModalReportMonthlyComparison(event) {
+            event.preventDefault();
+
+            $("#ReportMonthlyComparisonModalId").modal('show');
+        }
+
+        function GetReportMonthlyComparisonExcelReport() {
+            $("#ReportMonthlyComparisonModalId").modal('hide');
+            $("#ReportMonthlyComparisonExcelReportId").submit();
+        }
+
+        function GetReportSeasonalComparisonExcelReport() {
+            $("#ReportMonthlyComparisonModalId").modal('hide');
+            $("#ReportSeasonalComparisonExcelReportId").submit();
+        }
+
+    </script>
+}

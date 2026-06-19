@@ -1,0 +1,187 @@
+﻿@model ProductOwnerImasVesselPageDto
+@{
+	ViewData["Title"] = "لیست درخواست های صاحب کالا";
+	Layout = "~/Views/Shared/AdminLayout.cshtml";
+	int i = ((Model.ImasVesselList.PageNumber - 1) * Model.ImasVesselList.PageSize) + 1;
+}
+
+
+@section style {
+
+}
+
+
+<div class="col-lg-12">
+	<div class="card">
+		<div class="card-header pb-0">
+			<div class="d-flex justify-content-between">
+				<h3 class="title">
+					<i class="icon-frane"></i>
+					درخواست های صاحب کالا
+				</h3>
+			</div>
+
+		</div>
+		<div class="card-body pt-3">
+			<form id="formFilter" asp-action="VesselList" asp-route-p="" method="post">
+				<input name="p" id="pageNumber" hidden />
+				<div class="form-body">
+					<div class="row">
+						<div class="row  ">
+							<div class="form-group col-md-4 ">
+								<label>جستجو</label>
+								<div class="input-group">
+									<input asp-for="Filter.Search" type="text" class=" form-control">
+								</div>
+							</div>
+							<div class="form-group col-sm-4 ">
+								<label>صاحب کالا</label>
+								<div class="input-group">
+									<select class="form-control select2"
+											asp-for="Filter.UserId"
+											asp-items="Model.OwnerUser">
+										<option value="">همه صاحب کالاها</option>
+									</select>
+								</div>
+							</div>
+							<div class="col-sm-2 d-flex align-content-center flex-wrap">
+								<div class="">
+									<button style="margin-top:30px; border-radius:5px" class="alert-icon btn btn-success " type="submit"><p class="px-3">فیلتر</p></button>
+								</div>
+							</div>
+
+						</div>
+
+					</div>
+				</div>
+			</form>
+
+
+			<!-- /.portlet-title -->
+			<div class="buttons-box">
+
+				<i class="icon-size-fullscreen"></i>
+				<div class="paper-ripple">
+					<div class="paper-ripple__background"></div>
+					<div class="paper-ripple__waves"></div>
+				</div>
+			</div>
+			<!-- /.buttons-box -->
+		</div>
+		<div class="table-responsive px-3 vh-100">
+			<table class="table table-bordered table-hover table-striped" id="data-table">
+				<thead class="bg-primary">
+					<tr>
+						<th>ردیف</th>
+						<th>صاحب کالا  </th>
+						<td>نام شناور</td>
+						<td> شماره دریایی </td>
+						<td>آخرین موقعیت</td>
+						<th>تاریخ درخواست</th>
+
+						<td>وضعیت درخواست</td>
+
+						<td>عملیات</td>
+					</tr>
+				</thead>
+				<tbody>
+
+
+					@foreach (var item in Model.ImasVesselList.Data)
+					{
+						<tr>
+							<td>@(i++)</td>
+							<td>@($"{item.User?.FirstName} {item.User?.LastName} ({item.User.Company.CompanyName})")</td>
+							<td>@item.VesselPersianName</td>
+							<td>@item.PmoNumber</td>
+							<td>@item.LastLocationPersianName</td>
+							<td>@item.CreatedDateFa</td>
+
+
+							<td>
+								<span class="label rounded px-2 py-1 label-@(item.IsAccepted?"success":"danger")">
+									@(item.IsAccepted ? "تایید شده" : "در انتظار")
+								</span>
+							</td>
+
+
+							<td>
+								<a id="AcceptRequest@(i)" onclick="ShowQAlert(event,'AcceptRequest@(i)');" class="btn btn-success px-2 btn-sm btn-icon curve btn-questions"
+								   asp-action="AcceptRequest" asp-route-imasVesselId="@item.Id">
+									<i class="icon-check fs-6 align-middle fa-flip-horizontal"></i>
+								</a>
+
+								<a id="DeleteRequest@(i)" onclick="ShowQAlert(event,'DeleteRequest@(i)');" class="btn btn-danger px-2 btn-sm btn-icon curve btn-questions"
+								   asp-action="DeleteRequest" asp-route-imasVesselId="@item.Id">
+									<i class="icon-trash fs-6 align-middle fa-flip-horizontal"></i>
+								</a>
+							</td>
+						</tr>
+
+
+
+					}
+
+
+
+				</tbody>
+			</table>
+			<div class="mt-4">
+				<cs-pager cs-paging-pagesize="@Model.ImasVesselList.PageSize"
+						  cs-paging-pagenumber="@Model.ImasVesselList.PageNumber"
+						  cs-paging-totalitems="@Model.ImasVesselList.TotalItems"
+						  cs-paging-maxpageritems="10"
+						  cs-pagenumber-param="p"
+						  cs-show-first-last="true"
+						  cs-suppress-empty-nextprev="true"
+						  cs-suppress-inactive-firstlast="true"
+						  cs-show-numbered="true"
+						  cs-first-page-text="ابتدا"
+						  cs-last-page-text="انتها"
+						  cs-next-page-title="بعدی"
+						  cs-previous-page-title="قبلی"
+						  cs-first-page-title="ابتدا"
+						  cs-last-page-title="انتها"
+						  cs-next-page-text="بعدی"
+						  cs-previous-page-text="قبلی"
+						  cs-pager-li-current-class="page-item active"
+						  cs-pager-li-other-class="page-item"
+						  cs-pager-li-non-active-class="page-item disabled"
+						  cs-pager-link-current-class="page-link"
+						  cs-pager-link-other-class="page-link"
+						  asp-controller="ProductOwnerImasVessel"
+						  asp-action="VesselList">
+				</cs-pager>
+			</div>
+
+		</div>
+		<!-- /.table-responsive -->
+	</div>
+	<!-- /.portlet -->
+</div>
+
+
+
+
+
+@section script {
+
+
+	<script>
+		$(document).ready(function () {
+		@*val('@ViewData["CategoryProductId"]')*@
+				$("#Filter_UserId").select2().trigger('change');
+		});
+
+		 
+		$(".page-link").click(function (event) {
+			event.preventDefault(); // غیرفعال کردن عملکرد پیشفرض href
+
+			var hrefValue = $(this).attr("href");
+			$("#pageNumber").val(hrefValue.split("=")[1]);
+			$("#formFilter").submit();
+		});
+	</script>
+}
+
+

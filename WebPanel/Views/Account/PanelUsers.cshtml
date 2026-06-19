@@ -1,0 +1,211 @@
+﻿@model PanelUserPageDto
+
+
+@{
+    ViewData["Title"] = "لیست کاربران پورتال";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+    int i = 1;
+}
+
+
+
+@section style{
+
+   
+}
+
+
+<div class="col-lg-12">
+    <div class="card">
+        <div class="card-header ">
+            <div class="d-flex justify-content-between">
+                    <h3 class="title">
+                        <i class="icon-frane"></i> لیست کاربران پورتال
+                    </h3>
+
+                    <div>
+                    <a class="btn btn-primary rounded" onclick="createUser();">  +  ثبت کاربر  </a>
+                    </div>
+            </div>
+
+        </div>
+        <div class="card-body pt-0">
+            <div class="table-responsive">
+                <table class="table table-sm table-bordered table-hover table-striped" id="data-table">
+                    <thead class="bg-primary">
+                        <tr>
+                            <th style="width: 5%">ردیف</th>
+                            <th>نام و نام خانوادگی</th>
+                            <th>نام کاربری</th>
+                            <th>  بندر</th>
+                            <th>وضعیت</th>
+                            <th>مجوزها</th>
+                            <td>عملیات</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+
+                        @foreach (var item in Model.Users)
+                        {
+                            bool currentUser = User.Identity.GetUserName() == item.UserName;
+                            <tr>
+                                <td class="align-middle" >@(i++)</td>
+                                <td class="align-middle" > @item.FullName </td>
+                                <td class="align-middle" >@item.UserName</td>
+                                <td class="align-middle" >@item.PortName</td>
+                                <td class="align-middle" >
+                                    @if (!currentUser)
+                                    {
+                                        <a id="ActivationUser@(i)" onclick="ShowQAlert(event,'ActivationUser@(i)');"
+                                           asp-action="ActivationUser"
+                                           asp-route-userId="@item.Id">
+                                            <span class="label px-2 py-1 rounded label-@(item.IsActive?"success":"danger")">
+                                                @(item.IsActive ? "فعال" : "غیر فعال")
+                                            </span>
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <span class="label px-2 py-1 rounded label-@(item.IsActive?"success":"danger")">
+                                            @(item.IsActive ? "فعال" : "غیر فعال")
+                                        </span>
+                                    }
+
+                                </td>
+                                <td class="align-middle">
+                                    @foreach (var role in item.Roles)
+                                    {
+                                        <small class='label text-dark'><i class='fa align-middle fa-lock' style="margin-left:5px;"></i>@role</small>
+                                    }
+                                </td>
+
+                                <td>
+                                    <a class="btn px-2 btn-warning btn-sm btn-icon curve" onclick="editUser('@item.Id');"><i class="icon-pencil fs-6 align-middle"></i></a>
+
+                                    <a class="btn btn-info px-2" asp-action="ManageUserContracts" asp-route-userId="@item.Id" title="قراردادها">  <i class="fas fa-clipboard align-middle fs-6"></i>  </a>
+
+                                    @if (!currentUser)
+                                    {
+                                        <a class="btn btn-warning px-2 btn-sm btn-icon curve" onclick="resetPassword('@item.Id');"><i class="icon-key fs-6 align-middle"></i></a>
+
+                                        <a id="DeleteUser@(i)" onclick="ShowQAlert(event,'DeleteUser@(i)');" class="btn px-2 btn-danger btn-sm btn-icon curve btn-questions"
+                                           asp-action="DeleteUser" asp-route-userId="@item.Id">
+                                            <i class="icon-trash fs-6 align-middle fa-flip-horizontal"></i>
+                                        </a>
+                                    }
+
+                                </td>
+                            </tr>
+                        }
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div id="generalmodal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">ثبت کاربر پورتال</h4>
+                <button type="button" class="close btn-close rounded border" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="modalbody">
+
+                <partial name="_CreatePortalUser" model="Model.CreatePanelUser" />
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<div id="changePasswordModal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">تغییر رمز</h4>
+                <button type="button" class="close btn-close rounded border" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="modalbodyPassword">
+
+                <partial name="_ResetPassword" model="new ResetPasswordDto()" />
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section script {
+
+
+    <script>
+        $(document).ready(function () {
+            $('.select2').select2();
+            $("#CreateUser_PortDefaultId").select2({
+                dropdownParent: $('#generalmodal')
+            });
+
+        });
+
+
+        function createUser() {
+            $("#UsernameInput").css("display", "block");
+            $("#passwordInput").css("display", "block");
+            $("#isActiveInput").css("display", "block");
+
+            $("input:checkbox[name='CreateUser.SelectedRole']").each(function () {
+                $(this).prop('checked', false);//هیچ مجوزی از قبل انتخاب شده نباشد
+            })
+
+            $("#CreateUser_FirstName").val('');
+            $("#CreateUser_LastName").val('');
+            $("#CreateUser_Id").val('');
+            $("#CreateUser_UserName").val('');
+            $("#CreateUser_Password").val('');
+            $("#CreateUser_Phone").val('');
+            $("#CreateUser_PortDefaultId").val('');
+            $("#CreateUser_PortDefaultId").trigger('change');
+            $("#CreateUser_IsActive").prop('checked', true);
+            $("#generalmodal").modal('show');
+
+        }
+
+        function editUser(id) {
+
+            $.post("@Url.Action("GetPortalUserById","Account")", { UserId: id })
+                .done(function (res) {
+                    $("#modalbody").html(res);
+
+                    $("#UsernameInput").css("display", "none");
+                    $("#passwordInput").css("display", "none");
+                    $("#isActiveInput").css("display", "none");
+
+                    $("#generalmodal").modal('show');
+                });
+        }
+
+
+
+        function resetPassword(id) {
+            $("#IdUserForResrtPass").val(id);
+            $("#NewPass").val('');
+            $("#NewPassRe").val('');
+
+            $(".validation-summary-errors").empty(); // پاک کردن خطاهای نمایش داده شده
+            $(".field-validation-error").empty(); // پاک کردن خطاهای مربوط به فیلدها
+
+            $("#changePasswordModal").modal('show');
+
+        }
+
+
+
+    </script>
+}

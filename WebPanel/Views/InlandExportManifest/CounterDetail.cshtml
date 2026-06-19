@@ -1,0 +1,258 @@
+@model Entities.DTOs.Web.Hirman.InlandExportManifest.InlandExportManifestCounterDetail.InlandExportManifestCounterDetailPageDto
+@{
+    ViewData["Title"] = "جزئیات تالی های مجوز صادرات";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+
+    var manifestInfo = Model?.ManifestInfo;
+    var filter = Model?.Filter;
+    var counterGroups = Model?.List ?? new List<Entities.DTOs.Web.Hirman.InlandExportManifest.InlandExportManifestCounterDetail.InlandExportManifestCounterDetailGroupDto>();
+
+    var returnPage = 0;
+    if (ViewBag.returnPage != null)
+    {
+        int.TryParse(ViewBag.returnPage.ToString(), out returnPage);
+    }
+
+    var pageHeading = $"تالی های مجوز صادرات - {manifestInfo?.ManifestNumber}";
+}
+
+<style>
+    .table-responsive {
+        overflow-x: auto;
+        width: 100%;
+        max-height: 70vh;
+    }
+
+    #data-table {
+        table-layout: auto;
+        width: max-content;
+        min-width: 100%;
+    }
+
+        #data-table th,
+        #data-table td {
+            white-space: nowrap;
+            padding: 8px;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+    .hidden-col {
+        display: none !important;
+    }
+</style>
+
+<div class="col-lg-12">
+    <div class="card">
+        <div class="card-header pb-0 mb-0">
+            <div class="row gy-4 ">
+                <div class="col-md-4 d-flex align-items-center">
+                    <h3 class="title">
+                        <a asp-action="Details" asp-route-id="@filter?.InlandExportManifestId">
+                            <i class="fa-solid fa-right-to-bracket me-2"></i>
+                        </a>
+                        <i class="icon-frane"></i> @pageHeading
+                    </h3>
+                </div>
+                <div class="d-block d-lg-flex col-md-8 col-12 justify-content-end align-items-center gap-2">
+                    <a class="btn btn-primary"
+                       asp-action="Details" asp-route-id="@filter?.InlandExportManifestId">
+                        <i class="fa-solid fa-arrow-right me-2"></i>
+                        بازگشت
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table id="data-table" class="table table-bordered table-hover table-striped mb-5">
+                    <thead class="bg-primary position-sticky top-0" style="z-index: 99;">
+                        <tr>
+                            <th class="px-3 fs-6 text-center">#</th>
+                            <th class="px-3 fs-6 text-center">تاریخ</th>
+                            <th class="px-3 fs-6 text-center">نام شناور</th>
+                            <th class="px-3 fs-6 text-center">نوع شمارش</th>
+                            <th class="px-3 fs-6 text-center">نوع حمل</th>
+                            <th class="px-3 fs-6 text-center">چند سره بودن</th>
+                            <th class="px-3 fs-6 text-center">وسیله جا به جایی</th>
+                            <th class="px-3 fs-6 text-center">تفکیک یا صفافی</th>
+                            <th class="px-3 fs-6 text-center">صاحب کالا</th>
+                            <th class="px-3 fs-6 text-center">گروه کارگری</th>
+                            <th class="px-3 fs-6 text-center">تعداد تجهیز استفاده شده</th>
+                            <th class="px-3 fs-6 text-center">پلاک کامیون/شماره شاسی</th>
+                            <th class="px-3 fs-6 text-center">وزن خالی</th>
+                            <th class="px-3 fs-6 text-center">وزن پر</th>
+                            <th class="px-3 fs-6 text-center">وزن کالا</th>
+                            <th class="px-3 fs-6 text-center">کالا</th>
+                            <th class="px-3 fs-6 text-center">نوع انتقال کانتینر</th>
+                            <th class="px-3 fs-6 text-center">شماره کانتینر</th>
+                            <th class="px-3 fs-6 text-center">پلمپ کانتینر</th>
+                            <th class="px-3 fs-6 text-center">اندازه کانتینر</th>
+                            <th class="px-3 fs-6 text-center">نوع کانتینر</th>
+                            <th class="px-3 fs-6 text-center">شمارش محوطه</th>
+                            <th class="px-3 fs-6 text-center">مشکل محوطه</th>
+                            <th class="px-3 fs-6 text-center">کاربر محوطه</th>
+                            <th class="px-3 fs-6 text-center">انبار</th>
+                            <th class="px-3 fs-6 text-center">بخش انبار</th>
+                            <th class="px-3 fs-6 text-center">شمارش اسکله</th>
+                            <th class="px-3 fs-6 text-center">مشکل اسکله</th>
+                            <th class="px-3 fs-6 text-center">کاربر اسکله</th>
+                            <th class="px-3 fs-6 text-center">عملیات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            int rowIndex = 1;
+                            foreach (var counter in counterGroups)
+                            {
+                                var totalCounterRows = counter.CounterProducts.Sum(p =>
+                                    p.SecondCounterProducts?.Count > 0 ? p.SecondCounterProducts.Count : 1);
+                                var isFirstCounterRow = true;
+
+                                foreach (var counterProduct in counter.CounterProducts)
+                                {
+                                    var secondCounterProducts = counterProduct.SecondCounterProducts?.Any() == true
+                                        ? counterProduct.SecondCounterProducts
+                                        : new List<Entities.DTOs.Web.Hirman.InlandExportManifest.InlandExportManifestCounterDetail.InlandExportManifestCounterDetailGroupDto.InlandExportManifestCounterDetailProduct.InlandExportManifestCounterDetailSecondProduct> { null };
+                                    var isFirstProductRow = true;
+                                    var productRowspan = secondCounterProducts.Count;
+
+                                    foreach (var secondCounterProduct in secondCounterProducts)
+                                    {
+                                        <tr data-counter-id="@counter.CounterId" data-counter-product-id="@counterProduct.CounterProductId">
+                                            @if (isFirstCounterRow)
+                                            {
+                                                <td class="align-middle text-center" rowspan="@totalCounterRows">@rowIndex</td>
+                                                <td class="align-middle text-center" dir="ltr" rowspan="@totalCounterRows">@counter.CounterCreatedDate.ToShortPersianDateTimeString()</td>
+                                                <td class="align-middle text-center" dir="ltr" rowspan="@totalCounterRows">@counter.ShipName</td>
+                                                <td class="align-middle text-center" dir="ltr" rowspan="@totalCounterRows">@counter.CounterCounterType.ToDisplay()</td>
+                                                <td class="align-middle text-center" rowspan="@totalCounterRows">@counter.CounterTrafficType?.ToDisplay(DisplayProperty.Name)</td>
+                                                <td class="align-middle text-center" rowspan="@totalCounterRows">@counter.CounterUnloadingStageCount</td>
+                                                <td class="align-middle text-center" rowspan="@totalCounterRows">@counter.CounterIsSelfTransportTitle</td>
+                                                <td class="align-middle text-center" rowspan="@totalCounterRows">
+                                                    @if (counter.CounterIsSeparatedOrSorted == true)
+                                                    {
+                                                        <span>بلی</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span>خیر</span>
+                                                    }
+                                                </td>
+                                                <td class="align-middle text-center" rowspan="@totalCounterRows">@counter.ProductOwnerCompanyName</td>
+                                                <td class="align-middle text-center" rowspan="@totalCounterRows">@counter.CounterLaborWorkingGroupName</td>
+                                                <td class="align-middle text-center" rowspan="@totalCounterRows"><a onclick="ShowCounterGearModal('@counter.CounterId')"><i class="icon-eye rounded-circle bg-primary text-white mx-2 p-1 align-middle cursor-pointer btn"></i> @counter.CounterGearCount</a></td>
+
+                                                @if (counter.CounterIsSelfTransported == false)
+                                                {
+                                                    <td class="align-middle text-center" rowspan="@totalCounterRows">@counter.CounterTruckCarPlates</td>
+                                                }
+                                                else
+                                                {
+                                                    <td class="align-middle text-center" rowspan="@totalCounterRows">@counter.CounterSeoProductVehicleIdentificationNumber</td>
+                                                }
+
+                                                <td class="align-middle text-center" rowspan="@totalCounterRows">@counter.CounterWeightFree.ToPrice()</td>
+                                                <td class="align-middle text-center" rowspan="@totalCounterRows">@counter.CounterWeightFull.ToPrice()</td>
+                                                <td class="align-middle text-center" rowspan="@totalCounterRows">@counter.CounterWeightLoad.ToPrice()</td>
+                                                isFirstCounterRow = false;
+                                            }
+
+                                            @if (isFirstProductRow)
+                                            {
+                                                <td class="align-middle text-center" rowspan="@productRowspan">@counterProduct.CounterSeoProductProductName</td>
+                                                <td class="align-middle text-center" rowspan="@productRowspan">@counterProduct.CounterSeoProductContainerMoveType</td>
+                                                <td class="align-middle text-center" rowspan="@productRowspan">@counterProduct.CounterSeoProductContainerNumber</td>
+                                                <td class="align-middle text-center" rowspan="@productRowspan">@counterProduct.CounterSeoProductContainerSealNumber</td>
+                                                <td class="align-middle text-center" rowspan="@productRowspan">@counterProduct.CounterSeoProductContainerSize</td>
+                                                <td class="align-middle text-center" rowspan="@productRowspan">@counterProduct.CounterSeoProductContainerType</td>
+                                                <td class="align-middle text-center" rowspan="@productRowspan">@counterProduct.CounterProductCount</td>
+                                                <td class="align-middle text-center" rowspan="@productRowspan">@counterProduct.CounterProductCountProblem</td>
+                                                <td class="align-middle text-center" rowspan="@productRowspan">
+                                                    @counterProduct.CounterPersonelFirstName @counterProduct.CounterPersonelLastName
+                                                </td>
+                                                <td class="align-middle text-center" rowspan="@productRowspan">@counterProduct.CounterProductWarehouseName</td>
+                                                <td class="align-middle text-center" rowspan="@productRowspan">@counterProduct.CounterProductWarehouseSegmentName</td>
+                                                isFirstProductRow = false;
+                                            }
+
+                                            <td class="align-middle text-center">@secondCounterProduct?.SecondCounterProductCount</td>
+                                            <td class="align-middle text-center">@secondCounterProduct?.SecondCounterProductCountProblem</td>
+                                            <td class="align-middle text-center">
+                                                @secondCounterProduct?.SecondCounterPersonelFirstName @secondCounterProduct?.SecondCounterPersonelLastName
+                                            </td>
+                                            <td class="align-middle text-center">
+                                                @if (counter.CounterId != null && counterProduct.HasCounterProductCheckList == true)
+                                                {
+                                                    <a class="btn btn-primary px-2 my-1" onclick="ShowCounterProductFactorModal('@counter.CounterId')">
+                                                        <i class="fas fa-list-ul"></i> محوطه
+                                                    </a>
+                                                }
+                                                @if (secondCounterProduct?.SecondCounterId != null && secondCounterProduct.HasSecondCounterProductCheckList == true)
+                                                {
+                                                    <a class="btn btn-info px-2 my-1" onclick="ShowCounterProductFactorModal('@secondCounterProduct.SecondCounterId')">
+                                                        <i class="fas fa-list-ul"></i> اسکله
+                                                    </a>
+                                                }
+
+                                                @if (counter.CounterId != null && counter.CounterGearCount > 0)
+                                                {
+                                                    <a class="btn btn-secondary px-2 my-1" onclick="ShowCounterGearModal('@counter.CounterId')">
+                                                        <i class="fas fa-cogs"></i> مشاهده تجهیزات
+                                                    </a>
+                                                }
+
+                                                @if (counter.CounterId != null && counter.HasCounterFile == true)
+                                                {
+                                                    <a class="btn btn-primary px-2 my-1" onclick="ShowCounterFileModal('@counter.CounterId')">
+                                                        <i class="fas fa-list-ul"></i> فایل های محوطه
+                                                    </a>
+                                                }
+
+                                                @if (secondCounterProduct?.SecondCounterId != null && secondCounterProduct.HasSecondCounterFile == true)
+                                                {
+                                                    <a class="btn btn-primary px-2 my-1" onclick="ShowCounterFileModal('@secondCounterProduct.SecondCounterId')">
+                                                        <i class="fas fa-list-ul"></i> فایل های اسکله
+                                                    </a>
+                                                }
+                                            </td>
+                                        </tr>
+                                        rowIndex++;
+                                    }
+                                }
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="CounterProductFactorModalId">
+</div>
+
+<div id="CounterGearModalId">
+</div>
+
+<div id="CounterFileModalId">
+</div>
+
+@section script {
+    <script>
+        function ShowCounterProductFactorModal(counterId) {
+            // TODO: Implement counter product factor modal
+            console.log('Show counter product factor modal for counter:', counterId);
+        }
+
+        function ShowCounterGearModal(counterId) {
+            // TODO: Implement counter gear modal
+            console.log('Show counter gear modal for counter:', counterId);
+        }
+
+        function ShowCounterFileModal(counterId) {
+            // TODO: Implement counter file modal
+            console.log('Show counter file modal for counter:', counterId);
+        }
+    </script>
+}

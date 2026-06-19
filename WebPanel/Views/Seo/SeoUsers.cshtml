@@ -1,0 +1,101 @@
+﻿@model SeoMobileUserDto
+@{
+    ViewData["Title"] = "کاربران";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+    var seoId = ViewBag.seoId;
+}
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card min-height-600">
+            <div class="card-header border-0">
+                <div class="d-flex justify-content-between">
+                    <h3 class="title">
+                        <i class="icon-frane"></i>
+                        <a asp-controller="Seo" asp-action="SeoPortOperatorPage" asp-route-seoId="@((Guid)ViewBag.seoId)"><i class="fa-solid fa-right-to-bracket me-2"></i></a>
+                        کاربران @ViewBag.seo
+                    </h3>
+                </div>
+            </div>
+            <div class="card-body border-0 pt-0">
+                <ul class="nav nav-tabs border-botoom mb-5">
+                    <li class="nav-item">
+                        <a class="nav-link active" data-bs-toggle="tab" href="#tab1">کاربران بار شمار</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-bs-toggle="tab" href="#tab2">کاربران انبار دار</a>
+                    </li>
+                </ul>
+                <div class="tab-content">
+                    <div id="tab1" class="tab-pane active fade show">
+                        <div class="comments-box ">
+                            @*<div class="mt-1">
+                            <a asp-action="GetSeoTruckExcelFile" asp-controller="Report" asp-route-seoId="@Model.SeoInfo.Id" class="btn btn-success">خروجی اکسل</a>
+                            <br />
+                            </div>*@
+                            <table class="table table-bordered table-sm">
+                                <thead class="bg-primary">
+                                    <tr>
+                                        <th>کاربر</th>
+                                        <th>کد ملی</th>
+                                        <th>شماره موبایل</th>
+                                        <th>تعداد سرویس</th>
+                                        <th>وضعیت</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model.BarShomar)
+                                    {
+                                        <tr>
+
+                                            <td>@item.UserFullName</td>
+                                            <td>@item.MeliCode</td>
+                                            <td>@item.Phone</td>
+                                            <td>@item.ServiceCount</td>
+                                            <td>
+                                                <a id="exit@(item.Id)" onclick="ShowQAlert(event,'exit@(item.Id)');" class="btn btn-danger btn-sm btn-icon curve btn-questions" asp-controller="Seo" asp-action="ExitUserOnSeo" asp-route-seoId="@seoId" asp-route-personId="@item.Id"><i class="fa fa-close"></i></a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div id="tab2" class="tab-pane fade">
+                        <div class="comments-box">
+                            <table class="table table-bordered table-sm ">
+                                <thead class="bg-primary">
+                                    <tr>
+                                        <th>کاربر</th>
+                                        <th>کد ملی</th>
+                                        <th>شماره موبایل</th>
+                                        <th>تعداد سرویس</th>
+                                        <th>وضعیت</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model.AnbarDar)
+                                    {
+                                        <tr>
+
+                                            <td>@item.UserFullName</td>
+                                            <td>@item.MeliCode</td>
+                                            <td>@item.Phone</td>
+                                            <td>@item.ServiceCount</td>
+                                            <td>
+                                                <a id="exit@(item.Id)" onclick="ShowQAlert(event,'exit@(item.Id)');" class="btn btn-danger btn-sm btn-icon curve btn-questions" asp-controller="Seo" asp-action="ExitUserOnSeo" asp-route-seoId="@seoId" asp-route-personId="@item.Id"><i class="fa fa-close"></i></a>
+                                            </td>
+
+
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

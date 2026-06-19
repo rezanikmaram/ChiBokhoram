@@ -1,0 +1,75 @@
+﻿@model List<AssignedTaliProductCheckListFactorsDto>
+
+@{
+    var i = 1;
+}
+
+<div id="TaliProductFactorModal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title"> جزئیات چک لیست </h4>
+                <button type="button" class="close btn-close rounded border" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive mt-5">
+                    <table class="table table-sm table-bordered table-hover table-striped" id="data-table">
+                        <thead class="bg-primary">
+                            <tr>
+                                <th class="px-1 text-center">#</th>
+                                <th class="px-1 text-center">نام چک لیست</th>
+                                <th class="px-1 text-center">نام شاخص</th>
+                                <th class="px-1 text-center">وضعیت دارا بودن</th>
+                                <th class="px-1 text-center">وضعیت سالم بودن</th>
+                                <th class="px-1 text-center">مشکل دار</th>
+                                <th class="px-1 text-center">توضیحات</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td class="align-middle px-2 text-center">@(i++)</td>
+                                    <td class="align-middle px-2 text-center">
+                                        @item.CheckList.CheckListTitle
+                                    </td>
+
+                                    <td class="align-middle px-2 text-center">
+                                        @item.CheckListFactor.Title
+                                    </td>
+
+                                    <td class="align-middle px-2 text-center">
+
+                                        @(item.IsExists ? "بلی" : "خیر")
+                                    </td>
+                                    <td class="align-middle px-2 text-center">
+                                        @if (item.IsHealthy.HasValue)
+                                        {
+                                            @(item.IsHealthy.Value ? "بلی" : "خیر")
+                                        }
+                                        else
+                                        {
+                                            @:تعیین وضعیت نشده
+                                        }
+                                    </td>
+
+                                    <td class="align-middle px-2 text-center">
+
+                                        @(item.TaliProduct.IsProblem ? "بلی" : "خیر")
+                                    </td>
+                                   
+
+                                    <td class="align-middle px-2 text-center">
+                                        @item.Description
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

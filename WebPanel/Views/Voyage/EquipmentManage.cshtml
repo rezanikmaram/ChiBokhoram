@@ -1,0 +1,361 @@
+@model EquipmentManageVoyageDto
+
+
+@{
+    ViewData["Title"] = "مدیریت تجهیزات سفر";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+    int i = 1;
+}
+
+@* <div class="card p-2 mb-3"> *@
+@*     <div class="row"> *@
+@*         <div class="col-md-1 align-middle align-content-center px-4"> *@
+@*             <i class="fa-solid fa-circle-info fs-4 align-middle"></i> *@
+@*         </div> *@
+@*         <div class="col-md-11 px-5"> *@
+@*             <div class="d-flex justify-content-between align-items-center"> *@
+@*                 <div class="glass-bg px-2 py-1"> *@
+@*                     <p class="fs-6 m-0"> @Model.VogageInfo?.ShipShipName </p> *@
+@*                 </div> *@
+@*                 <div> *@
+@*                     <p class="fs-6 m-0"> @Model.VogageInfo?.CompanyShippingCompanyName </p> *@
+@*                 </div> *@
+@*                 <div> *@
+@*                     <p class="fs-6 m-0">@Model.VogageInfo?.TransportTypeTitle</p> *@
+@*                 </div> *@
+@*                 <div> *@
+@*                     <p class="fs-6 m-0">شماره سفر: @Model.VogageInfo?.VoyageNumber</p> *@
+@*                 </div> *@
+@*                 <div> *@
+@*                     <p class="fs-6 m-0">شماره دریایی: @Model.VogageInfo?.PmoNumber</p> *@
+@*                 </div> *@
+@*             </div> *@
+@*         </div> *@
+@*     </div> *@
+@* </div> *@
+
+<div class="col-md-12">
+    <div class="p-3 bg-white rounded-3 shadow-sm">
+        <div class="d-flex justify-content-between">
+            <div class="d-flex align-items-center">
+                <span class="fs-6">
+                    <a asp-controller="Voyage" asp-action="VoyageSeo" asp-route-voyageId="@(Model.VogageInfo.Id)"><i class="fa-solid fa-right-to-bracket align-middle me-2"></i></a>
+                    مدیریت تجهیزات سفر
+                </span>
+            </div>
+            <div>
+                <button id="updateEquipmentBtn" class="btn btn-primary">بروزرسانی تجهیزات بارنامه</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row mt-3">
+    <div class="col-md-6">
+        <div class="card rounded-3 min-height-600">
+            <div class="card-header pb-3">
+                <div class="d-flex justify-content-between d-flex ">
+                    <h3 class="title m-0">
+                        <i class="icon-speech"></i>
+                        انتخاب تجهیــز
+                    </h3>
+                    <form asp-action="SetEquipmentForVoyage" method="post" id="postEquipment" asp-route-returnPage="@((int)ViewBag.returnPage)">
+                        <a class="btn btn-success text-white label rounded" onclick="setTruckForSeo();">   +  اضافه کردن انتخاب شده ها</a>
+                        <input id="selectEquipmentId" name="ids" type="hidden" />
+                        <input asp-for="FilterDto.VoyageId" name="VoyageId" type="hidden" />
+                    </form>
+                </div>
+                <div>
+                    <form id="formFilter" asp-action="EquipmentManage" asp-route-voyageId="@Model.FilterDto.VoyageId" asp-route-returnPage="@((int)ViewBag.returnPage)" method="post">
+                        <input asp-for="FilterDto.VoyageId" type="hidden" />
+                        <div class="form-body d-flex justify-content-between">
+
+                            <div class="form-group col-md-4 ">
+                                <label>جستجو</label>
+                                <div class="input-group">
+                                    <input asp-for="FilterDto.Search" type="text" placeholder="نام" class="form-control">
+                                </div>
+                            </div>
+
+                            <div class="form-group col-md-4 m-r-10 ">
+                                <label>نوع تجهیز</label>
+                                <div class="input-group">
+                                    <select class="form-control select2" style="width:100%!important;"
+                                            asp-for="FilterDto.EquipmentType"
+                                            asp-items="Model.EquipmentTypes">
+                                        <option value="">همه تجهیزات</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-md-2">
+                                <div style="margin-top:32px;" class="d-flex justify-content-around">
+                                    <button class="alert-icon btn btn-success rounded label" type="submit"><p class="px-2 mb-0">فیلتر</p></button>
+                                </div>
+                            </div>
+
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="card-body pt-0">
+                <table id="TableUnSelected" class="table table-bordered ">
+                    <thead class="bg-primary">
+                        <tr>
+                            <th><input type="checkbox" id="selectAllTableUnSelected" /></th>
+                            <th>نام تجهیز</th>
+                            <th>نوع</th>
+                            <th>دسته بندی</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.Equipments)
+                        {
+                            <tr>
+                                <td style="width:30px;"><input type="checkbox" value="@item.Id" name="equipmentId" class="row-selector" /></td>
+                                <td>@item.Name</td>
+                                <td>@item.EquipmentType.ToDisplay()</td>
+                                <td>@item.GearCategoryTitle</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card rounded-3">
+            <div class="card-header ">
+                <div class="d-flex justify-content-between d-flex">
+                    <h3 class="title m-0">
+                        <i class="icon-speech"></i>
+                        تجهیزات انتخاب شده
+                    </h3>
+                    <form asp-action="RemoveEquipmentFormVoyage" method="post" id="deleteEquipment" asp-route-returnPage="@((int)ViewBag.returnPage)">
+                        <a class="btn btn-danger text-white label rounded" onclick="deleteProduct();"> <i class="fa fa-trash me-2"></i> حذف انتخاب شده ها </a>
+                        <input id="removeIds" name="ids" type="hidden" />
+                        <input asp-for="FilterDto.VoyageId" name="VoyageId" type="hidden" />
+                    </form>
+                </div><!-- /.portlet-title -->
+                <!-- /.buttons-box -->
+            </div><!-- /.portlet-heading -->
+            <div class="card-body pt-0">
+                <table id="TableSelected" class="table table-bordered ">
+                    <tr class="bg-primary">
+                        <th><input type="checkbox" id="selectAllTableSelected" /></th>
+                        <th>نام تجهیز</th>
+                        <th>نوع</th>
+                        <th>دسته بندی</th>
+                        <th>وضعیت</th>
+                        <th>نمایش در</th>
+                    </tr>
+                    <tbody>
+                        @foreach (var item in Model.SelectedEquipment)
+                        {
+                            <tr>
+                                <td style="width:30px;"><input type="checkbox" value="@item.Id" name="selectequipmentId" class="row-selector" /></td>
+                                <td>@item.Name</td>
+                                <td>@item.EquipmentType.ToDisplay()</td>
+                                <td>@item.GearCategoryTitle</td>
+                                <td><a id="activeequipment@(i)" onclick="ShowQAlert(event,'activeequipment@(i)');" asp-action="ActivationEquipment" asp-route-voyageId="@Model.FilterDto.VoyageId" asp-route-equipmentId="@item.Id"><span class="label p-2 py-1 rounded label-@(item.IsActive ? "success" : "danger")">@(item.IsActive ? "فعال" : "غیر فعال")</span></a></td>
+                                <td>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="checkbox" id="waterfront@(i)" equipment-id="@item.Id" @(item.UsedInWaterfrontSide ? "checked" : "") onchange="updateEquipmentSide('@Model.FilterDto.VoyageId', '@item.Id', 'waterfront', this.checked)">
+                                        <label class="form-check-label" for="waterfront@(i)">سمت اسکله</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="checkbox" id="port@(i)" equipment-id="@item.Id" @(item.UsedInPortSide ? "checked" : "") onchange="updateEquipmentSide('@Model.FilterDto.VoyageId', '@item.Id', 'port', this.checked)">
+                                        <label class="form-check-label" for="port@(i)">سمت محوطه</label>
+                                    </div>
+                                </td>
+
+
+
+                            </tr>
+                            i++;
+                        }
+                    </tbody>
+                </table>
+
+                <!-- /.tab-content -->
+
+            </div><!-- /.portlet-body -->
+        </div>
+    </div>
+</div>
+
+<!-- Modal for Equipment Assignment -->
+<div class="modal fade" id="equipmentAssignmentModal" tabindex="-1" role="dialog" aria-labelledby="equipmentAssignmentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="equipmentAssignmentModalLabel">تخصیص تجهیزات</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>لطفاً مشخص کنید که تجهیزات انتخاب شده در کدام سمت‌ها استفاده شوند:</p>
+                <div class="form-group mt-3">
+                    <div class="input-group activeor mb-2">
+                        <label>
+                            <input type="checkbox"
+                                   class="normal"
+                                   id="modalWaterfrontSide"
+                                   checked>
+                            سمت اسکله
+                        </label>
+                    </div>
+
+                    <div class="input-group activeor">
+                        <label>
+                            <input type="checkbox"
+                                   class="normal"
+                                   id="modalPortSide"
+                                   checked>
+                            سمت محوطه
+                        </label>
+                    </div>
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="confirmEquipmentAssignment()">تایید و تخصیص</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section script {
+    <script>
+        function setTruckForSeo() {
+            var ids = "";
+            $("#selectEquipmentId").val('');
+            $("input:checkbox[name=equipmentId]:checked").each(function () {
+                if (ids) {
+                    ids += ',' + $(this).val();
+                }
+                else {
+                    ids = $(this).val();
+                }
+            });
+            $("#selectEquipmentId").val(ids);
+            if (ids) {
+                // Show modal instead of direct submission
+                $('#equipmentAssignmentModal').modal('show');
+            }
+            else {
+                showAlert2('تجهیزی انتخاب نشده است', 1);
+                return;
+            }
+        }
+
+        function confirmEquipmentAssignment() {
+            var ids = $("#selectEquipmentId").val();
+            var waterfrontSide = $("#modalWaterfrontSide").is(':checked');
+            var portSide = $("#modalPortSide").is(':checked');
+
+            // Add hidden fields to the form
+            $('<input>').attr({
+                type: 'hidden',
+                name: 'usedInWaterfrontSide',
+                value: waterfrontSide
+            }).appendTo('#postEquipment');
+
+            $('<input>').attr({
+                type: 'hidden',
+                name: 'usedInPortSide',
+                value: portSide
+            }).appendTo('#postEquipment');
+
+            // Hide modal and submit form
+            $('#equipmentAssignmentModal').modal('hide');
+            $("#postEquipment").submit();
+        }
+        function deleteProduct() {
+            var ids = "";
+            $("#removeIds").val('');
+            $("input:checkbox[name=selectequipmentId]:checked").each(function () {
+                if (ids) {
+                    ids += ',' + $(this).val();
+                }
+                else {
+                    ids = $(this).val();
+                }
+            });
+            $("#removeIds").val(ids);
+            if (ids) {
+                $("#deleteEquipment").submit();
+            }
+            else {
+                showAlert2('تجهیزی انتخاب نشده است', 1);
+                return;
+            }
+        }
+
+        $(document).ready(function () {
+
+            $('#selectAllTableUnSelected').click(function (e) {
+                    var isChecked = this.checked;
+                // Only select/deselect visible checkboxes
+                $('#TableUnSelected tbody tr:visible').find('td input:checkbox.row-selector').prop('checked', isChecked);
+            });
+
+
+            $('#selectAllTableSelected').click(function (e) {
+                    var isChecked = this.checked;
+                // Only select/deselect visible checkboxes
+                $('#TableSelected tbody tr:visible').find('td input:checkbox.row-selector').prop('checked', isChecked);
+            });
+        });
+
+
+        $(document).ready(function () {
+             $('.select2').select2();
+            $('#updateEquipmentBtn').on('click', function () {
+                var voyageId = '@Model.VogageInfo.Id';
+                if (!voyageId) {
+                    alert('آی دی سفر تعریف نشده، مشکلی در برنامه پیش آمده است');
+                    return;
+                }
+
+                $.ajax({
+                    url: '/Voyage/UpdateSeoEquipment',
+                    type: 'POST',
+                    data: { voyageId: voyageId },
+                    success: function (response) {
+                        alert('تجهیزات بارنامه با موفقیت به‌روزرسانی شد.');
+
+                    },
+                    error: function (xhr, status, error) {
+                        alert('خطا در به‌روزرسانی تجهیزات: ' + error);
+                    }
+                });
+            });
+        });
+
+        function updateEquipmentSide(voyageId, equipmentId, side, isChecked) {
+            $.ajax({
+                url: '/Voyage/UpdateEquipmentSide',
+                type: 'POST',
+                data: {
+                    voyageId: voyageId,
+                    equipmentId: equipmentId,
+                    side: side,
+                    isChecked: isChecked
+                },
+                success: function (response) {
+                    // Optionally show success message
+                },
+                error: function (xhr, status, error) {
+                    alert('خطا در به‌روزرسانی وضعیت تجهیزات: ' + error);
+                    // Revert checkbox state on error
+                    if (side === 'waterfront') {
+                        $('#waterfront' + equipmentId).prop('checked', !isChecked);
+                    } else {
+                        $('#port' + equipmentId).prop('checked', !isChecked);
+                    }
+                }
+            });
+        }
+
+    </script>
+}
+

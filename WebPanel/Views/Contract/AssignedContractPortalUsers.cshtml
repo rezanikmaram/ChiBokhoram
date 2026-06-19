@@ -1,0 +1,156 @@
+@model GetAssignedContractPortalUsersDto
+@{
+    ViewData["Title"] = $"کاربران پورتال قرارداد ({Model.ContractNumber})";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+<div class="bg-white card-header p-15 rounded-3 shadow-sm">
+    <div class="d-flex justify-content-between">
+        <h3 class="title m-0">
+            <a asp-action="Index">
+                <i class="fa-solid fa-right-to-bracket align-middle me-2"></i>
+            </a>
+            کاربران پورتال قرارداد (@Model.ContractNumber)
+        </h3>
+        <div class="buttons-box">
+            <i class="icon-size-fullscreen"></i>
+            <div class="paper-ripple">
+                <div class="paper-ripple__background"></div>
+                <div class="paper-ripple__waves"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-3">
+    <div class="col-md-6">
+        <div class="card rounded-3 min-height-600">
+            <div class="card-header">
+                <div class="d-flex justify-content-between">
+                    <h3 class="title m-0">
+                        <i class="icon-user"></i>
+                        انتخاب کاربران پورتال برای قرارداد
+                    </h3>
+                    <form asp-action="AssignPortalUsersToContract" method="post" id="assignPortalUsersForm">
+                        <a class="btn mb-2 float-end btn-success rounded text-white label py-2" onclick="assignPortalUsers();">+  اضافه کردن انتخاب شده ها</a>
+                        <input id="assignPortalUserIds" name="Ids" type="hidden" />
+                        <input name="ContractId" type="hidden" value="@Model.ContractId" />
+                    </form>
+                </div>
+            </div>
+            <div class="card-body pt-0">
+                <form asp-action="GetPortalUsers" method="post" id="filterPortalUserForm">
+                    <input type="hidden" asp-for="ContractId" />
+                    <div class="form-body mb-4">
+                        <div class="row">
+                            <div class="form-group col-lg-6">
+                                <label>جستجو</label>
+                                <div class="input-group">
+                                    <input asp-for="Filter.Search" type="text" class="form-control" placeholder="نام/نام‌کاربری/تلفن">
+                                </div>
+                            </div>
+                            <div class="col-lg-3 d-flex align-items-end">
+                                <button class="btn btn-success rounded label w-100" type="submit"><p class="m-0">فیلتر</p></button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+
+                <div class="table-responsive w-100">
+                    <table class="table table-bordered">
+                        <thead class="bg-primary">
+                            <tr>
+                                <th style="width:30px"></th>
+                                <th>نام و نام خانوادگی</th>
+                                <th>نام کاربری</th>
+                                <th>تلفن</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        @foreach (var item in Model.UnAssignedUsers)
+                        {
+                            <tr>
+                                <td><input type="checkbox" value="@item.Id" name="unassignedPortalUserId" /></td>
+                                <td>@item.FullName</td>
+                                <td>@item.UserName</td>
+                                <td>@item.Phone</td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card rounded-3">
+            <div class="card-header d-flex justify-content-between">
+                <h3 class="title m-0">
+                    <i class="icon-speech"></i>
+                    کاربران متصل به قرارداد
+                </h3>
+                <form asp-action="RemovePortalUsersFromContract" method="post" id="removePortalUsersForm">
+                    <a class="btn btn-danger text-white label rounded" onclick="removePortalUsers();"> <i class="fas fa-trash"></i> حذف انتخاب شده ها</a>
+                    <input id="removePortalUserIds" name="Ids" type="hidden" />
+                    <input name="ContractId" type="hidden" value="@Model.ContractId" />
+                </form>
+            </div>
+            <div class="card-body pt-0">
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <thead class="bg-primary">
+                            <tr>
+                                <th style="width:30px"></th>
+                                <th>نام و نام خانوادگی</th>
+                                <th>نام کاربری</th>
+                                <th>تلفن</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        @foreach (var item in Model.AssignedUsers)
+                        {
+                            <tr>
+                                <td><input type="checkbox" value="@item.Id" name="assignedPortalUserId" /></td>
+                                <td>@item.FullName</td>
+                                <td>@item.UserName</td>
+                                <td>@item.Phone</td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section script {
+<script>
+    function assignPortalUsers() {
+        var ids = "";
+        $("#assignPortalUserIds").val('');
+        $("input:checkbox[name=unassignedPortalUserId]:checked").each(function () {
+            ids = ids ? (ids + ',' + $(this).val()) : $(this).val();
+        });
+        if (ids) {
+            $("#assignPortalUserIds").val(ids);
+            $("#assignPortalUsersForm").submit();
+        } else {
+            showAlert2('کاربری انتخاب نشده است', 1);
+        }
+    }
+    function removePortalUsers() {
+        var ids = "";
+        $("#removePortalUserIds").val('');
+        $("input:checkbox[name=assignedPortalUserId]:checked").each(function () {
+            ids = ids ? (ids + ',' + $(this).val()) : $(this).val();
+        });
+        if (ids) {
+            $("#removePortalUserIds").val(ids);
+            $("#removePortalUsersForm").submit();
+        } else {
+            showAlert2('کاربری انتخاب نشده است', 1);
+        }
+    }
+</script>
+}

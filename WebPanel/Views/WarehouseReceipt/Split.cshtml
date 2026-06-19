@@ -1,0 +1,309 @@
+﻿@model WarehouseReceiptSplitPageDto
+
+@{
+	ViewData["Title"] = "تفکیک قبض انبار";
+	Layout = "~/Views/Shared/AdminLayout.cshtml";
+	int i = 1;
+}
+
+<div class="col-md-12">
+	<div class="p-3 bg-white rounded-3 border-0">
+		<div class="d-flex justify-content-between">
+			<div>
+				<span>
+					<i class="icon-frane"></i>
+					@if ((Guid?)ViewBag.seoId != null)
+					{
+						<a asp-controller="Seo" asp-action="SeoWarehouseReceipt" asp-route-seoId="@((Guid?)ViewBag.seoId)"><i class="fa-solid fa-right-to-bracket align-middle me-2"></i></a>
+					}
+					else
+					{
+						<a asp-action="List"><i class="fa-solid fa-right-to-bracket align-middle me-2"></i></a>
+					}
+
+					مدیریت قبض انبار اصلی
+				</span>
+
+				<span class="label label-primary p-1 rounded mx-2">
+					شماره قبض: @Model.WarehouseReceiptMaster.Number
+				</span>
+
+				<span class="label label-info p-1 rounded mx-2">
+					تاریخ قبض: @Model.WarehouseReceiptMaster.CreatedDateFa
+				</span>
+
+				<span class="label label-info p-1 rounded mx-2">
+					صاحب کالا: @Model.WarehouseReceiptMaster.CompanyOwnerCompanyName
+				</span>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="mt-4">
+	<div class="col-md-12">
+		<div class="card rounded-3 min-height-600">
+			<div class="card-header pb-0">
+				<div class="d-flex justify-content-between">
+					<h3 class="title m-0">
+						<i class="icon-speech"></i>
+						لیست کالاهای قبض انبار اصلی
+					</h3>
+					@if (Model.HasSplitWarehouseReceipt)
+					{
+						<a class="btn btn-primary rounded" onclick="FinalWarehouserReciept(event,'@Model.WarehouseReceiptMaster.Id')"
+						   id="finalizeButton">تایید نهایی </a>
+					}
+				</div>
+			</div>
+			<div class="card-body mt-0">
+				<table class="table table-bordered">
+					<thead class="bg-primary">
+						<tr>
+							<th style="width: 5%">ردیف</th>
+							<th>نام کالا</th>
+							<th>کد کالا</th>
+
+							<th>تعداد باقیمانده</th>
+							<th>وزن خالص باقیمانده</th>
+							<th>وزن ناخالص باقیمانده</th>
+							<th>حجم باقیمانده</th>
+							<th>  انبار</th>
+							<th>عملیات</th>
+						</tr>
+					</thead>
+					<tbody>
+						@foreach (var item in Model.WarehouseReceiptMaster.Products)
+						{
+							<tr>
+								<td class="align-middle">@(i++)</td>
+								<td>@item.ProductFullTitle</td>
+								<td>@item.ProductHSCodeTitle</td>
+
+								<td>@item.RemainingCount.ToPrice()</td>
+								<td>@item.RemainingWeightNet.ToPrice()</td>
+								<td>@item.RemainingWeightGross.ToPrice()</td>
+								<td>@item.RemainingVolume.ToPrice()</td>
+
+								<td>@item.WarehouseTitle</td>
+
+								<td class="align-middle px-1 text-center">
+									@if (!item.IsFullyConsumed)
+									{
+										<a class="btn btn-warning px-2 btn-sm btn-icon curve" onclick="splitProduct('@item.Id');">
+											تفکیک
+										</a>
+									}
+								</td>
+							</tr>
+						}
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+</div>
+
+@foreach (var receipt in Model.WarehouseReceipts)
+{
+	<div class="mt-4">
+		<div class="col-md-12">
+			<div class="card rounded-3 min-height-600">
+				<div class="card-header pb-0 ">
+					<h3 class="title m-0">
+						<i class="icon-speech"></i>
+						قبض تفکیک شده برای شرکت: @receipt.CompanyOwnerCompanyName
+					</h3>
+				</div>
+				<div class="card-body mt-0">
+
+					<table class="table table-bordered">
+						<thead class="bg-primary">
+							<tr>
+								<th style="width: 5%">ردیف</th>
+								<th>نام کالا</th>
+								<th>کد کالا</th>
+								<th>تعداد</th>
+								<th>وزن ناخالص</th>
+								<th>وزن خالص</th>
+								<th>حجم</th>
+								<th>  انبار</th>
+								<th>عملیات</th>
+							</tr>
+						</thead>
+						<tbody>
+							@{
+								int j = 1;
+							}
+							@foreach (var item in receipt.Products)
+							{
+								<tr>
+									<td class="align-middle">@(j++)</td>
+									<td>@item.ProductFullTitle</td>
+									<td>@item.ProductHSCodeTitle</td>
+									<td>@item.Count.ToPrice()</td>
+									<td>@item.WeightGross.ToPrice()</td>
+									<td>@item.WeightNet.ToPrice()</td>
+									<td>@item.Volume.ToPrice()</td>
+									<td>@item.WarehouseTitle</td>
+									<td class="align-middle px-1 text-center">
+
+										<a id="DeleteProduct@(i)" onclick="ShowQAlert(event,'DeleteProduct@(i)');" asp-action="DeleteProductWarehouseReceiptSplit"
+										   asp-route-seoWarehouseReceiptProductId="@item.Id" asp-route-seoId="@((Guid?)ViewBag.seoId)"><i class="icon-trash fa-flip-horizontal"> </i> حذف</a>
+
+									</td>
+								</tr>
+							}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+}
+
+
+<div id="productModal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" tabindex="-1">
+	<div class="modal-dialog modal-lg modal-dialog-centered">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h4 class="modal-title">تفکیک کالا</h4>
+				<button type="button" class="close btn-close rounded border" data-bs-dismiss="modal"></button>
+			</div>
+			<div class="modal-body" id="modalBody">
+				<form asp-action="AddUpdateProductWarehouseReceiptSplit" method="post">
+					<input asp-for="AddUpdateProduct.MasterSeoWarehouseReceiptId" type="hidden" />
+					<input name="seoId" value="@((Guid?)ViewBag.seoId)" type="hidden" />
+					<div class="row gy-4">
+						<div class="col-sm-12">
+							<div class="form-group">
+								<label> کالا</label>
+								<div class="input-group">
+									<select class="form-control select2"
+											asp-for="AddUpdateProduct.MasterSeoWarehouseReceiptProductId"
+											asp-items="Model.MasterProducts">
+									</select>
+									<span asp-validation-for="AddUpdateProduct.MasterSeoWarehouseReceiptProductId" class="w-100 text-danger"></span>
+								</div>
+							</div>
+						</div>
+
+						<div class="col-sm-4">
+							<div class="form-group">
+								<label>صاحب کالا</label>
+								<div class="input-group">
+									<select class="form-control select2" style="width:100%!important;"
+											asp-for="AddUpdateProduct.CompanyOwnerId"
+											asp-items="Model.OwnerCompanies">
+									</select>
+									<span asp-validation-for="AddUpdateProduct.CompanyOwnerId" class="w-100 text-danger"></span>
+								</div>
+							</div>
+						</div>
+
+						<div class="col-md-2">
+							<label> تعداد</label>
+							<div class="input-group">
+								<input asp-for="AddUpdateProduct.Count" min="1" max="@int.MaxValue" type="number" class="form-control w-100 ">
+								<span asp-validation-for="AddUpdateProduct.Count" class="w-100 text-danger"></span>
+							</div>
+						</div>
+
+						<div class="col-md-2">
+							<label> وزن ناخالص</label>
+							<div class="input-group">
+								<input asp-for="AddUpdateProduct.WeightGross" min="0" max="@int.MaxValue" type="number" class="form-control w-100 ">
+								<span asp-validation-for="AddUpdateProduct.WeightGross" class="w-100 text-danger"></span>
+							</div>
+						</div>
+
+						<div class="col-md-2">
+							<label> وزن خالص</label>
+							<div class="input-group">
+								<input asp-for="AddUpdateProduct.WeightNet" min="0" max="@int.MaxValue" type="number" class="form-control w-100 ">
+								<span asp-validation-for="AddUpdateProduct.WeightNet" class="w-100 text-danger"></span>
+							</div>
+						</div>
+
+
+						<div class="col-md-2">
+							<label> حجم  </label>
+							<div class="input-group">
+								<input asp-for="AddUpdateProduct.Volume" min="0" max="@int.MaxValue" type="number" class="form-control w-100 ">
+								<span asp-validation-for="AddUpdateProduct.Volume" class="w-100 text-danger"></span>
+							</div>
+						</div>
+
+					</div>
+
+
+					<div class="modal-footer px-0 pb-0 border-0 mt-3">
+						<button type="submit" class="btn btn-success btn-round"> ذخیره </button>
+						<button type="button" class="btn btn-danger btn-round" data-bs-dismiss="modal">بازگشت</button>
+					</div>
+
+				</form>
+
+			</div>
+		</div>
+	</div>
+</div>
+
+@section script {
+	<script>
+		function splitProduct(productId) {
+			$("#AddUpdateProduct_MasterSeoWarehouseReceiptProductId").val(productId);
+			$("#AddUpdateProduct_MasterSeoWarehouseReceiptProductId").trigger('change');
+
+			$("#AddUpdateProduct_CompanyOwnerId").val('');
+			$("#AddUpdateProduct_CompanyOwnerId").trigger('change');
+
+			$("#AddUpdateProduct_Count").val('1');
+			$("#AddUpdateProduct_WeightNet").val('0');
+			$("#AddUpdateProduct_WeightGross").val('0');
+			$("#AddUpdateProduct_Volume").val('0');
+
+			$("#productModal").modal('show');
+		}
+
+
+
+		function deleteProduct(productId) {
+			if (confirm('آیا از حذف این کالا اطمینان دارید؟')) {
+				$.post("@Url.Action("DeleteProduct", "WarehouseReceipt")", { productId: productId })
+					.done(function (result) {
+						if (result.success) {
+							location.reload();
+						} else {
+							alert(result.message);
+						}
+					});
+			}
+		}
+
+		async function FinalWarehouserReciept(event, seoWarehouseReceiptId) {
+			event.preventDefault();
+			let result = await ShowQAlert2(event, 'بعد از تایید نهایی امکان ویرایش وجود ندارد', 'تایید نهایی');
+			let seoId = '@((Guid?)ViewBag.seoId)';
+
+			if (result === true) {
+				document.getElementById("finalizeButton").classList.add("disabled");
+
+				$.post("@Url.Action("EndSplit", "WarehouseReceipt")", {
+					seoWarehouseReceiptId,
+					seoId
+				}).done(function (res) {
+					window.location.href = "@Url.Action("List", "WarehouseReceipt")";
+				}).fail(function (xhr, status, error) {
+					location.reload();
+				});
+			}
+		}
+
+		$(document).ready(function () {
+			$(".select2").select2({
+				dropdownParent: $('#productModal')
+			});
+		});
+	</script>
+}

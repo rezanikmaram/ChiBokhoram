@@ -1,0 +1,748 @@
+@{
+	var getProductUrl = Url.Action("GetSeoProductById", "Seo");
+	var addProductAjaxUrl = Url.Action("AddProductToSeoAjax", "Seo");
+	var deleteProductAjaxUrl = Url.Action("DeleteProductFromSeoAjax", "Seo");
+	var tariffUrl = Url.Action("GetSpecialGearTariff", "Seo");
+	var getSeoDefaultValuesUrl = Url.Action("GetSeoDefaultValues", "Seo");
+	var copyProductUrl = Url.Action("CopySeoProduct", "Seo");
+	var exportProductsUrl = Url.Action("ExportProductsToExcel", "Seo");
+	var importProductsUrl = Url.Action("ImportProductsFromExcel", "Seo");
+}
+<script>
+	(function () {
+		const endpoints = {
+			getProduct: '@getProductUrl',
+			addProduct: '@addProductAjaxUrl',
+			deleteProduct: '@deleteProductAjaxUrl',
+			tariff: '@tariffUrl',
+			getSeoDefaultValues: '@getSeoDefaultValuesUrl',
+			copyProduct: '@copyProductUrl',
+			exportProducts: '@exportProductsUrl',
+			importProducts: '@importProductsUrl'
+		};
+
+		const getModalInstance = (el) => {
+			if (!window.bootstrap || !el) {
+				return null;
+			}
+			return bootstrap.Modal.getOrCreateInstance(el);
+		};
+
+		const manager = {
+			root: null,
+			mode: 'page',
+			options: {},
+			defaultProductId: null,
+			defaultValues: null,
+			initialized: false,
+			init: function (rootSelector, options) {
+				const oldRoot = this.root;
+				
+				this.root = $(rootSelector);
+				if (!this.root.length) {
+					return this;
+				}
+				this.options = options || {};
+				this.mode = this.options.mode || 'page';
+				this.defaultProductId = this.root.data('default-product-id') || null;
+				
+				if (this.initialized && oldRoot && oldRoot.length) {
+					this.unbindEvents(oldRoot);
+				}
+				
+				this.loadDefaultValues();
+				this.setupSelect2();
+				this.bindEvents();
+				this.setupCopyModal();
+				this.setupImportModal();
+				
+				this.initialized = true;
+				return this;
+			},
+			reset: function () {
+				this.initialized = false;
+				this.root = null;
+				this.defaultValues = null;
+				this.options = {};
+				this.mode = 'page';
+			},
+			unbindEvents: function (targetRoot) {
+				const root = targetRoot || this.root;
+				if (!root || !root.length) return;
+				
+				const form = root.find('#AddProductToSeoId');
+				form.off('submit.seoProduct');
+				root.off('click.seoProduct');
+				root.off('submit.seoProduct');
+				
+				let copyModal = root.find('#copyProductModal');
+				if (!copyModal.length) {
+					copyModal = $('#copyProductModal');
+				}
+				if (copyModal.length) {
+					copyModal.find('#confirmCopyBtn').off('click.copyProduct');
+					copyModal.find('#copyCount').off('keypress.copyProduct');
+				}
+				
+				let importModal = root.find('#importExcelModal');
+				if (!importModal.length) {
+					importModal = $('#importExcelModal');
+				}
+				if (importModal.length) {
+					importModal.find('#confirmImportBtn').off('click.importExcel');
+				}
+			},
+			loadDefaultValues: function () {
+				if (!this.root || !this.root.length) {
+					return;
+				}
+				const form = this.root.find('#AddProductToSeoId');
+				if (!form.length) {
+					return;
+				}
+				// Store default values from the form (which are set from SEO data)
+				this.defaultValues = {
+					productId: form.find('#AddProductToSeo_ProductId').val() || this.defaultProductId || '',
+					count: form.find('#AddProductToSeo_Count').val() || '1',
+					volume: form.find('#AddProductToSeo_Volume').val() || '0',
+					weightGross: form.find('#AddProductToSeo_WeightGross').val() || '0',
+					weightNet: form.find('#AddProductToSeo_WeightNet').val() || '0'
+				};
+			},
+			setupSelect2: function () {
+				if (!$.fn.select2) {
+					return;
+				}
+				const parent = this.root.find('#generalmodal');
+				this.root.find('.select2').select2({
+					dropdownParent: parent.length ? parent : undefined
+				});
+				this.root.find('#AddProductToSeo_ProductId').trigger('change');
+			},
+			bindEvents: function () {
+				const form = this.root.find('#AddProductToSeoId');
+				form.off('submit.seoProduct');
+				this.root.off('click.seoProduct', '.btn-delete-product');
+				this.root.off('click.seoProduct', '#generalmodal [data-bs-dismiss="modal"]');
+				this.root.off('click.seoProduct', '#copyProductModal [data-bs-dismiss="modal"]');
+				this.root.off('click.seoProduct', '#importExcelModal [data-bs-dismiss="modal"]');
+
+				if (this.mode === 'modal') {
+					const self = this;
+					// Remove global confirmation wiring to avoid double prompts
+					this.root.find('.btn-delete-product').removeClass('btn-questions').removeAttr('onclick');
+					form.on('submit.seoProduct', function (e) {
+						e.preventDefault();
+						self.saveProductAjax($(this));
+					});
+					this.root.on('click.seoProduct', '.btn-delete-product', function (e) {
+						e.preventDefault();
+						const url = $(this).data('delete-url');
+						self.confirmAction('حذف کالا', 'آیا از حذف این کالا مطمئن هستید؟').then(function (ok) {
+							if (ok) {
+								self.deleteProductAjax(url);
+							}
+						});
+					});
+					this.root.on('click.seoProduct', '#generalmodal [data-bs-dismiss="modal"]', function (e) {
+						e.stopPropagation();
+					});
+					this.root.on('click.seoProduct', '#copyProductModal [data-bs-dismiss="modal"]', function (e) {
+						e.stopPropagation();
+					});
+					this.root.on('click.seoProduct', '#importExcelModal [data-bs-dismiss="modal"]', function (e) {
+						e.stopPropagation();
+					});
+					this.keepParentOpen();
+				}
+			},
+			confirmAction: function (title, text) {
+				return new Promise(function (resolve) {
+					if (window.Swal && typeof window.Swal.fire === 'function') {
+						Swal.fire({
+							title: title || 'تایید',
+							text: text || '',
+							icon: 'question',
+							showCancelButton: true,
+							confirmButtonText: 'بله',
+							cancelButtonText: 'خیر',
+							reverseButtons: true,
+							confirmButtonColor: '#d33',
+							focusCancel: true
+						}).then(function (result) {
+							resolve(result.isConfirmed === true);
+						});
+					} else {
+						resolve(window.confirm(text || title || 'تایید؟'));
+					}
+				});
+			},
+			keepParentOpen: function () {
+				const parentModal = this.root.closest('.modal');
+				if (!parentModal.length) {
+					return;
+				}
+				const childModals = parentModal.find('#generalmodal, #copyProductModal, #importExcelModal');
+				if (!childModals.length) {
+					return;
+				}
+				parentModal.off('hide.bs.modal.seoProduct');
+				childModals.off('hide.bs.modal.seoProduct hidden.bs.modal.seoProduct');
+
+				// Prevent parent from hiding while any child is open
+				parentModal.on('hide.bs.modal.seoProduct', function (e) {
+					const anyChildOpen = childModals.filter('.show').length > 0;
+					if (anyChildOpen) {
+						e.preventDefault();
+					}
+				});
+
+				// Stop bubbling hide from child to parent
+				childModals.on('hide.bs.modal.seoProduct', function (e) {
+					e.stopPropagation();
+				});
+
+				childModals.on('hidden.bs.modal.seoProduct', function () {
+					if (parentModal.hasClass('show')) {
+						$('body').addClass('modal-open');
+					}
+				});
+			},
+			addProduct: function () {
+				if (!this.root || !this.root.length) {
+					return;
+				}
+				const self = this;
+				const seoId = this.root.data('seo-id');
+				
+				// Fetch SEO default values from server
+				if (seoId && endpoints.getSeoDefaultValues) {
+					$.post(endpoints.getSeoDefaultValues, { seoId: seoId })
+						.done(function (defaults) {
+							self.defaultValues = {
+								productId: defaults.productId || self.defaultProductId || '',
+								count: String(defaults.count || 1),
+								volume: String(defaults.volume || 0),
+								weightGross: String(defaults.weightGross || 0),
+								weightNet: String(defaults.weightNet || 0)
+							};
+							self.resetForm(self.defaultValues.productId);
+							self.showFormModal();
+						})
+						.fail(function () {
+							// Fallback to stored defaults or empty form
+							const productId = self.defaultProductId;
+							self.resetForm(productId);
+							self.showFormModal();
+						});
+				} else {
+					// Fallback if seoId not available
+					const productId = this.defaultProductId;
+					this.resetForm(productId);
+					this.showFormModal();
+				}
+			},
+			editProduct: function (id) {
+				if (!id || !this.root || !this.root.length) {
+					return;
+				}
+				const self = this;
+				// Clear any default values to ensure edit mode uses real product data
+				this.defaultValues = null;
+				$.post(endpoints.getProduct, { seoProductId: id })
+					.done(function (res) {
+						self.populateForm(res);
+						self.showFormModal();
+					});
+			},
+			populateForm: function (res) {
+				if (!this.root || !this.root.length) {
+					return;
+				}
+				const root = this.root;
+				// Clear the form ID first to indicate this is an edit, not a create
+				root.find('#AddProductToSeo_Id').val(res.id || '');
+				root.find('#AddProductToSeo_ProductId').val(res.productId || '').trigger('change');
+				root.find('#AddProductToSeo_ProductHSCodeId').val(res.productHSCodeId || '').trigger('change');
+				root.find('#AddProductToSeo_HSCode').val(res.hsCode || '');
+
+				// Use actual product data - never use defaults in edit mode
+				// Helper function to handle null/undefined while preserving 0
+				const val = (v) => v !== undefined && v !== null ? v : '';
+				const numVal = (v) => v !== undefined && v !== null ? v : '0';
+				
+				root.find('#AddProductToSeo_Count').val(val(res.count));
+				SetNumber(numVal(res.count), '#AddProductToSeo_Count');
+				root.find('#AddProductToSeo_WeightNet').val(val(res.weightNet));
+				SetNumber(numVal(res.weightNet), '#AddProductToSeo_WeightNet');
+				root.find('#AddProductToSeo_WeightGross').val(val(res.weightGross));
+				SetNumber(numVal(res.weightGross), '#AddProductToSeo_WeightGross');
+				root.find('#AddProductToSeo_WeightOneProduct').val(val(res.weightOneProduct));
+				SetNumber(numVal(res.weightOneProduct), '#AddProductToSeo_WeightOneProduct');
+				root.find('#AddProductToSeo_Volume').val(val(res.volume));
+				SetNumber(numVal(res.volume), '#AddProductToSeo_Volume');
+
+				root.find('#AddProductToSeo_Length').val(val(res.length));
+				SetNumber(numVal(res.length), '#AddProductToSeo_Length');
+				root.find('#AddProductToSeo_Width').val(val(res.width));
+				SetNumber(numVal(res.width), '#AddProductToSeo_Width');
+				root.find('#AddProductToSeo_Height').val(val(res.height));
+				SetNumber(numVal(res.height), '#AddProductToSeo_Height');
+				root.find('#AddProductToSeo_CountGear').val(res.countGear || '');
+				root.find('#AddProductToSeo_GearInSpecialTariffType').val(res.gearInSpecialTariffType || '').trigger('change');
+
+				root.find('#AddProductToSeo_Description').val(res.description || '');
+				root.find('#AddProductToSeo_Size').val(res.size || '');
+				root.find('#AddProductToSeo_NameFa').val(res.nameFa || '');
+				root.find('#AddProductToSeo_NameEn').val(res.nameEn || '');
+				root.find('#AddProductToSeo_VehicleIdentificationNumber').val(res.vehicleIdentificationNumber || '');
+				root.find('#AddProductToSeo_Color').val(res.color || '');
+				root.find('#AddProductToSeo_ProductionYear').val(res.productionYear || '');
+				root.find('#AddProductToSeo_Manufacturer').val(res.manufacturer || '');
+
+				root.find('#AddProductToSeo_IsDangerous').prop('checked', res.isDangerous);
+				root.find('#AddProductToSeo_IsBigVolume').prop('checked', res.isBigVolume);
+				root.find('#AddProductToSeo_IsUnusual').prop('checked', res.isUnusual);
+				root.find('#AddProductToSeo_IsRawMaterials').prop('checked', res.isRawMaterials);
+				root.find('#AddProductToSeo_IsSelfTransported').prop('checked', res.isSelfTransported);
+				root.find('#AddProductToSeo_IsTariffAllTonnage').prop('checked', res.isTariffAllTonnage);
+				root.find('#AddProductToSeo_IsNeedsSpecialEquipment').prop('checked', res.isNeedsSpecialEquipment);
+				root.find('#AddProductToSeo_IsUsedOrScrap').prop('checked', res.isUsedOrScrap);
+
+				// ProductCondition handling
+				root.find('#AddProductToSeo_ProductCondition').val(res.productCondition != null ? res.productCondition.toString() : '0');
+				root.find('#AddProductToSeo_ProductCondition').trigger('change');
+
+				root.find('#AddProductToSeo_ContainerNumber').val(res.containerNumber || '');
+				root.find('#AddProductToSeo_ContainerSize').val(val(res.containerSize));
+				SetNumber(numVal(res.containerSize), '#AddProductToSeo_ContainerSize');
+				root.find('#AddProductToSeo_ContainerSealNumber').val(res.containerSealNumber || '');
+				root.find('#AddProductToSeo_ContainerType').val(res.containerType || '');
+				root.find('#AddProductToSeo_ContainerMoveType').val(res.containerMoveType || '');
+
+				if (res.isFreeContainer != null) {
+					root.find('#AddProductToSeo_IsFreeContainer').val(res.isFreeContainer.toString().toLowerCase());
+				} else {
+					root.find('#AddProductToSeo_IsFreeContainer').val('');
+				}
+				root.find('#AddProductToSeo_IsFreeContainer').trigger('change');
+
+				cleanNumberInputs();
+			},
+			resetForm: function (productId) {
+				if (!this.root || !this.root.length) {
+					return;
+				}
+				const root = this.root;
+				const defaults = this.defaultValues || {};
+				
+				root.find('#AddProductToSeo_Id').val('');
+				// Use productId parameter if provided, otherwise use default from SEO
+				const finalProductId = productId || defaults.productId || '';
+				root.find('#AddProductToSeo_ProductId').val(finalProductId);
+				root.find('#AddProductToSeo_ProductHSCodeId').val('');
+				root.find('#AddProductToSeo_ProductId').trigger('change');
+				root.find('#AddProductToSeo_ProductHSCodeId').trigger('change');
+
+				// Use default values from SEO if available
+				const val = (v, d) => v !== undefined && v !== null ? v : d;
+				const numVal = (v, d) => v !== undefined && v !== null ? v : d;
+				
+				root.find('#AddProductToSeo_Count').val(val(defaults.count, '1'));
+				SetNumber(numVal(defaults.count, '1'), '#AddProductToSeo_Count');
+				root.find('#AddProductToSeo_WeightNet').val(val(defaults.weightNet, '0'));
+				SetNumber(numVal(defaults.weightNet, '0'), '#AddProductToSeo_WeightNet');
+				root.find('#AddProductToSeo_WeightGross').val(val(defaults.weightGross, '0'));
+				SetNumber(numVal(defaults.weightGross, '0'), '#AddProductToSeo_WeightGross');
+				root.find('#AddProductToSeo_WeightOneProduct').val('0');
+				SetNumber('0', '#AddProductToSeo_WeightOneProduct');
+				root.find('#AddProductToSeo_Volume').val(val(defaults.volume, '0'));
+				SetNumber(numVal(defaults.volume, '0'), '#AddProductToSeo_Volume');
+
+				root.find('#AddProductToSeo_Length').val('');
+				SetNumber('', '#AddProductToSeo_Length');
+				root.find('#AddProductToSeo_Width').val('');
+				SetNumber('', '#AddProductToSeo_Width');
+				root.find('#AddProductToSeo_Height').val('');
+				SetNumber('', '#AddProductToSeo_Height');
+				root.find('#AddProductToSeo_CountGear').val('1');
+				root.find('#AddProductToSeo_GearInSpecialTariffType').val('').trigger('change');
+
+				root.find('#AddProductToSeo_Description').val('');
+				root.find('#AddProductToSeo_Size').val('');
+				root.find('#AddProductToSeo_NameFa').val('');
+				root.find('#AddProductToSeo_NameEn').val('');
+				root.find('#AddProductToSeo_VehicleIdentificationNumber').val('');
+				root.find('#AddProductToSeo_Color').val('');
+				root.find('#AddProductToSeo_ProductionYear').val('');
+				root.find('#AddProductToSeo_Manufacturer').val('');
+
+				root.find('#AddProductToSeo_IsDangerous').prop('checked', false);
+				root.find('#AddProductToSeo_IsBigVolume').prop('checked', false);
+				root.find('#AddProductToSeo_IsEssentialProduct').prop('checked', false);
+				root.find('#AddProductToSeo_IsUnusual').prop('checked', false);
+				root.find('#AddProductToSeo_IsRawMaterials').prop('checked', false);
+				root.find('#AddProductToSeo_IsNeedsSpecialEquipment').prop('checked', false);
+				root.find('#AddProductToSeo_IsSelfTransported').prop('checked', false);
+				root.find('#AddProductToSeo_IsTariffAllTonnage').prop('checked', false);
+				root.find('#AddProductToSeo_IsUsedOrScrap').prop('checked', false);
+
+				// Reset ProductCondition to default
+				root.find('#AddProductToSeo_ProductCondition').val('0').trigger('change');
+
+				root.find('#AddProductToSeo_ContainerNumber').val('');
+				root.find('#AddProductToSeo_ContainerSize').val('0');
+				SetNumber('0', '#AddProductToSeo_ContainerSize');
+				root.find('#AddProductToSeo_ContainerSealNumber').val('');
+				root.find('#AddProductToSeo_ContainerType').val('');
+				root.find('#AddProductToSeo_ContainerMoveType').val('');
+				root.find('#AddProductToSeo_IsFreeContainer').val('').trigger('change');
+			},
+			showFormModal: function () {
+				const modalEl = document.getElementById('generalmodal');
+				if (modalEl) {
+					const modalInstance = getModalInstance(modalEl);
+					if (modalInstance) {
+						modalInstance.show();
+					} else {
+						$(modalEl).modal('show');
+					}
+				}
+			},
+			hideFormModal: function () {
+				const modalEl = document.getElementById('generalmodal');
+				const modalInstance = getModalInstance(modalEl);
+				if (modalInstance) {
+					modalInstance.hide();
+				} else if (modalEl) {
+					$(modalEl).modal('hide');
+				}
+			},
+			reloadAfterChange: function () {
+				if (typeof this.options.onReload === 'function') {
+					const self = this;
+					this.options.onReload();
+					// Reload default values after content is reloaded
+					setTimeout(function() {
+						self.loadDefaultValues();
+					}, 100);
+					return;
+				}
+				if (this.mode === 'page') {
+					window.location.reload();
+				}
+			},
+			saveProductAjax: function (form) {
+				if (this.mode !== 'modal') {
+					return true;
+				}
+				if (form && typeof form.valid === 'function' && !form.valid()) {
+					showAlert('لطفاً تمام فیلدهای ضروری را پر کنید', 1);
+					return false;
+				}
+				const button = form.find('button[type="submit"]');
+				const originalText = button.html();
+				button.prop('disabled', true).html('<i class="fa-solid fa-spinner fa-spin"></i> در حال ثبت');
+
+				const self = this;
+				$.post(endpoints.addProduct, form.serialize())
+					.done(function () {
+						self.hideFormModal();
+						self.reloadAfterChange();
+					})
+					.fail(function () {
+						showAlert('خطا در ذخیره کالا', 1);
+					})
+					.always(function () {
+						button.prop('disabled', false).html(originalText);
+					});
+				return false;
+			},
+			deleteProductAjax: function (url) {
+				if (this.mode !== 'modal' || !url) {
+					return;
+				}
+				const self = this;
+				$.post(url)
+					.done(function () {
+						self.reloadAfterChange();
+					})
+					.fail(function () {
+						showAlert('حذف با خطا مواجه شد', 1);
+					});
+			},
+			getPrice: function (e) {
+				if (!this.root || !this.root.length) {
+					return false;
+				}
+				const form = this.root.find('#AddProductToSeoId');
+				if (form && typeof form.valid === 'function' && !form.valid()) {
+					showAlert('لطفاً تمام فیلدهای ضروری را پر کنید', 1);
+					if (e && e.preventDefault) e.preventDefault();
+					return false;
+				}
+				const button = this.root.find('#calculatePriceBtn');
+				const formData = form.serialize();
+				const originalText = button.html();
+				button.prop('disabled', true).html('<i class="fa-solid fa-spinner fa-spin"></i> در حال محاسبه');
+
+				$.ajax({
+					url: endpoints.tariff,
+					type: 'POST',
+					data: formData,
+					dataType: 'json'
+				})
+					.done(function (response) {
+						if (response && response.afterDiscountPrice > 0) {
+							const formattedPrice = response.afterDiscountPrice.toLocaleString('fa-IR');
+							$('#PriceGearSpecialTariffId')
+								.html('قیمت تعرفه : ' + formattedPrice + ' ريال')
+								.removeClass('d-none');
+						} else {
+							$('#PriceGearSpecialTariffId')
+								.html('تعرفه یافت نشد')
+								.removeClass('d-none');
+						}
+					})
+					.fail(function (xhr) {
+						let errorMessage = 'خطا در ارتباط با سرور';
+						if (xhr.responseJSON && xhr.responseJSON.message) {
+							errorMessage = xhr.responseJSON.message;
+						}
+						$('#PriceGearSpecialTariffId')
+							.html(errorMessage)
+							.removeClass('d-none');
+					})
+					.always(function () {
+						button.prop('disabled', false).html(originalText);
+					});
+				return false;
+			},
+			copyProduct: function (id) {
+				if (!id) {
+					return;
+				}
+				const self = this;
+				self.currentCopyProductId = id;
+				
+				let copyModal = this.root.find('#copyProductModal');
+				if (!copyModal.length) {
+					copyModal = $('#copyProductModal');
+				}
+				
+				if (copyModal.length) {
+					copyModal.find('#copyCount').val(1);
+					const modalInstance = getModalInstance(copyModal[0]);
+					if (modalInstance) {
+						modalInstance.show();
+					} else {
+						copyModal.modal('show');
+					}
+				}
+			},
+			confirmCopy: function () {
+				if (!this.currentCopyProductId) {
+					return;
+				}
+				
+				const self = this;
+				let copyCountInput = this.root.find('#copyCount');
+				if (!copyCountInput.length) {
+					copyCountInput = $('#copyCount');
+				}
+				const copyCount = parseInt(copyCountInput.val()) || 1;
+				
+				if (copyCount < 1 || copyCount > 100) {
+					showAlert('تعداد کپی باید بین 1 تا 100 باشد', 1);
+					return;
+				}
+				
+				let copyModal = this.root.find('#copyProductModal');
+				if (!copyModal.length) {
+					copyModal = $('#copyProductModal');
+				}
+				
+				const confirmBtn = copyModal.find('#confirmCopyBtn');
+				const originalText = confirmBtn.html();
+				
+				confirmBtn.prop('disabled', true).html('<i class="fa-solid fa-spinner fa-spin"></i> در حال کپی');
+				
+				$.post(endpoints.copyProduct, { seoProductId: self.currentCopyProductId, copyCount: copyCount })
+					.done(function (response) {
+						if (response.success) {
+							const modalInstance = getModalInstance(copyModal[0]);
+							if (modalInstance) {
+								modalInstance.hide();
+							} else {
+								copyModal.modal('hide');
+							}
+							showAlert('کالا با موفقیت کپی شد', 0);
+							self.reloadAfterChange();
+						} else {
+							showAlert(response.message || 'خطا در کپی کردن کالا', 1);
+						}
+					})
+					.fail(function () {
+						showAlert('خطا در ارتباط با سرور', 1);
+					})
+					.always(function () {
+						confirmBtn.prop('disabled', false).html(originalText);
+					});
+			},
+			setupCopyModal: function () {
+				const self = this;
+				let copyModal = this.root.find('#copyProductModal');
+				if (!copyModal.length) {
+					copyModal = $('#copyProductModal');
+				}
+				
+				if (copyModal.length) {
+					copyModal.find('#confirmCopyBtn').off('click.copyProduct').on('click.copyProduct', function () {
+						self.confirmCopy();
+					});
+					
+					copyModal.find('#copyCount').off('keypress.copyProduct').on('keypress.copyProduct', function (e) {
+						if (e.which === 13) {
+							self.confirmCopy();
+						}
+					});
+				}
+			},
+			exportProducts: function () {
+				if (!this.root || !this.root.length) {
+					return;
+				}
+				const seoId = this.root.data('seo-id');
+				if (!seoId) {
+					showAlert('شناسه بارنامه یافت نشد', 1);
+					return;
+				}
+				
+				// Open export in new tab/window
+				window.open(endpoints.exportProducts + '?seoId=' + seoId, '_blank');
+			},
+			openImportModal: function () {
+				let importModal = this.root.find('#importExcelModal');
+				if (!importModal.length) {
+					importModal = $('#importExcelModal');
+				}
+				
+				if (importModal.length) {
+					importModal.find('#importExcelForm')[0].reset();
+					importModal.find('#excelFile').val('');
+					const modalInstance = getModalInstance(importModal[0]);
+					if (modalInstance) {
+						modalInstance.show();
+					} else {
+						importModal.modal('show');
+					}
+				}
+			},
+			confirmImport: function () {
+				if (!this.root || !this.root.length) {
+					return;
+				}
+				
+				const self = this;
+				let form = this.root.find('#importExcelForm');
+				if (!form.length) {
+					form = $('#importExcelForm');
+				}
+				const fileInput = form.find('#excelFile')[0];
+				
+				if (!fileInput.files || fileInput.files.length === 0) {
+					showAlert('لطفاً یک فایل Excel انتخاب کنید', 1);
+					return;
+				}
+				
+				const formData = new FormData(form[0]);
+				const seoId = self.root.data('seo-id');
+				formData.set('seoId', seoId);
+				
+				let importModal = this.root.find('#importExcelModal');
+				if (!importModal.length) {
+					importModal = $('#importExcelModal');
+				}
+				
+				const confirmBtn = importModal.find('#confirmImportBtn');
+				const originalText = confirmBtn.html();
+				
+				confirmBtn.prop('disabled', true).html('<i class="fa-solid fa-spinner fa-spin"></i> در حال بارگذاری');
+				
+				$.ajax({
+					url: endpoints.importProducts,
+					type: 'POST',
+					data: formData,
+					processData: false,
+					contentType: false,
+					dataType: 'json'
+				})
+					.done(function (response) {
+						if (response.success) {
+							const modalInstance = getModalInstance(importModal[0]);
+							if (modalInstance) {
+								modalInstance.hide();
+							} else {
+								importModal.modal('hide');
+							}
+							showAlert(response.message || 'فایل با موفقیت بارگذاری شد', 0);
+							self.reloadAfterChange();
+						} else {
+							showAlert(response.message || 'خطا در بارگذاری فایل', 1);
+						}
+					})
+					.fail(function () {
+						showAlert('خطا در ارتباط با سرور', 1);
+					})
+					.always(function () {
+						confirmBtn.prop('disabled', false).html(originalText);
+					});
+			},
+			setupImportModal: function () {
+				const self = this;
+				let importModal = this.root.find('#importExcelModal');
+				if (!importModal.length) {
+					importModal = $('#importExcelModal');
+				}
+				
+				if (importModal.length) {
+					importModal.find('#confirmImportBtn').off('click.importExcel').on('click.importExcel', function () {
+						self.confirmImport();
+					});
+				}
+			}
+		};
+
+		window.seoProductManager = manager;
+		window.addProduct = function () {
+			if (window.seoProductManager) {
+				return window.seoProductManager.addProduct();
+			}
+		};
+		window.editProduct = function (id) {
+			if (window.seoProductManager) {
+				return window.seoProductManager.editProduct(id);
+			}
+		};
+		window.GetPrice = function (e) {
+			if (window.seoProductManager) {
+				return window.seoProductManager.getPrice(e);
+			}
+		};
+		window.copyProduct = function (id) {
+			if (window.seoProductManager) {
+				return window.seoProductManager.copyProduct(id);
+			}
+		};
+		window.exportProductsToExcel = function () {
+			if (window.seoProductManager) {
+				return window.seoProductManager.exportProducts();
+			}
+		};
+		window.openImportExcelModal = function () {
+			if (window.seoProductManager) {
+				return window.seoProductManager.openImportModal();
+			}
+		};
+	})();
+</script>

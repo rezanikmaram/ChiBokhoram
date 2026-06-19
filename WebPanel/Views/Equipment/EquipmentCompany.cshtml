@@ -1,0 +1,69 @@
+﻿@model List<EquipmentDto>
+@{
+    ViewData["Title"] = "لیست تجهیزات";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+    int i = 1;
+}
+
+<div class="col-lg-12">
+    <div class="card">
+        <div class="card-header">
+            <div class="d-flex justify-content-between">
+                <h3 class="title">
+                    <a asp-controller="Company" asp-action="Details" asp-route-companyId="@ViewBag.companyId"><i class="fa-solid fa-right-to-bracket me-2"></i></a>
+                    <i class="icon-frane"></i> لیست تجهیزات شرکت - @ViewBag.CompanyName
+                </h3>
+                 <div>
+                    <a class="alert-icon btn btn-success round" asp-action="CreateEquipment" asp-route-companyId="@ViewBag.CompanyId">تجهیز جدید</a>
+                    @* <a asp-controller="Company" asp-action="Details" asp-route-companyId="@ViewBag.companyId" class="btn btn-warning btn-round"> <i class="icon-close"> </i> برگشت</a> *@
+                 </div>
+            </div>
+        </div>
+            <div class="card-body pt-0">
+
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover table-striped" id="data-table">
+                        <thead class="bg-primary">
+                            <tr>
+                                <th>ردیف</th>
+                                <th>نام تجهیز</th>
+                                <td>شناسه تجهیز</td>
+                                <td>دسته تجهیز</td>
+                                <td>نوع تجهیز</td>
+                                <td>مدل تجهیز</td>
+                                <td>آماده به کار</td>
+                                <td>عملیات</td>
+                            </tr>
+                        </thead>
+                        <tbody>
+
+
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td class="align-middle" >@(i++)</td>
+                                    <td class="align-middle" >@item.EquipmentName</td>
+                                    <td class="align-middle" >@item.EquipmentId</td>
+                                    <td class="align-middle" >@item.EquipmentCategoryName</td>
+                                    <td class="align-middle" >@item.EquipmentType.ToDisplay()</td>
+                                    <td class="align-middle" >@item.Model</td>
+                                    <td class="align-middle" >
+                                        <span class="label rounded px-2 py-1 label-@(item.Status?"success":"danger")">@(item.Status ? "آماده به کار" : "خارج از سرویس")</span>
+                                    </td>
+                                    <td class="align-middle">
+                                        <a class="btn btn-warning px-2 btn-sm btn-icon curve" asp-action="CreateEquipment" asp-route-companyId="@item.CompanyId" asp-route-equipmentId="@item.Id"><i class="icon-pencil fs-6 align-middle"></i></a>
+
+                                        <a id="DeleteEquipmentCategory@(i)" onclick="ShowQAlert(event,'DeleteEquipmentCategory@(i)');" class="btn px-2 btn-danger btn-sm btn-icon curve btn-questions" asp-action="DeleteEquipmentCategory" asp-route-equipmentCategoryId="@item.Id"><i class="icon-trash fa-flip-horizontal fs-6 align-middle"></i></a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+    </div>
+</div>
+
+
+
+

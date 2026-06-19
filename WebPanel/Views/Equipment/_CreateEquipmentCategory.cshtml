@@ -1,0 +1,37 @@
+﻿@model EquipmentCategoryDto
+
+<form asp-action="CreateEquipmentCategory" method="post">
+    <input asp-for="Id" type="hidden" />
+    <div class="card-body px-0 pt-0">
+        <div class="col-lg-6">
+            <div class="d-flex col-md-12 mt-4">
+                <div class="">
+                    <div class="form-group m-l-60 d-flex ">
+                        <div>
+                            <label>عنوان نوع تجهیز</label>
+                            <div class="input-group " style="width: 200px;">
+                                <input asp-for="Name" type="text" class="form-control ms-1 rounded m-l-10">
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="form-actions" style="margin-top: 30px;">
+                                <button type="submit" class="btn btn-info btn-round ms-2">
+                                    <i class="icon-check align-middle"></i>
+                                    ذخیره
+                                    <div class="paper-ripple"><div class="paper-ripple__background"></div><div class="paper-ripple__waves"></div></div>
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+</form>
+
+  <script src="~/assets/js/validation/jquery.validate.min.js"></script>
+ <script src="~/assets/js/validation/jquery.validate.unobtrusive.min.js"></script>

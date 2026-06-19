@@ -1,0 +1,45 @@
+@model Entities.DTOs.Web.Hirman.Tariff.ContractPeriod.ContractPeriodDeleteInfoDto
+@using Common.Utilities
+
+<form asp-action="DeleteConfirmed" method="post">
+    <input type="hidden" name="contractPeriodId" value="@Model.ContractPeriodId" />
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="alert alert-warning mb-2">
+                <div>با حذف این دوره تعرفه، رکوردهای وابسته نیز به صورت نرم حذف (غیرفعال) می‌شوند.</div>
+            </div>
+
+            @if (!string.IsNullOrWhiteSpace(Model.Title))
+            {
+                <div class="mb-2">
+                    <strong>دوره:</strong> @Model.Title
+                </div>
+            }
+
+            @if (Model.Dependencies != null && Model.Dependencies.Count > 0)
+            {
+                <div class="mb-2">
+                    <strong>جداول وابسته:</strong>
+                </div>
+                <ul class="mb-3">
+                    @foreach (var dep in Model.Dependencies)
+                    {
+                        <li>@dep.Table.GetEnumDescription() (@dep.Count)</li>
+                    }
+                </ul>
+            }
+            else
+            {
+                <div class="alert alert-info mb-3">رکورد وابسته‌ای برای این دوره یافت نشد.</div>
+            }
+        </div>
+    </div>
+
+    <div class="row mt-2">
+        <div class="col-md-12 d-flex gap-2">
+            <button type="submit" class="btn btn-danger w-100">حذف</button>
+            <button type="button" class="btn btn-secondary w-100" data-bs-dismiss="modal">انصراف</button>
+        </div>
+    </div>
+</form>

@@ -1,0 +1,180 @@
+﻿@model OtherFactorServicePageDto
+
+
+<div id="generalmodal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" tabindex="-1">
+	<div class="modal-dialog modal-dialog-centered modal-xl">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h4 class="modal-title">ثبت  کالا/خدمات</h4>
+				<button type="button" class="close btn-close rounded border" data-bs-dismiss="modal" data-bs-original-title="" title=""></button>
+			</div>
+			<div class="modal-body" id="modalbody">
+
+				<div class="card-body pt-0">
+					<form id="FormAddService" method="post">
+						<div class="form-body">
+							<input asp-for="CreateService.Id" hidden />
+							<input value="@Model.SeoFactorId" id="CreateService_SeoFactorId" name="CreateService.SeoFactorId" hidden />
+							<div class="row gy-4">
+
+								<div class="col-sm-6">
+									<div class="form-group">
+										<label>نوع</label>
+										<div class="input-group">
+											<select class="form-control select2 generalmodal" asp-for="CreateService.Type"
+													asp-items="@Model.ServiceType"
+													style="width:100%!important;">
+											</select>
+											<span asp-validation-for="CreateService.Type"></span>
+										</div>
+									</div>
+								</div>
+
+								<div class="col-sm-6">
+									<div class="form-group">
+										<label>شرح کالا/خدمات</label>
+										<div class="input-group">
+											<input type="text" class="form-control" asp-for="CreateService.Description" required>
+											<span asp-validation-for="CreateService.Description"></span>
+										</div>
+									</div>
+								</div>
+
+								 
+
+
+								<div class="col-sm-3">
+									<div class="form-group">
+										<label id="CountTitleId">تعداد/مقدار</label>
+										<div class="input-group d-grid">
+											<price-input asp-for="CreateService.Count"></price-input>
+											<span asp-validation-for="CreateService.Count"></span>
+										</div>
+									</div>
+								</div>
+
+								<div class="col-sm-3">
+									<div class="form-group">
+										<label id="LargerWeightOrVolumeLableId">حجم/تناژ/ضریب</label>
+										<div class="input-group">
+											<price-input asp-for="CreateService.LargerWeightOrVolume"></price-input>
+											<span asp-validation-for="CreateService.LargerWeightOrVolume"></span>
+										</div>
+									</div>
+								</div>
+
+								<div class="col-sm-2 d-none">
+									<div class="form-group">
+										<label>نوع حجم/تناژ</label>
+										<div class="input-group">
+											<select class="form-control select2 generalmodal" asp-for="CreateService.LargerWeightOrVolumeType"
+													asp-items="@Html.GetEnumSelectList<LargerWeightOrVolumeType>()"
+													style="width:100%!important;">
+											</select>
+											<span asp-validation-for="CreateService.LargerWeightOrVolumeType"></span>
+										</div>
+									</div>
+								</div>
+
+								<div class="col-sm-6">
+									<div class="form-group ">
+										<span>
+											قیمت تعرفه
+										</span>
+										<div class="input-group mt-2">
+											<div id="inputPriceOne">
+												<price-input asp-for="CreateService.PriceOne"></price-input>
+												<span asp-validation-for="CreateService.PriceOne"></span>
+											</div>
+											<div id="btnPrice" class="align-items-center d-flex">
+												<a onclick="GetPrice(event)" class="btn btn-primary ms-3 px-4">دریافت اطلاعات</a>
+											</div>
+										</div>
+									</div>
+
+								</div>
+
+								<div class="col-sm-3">
+									<div class="form-group">
+										<label>مالیات دارد؟</label>
+										<div class="input-group">
+											<label><input asp-for="CreateService.HasTax" type="checkbox" checked />   مالیات محاسبه شود</label><br />
+										</div>
+									</div>
+								</div>
+
+								<div class="col-sm-3">
+									<div class="form-group">
+										<label>درصد سهم شرکت</label>
+										<div class="input-group">
+											<input type="number" step="0.01" class="form-control" min="0.0" max="100.0"
+												   asp-for="CreateService.PercentCompany">
+											<span asp-validation-for="CreateService.PercentCompany"></span>
+										</div>
+									</div>
+								</div>
+								 
+								<div class="col-sm-3">
+									<div class="form-group">
+										<label>تعرفه مشارکت  </label>
+										<div class="input-group">
+											<price-input asp-for="CreateService.PriceMosharekat"></price-input>
+											<span asp-validation-for="CreateService.PriceMosharekat"></span>
+										</div>
+									</div>
+								</div>
+
+
+								<div class="col-sm-3">
+									<div class="form-group">
+										<label>مدل تخفیف</label>
+										<div class="input-group">
+											<select class="form-control select2 generalmodal" id="DiscountTypeId"
+													style="width:100%!important;">
+												<option value="1">درصدی</option>
+												<option value="2">قیمت مشخص</option>
+											</select>
+										</div>
+									</div>
+								</div>
+
+								<div class="col-sm-3" id="DiscountPercentId">
+									<div class="form-group">
+										<label>تخفیف درصدی</label>
+										<div class="input-group">
+											<input type="text" class="form-control"
+												   asp-for="CreateService.DiscountPercent" min="0" max="100" step="1">
+											<span asp-validation-for="CreateService.DiscountPercent"></span>
+										</div>
+									</div>
+								</div>
+
+								<div class="col-sm-3 d-none" id="DiscountPriceId">
+									<div class="form-group">
+										<label>تخفیف قیمت مشخص</label>
+										<div class="input-group">
+											<price-input asp-for="CreateService.DiscountPrice"></price-input>
+											<span asp-validation-for="CreateService.DiscountPrice"></span>
+										</div>
+									</div>
+								</div>
+
+								<div class="row">
+									<p class="m-0 pe-2 ms-1"> <span id="TariffDescriptionId" class="fw-bold mx-2 text-success">     </span> </p>
+								</div>
+							</div>
+
+
+							<div class="modal-footer px-0 border-0 mt-4">
+								<a onclick="createService(event)" class="btn btn-success btn-round">ذخیره</a>
+								<button type="button" class="btn btn-danger btn-round" data-bs-dismiss="modal">بازگشت</button>
+							</div>
+
+						</div>
+					</form>
+				</div>
+
+			</div>
+		</div>
+	</div>
+</div>

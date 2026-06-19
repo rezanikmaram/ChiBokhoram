@@ -1,0 +1,466 @@
+﻿@model WarehouseReceiptStripContainerPageDto
+
+@{
+	ViewData["Title"] = "استریپ کانتینر";
+	Layout = "~/Views/Shared/AdminLayout.cshtml";
+	int i = 1;
+}
+
+<div class="col-md-12">
+	<div class="p-3 bg-white rounded-3 border-0">
+		<div class="d-flex justify-content-between">
+			<div>
+				<span>
+					<i class="icon-frane"></i>
+					<a asp-action="StripContainerList" asp-route-swrId="@Model.ProductInfo.SeoWarehouseReceiptId" 
+						asp-route-seoId="@((Guid?)ViewBag.seoId)">
+						<i class="fa-solid fa-right-to-bracket align-middle me-2"></i>
+					</a>
+					استریپ کانتینر
+				</span>
+
+				<span class="label label-primary p-1 rounded mx-2">
+					مشخصات: @Model.ProductInfo.ProductTitle
+				</span>
+
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="mt-4">
+	<div class="col-md-12">
+		<div class="card rounded-3 min-height-600">
+			<div class="card-header pb-0">
+				<div class="d-flex justify-content-between d-flex ">
+					<h3 class="title m-0">
+						<i class="icon-speech"></i>
+						لیست کالا های درون کانتنر
+					</h3>
+					<a class="btn btn-primary rounded" onclick="addProduct();">کالا جدید</a>
+				</div>
+			</div>
+			<div class="card-body">
+				<table class="table table-bordered ">
+					<thead class="bg-primary">
+						<tr>
+							<th style="width: 5%"> ردیف </th>
+							<th>نام  </th>
+							<th>HS Code</th>
+
+							<th>شماره شاسی  </th>
+
+							<th>تعداد  </th>
+
+							<th>وزن ناخالص </th>
+							<th>وزن خالص </th>
+							<th>حجم </th>
+
+
+							<th>خطرناک </th>
+
+							<th>صاحب کالا </th>
+							<th>انبار </th>
+
+							<th>عملیات </th>
+						</tr>
+					</thead>
+
+					<tbody>
+						@foreach (var swr in Model.WarehouseReceipts)
+						{
+							foreach (var item in swr.Products)
+							{
+								<tr>
+									<td class="align-middle">@(i++)</td>
+									<td>@item.ProductFullTitle</td>
+									<td>@item.ProductHSCodeTitle</td>
+
+									<td>@item.VehicleIdentificationNumber</td>
+									<td>@item.CountTitle</td>
+
+									<td>@item.WeightGrossTitle</td>
+									<td>@item.WeightNetTitle</td>
+									<td>@item.VolumeTitle</td>
+
+									<td class="align-middle text-center">
+										<span class="label rounded px-2 py-1 label-@(!item.IsDangerous ? "success" : "danger")">@(item.IsDangerous ? "خطرناک" : "معمولی")</span>
+									</td>
+
+									<td>@swr.CompanyOwnerCompanyName</td>
+									<td>@item.WarehouseTitle</td>
+
+									<td class="align-middle px-1 text-center">
+										@* <a class="btn btn-warning px-2 btn-sm btn-icon curve" onclick="editProduct('@item.Id');"><i class="icon-pencil fs-6 align-middle"></i></a> *@
+										<a id="DeleteProduct@(i)" onclick="ShowQAlert(event,'DeleteProduct@(i)');" class="btn btn-danger px-2 btn-sm btn-icon curve btn-questions"
+										   asp-action="DeleteProductFromStripContainer" asp-route-swrProductId="@item.Id" asp-route-seoId="@((Guid?)ViewBag.seoId)">
+											<i class="icon-trash align-middle fs-6 fa-flip-horizontal"></i>
+										</a>
+									</td>
+								</tr>
+							}
+
+						}
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div id="generalmodal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" tabindex="-1">
+	<div class="modal-dialog modal-lg modal-dialog-centered">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h4 class="modal-title">ثبت کالا</h4>
+				<button type="button" class="close btn-close rounded border" data-bs-dismiss="modal"></button>
+			</div>
+			<div class="modal-body" id="modalbody">
+
+				<form asp-action="AddOrUpdateProductFromStripContainer" method="post">
+					<input asp-for="AddProduct.Id" type="hidden" />
+					<input name="seoId" value="@((Guid?)ViewBag.seoId)" type="hidden" />
+					<input asp-for="AddProduct.SeoWarehouseReceiptProductId" value="@Model.ProductInfo.SeoWarehouseReceiptProductId" type="hidden" />
+					<div class="form-body  row gy-4">
+
+						<div class="form-group col-md-6 ">
+							<label>
+								کالا
+								@if (Model.ProductInfo.SeoProductId != null)
+								{
+									<span class="ms-2">
+										<a target="_blank" asp-action="ContainerProductManage" asp-controller="Seo" asp-route-seoProductId="@Model.ProductInfo.SeoProductId">
+											<i class="fa-solid fa-share"></i> مدیریت کالاها درون بارنامه
+										</a>
+									</span>
+								}
+							</label>
+
+							<div class="input-group">
+								<select class="form-control border select2 generalmodal" style="width:100%!important;"
+										asp-for="AddProduct.ProductId">
+									@foreach (var item in Model.Products)
+									{
+										<option value="@item.ProductId" data-jsonProductInContainer-date="@item.SeoContainerProductJson">
+											@item.ProductTitle
+										</option>
+									}
+								</select>
+								<span asp-validation-for="AddProduct.ProductId" class="text-danger"></span>
+							</div>
+						</div>
+						<div class="form-group col-md-6 ">
+							<label>HS Code</label>
+							<div class="input-group">
+								<select class="form-control border select2 generalmodal" style="width:100%!important;"
+										asp-for="AddProduct.ProductHSCodeId"
+										asp-items="Model.ProductHSCodes">
+									<option value="">نامشخص</option>
+								</select>
+								<span asp-validation-for="AddProduct.ProductHSCodeId" class="text-danger"></span>
+							</div>
+						</div>
+
+						<div class="form-group col-md-6 ">
+							<label>صاحب کالا</label>
+							<div class="input-group">
+								<select class="form-control border select2 generalmodal" style="width:100%!important;"
+										asp-for="AddProduct.OwnerCompanyId"
+										asp-items="Model.Companies">
+								</select>
+								<span asp-validation-for="AddProduct.OwnerCompanyId" class="text-danger"></span>
+							</div>
+						</div>
+
+						<div class="form-group col-md-6 ">
+							<label>انبار</label>
+							<div class="input-group">
+								<select class="form-control border select2 generalmodal" style="width:100%!important;"
+										asp-for="AddProduct.WarehouseJson"
+										asp-items="Model.Warehouses">
+								</select>
+								<span asp-validation-for="AddProduct.WarehouseJson" class="text-danger"></span>
+							</div>
+						</div>
+
+						<div class="col-md-6">
+							<div class=" form-group">
+								<label> وضعیت تخلیه و بارگیری</label>
+								<div class="input-group">
+									<select class="form-control  select2 generalmodal"
+											asp-for="AddProduct.GeneralCargoProductTariffId"
+											asp-items="@Model.GeneralCargoProductTariff">
+									</select>
+									<span asp-validation-for="AddProduct.GeneralCargoProductTariffId" class="text-danger"></span>
+								</div>
+							</div>
+						</div>
+
+						<div class="col-md-6">
+							<div class=" form-group">
+								<label> نوع کالای انبار شده</label>
+								<div class="input-group">
+									<select class="form-control  select2 generalmodal"
+											asp-for="AddProduct.NonContainerWarehouseProductTariffId"
+											asp-items="@Model.TariffWarehouse">
+									</select>
+									<span asp-validation-for="AddProduct.NonContainerWarehouseProductTariffId" class="text-danger"></span>
+								</div>
+							</div>
+						</div>
+
+						<div class="col-md-3">
+							<div class=" form-group">
+								<label> بسته بندی</label>
+								<div class="input-group">
+									<select class="form-control  select2 generalmodal"
+											asp-for="AddProduct.ProductPackingId"
+											asp-items="@Model.ProductPacking">
+									</select>
+									<span asp-validation-for="AddProduct.ProductPackingId" class="text-danger"></span>
+								</div>
+							</div>
+						</div>
+
+						<div class="col-md-3 col-sm-12">
+							<div class="form-group">
+								<label>تاریخ اولین تخلیه</label>
+								<div class="input-group">
+									<input asp-for="AddProduct.FirstUnloadDateFa" type="text" class=" form-control rounded" autocomplete="off">
+									<span asp-validation-for="AddProduct.FirstUnloadDateFa" class="text-danger"></span>
+								</div>
+							</div>
+						</div>
+
+						<div class="col-md-2">
+							<label> تعداد</label>
+							<div class="input-group">
+								<input asp-for="AddProduct.Count" min="1" max="@int.MaxValue" type="number" class="form-control w-100 ">
+								<span asp-validation-for="AddProduct.Count" class="w-100 text-danger"></span>
+							</div>
+						</div>
+
+						<div class="col-md-2">
+							<label> وزن ناخالص</label>
+							<div class="input-group">
+								<input asp-for="AddProduct.WeightGross" min="0" max="@int.MaxValue" type="number" class="form-control w-100 ">
+								<span asp-validation-for="AddProduct.WeightGross" class="w-100 text-danger"></span>
+							</div>
+						</div>
+
+						<div class="col-md-2">
+							<label> وزن خالص</label>
+							<div class="input-group">
+								<input asp-for="AddProduct.WeightNet" min="0" max="@int.MaxValue" type="number" class="form-control w-100 ">
+								<span asp-validation-for="AddProduct.WeightNet" class="w-100 text-danger"></span>
+							</div>
+						</div>
+
+
+						<div class="col-md-2">
+							<label> حجم  </label>
+							<div class="input-group">
+								<input asp-for="AddProduct.Volume" min="0" max="@int.MaxValue" type="number" class="form-control w-100 ">
+								<span asp-validation-for="AddProduct.Volume" class="w-100 text-danger"></span>
+							</div>
+						</div>
+
+
+						<div class="col-md-4">
+							<label> شماره شاسی  </label>
+							<div class="input-group">
+								<input asp-for="AddProduct.VehicleIdentificationNumber" type="text" class="form-control w-100 ">
+								<span asp-validation-for="AddProduct.VehicleIdentificationNumber" class="w-100 text-danger"></span>
+							</div>
+						</div>
+
+						<div class="row mt-4">
+							<div class="col-md-3">
+								<div class="form-check form-switch">
+									<input type="checkbox" asp-for="AddProduct.IsDangerous" class="form-check-input" role="switch" />
+									<label class="form-check-label ms-2">کالا خطرناک است؟ </label>
+									<span asp-validation-for="AddProduct.IsDangerous" class="text-danger"></span>
+								</div>
+							</div>
+
+							<div class="col-md-3">
+								<div class="form-check form-switch">
+									<input type="checkbox" asp-for="AddProduct.IsBigVolume" class="form-check-input" role="switch" />
+									<label class="form-check-label ms-2">کالا حجیم است؟ </label>
+									<span asp-validation-for="AddProduct.IsBigVolume" class="text-danger"></span>
+								</div>
+							</div>
+
+							<div class="col-md-3">
+								<div class="form-check form-switch">
+									<input type="checkbox" asp-for="AddProduct.IsDangerous" class="form-check-input" role="switch" />
+									<label class="form-check-label ms-2">کالا نامتعارف است؟ </label>
+									<span asp-validation-for="AddProduct.IsDangerous" class="text-danger"></span>
+								</div>
+							</div>
+
+							<div class="col-md-3">
+								<div class="form-check form-switch">
+									<input type="checkbox" asp-for="AddProduct.IsBigVolume" class="form-check-input" role="switch" />
+									<label class="form-check-label ms-2">کالا مواد اولیه است؟ </label>
+									<span asp-validation-for="AddProduct.IsBigVolume" class="text-danger"></span>
+								</div>
+							</div>
+						</div>
+
+
+						<div class="col-md-12">
+							<div class="form-check form-switch">
+								<input type="checkbox" asp-for="AddProduct.IsSelfTransported" class="form-check-input" role="switch" />
+								<label class="form-check-label ms-2">کالا خودران است؟ برای جابجایی نیاز به کامیون ندارد </label>
+								<span asp-validation-for="AddProduct.IsSelfTransported" class="text-danger"></span>
+							</div>
+						</div>
+
+
+
+						<div class="col-md-2 ">
+							<div class="d-flex justify-items-start">
+								<button class="alert-icon btn btn-success rounded label" type="submit"><p class="px-2 m-0">ثبت</p></button>
+							</div>
+						</div>
+
+					</div>
+				</form>
+
+			</div>
+		</div>
+	</div>
+</div>
+
+
+@section script {
+	<script>
+		$(document).ready(function () {
+
+			$('select[class*="generalmodal"].select2').select2({
+				dropdownParent: $('#generalmodal')
+			});
+
+
+			kamaDatepicker('AddProduct_FirstUnloadDateFa', customOptions);
+
+			$('#AddProduct_ProductId').on('change', function () {
+				let selectedOption = $(this).find('option:selected');
+
+				// گرفتن داده از attribute - توجه: نام attribute به صورت camelCase است
+				let productData = selectedOption.data('jsonproductincontainer-date');
+
+				if (!productData) {
+					return;
+				}
+
+				try{
+					$('#AddProduct_Count').val(productData.Count);
+					$('#AddProduct_WeightNet').val(productData.WeightNet);
+					$('#AddProduct_WeightGross').val(productData.WeightGross);
+					$('#AddProduct_Volume').val(productData.Volume);
+					$('#AddProduct_VehicleIdentificationNumber').val(productData.VehicleIdentificationNumber);
+
+					$('#AddProduct_IsDangerous').prop('checked', productData.IsDangerous);
+					$('#AddProduct_IsBigVolume').prop('checked', productData.IsBigVolume);
+					$('#AddProduct_IsUnusual').prop('checked', productData.IsUnusual);
+					$('#AddProduct_IsRawMaterials').prop('checked', productData.IsRawMaterials);
+					$('#AddProduct_IsSelfTransported').prop('checked', productData.IsSelfTransported);
+
+					if (productData.ProductHSCodeId) {
+						$('#AddProduct_ProductHSCodeId').val(productData.ProductHSCodeId).trigger('change');
+					}
+					else{
+						$('#AddProduct_ProductHSCodeId').val('').trigger('change');
+					}
+
+					if (productData.OwnerCompanyId) {
+						$('#AddProduct_OwnerCompanyId').val(productData.OwnerCompanyId).trigger('change');
+					}
+					else{
+						$('#AddProduct_OwnerCompanyId').val('').trigger('change');
+					}
+				}
+				catch (e) {
+					console.error('Error parsing product data:', e);
+				}
+
+			});
+		});
+
+
+
+		function addProduct() {
+
+			$("#AddProduct_Id").val('');
+
+			$("#AddProduct_ProductId").val('');
+			$("#AddProduct_ProductHSCodeId").val('');
+
+			$("#AddProduct_ProductId").trigger('change');
+			$("#AddProduct_ProductHSCodeId").trigger('change');
+
+			$("#AddProduct_WarehouseJson").val('');
+			$("#AddProduct_WarehouseJson").trigger('change');
+
+			$("#AddProduct_OwnerCompanyId").val('');
+			$("#AddProduct_OwnerCompanyId").trigger('change');
+
+			$("#AddProduct_Count").val('1');
+			$("#AddProduct_WeightNet").val('0');
+			$("#AddProduct_WeightGross").val('0');
+			$("#AddProduct_Volume").val('0');
+
+			$("#AddProduct_VehicleIdentificationNumber").val('');
+
+			$("#AddProduct_IsDangerous").prop('checked', false);
+			$("#AddProduct_IsBigVolume").prop('checked', false);
+			$("#AddProduct_IsUnusual").prop('checked', false);
+			$("#AddProduct_IsRawMaterials").prop('checked', false);
+			$("#AddProduct_IsSelfTransported").prop('checked', false);
+
+			$("#generalmodal").modal('show');
+
+		}
+
+		function editProduct(id) {
+
+			$.post("@Url.Action("GetSeoContainerProductById", "Seo")", { seoContainerProductId: id })
+				.done(function (res) {
+					//$("#modalbody").html(res);
+
+					$("#AddProduct_Id").val(res.id);
+					$("#AddProduct_ProductId").val(res.productId);
+					$("#AddProduct_ProductId").trigger('change');
+
+					$("#AddProduct_ProductHSCodeId").val(res.productHSCodeId);
+					$("#AddProduct_ProductHSCodeId").trigger('change');
+
+					$("#AddProduct_WarehouseJson").val(res.warehouseJson);
+					$("#AddProduct_WarehouseJson").trigger('change');
+
+					$("#AddProduct_OwnerCompanyId").val(res.ownerCompanyId);
+					$("#AddProduct_OwnerCompanyId").trigger('change');
+
+					$("#AddProduct_Count").val(res.count);
+					$("#AddProduct_WeightNet").val(res.weightNet);
+					$("#AddProduct_WeightGross").val(res.weightGross);
+					$("#AddProduct_Volume").val(res.volume);
+
+					$("#AddProduct_VehicleIdentificationNumber").val(res.vehicleIdentificationNumber);
+
+					$("#AddProduct_IsDangerous").prop('checked', res.isDangerous);
+					$("#AddProduct_IsBigVolume").prop('checked', res.isBigVolume);
+					$("#AddProduct_IsUnusual").prop('checked', res.isUnusual);
+					$("#AddProduct_IsRawMaterials").prop('checked', res.isRawMaterials);
+					$("#AddProduct_IsSelfTransported").prop('checked', res.isSelfTransported);
+
+					$("#generalmodal").modal('show');
+				});
+		}
+
+
+
+	</script>
+}

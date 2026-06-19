@@ -1,0 +1,172 @@
+@model Entities.DTOs.Web.Common.CountryPageDto
+@{
+    int i = ((Model.Countries.PageNumber - 1) * Model.Countries.PageSize) + 1;
+    var currentSortColumn = Model.Filter?.SortColumn ?? "countrynamefa";
+    var currentSortDirection = Model.Filter?.SortDirection ?? "asc";
+}
+
+<div class="table-responsive mt-4">
+    <table class="table table-bordered table-hover table-striped" id="data-table">
+        <thead class="bg-primary">
+            <tr>
+                <th class="sortable-header" data-column="row">ردیف</th>
+                <th class="sortable-header" data-column="countrynamefa" style="cursor: pointer;">
+                    نام کشور فارسی
+                    @if (currentSortColumn == "countrynamefa")
+                    {
+                        <i class="icon-arrow-@(currentSortDirection == "asc" ? "up" : "down") text-white"></i>
+                    }
+                    else
+                    {
+                        <i class="icon-sort text-white-50"></i>
+                    }
+                </th>
+                <th class="sortable-header" data-column="countrynameen" style="cursor: pointer;">
+                    نام کشور انگلیسی
+                    @if (currentSortColumn == "countrynameen")
+                    {
+                        <i class="icon-arrow-@(currentSortDirection == "asc" ? "up" : "down") text-white"></i>
+                    }
+                    else
+                    {
+                        <i class="icon-sort text-white-50"></i>
+                    }
+                </th>
+                <th class="sortable-header" data-column="nationalitynamefa" style="cursor: pointer;">
+                    ملیت فارسی
+                    @if (currentSortColumn == "nationalitynamefa")
+                    {
+                        <i class="icon-arrow-@(currentSortDirection == "asc" ? "up" : "down") text-white"></i>
+                    }
+                    else
+                    {
+                        <i class="icon-sort text-white-50"></i>
+                    }
+                </th>
+                <th class="sortable-header" data-column="nationalitynameen" style="cursor: pointer;">
+                    ملیت انگلیسی
+                    @if (currentSortColumn == "nationalitynameen")
+                    {
+                        <i class="icon-arrow-@(currentSortDirection == "asc" ? "up" : "down") text-white"></i>
+                    }
+                    else
+                    {
+                        <i class="icon-sort text-white-50"></i>
+                    }
+                </th>
+                <th class="sortable-header" data-column="governmentnamefa" style="cursor: pointer;">
+                    دولت فارسی
+                    @if (currentSortColumn == "governmentnamefa")
+                    {
+                        <i class="icon-arrow-@(currentSortDirection == "asc" ? "up" : "down") text-white"></i>
+                    }
+                    else
+                    {
+                        <i class="icon-sort text-white-50"></i>
+                    }
+                </th>
+                <th class="sortable-header" data-column="ab" style="cursor: pointer;">
+                    کد ISO
+                    @if (currentSortColumn == "ab")
+                    {
+                        <i class="icon-arrow-@(currentSortDirection == "asc" ? "up" : "down") text-white"></i>
+                    }
+                    else
+                    {
+                        <i class="icon-sort text-white-50"></i>
+                    }
+                </th>
+                <th class="sortable-header" data-column="isimomember" style="cursor: pointer;">
+                    عضو IMO
+                    @if (currentSortColumn == "isimomember")
+                    {
+                        <i class="icon-arrow-@(currentSortDirection == "asc" ? "up" : "down") text-white"></i>
+                    }
+                    else
+                    {
+                        <i class="icon-sort text-white-50"></i>
+                    }
+                </th>
+                <th>عملیات</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Countries.Data)
+            {
+                <tr>
+                    <td class="align-middle">@(i++)</td>
+                    <td class="align-middle">@item.CountryNameFa</td>
+                    <td class="align-middle">@item.CountryNameEn</td>
+                    <td class="align-middle">@item.NationalityNameFa</td>
+                    <td class="align-middle">@item.NationalityNameEn</td>
+                    <td class="align-middle">@item.GovernmentNameFa</td>
+                    <td class="align-middle">@item.ab</td>
+                    <td class="align-middle">
+                        <span class="label px-2 py-1 rounded label-@(item.IsIMOMember ? "success" : "danger")">
+                            @(item.IsIMOMember ? "بله" : "خیر")
+                        </span>
+                    </td>
+                    <td class="d-flex justify-content-first">
+                        <div class="d-flex">
+                            <button type="button" class="btn btn-danger btn-sm btn-icon curve mx-1 px-2 btn-delete-country" data-id="@item.Id" data-name="@item.CountryNameFa">
+                                <i class="icon-trash fa-flip-horizontal fs-6 align-middle"></i>
+                            </button>
+                            <button type="button" class="btn btn-warning btn-sm btn-icon curve mx-1 px-2 btn-edit-country" data-id="@item.Id">
+                                <i class="icon-pencil align-middle fs-6"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <div class="mt-3">
+        <cs-pager cs-paging-pagesize="@Model.Countries.PageSize"
+                  cs-paging-pagenumber="@Model.Countries.PageNumber"
+                  cs-paging-totalitems="@Model.Countries.TotalItems"
+                  cs-paging-maxpageritems="10"
+                  cs-pagenumber-param="p"
+                  cs-show-first-last="true"
+                  cs-suppress-empty-nextprev="true"
+                  cs-suppress-inactive-firstlast="true"
+                  cs-show-numbered="true"
+                  cs-first-page-text="ابتدا"
+                  cs-last-page-text="انتها"
+                  cs-next-page-title="بعدی"
+                  cs-previous-page-title="قبلی"
+                  cs-first-page-title="ابتدا"
+                  cs-last-page-title="انتها"
+                  cs-next-page-text="بعدی"
+                  cs-previous-page-text="قبلی"
+                  cs-pager-li-current-class="page-item active"
+                  cs-pager-li-other-class="page-item"
+                  cs-pager-li-non-active-class="page-item disabled"
+                  cs-pager-link-current-class="page-link"
+                  cs-pager-link-other-class="page-link"
+                  asp-controller="Country"
+                  asp-action="Table">
+        </cs-pager>
+    </div>
+</div>
+
+<script>
+    // Handle column sorting
+    $(document).off('click', '.sortable-header').on('click', '.sortable-header', function(e) {
+        var column = $(this).data('column');
+        if (!column || column === 'row') return;
+        
+        var currentSortColumn = '@currentSortColumn';
+        var currentSortDirection = '@currentSortDirection';
+        
+        // Toggle direction if clicking the same column
+        var newDirection = 'asc';
+        if (column === currentSortColumn) {
+            newDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
+        }
+        
+        // Call parent page's loadTableWithSort function
+        if (typeof loadTableWithSort === 'function') {
+            loadTableWithSort(column, newDirection);
+        }
+    });
+</script>

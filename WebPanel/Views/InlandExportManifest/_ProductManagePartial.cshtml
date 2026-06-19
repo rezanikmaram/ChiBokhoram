@@ -1,0 +1,452 @@
+@model ProductManageDto
+@{
+	int i = 1;
+	string colSize = Model.SeoInfo.TrafficType == TrafficType.Container ? "col-md-6" : "col-md-6";
+	bool hasVIN = Model.SelectedProduct?.Any(x => !string.IsNullOrWhiteSpace(x.VehicleIdentificationNumber)) ?? false;
+	bool isModal = ViewBag.IsModal == true;
+}
+<div id="productManageWrapper"
+	 data-seo-id="@Model.SeoInfo.Id"
+	 data-default-product-id="@Model.SeoInfo.ProuductId"
+	 data-modal-mode="@(isModal.ToString().ToLower())">
+	<div class="col-md-12">
+		<div class="p-3 bg-white rounded-3 border-0">
+			<div class="d-flex justify-content-between">
+				<div>
+					<span>
+						<i class="icon-frane"></i>
+						@if (!isModal)
+						{
+							<a asp-controller="Seo" asp-action="SeoAccessPage" asp-route-seoId="@Model.SeoInfo.Id">
+								<i class="fa-solid fa-right-to-bracket align-middle me-2"></i>
+							</a>
+						}
+						مدیریت کالاها
+					</span>
+					<span class="label label-primary p-1 rounded mx-2">@Model.SeoInfo.ShipShipName (@Model.SeoInfo.BillOfLadingNumber)</span>
+					<span class="label label-info p-1 rounded mx-2">@Model.SeoInfo.TransportTypeTitle</span>
+					<span class="label label-info p-1 rounded mx-2">تعداد  @Model.SeoInfo.CountTitle </span>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="mt-4">
+		<div class="col-md-12">
+			<div class=" card rounded-3 min-height-600 ">
+				<div class="card-header pb-0">
+				<div class="d-flex justify-content-between d-flex ">
+					<h3 class="title m-0">
+						<i class="icon-speech"></i>
+						لیست کالاهای درون بارنامه
+					</h3>
+					<div class="d-flex gap-2">
+						<a class="btn btn-success rounded" onclick="exportProductsToExcel();" data-bs-toggle="tooltip" data-bs-placement="top" title="خروجی Excel">
+							<i class="fa-solid fa-file-excel me-2"></i> خروجی Excel
+						</a>
+						<a class="btn btn-warning rounded" onclick="openImportExcelModal();" data-bs-toggle="tooltip" data-bs-placement="top" title="بارگذاری از Excel">
+							<i class="fa fa-upload me-2"></i> بارگذاری Excel
+						</a>
+						<a class="btn btn-primary rounded" onclick="addProduct();">کالا جدید</a>
+					</div>
+				</div>
+				</div>
+				<div class="card-body mt-0">
+					<table class="table table-bordered ">
+						<thead class="bg-primary">
+							<tr>
+								<th style="width: 5%"> ردیف </th>
+								<th>نام  </th>
+								<th>HS Code</th>
+								@if (Model.SeoInfo.TrafficType == TrafficType.Container)
+								{
+									<th>کانتینر  </th>
+								}
+								else if (hasVIN)
+								{
+									<th>شماره شاسی  </th>
+								}
+								<th>تعداد  </th>
+								<th>وزن ناخالص </th>
+								<th>وزن خالص </th>
+								<th>حجم </th>
+								<th>وزن(تن)/حجم </th>
+								<th>قیمت تعرفه </th>
+								<th>خطرناک </th>
+								<th>عملیات </th>
+							</tr>
+						</thead>
+						<tbody>
+							@foreach (var item in Model.SelectedProduct)
+							{
+								var rowNumber = i++;
+								var deleteId = $"DeleteProduct{rowNumber}";
+								<tr>
+									<td class="align-middle">@rowNumber</td>
+									<td>@item.ProductTitle</td>
+									<td>@item.ProductHSCodeTitle</td>
+									@if (Model.SeoInfo.TrafficType == TrafficType.Container)
+									{
+										<td>@item.ContainerTitle</td>
+									}
+									else if (hasVIN)
+									{
+										<td>@item.VehicleIdentificationNumber</td>
+									}
+									<td>@item.CountTitle</td>
+									<td>@item.WeightGrossTitle</td>
+									<td>@item.WeightNetTitle</td>
+									<td>@item.VolumeTitle</td>
+									<td>@item.LargerWeightOrVolumeTitle</td>
+									<td>@item.PriceSpecialGearTariffTitle</td>
+									<td class="align-middle text-center">
+										<span class="label rounded px-2 py-1 label-@(!item.IsDangerous ? "success" : "danger")">@(item.IsDangerous ? "خطرناک" : "معمولی")</span>
+									</td>
+									<td class="align-middle px-1  text-center">
+										<a class="btn btn-warning px-2 btn-sm btn-icon curve" onclick="editProduct('@item.Id');"><i class="icon-pencil fs-6 align-middle"></i></a>
+										<a id="@(isModal ? null : deleteId)"
+										   onclick="@(isModal ? null : $"ShowQAlert(event,'{deleteId}');")"
+										   class="btn btn-danger my-1 px-2 btn-sm btn-icon curve btn-questions btn-delete-product"
+										   asp-action="DeleteProductFromSeo"
+										   asp-route-seoProductId="@item.Id"
+										   data-delete-url="@Url.Action("DeleteProductFromSeoAjax", new { seoProductId = item.Id })">
+											<i class="icon-trash align-middle fs-6 fa-flip-horizontal"></i>
+										</a>
+										@if (!string.IsNullOrEmpty(item.ContainerNumber) && item.IsFreeContainer == false)
+										{
+											<a class="btn btn-warning my-1 px-2 btn-sm btn-icon curve" asp-action="ContainerProductManage"
+											   asp-route-seoProductId="@item.Id" data-bs-toggle="tooltip" data-bs-placement="top" title="مدیریت کالاهای درون کانتینر"> کالاهای درون کانتینر </a>
+										}
+									</td>
+								</tr>
+							}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div id="generalmodal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" tabindex="-1">
+		<div class="modal-dialog modal-lg modal-dialog-centered">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h4 class="modal-title">ثبت کالا</h4>
+					<button type="button" class="close btn-close rounded border" data-bs-dismiss="modal"></button>
+				</div>
+				<div class="modal-body" id="modalbody">
+					<form id="AddProductToSeoId" asp-action="AddProductToSeo" method="post">
+						<input asp-for="SeoInfo.Id" name="AddProductToSeo.SeoId" type="hidden" />
+						<input asp-for="AddProductToSeo.Id" type="hidden" />
+						<div class="form-body  row gy-4">
+							<div class="form-group col-md-6">
+								<label>کالا</label>
+								<div class="input-group">
+									<select class="form-control border select2" style="width:100%!important;"
+											asp-for="AddProductToSeo.ProductId" asp-items="Model.Products">
+									</select>
+									<span asp-validation-for="AddProductToSeo.ProductId" class="text-danger"></span>
+								</div>
+							</div>
+							<div class="form-group col-md-6">
+								<label>HS Code</label>
+								<div class="input-group">
+									<div class="input-group">
+										<input asp-for="AddProductToSeo.HSCode" type="text" class="form-control w-100 ">
+										<span asp-validation-for="AddProductToSeo.HSCode" class="w-100 text-danger"></span>
+									</div>
+								</div>
+							</div>
+							<div class="col-md-2">
+								<label> تعداد</label>
+								<div class="input-group">
+									<input asp-for="AddProductToSeo.Count" min="1" max="@int.MaxValue" type="number" class="form-control w-100 ">
+									<span asp-validation-for="AddProductToSeo.Count" class="w-100 text-danger"></span>
+								</div>
+							</div>
+							<div class="col-md-2">
+								<label> وزن ناخالص</label>
+								<div class="input-group">
+									<input asp-for="AddProductToSeo.WeightGross" min="0" type="number" class="form-control w-100 clean-number">
+									<span asp-validation-for="AddProductToSeo.WeightGross" class="w-100 text-danger"></span>
+								</div>
+							</div>
+							<div class="col-md-2">
+								<label> وزن خالص</label>
+								<div class="input-group">
+									<input asp-for="AddProductToSeo.WeightNet" min="0" type="number" class="form-control w-100 clean-number">
+									<span asp-validation-for="AddProductToSeo.WeightNet" class="w-100 text-danger"></span>
+								</div>
+							</div>
+							<div class="col-md-2">
+								<label> وزن میانگین هر کالا</label>
+								<div class="input-group">
+									<input asp-for="AddProductToSeo.WeightOneProduct" min="0" type="number" class="form-control w-100 clean-number">
+									<span asp-validation-for="AddProductToSeo.WeightOneProduct" class="w-100 text-danger"></span>
+								</div>
+							</div>
+							<div class="col-md-2">
+								<label> حجم  </label>
+								<div class="input-group">
+									<input asp-for="AddProductToSeo.Volume" min="0" type="number" class="form-control w-100 clean-number">
+									<span asp-validation-for="AddProductToSeo.Volume" class="w-100 text-danger"></span>
+								</div>
+							</div>
+							<div class="col-md-2">
+								<label> طول</label>
+								<div class="input-group">
+									<input asp-for="AddProductToSeo.Length" type="number" class="form-control w-100 clean-number">
+									<span asp-validation-for="AddProductToSeo.Length" class="w-100 text-danger"></span>
+								</div>
+							</div>
+							<div class="col-md-2">
+								<label>عرض</label>
+								<div class="input-group">
+									<input asp-for="AddProductToSeo.Width" type="number" class="form-control w-100 clean-number">
+									<span asp-validation-for="AddProductToSeo.Width" class="w-100 text-danger"></span>
+								</div>
+							</div>
+							<div class="col-md-2">
+								<label> ارتفاع</label>
+								<div class="input-group">
+									<input asp-for="AddProductToSeo.Height" type="number" class="form-control w-100 clean-number">
+									<span asp-validation-for="AddProductToSeo.Height" class="w-100 text-danger"></span>
+								</div>
+							</div>
+							<div class="col-md-4">
+								<label> توضیحات  </label>
+								<div class="input-group">
+									<input asp-for="AddProductToSeo.Description" type="text" placeholder="توضیحات/برند/MARKS" class="form-control w-100 ">
+									<span asp-validation-for="AddProductToSeo.Description" class="w-100 text-danger"></span>
+								</div>
+							</div>
+							<div class="col-md-2">
+								<div class="form-group">
+									<label>وضعیت کالا</label>
+									<div class="input-group">
+										<select class="form-control select2 generalmodal" asp-for="AddProductToSeo.ProductCondition">
+											<option value="@((int)Common.enumeration.Hirman.ProductConditionType.Unknown)">نامشخص</option>
+											<option value="@((int)Common.enumeration.Hirman.ProductConditionType.New)">نو</option>
+											<option value="@((int)Common.enumeration.Hirman.ProductConditionType.SecondHand)">دست دوم</option>
+										</select>
+										<span asp-validation-for="AddProductToSeo.ProductCondition" class="text-danger"></span>
+									</div>
+								</div>
+							</div>
+							@if (Model.SeoInfo.TrafficType == TrafficType.Container)
+							{
+								<div class="col-md-4 col-sm-12">
+									<label> نوع انتقال کانتینر  </label>
+									<div class="input-group">
+										<input asp-for="AddProductToSeo.ContainerMoveType" type="text" placeholder="FCL" class="form-control w-100 ">
+										<span asp-validation-for="AddProductToSeo.ContainerMoveType" class="w-100 text-danger"></span>
+									</div>
+								</div>
+								<div class="col-md-3 col-sm-12">
+									<label> شماره کانتینر  </label>
+									<div class="input-group">
+										<input asp-for="AddProductToSeo.ContainerNumber" type="text" class="form-control w-100 ">
+										<span asp-validation-for="AddProductToSeo.ContainerNumber" class="w-100 text-danger"></span>
+									</div>
+								</div>
+								<div class="col-md-3 col-sm-12">
+									<label> پلمپ کانتینر  </label>
+									<div class="input-group">
+										<input asp-for="AddProductToSeo.ContainerSealNumber" type="text" class="form-control w-100 ">
+										<span asp-validation-for="AddProductToSeo.ContainerSealNumber" class="w-100 text-danger"></span>
+									</div>
+								</div>
+								<div class="col-md-2">
+									<label> اندازه کانتینر (فوت)</label>
+									<div class="input-group">
+										<input asp-for="AddProductToSeo.ContainerSize" min="1" max="@int.MaxValue" type="number" class="form-control w-100 ">
+										<span asp-validation-for="AddProductToSeo.ContainerSize" class="w-100 text-danger"></span>
+									</div>
+								</div>
+								<div class="col-md-2 col-sm-12">
+									<label> نوع کانتینر  </label>
+									<div class="input-group">
+										<input asp-for="AddProductToSeo.ContainerType" type="text" placeholder="HC" class="form-control w-100 ">
+										<span asp-validation-for="AddProductToSeo.ContainerType" class="w-100 text-danger"></span>
+									</div>
+								</div>
+								<div class="col-md-2 col-sm-12">
+									<div class="form-group">
+										<label>پر/خالی بودن</label>
+										<div class="input-group">
+											<select class="form-control select2 generalmodal" asp-for="AddProductToSeo.IsFreeContainer">
+												<option value="true">کانتینر خالی</option>
+												<option value="false">کانتینر پر</option>
+											</select>
+											<span asp-validation-for="AddProductToSeo.IsFreeContainer" class="text-danger"></span>
+										</div>
+									</div>
+								</div>
+							}
+							@if (Model.SeoInfo.TrafficType != TrafficType.Container)
+							{
+								<div class="col-md-4">
+									<label> شماره شاسی  </label>
+									<div class="input-group">
+										<input asp-for="AddProductToSeo.VehicleIdentificationNumber" type="text" class="form-control w-100 ">
+										<span asp-validation-for="AddProductToSeo.VehicleIdentificationNumber" class="w-100 text-danger"></span>
+									</div>
+								</div>
+							}
+							<div class="@colSize">
+								<label> نام فارسی  </label>
+								<div class="input-group">
+									<input asp-for="AddProductToSeo.NameFa" type="text" class="form-control w-100 ">
+									<span asp-validation-for="AddProductToSeo.NameFa" class="w-100 text-danger"></span>
+								</div>
+							</div>
+							<div class="@colSize">
+								<label> نام انگلیسی  </label>
+								<div class="input-group">
+									<input asp-for="AddProductToSeo.NameEn" type="text" class="form-control w-100 ">
+									<span asp-validation-for="AddProductToSeo.NameEn" class="w-100 text-danger"></span>
+								</div>
+							</div>
+							<div class="col-md-3">
+								<div class="form-check form-switch">
+									<input type="checkbox" asp-for="AddProductToSeo.IsDangerous" class="form-check-input" role="switch" />
+									<label class="form-check-label ms-2">کالا خطرناک است؟ </label>
+									<span asp-validation-for="AddProductToSeo.IsDangerous" class="text-danger"></span>
+								</div>
+							</div>
+							<div class="col-md-3">
+								<div class="form-check form-switch">
+									<input type="checkbox" asp-for="AddProductToSeo.IsBigVolume" class="form-check-input" role="switch" />
+									<label class="form-check-label ms-2">کالا ترافیکی است؟ </label>
+									<span asp-validation-for="AddProductToSeo.IsBigVolume" class="text-danger"></span>
+								</div>
+							</div>
+							<div class="col-md-3">
+								<div class="form-check form-switch">
+									<input type="checkbox" asp-for="AddProductToSeo.IsEssentialProduct" class="form-check-input" role="switch" />
+									<label class="form-check-label ms-2">کالای اساسی است؟ </label>
+									<span asp-validation-for="AddProductToSeo.IsEssentialProduct" class="text-danger"></span>
+								</div>
+							</div>
+							<div class="col-md-3">
+								<div class="form-check form-switch">
+									<input type="checkbox" asp-for="AddProductToSeo.IsUnusual" class="form-check-input" role="switch" />
+									<label class="form-check-label ms-2">کالا نامتعارف است؟ </label>
+									<span asp-validation-for="AddProductToSeo.IsUnusual" class="text-danger"></span>
+								</div>
+							</div>
+							<div class="col-md-3">
+								<div class="form-check form-switch">
+									<input type="checkbox" asp-for="AddProductToSeo.IsRawMaterials" class="form-check-input" role="switch" />
+									<label class="form-check-label ms-2">کالا مواد اولیه است؟ </label>
+									<span asp-validation-for="AddProductToSeo.IsRawMaterials" class="text-danger"></span>
+								</div>
+							</div>
+							<div class="col-md-6">
+								<div class="form-check form-switch">
+									<input type="checkbox" asp-for="AddProductToSeo.IsSelfTransported" class="form-check-input" role="switch" />
+									<label class="form-check-label ms-2">کالا خودران است؟ برای جابجایی نیاز به کامیون ندارد </label>
+									<span asp-validation-for="AddProductToSeo.IsSelfTransported" class="text-danger"></span>
+								</div>
+							</div>
+							<div class="col-md-3">
+								<div class="form-check form-switch">
+									<input type="checkbox" asp-for="AddProductToSeo.IsTariffAllTonnage" class="form-check-input" role="switch" />
+									<label class="form-check-label ms-2">تعرفه تناژ کلی </label>
+									<span asp-validation-for="AddProductToSeo.IsTariffAllTonnage" class="text-danger"></span>
+								</div>
+							</div>
+
+							<div class="col-md-3">
+								<div class="form-check form-switch">
+									<input type="checkbox" asp-for="AddProductToSeo.IsNeedsSpecialEquipment" class="form-check-input" role="switch" />
+									<label class="form-check-label ms-2">نیاز به تجهیزات ویژه </label>
+									<span asp-validation-for="AddProductToSeo.IsNeedsSpecialEquipment" class="text-danger"></span>
+								</div>
+							</div>
+
+							<div class="col-md-6 align-content-end">
+								<div class="form-check form-switch">
+									<input type="checkbox" asp-for="AddProductToSeo.IsUsedOrScrap" class="form-check-input" role="switch" />
+									<label class="form-check-label ms-2">مخصوص کالای اوراقی، مواد قراضه و مستعمل</label>
+									<span asp-validation-for="AddProductToSeo.IsUsedOrScrap" class="text-danger"></span>
+								</div>
+							</div>
+
+							<div class="card-footer pt-3">
+								<div class="d-flex justify-items-start">
+									<button class="alert-icon btn btn-success rounded label" type="submit"><p class="px-2 m-0">ثبت</p></button>
+									<div class="ms-2 d-flex align-items-center">
+										<div class="form-group">
+											<div class="align-items-center d-flex">
+												<a id="calculatePriceBtn" onclick="GetPrice()" class="btn btn-primary ms-3 px-2">دریافت تعرفه اجاره تجهزات</a>
+											</div>
+										</div>
+										<span class="ms-3 d-none" id="PriceGearSpecialTariffId">قیمت تعرفه : 4،500</span>
+									</div>
+								</div>
+							</div>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- Copy Product Modal -->
+<div id="copyProductModal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" tabindex="-1">
+	<div class="modal-dialog modal-dialog-centered">
+		<div class="modal-content rounded shadow shadow-lg">
+			<div class="modal-header">
+				<h4 class="modal-title">کپی کردن کالا</h4>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				<div class="form-group">
+					<label for="copyCount">تعداد کپی مورد نظر را وارد کنید:</label>
+					<input type="number" id="copyCount" class="form-control" min="1" max="100" value="1" />
+					<small class="text-muted">حداکثر 100 کپی مجاز است</small>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">انصراف</button>
+				<button type="button" class="btn btn-primary" id="confirmCopyBtn">تایید و کپی</button>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- Import Excel Modal -->
+<div id="importExcelModal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" tabindex="-1">
+	<div class="modal-dialog modal-dialog-centered">
+		<div class="modal-content rounded shadow shadow-lg">
+			<div class="modal-header">
+				<h4 class="modal-title">بارگذاری از Excel</h4>
+				<button type="button" class="close btn-close rounded border" data-bs-dismiss="modal"></button>
+			</div>
+			<div class="modal-body">
+				<form id="importExcelForm" enctype="multipart/form-data">
+					<input type="hidden" name="seoId" value="@Model.SeoInfo.Id" />
+					<div class="form-group">
+						<label for="excelFile">فایل Excel را انتخاب کنید:</label>
+						<input type="file" id="excelFile" name="excelFile" class="form-control" accept=".xlsx,.xls" />
+						<small class="text-muted">فقط فایل‌های .xlsx و .xls مجاز هستند</small>
+					</div>
+					<div class="mt-3">
+						<a href="@Url.Action("DownloadProductTemplate", "Seo", new { seoId = Model.SeoInfo.Id })" class="btn btn-outline-info btn-sm">
+							<i class="fa fa-download"></i> دانلود قالب Excel
+						</a>
+					</div>
+				</form>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">انصراف</button>
+				<button type="button" class="btn btn-warning" id="confirmImportBtn">بارگذاری</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script src="~/assets/js/validation/jquery.validate.min.js"></script>
+<script src="~/assets/js/validation/jquery.validate.unobtrusive.min.js"></script>
+
+<script>
+	cleanNumberInputs();
+</script>											 

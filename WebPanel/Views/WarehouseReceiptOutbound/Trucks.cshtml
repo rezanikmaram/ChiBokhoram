@@ -1,0 +1,140 @@
+﻿@model WroTruckPageDto
+@{
+	ViewData["Title"] = "کامیون ها خروج کالا";
+	Layout = "~/Views/Shared/AdminLayout.cshtml";
+	int i = 1;
+}
+
+
+<partial name="_WroInfo" model="Model.PageInfo" />
+
+<div class="card">
+	<div class="card-header">
+		<div class="d-flex justify-content-between">
+			<h3 class="title">
+				<a asp-action="Details"
+				   asp-route-wroId="@Model.PageInfo.Id">
+					<i class="fa-solid fa-right-to-bracket me-2 align-middle"></i>
+				</a>
+				کامیون های خروج کالا
+			</h3>
+
+			<div>
+				<button class="btn btn-success rounded" onclick="showAddModal()">
+					<i class="fa-solid fa-plus"></i> کامیون جدید
+				</button>
+
+				<div class="buttons-box">
+					<i class="icon-size-fullscreen"></i>
+					<div class="paper-ripple">
+						<div class="paper-ripple__background"></div>
+						<div class="paper-ripple__waves"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="card-body pt-0">
+		<div class="table-responsive">
+			<table class="table table-sm table-bordered table-hover table-striped" id="documents-table">
+				<thead class="bg-primary">
+					<tr>
+						<th style="width: 5%">#</th>
+						<th>پلاک کامیون</th>
+						<th>تاریخ ثبت</th>
+						<th>مجوز</th>
+
+						<th>عملیات</th>
+					</tr>
+				</thead>
+				<tbody>
+					@if (Model?.List?.Any() == true)
+					{
+						foreach (var item in Model.List)
+						{
+							<tr>
+								<td class="align-middle px-2 text-center">@(i++)</td>
+								<td class="align-middle px-2 text-center">@item.CarPlates</td>
+
+								<td class="align-middle px-2 text-center">@item.CreatedDateFa</td>
+								<td class="align-middle px-2 text-center">@(item.Document?.Number ?? "---")</td>
+
+								<td class="align-middle px-2 text-center">
+
+									<a class="btn btn-warning px-2 btn-sm btn-icon curve" onclick="editTruck('@item.Id');"><i class="icon-pencil align-middle fs-6"></i></a>
+									<a id="DeleteTruck@(i)" onclick="ShowQAlert(event,'DeleteTruck@(i)');" class="btn btn-danger px-2 btn-sm btn-icon curve btn-questions"
+									   asp-action="DeleteTruck" asp-route-truckId="@item.Id" asp-route-wroId="@Model.PageInfo.Id">
+										<i class="icon-trash fs-6 align-middle fa-flip-horizontal"></i>
+									</a>
+
+								</td>
+							</tr>
+						}
+					}
+					else
+					{
+						<tr>
+							<td colspan="5" class="text-center">هیچ کامیونی نشده است</td>
+						</tr>
+					}
+				</tbody>
+			</table>
+		</div>
+	</div>
+
+
+</div>
+
+
+
+<div id="generalmodal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" tabindex="-1">
+	<div class="modal-dialog modal-dialog-centered modal-lg">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h4 class="modal-title">مجوز خروج کالا</h4>
+				<button type="button" class="close btn-close rounded border" data-bs-dismiss="modal"></button>
+			</div>
+			<div class="modal-body" id="modalbody">
+				<partial name="_CreateWarehouseReceiptOutboundTruck" model="@Model.CreatePageDto" />
+			</div>
+		</div>
+	</div>
+</div>
+
+@section script {
+	<script>
+			$(document).ready(function () {
+			$('select[class*="generalmodal"].select2').select2({
+				dropdownParent: $('#generalmodal')
+			});
+
+
+			$("#CreateDto_CarPlatesType").change(function () {
+				var selectedValue = $(this).val();
+
+				if (selectedValue === "1") {
+					$("#CarPlatesTypeMeli").removeClass("d-none");
+					$("#CarPlatesTypeBandari").addClass("d-none");
+				} else {
+					$("#CarPlatesTypeMeli").addClass("d-none");
+					$("#CarPlatesTypeBandari").removeClass("d-none");
+				}
+			});
+
+		});
+
+		function showAddModal() {
+			$("#Id").val('');
+			$('#generalmodal').modal('show')
+		}
+
+		function editTruck(id) {
+			$.post("@Url.Action("GetTruckById", "WarehouseReceiptOutbound")", { truckId: id })
+				.done(function (res) {
+					$("#modalbody").html(res);
+					$("#generalmodal").modal('show');
+				});
+		}
+	</script>
+}

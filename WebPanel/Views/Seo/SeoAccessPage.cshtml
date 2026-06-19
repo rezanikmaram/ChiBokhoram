@@ -1,0 +1,719 @@
+@model SeoAccessPageDto
+@{
+    ViewData["Title"] = "مدیریت بارنامه";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+    bool isModal = ViewBag.IsModal == true;
+    bool returnPageToVoyage = (int)ViewBag.returnPage == 100 && Model?.SeoInfo?.VoyageId != null;
+
+    string CollapsClassName = ViewBag.IsEmpty == true ? "show" : "";
+    string aria_expandedValue = ViewBag.IsEmpty == true ? "true" : "false";
+
+    var color = "";
+    var imageSrc = "";
+    switch (Model.SeoInfo.State)
+    {
+        case SeoState.Active:
+            color = "bg-primary";
+            imageSrc = "craneShip.png";
+            break;
+        case SeoState.Stoped:
+            color = "bg-warning";
+            imageSrc = "ship.png";
+            break;
+        case SeoState.Finish:
+            color = "bg-success2";
+            imageSrc = "Eship.png";
+            break;
+        default:
+            color = "bg-primary";
+            imageSrc = "craneShip.png";
+            break;
+
+    }
+}
+<div class="row">
+    <div class="card">
+        <div class="card-header pb-0 px-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <h3 class="title">
+                    <i class="icon-frane"></i>
+                    @if (returnPageToVoyage)
+                    {
+                        <a asp-controller="Voyage" asp-action="VoyageSeo" asp-route-voyageId="@Model.SeoInfo.VoyageId"><i class="fa-solid fa-right-to-bracket me-2"></i></a>
+                    }
+                    else
+                    {
+                        <a asp-action="Index"><i class="fa-solid fa-right-to-bracket me-2"></i></a>
+                    }
+
+                    مدیریت بارنامه
+                </h3>
+                <div class="d-flex align-items-center">
+
+                    @if (Model?.SeoInfo?.VoyageId != null)
+                    {
+                        <a asp-controller="Voyage" asp-action="VoyageSeo" asp-route-voyageId="@Model.SeoInfo.VoyageId" class="me-2 btn btn-primary"><i class="fas fa-anchor me-2 align-middle"></i> مشاهده سفر </a>
+                    }
+
+                    @if (Model?.SeoInfo?.VoyageId == null)
+                    {
+                        <a asp-action="CreateSeoOld" asp-route-SeoId="@Model.SeoInfo.Id" class="me-2 btn btn-info"><i class="fa-regular fa-pen-to-square me-2 align-middle"></i> ویرایش </a>
+                    }
+
+                    @if (User.IsInRole("admin") || User.IsInRole("adminOnePort"))
+                    {
+                        <a asp-action="SeoView" asp-route-seoId="@Model.SeoInfo.Id" class="me-2 btn btn-info"><i class="fa-regular fa-circle-info align-middle"></i> نمای کلی </a>
+
+                        <a id="DeleteSeo" onclick="ShowQAlert(event,'DeleteSeo', 'حذف بارنامه' , 'آیا از حذف این بارنامه مطمئن هستید');" asp-controller="Seo" asp-action="DeleteSeo" asp-route-seoId="@Model.SeoInfo.Id" asp-route-VoyageId="@(returnPageToVoyage ? Model.SeoInfo.VoyageId : null)" class=" btn btn-danger"><i class="icon-trash fa-flip-horizontal"></i> حذف </a>
+
+                        @if (Model.SeoInfo.State != SeoState.Finish)
+                        {
+                            <a id="CloseSeo" onclick="ShowQAlert(event,'CloseSeo' , 'اتمام و بستن بارنامه', 'آیا مایل به بستن بارنامه هستید');" asp-controller="Seo" asp-action="ClosingSeo" asp-route-seoId="@Model.SeoInfo.Id" class=" btn mx-2 btn-success"><i class="fa-solid fa-check me-2 align-middle"></i>اتمام عملیات</a>
+
+                            @* @if (!Model.AlloMinInfo.CanCloseSeo)
+							{
+								<a onclick="ErrorAllocationNotFinish()" class=" btn mx-2 btn-success"><i class="fa-solid fa-check me-2 align-middle"></i>اتمام عملیات</a>
+							}
+							else
+							{
+								<a id="CloseSeo" onclick="ShowQAlert(event,'CloseSeo' , 'اتمام و بستن بارنامه', 'آیا مایل به بستن بارنامه هستید');" asp-controller="Seo" asp-action="ClosingSeo" asp-route-seoId="@Model.SeoInfo.Id" class=" btn mx-2 btn-success"><i class="fa-solid fa-check me-2 align-middle"></i>اتمام عملیات</a>
+							} *@
+                        }
+
+                        @if (Model.SeoInfo.State == SeoState.Stoped)
+                        {
+                            <a class="btn btn-primary" id="StartSeo" onclick="ShowQAlert(event,'StartSeo', 'شروع مجدد', 'آیا از شروع مجدد بارنامه مطمئن هستید');" asp-controller="Seo" asp-action="StartSeo" asp-route-seoId="@Model.SeoInfo.Id"> از سرگیری CHO</a>
+                        }
+                    }
+                </div>
+            </div>
+            <div class="row">
+            </div>
+        </div>
+        <div class="card-body pt-0 px-2">
+            <div class="@color rounded-3 mt-4 p-3">
+                <div class="row gy-3 align-items-center">
+                    <div class="col-1">
+                        <img src="~/assets/images/@imageSrc" alt="" class="img-fluid">
+                    </div>
+                    <div class="col-3">
+                        <p class="fs-6 fw-bold">@Model.SeoInfo.ShipShipName (@Model.SeoInfo.BillOfLadingNumber)</p>
+                        <p class="fs-6 fw-bold">تاریخ ورود: @Model.SeoInfo.ShipEntranceDateFa</p>
+                    </div>
+                    <div class="col-3">
+                        <p class="fs-6 fw-bold">اسکله: @Model.SeoInfo.WaterfrontWaterfrontName</p>
+                        <p class="fs-6 fw-bold">کالا: @Model.SeoInfo.ProductProductName</p>
+                    </div>
+                    <div class="col-3">
+                        <p class="fs-6 fw-bold">تناژ: @Model.SeoInfo.TonnageTitle</p>
+                        <p class="fs-6 fw-bold">صاحب کالا: @Model.SeoInfo.ProductOwnerCompanyCompanyName</p>
+                    </div>
+                    <div class="col-2">
+                        <p class="fs-6 fw-bold">نوع بارنامه: @Model.SeoInfo.TransportTypeTitle</p>
+                        <p class="fs-6 fw-bold">وضعیت: @Model.SeoInfo.StateTitle</p>
+                    </div>
+                    <div class="col-3">
+                        <a class="filter-collapse text-dark px-4 py-1 rounded w-100 bg-white" data-bs-toggle="collapse" href="#collapseExample" role="button" aria-expanded="@(ViewBag.IsEmpty)" aria-controls="collapseExample">
+                            تکمیل مشخصات <i class="fa-solid fa-angle-down mx-2 align-middle"></i>
+                        </a>
+                    </div>
+                    <div class="collapse  @(ViewBag.IsEmpty == true ? "show" : "")" id="collapseExample">
+                        <div class="card-body">
+                            <form id="formFilter" asp-action="SetFirstStepSeo" method="post">
+                                <input name="p" id="pageNumber" hidden />
+                                <input type="hidden" asp-for="FristStepSeo.Id" value="@Model.SeoInfo.Id" />
+                                <div class="form-body ">
+                                    <div class="row gy-4">
+
+                                        <div class="col-md-2 col-sm-12">
+                                            <div class="form-group  ">
+                                                <label>شماره بارنامه</label>
+                                                <div class="input-group">
+                                                    <input asp-for="FristStepSeo.BillOfLadingNumber" type="text" class="rounded form-control">
+                                                    <span asp-validation-for="FristStepSeo.BillOfLadingNumber" class="text-danger"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-2 col-sm-12">
+                                            <div class="form-group  ">
+                                                <label>MARKS  </label>
+                                                <div class="input-group">
+                                                    <input asp-for="FristStepSeo.Marks" type="text" class="rounded form-control">
+                                                    <span asp-validation-for="FristStepSeo.Marks" class="text-danger"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-4 col-sm-12">
+                                            <div class="form-group">
+                                                <label>صاحب کالا</label>
+                                                <div class="input-group d-flex flex-nowrap">
+                                                    <select class="form-control select2 rounded" asp-for="FristStepSeo.ProductOwnerCompanyId"
+                                                            asp-items="Model.Companies">
+                                                        <option value="">نامشخص</option>
+                                                    </select>
+                                                    <a class="btn btn-success px-2 ms-2 rounded btnAddCompany"
+                                                       href="javascript:void(0)"
+                                                       data-target-select='select[name="FristStepSeo.ProductOwnerCompanyId"]'>
+                                                        <i class="icon-plus align-bottom"></i>
+                                                    </a>
+                                                </div>
+                                                <span asp-validation-for="FristStepSeo.ProductOwnerCompanyId" class="text-danger"></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-4 col-sm-12">
+                                            <div class="form-group">
+                                                <label>شرکت پورت اپراتور</label>
+                                                <div class="input-group d-flex flex-nowrap">
+                                                    <select class="form-control select2 rounded" asp-for="FristStepSeo.CompanyPortOperatorId"
+                                                            asp-items="Model.Companies">
+                                                        <option value="">نامشخص</option>
+                                                    </select>
+                                                    @*  <a class="btn btn-success px-2 ms-2 rounded" target="_blank"
+                                                       asp-action="CreateCompany" asp-controller="Company">
+                                                        <i class="icon-plus align-bottom"></i>
+                                                    </a> *@
+                                                </div>
+                                                <span asp-validation-for="FristStepSeo.CompanyPortOperatorId" class="text-danger"></span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="col-md-4 col-sm-12">
+                                            <div class="  form-group ">
+                                                <label>کالا</label>
+                                                <div class="input-group d-flex flex-nowrap  ">
+                                                    <select class="form-control select2 rounded" asp-for="FristStepSeo.ProuductId"
+                                                            asp-items="Model.Products">
+                                                    </select>
+
+                                                    <a class="btn btn-success px-2 ms-2 rounded btnAddProduct"
+                                                       href="javascript:void(0)"
+                                                       data-target-select='select[name="FristStepSeo.ProuductId"]'>
+                                                        <i class="icon-plus align-bottom"></i>
+                                                    </a>
+                                                     
+                                                </div>
+                                                <span asp-validation-for="FristStepSeo.ProuductId"
+                                                      class="text-danger"></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-2 col-sm-12">
+                                            <div class="  form-group ">
+                                                <label>بسته بندی  </label>
+                                                <div class="input-group  ">
+                                                    <select class="form-control select2" asp-for="FristStepSeo.ProductPackingId"
+                                                            asp-items="@ViewBag.productPacking">
+                                                    </select>
+                                                </div>
+                                                <span asp-validation-for="FristStepSeo.ProductPackingId"
+                                                      class="text-danger"></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-2 col-sm-12">
+                                            <div class="form-group  ">
+                                                <label>تعداد</label>
+                                                <div class="input-group">
+                                                    <price-input asp-for="FristStepSeo.Count" min="1"></price-input>
+                                                    <span asp-validation-for="FristStepSeo.Count" class="text-danger"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-2 col-sm-12">
+                                            <div class="form-group  ">
+                                                <label>وزن به کیلوگرم</label>
+                                                <div class="input-group">
+                                                    <price-input asp-for="FristStepSeo.ShipTonnage" min="0"></price-input>
+                                                    <span asp-validation-for="FristStepSeo.ShipTonnage" class="text-danger"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-2 col-sm-12">
+                                            <div class="form-group  ">
+                                                <label>حجم</label>
+                                                <div class="input-group">
+                                                    <price-input asp-for="FristStepSeo.Volume" ></price-input>
+                                                    <span asp-validation-for="FristStepSeo.Volume" class="text-danger"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-2 col-sm-12">
+                                            <div class="form-group  ">
+                                                <label>HS Code</label>
+                                                <div class="input-group">
+                                                    <input asp-for="FristStepSeo.HSCode" type="text" class="rounded form-control">
+                                                    <span asp-validation-for="FristStepSeo.HSCode" class="text-danger"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-2 col-sm-12">
+                                            <div class="  form-group ">
+                                                <label>تاریخ ورود</label>
+                                                <div class="input-group">
+                                                    <input asp-for="FristStepSeo.ShipEntranceDateFa" type="text" class=" form-control rounded" autocomplete="off">
+                                                    <span asp-validation-for="FristStepSeo.ShipEntranceDateFa" class="text-danger"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-2 col-sm-12">
+                                            <div class="  form-group ">
+                                                <label>اسکله</label>
+                                                <div class="input-group  ">
+                                                    <select class="form-control select2" asp-for="FristStepSeo.WaterfrontId"
+                                                            asp-items="@(new SelectList(ViewBag.waterfront, "Id", "Title"))">
+                                                        @* @if (Model.FristStepSeo?.WaterfrontId == null)
+														{ *@
+                                                        <option value="">نامشخص</option>
+                                                        @* } *@
+                                                    </select>
+                                                </div>
+                                                <span asp-validation-for="FristStepSeo.WaterfrontId"
+                                                      class="text-danger"></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-2 col-sm-12">
+                                            <div class="  form-group ">
+                                                <label>نوع محموله</label>
+                                                <div class="input-group  ">
+                                                    <select class="form-control select2" asp-for="FristStepSeo.TrafficType"
+                                                            asp-items="Html.GetEnumSelectList<TrafficType>()">
+                                                    </select>
+                                                </div>
+                                                <span asp-validation-for="FristStepSeo.TrafficType"
+                                                      class="text-danger"></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-2 col-sm-12">
+                                            <div class="  form-group ">
+                                                <label>نوع ورود به بندر</label>
+                                                <div class="input-group  ">
+                                                    <select class="form-control select2" asp-for="FristStepSeo.EntryType"
+                                                            asp-items="Html.GetEnumSelectList<EntryProductType>()">
+                                                    </select>
+                                                </div>
+                                                <span asp-validation-for="FristStepSeo.EntryType"
+                                                      class="text-danger"></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-2 col-sm-12">
+                                            <div class="  form-group ">
+                                                <label>رویه گمرکی</label>
+                                                <div class="input-group  ">
+                                                    <select class="form-control select2" asp-for="FristStepSeo.CustomsProcedure"
+                                                            asp-items="Html.GetEnumSelectList<CustomsProcedure>()">
+                                                        <option value="">نامشخص</option>
+                                                    </select>
+                                                </div>
+                                                <span asp-validation-for="FristStepSeo.CustomsProcedure"
+                                                      class="text-danger"></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-4 col-sm-12">
+                                            <div class="form-group  ">
+                                                <label>توضیحات  </label>
+                                                <div class="input-group">
+                                                    <input asp-for="FristStepSeo.Description" type="text" class="rounded form-control">
+                                                    <span asp-validation-for="FristStepSeo.Description" class="text-danger"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-2 col-sm-12">
+                                            <div class="form-group  ">
+                                                <label>حمل کننده  </label>
+                                                <div class="input-group">
+                                                    <input asp-for="FristStepSeo.Carrier" type="text" class="rounded form-control">
+                                                    <span asp-validation-for="FristStepSeo.Carrier" class="text-danger"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-2 col-sm-12">
+                                            <div class="form-group  ">
+                                                <label>کشور مقصد  </label>
+                                                <div class="input-group">
+                                                    <input asp-for="FristStepSeo.DestinationCountry" type="text" class="rounded form-control">
+                                                    <span asp-validation-for="FristStepSeo.DestinationCountry" class="text-danger"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-2 col-sm-12">
+                                            <div class="form-group  ">
+                                                <label>شهر مقصد  </label>
+                                                <div class="input-group">
+                                                    <input asp-for="FristStepSeo.DestinationCity" type="text" class="rounded form-control">
+                                                    <span asp-validation-for="FristStepSeo.DestinationCity" class="text-danger"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-12 mt-4">
+                                            <div class="form-group align-content-center mb-3 text-end">
+                                                <button style="border-radius:5px; margin-top:30px" class="alert-icon px-5 btn btn-success "
+                                                        type="submit">
+                                                    ذخیره
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    @* white devider start *@
+                    <div class="col-12 border-top border-white"></div>
+                    @* white divider end *@
+
+
+                    @* @if (User.IsInRole("admin") || User.IsInRole("adminOnePort")) *@
+
+                    <div class="col-3">
+                        @if (ViewBag.IsEmpty == true)
+                        {
+                            <a class="btn btn-light w-100 py-3 fs-5" onclick="ErrorEmptyForm()">
+                                <p><i class="fa-solid fa-file fs-3  mb-2"></i></p>
+                                مدیریت اسناد مرتبط
+                            </a>
+                        }
+                        else
+                        {
+                            <a class="btn btn-light w-100 py-3 fs-5" asp-action="DocFiles" asp-controller="AllocationOfEquipment" asp-route-reternPage="0"
+                               asp-route-allocationEquId="@Model.AlloMinInfo.Id">
+                                <p><i class="fa-solid fa-file fs-3  mb-2"></i></p>
+                                مدیریت اسناد مرتبط
+                            </a>
+                        }
+                    </div>
+
+
+
+                    @if (User.IsInRole("admin") || User.IsInRole("adminOnePort") || User.IsInRole("AllocationEquToEnd"))
+                    {
+                        <div class="col-3">
+                            @if (ViewBag.IsEmpty == true)
+                            {
+                                <a onclick="ErrorEmptyForm()" class="btn btn-light w-100 py-3 fs-5">
+                                    <p><i class="fa-solid fa-boxes-packing fs-3  mb-2"></i></p>
+                                    اجاره تجهیزات ویژه
+                                </a>
+                            }
+                            else
+                            {
+                                <a asp-action="SeoAllocationPage" asp-route-seoId="@Model.SeoInfo.Id" class="btn btn-light w-100 py-3 fs-5">
+                                    <p><i class="fa-solid fa-boxes-packing fs-3  mb-2"></i></p>
+                                    اجاره تجهیزات ویژه
+                                </a>
+                            }
+
+                        </div>
+                    }
+
+                    @if (User.IsInRole("admin") || User.IsInRole("adminOnePort"))
+                    {
+                        <div class="col-3">
+                            @if (ViewBag.IsEmpty == true)
+                            {
+                                <a class="btn btn-light w-100 py-3 fs-5" onclick="ErrorEmptyForm()">
+                                    <p><i class="fa-solid fa-box-open fs-3  mb-2"></i></p>
+                                    بارشماری
+                                </a>
+                            }
+                            else
+                            {
+                                <a asp-controller="Voyage" asp-action="DetailTali"
+                                   asp-route-seoId="@Model.SeoInfo.Id" asp-route-returnPage="200"
+                                   asp-route-voyageId="@Model.SeoInfo.VoyageId" class="btn btn-light w-100 py-3 fs-5">
+                                    <p><i class="fa-solid fa-box-open fs-3  mb-2"></i></p>
+                                    بارشماری
+                                </a>
+                            }
+
+                        </div>
+                    }
+
+                    @if (User.IsInRole("admin") || User.IsInRole("adminOnePort") || User.IsInRole("FinanceUser"))
+                    {
+                        <div class="col-3">
+                            <a class="btn btn-light w-100 py-3 fs-5" asp-action="GetSeoSummary" asp-route-seoId="@Model.SeoInfo.Id">
+                                <p><i class="fa-solid fa-clipboard fs-3  mb-2"></i></p>
+                                خلاصه عملکرد
+                            </a>
+                        </div>
+                    }
+
+                    @if (User.IsInRole("admin") || User.IsInRole("adminOnePort") || User.IsInRole("FinanceUser"))
+                    {
+                        <div class="col-3">
+                            <a class="btn btn-light w-100 py-3 fs-5" asp-action="GetSeoEquipmentPerformance" asp-route-seoId="@Model.SeoInfo.Id">
+                                <p><i class="fa-solid fa-dolly fs-3  mb-2"></i></p>
+                                عملکرد تجهیزات
+                            </a>
+                        </div>
+                    }
+
+
+                    @if (User.IsInRole("admin") || User.IsInRole("adminOnePort") || User.IsInRole("FinanceUser"))
+                    {
+                        <div class="col-3">
+                            <button class="btn btn-light w-100 py-3 fs-5">
+                                <p><i class="fa-solid fa-cubes fs-3  mb-2"></i></p>
+                                خن کاری
+                            </button>
+                        </div>
+
+                        <div class="col-3">
+                            <button type="button" class="btn btn-light w-100 py-3 fs-5" onclick="openSeoProductModal('@Model.SeoInfo.Id')">
+                                <p><i class="fa-solid fa-boxes fs-3  mb-2"></i></p>
+                                مدیریت کالا
+                            </button>
+                        </div>
+
+                        <div class="col-3">
+                            @if (ViewBag.IsEmpty == true)
+                            {
+                                <a class="btn btn-light w-100 py-3 fs-5" onclick="ErrorEmptyForm()">
+                                    <p><i class="fa-solid fa-warehouse fs-3  mb-2"></i></p>
+                                    قبض انبار
+                                </a>
+                            }
+                            else
+                            {
+                                <a class="btn btn-light w-100 py-3 fs-5" asp-action="SeoWarehouseReceipt" asp-route-seoId="@Model.SeoInfo.Id">
+                                    <p><i class="fa-solid fa-warehouse fs-3  mb-2"></i></p>
+                                    قبض انبار
+                                </a>
+                            }
+                        </div>
+
+
+                        <div class="col-3">
+                            <button class="btn btn-light w-100 py-3 fs-5">
+                                <p><i class="fa-solid fa-anchor fs-3  mb-2"></i></p>
+                                جدا سازی
+                            </button>
+                        </div>
+
+                        @if (User.IsInRole("admin") || User.IsInRole("adminOnePort") || User.IsInRole("FinanceUser"))
+                        {
+                            <div class="col-3">
+                                <a class="btn btn-light w-100 py-3 fs-5" asp-controller="SeoDocument" asp-action="InsuranceList" asp-route-seoId="@Model.SeoInfo.Id">
+                                    <p><i class="fa-solid fa-shield-alt fs-3  mb-2"></i></p>
+                                    امور بیمه
+                                </a>
+                            </div>
+                            <div class="col-3">
+                                <a class="btn btn-light w-100 py-3 fs-5" asp-controller="SeoDocument" asp-action="CustomsList" asp-route-seoId="@Model.SeoInfo.Id">
+                                    <p><i class="fa-solid fa-anchor fs-3  mb-2"></i></p>
+                                    امور گمرک
+                                </a>
+                            </div>
+                        }
+
+                        <div class="col-3">
+                            @if (User.IsInRole("admin") || User.IsInRole("adminOnePort") || User.IsInRole("FinanceUser"))
+                            {
+                                @if (ViewBag.IsEmpty == true)
+                                {
+                                    <a class="btn btn-light w-100 py-3 fs-5" onclick="ErrorEmptyForm()">
+                                        <p><i class="fa-solid fa-warehouse fs-3  mb-2"></i></p>
+                                        صورت حساب ها
+                                    </a>
+                                }
+                                else
+                                {
+                                    <a class="btn btn-light w-100 py-3 fs-5" asp-controller="SeoFactor" asp-action="List" asp-route-seoId="@Model.SeoInfo.Id">
+                                        <p><i class="fa-solid fa-receipt fs-3  mb-2"></i></p>
+                                        صورت حساب ها
+                                    </a>
+                                }
+                            }
+                        </div>
+
+                        <div class="col-3">
+                            <button class="btn btn-light w-100 py-3 fs-5">
+                                <p><i class="fa-solid fa-anchor fs-3  mb-2"></i></p>
+                                ---
+                            </button>
+                        </div>
+                        <div class="col-3">
+                            <button class="btn btn-light w-100 py-3 fs-5">
+                                <p><i class="fa-solid fa-anchor fs-3  mb-2"></i></p>
+                                ---
+                            </button>
+                        </div>
+                        <div class="col-3">
+                            <button class="btn btn-light w-100 py-3 fs-5">
+                                <p><i class="fa-solid fa-anchor fs-3  mb-2"></i></p>
+                                ---
+                            </button>
+                        </div>
+                        <div class="col-3">
+                            <button class="btn btn-light w-100 py-3 fs-5">
+                                <p><i class="fa-solid fa-anchor fs-3  mb-2"></i></p>
+                                ---
+                            </button>
+                        </div>
+
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="seoProductManageModal" class="modal fade" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+	<div class="modal-dialog modal-fullscreen p-15 modal-dialog-centered modal-dialog-scrollable">
+		<div class="modal-content rounded">
+			<div class="modal-header">
+                <div class="d-flex justify-content-start align-items-center">
+                    <span>
+                        @* @if (!isModal) *@
+                        @* { *@
+                        @*     <a asp-controller="Seo" asp-action="SeoAccessPage" asp-route-seoId="@Model.SeoInfo.Id"> *@
+                        @*         <i class="fa-solid fa-right-to-bracket align-middle me-2"></i> *@
+                        @*     </a> *@
+                        @* } *@
+                        مدیریت کالاها
+                    </span>
+                    <span class="label label-primary p-2 rounded mx-2">@Model.SeoInfo.ShipShipName (@Model.SeoInfo.BillOfLadingNumber)</span>
+                    <span class="label label-info p-2 rounded mx-2">@Model.SeoInfo.TransportTypeTitle</span>
+                    <span class="label label-info p-2 rounded mx-2">تعداد  @Model.SeoInfo.CountTitle</span>
+                    
+                </div>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body" id="seoProductModalBody">
+				<div class="text-center py-5">
+					<div class="spinner-border text-primary" role="status">
+						<span class="visually-hidden">Loading...</span>
+					</div>
+					<p class="mt-3 mb-0">در حال بارگذاری ...</p>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+ 
+<div id="addProductModalContainer"></div>
+<div id="addCompanyModalContainer"></div>
+
+
+
+
+@section script {
+    <partial name="_ProductManageScripts" />
+    <partial name="~/Views/Company/_AddCompanyScript.cshtml" />
+    <partial name="~/Views/Product/_AddProductScript.cshtml" />
+
+    <script>
+
+            $(document).ready(function () {
+
+                $(".select2").select2();
+
+                kamaDatepicker('FristStepSeo_ShipEntranceDateFa', customOptions);
+                 
+            });
+             
+             
+            function ErrorEmptyForm() {
+
+                Toast.fire({
+                    icon: 'error',
+                    title: 'بخش تکمیل مشخصات را پر کنید'
+                });
+            }
+
+
+            function ErrorAllocationNotFinish() {
+
+                Toast.fire({
+                    icon: 'error',
+                    title: 'تخلیه و بارگیری به اتمام نرسیده است'
+                });
+            }
+
+            function ErrorSeoNotVoyage() {
+
+                Toast.fire({
+                    icon: 'error',
+                    title: 'این بارنامه در یک سفر تعریف نشده است'
+                });
+            }
+
+            function openSeoProductModal(seoId) {
+                const modalEl = document.getElementById('seoProductManageModal');
+                if (!modalEl) {
+                    return;
+                }
+                loadSeoProductModalContent(seoId);
+                const modalInstance = bootstrap.Modal.getOrCreateInstance(modalEl);
+                modalInstance.show();
+            }
+
+            function loadSeoProductModalContent(seoId) {
+                const body = $("#seoProductModalBody");
+                body.html(`<div class="text-center py-5">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <p class="mt-3 mb-0">در حال بارگذاری ...</p>
+                            </div>`);
+
+                $.get('@Url.Action("ProductManageModal", "Seo")', { seoId: seoId, _: Date.now() })
+                    .done(function (html) {
+                        body.html(html);
+                        if (window.seoProductManager) {
+                            try {
+                                window.seoProductManager.init('#productManageWrapper', {
+                                    mode: 'modal',
+                                    seoId: seoId,
+                                    onReload: function () { loadSeoProductModalContent(seoId); }
+                                });
+                            } catch (e) {
+                                console.error('Error initializing product manager:', e);
+                                body.html('<div class="alert alert-danger mb-0"><i class="fa-solid fa-circle-exclamation me-2"></i>خطا در راه‌اندازی مدیریت کالا: ' + e.message + '</div>');
+                            }
+                        } else {
+                            body.html('<div class="alert alert-warning mb-0"><i class="fa-solid fa-triangle-exclamation me-2"></i>سیستم مدیریت کالا یافت نشد</div>');
+                        }
+                    })
+                    .fail(function (xhr) {
+                        var errorMsg = 'خطا در دریافت اطلاعات کالا';
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            errorMsg = xhr.responseJSON.message;
+                        } else if (xhr.statusText) {
+                            errorMsg = errorMsg + ' (' + xhr.statusText + ')';
+                        }
+                        body.html('<div class="alert alert-danger mb-0"><i class="fa-solid fa-circle-exclamation me-2"></i>' + errorMsg + '</div>');
+                    });
+            }
+
+            $('#seoProductManageModal').on('hidden.bs.modal', function (e) {
+                if (e.target === this) {
+                    if (window.seoProductManager && window.seoProductManager.unbindEvents) {
+                        window.seoProductManager.unbindEvents();
+                    }
+                    if (window.seoProductManager && window.seoProductManager.reset) {
+                        window.seoProductManager.reset();
+                    }
+                    $("#seoProductModalBody").html('');
+                }
+            });
+
+    </script>
+}

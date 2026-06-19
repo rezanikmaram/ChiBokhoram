@@ -1,0 +1,63 @@
+@model TaliExportCompactPageDto
+
+<div class="d-flex justify-content-between mb-3">
+    <h5>لیست بارگیری به شناور</h5>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-sm table-bordered table-hover table-striped" id="compact-export-table">
+        <thead class="bg-primary">
+            <tr>
+                <th style="width: 5%">#</th>
+                <th>کالا</th>
+                <th>تعداد کل</th>
+                <th>شمارش محوطه</th>
+                <th>باقیمانده محوطه</th>
+                <th>شمارش اسکله</th>
+                <th>باقیمانده اسکله</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model?.List?.Any() == true)
+            {
+                int i = 1;
+                foreach (var item in Model.List)
+                {
+                    <tr>
+                        <td class="align-middle px-2 text-center">@(i++)</td>
+                        <td class="align-middle px-2 text-center">@item.ProductTitle</td>
+                        <td class="align-middle px-2 text-center">@item.Count.ToPrice() @item.ProductPackingName</td>
+                        <td class="align-middle px-2 text-center">
+                            <button class="btn btn-outline-primary px-2" onclick="ShowModalTaliList('@item.WroProductId', true)">
+                                @item.TaliCount1.ToPrice()
+                            </button>
+                        </td>
+                        <td class="align-middle px-2 text-center">@item.RemainingTaliCount1.ToPrice()</td>
+                        <td class="align-middle px-2 text-center">
+                            <button class="btn btn-outline-primary px-2" onclick="ShowModalTaliList('@item.WroProductId', false)">
+                                @item.TaliCount2.ToPrice()
+                            </button>
+                        </td>
+                        <td class="align-middle px-2 text-center">@item.RemainingTaliCount2.ToPrice()</td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="7" class="text-center">هیچ بارگیری به شناور ثبت نشده است</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<script>
+    function ShowModalTaliList(WroProductId, step) {
+        $.post("@Url.Action("GetListCounterOneProduct", "WarehouseReceiptOutbound")", { swrProductId: WroProductId, step: step, page: 1, pageSize: 50 })
+            .done(function (res) {
+                $("#generalModalContent").html(res);
+                $("#taliListModal").modal('show');
+            });
+    }
+</script>

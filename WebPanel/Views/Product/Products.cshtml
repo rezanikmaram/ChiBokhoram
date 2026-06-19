@@ -1,0 +1,163 @@
+﻿@model ProductCargoHandlingFlatPageDto
+@{
+    ViewData["Title"] = "کالا ها";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+    int i = 1;
+}
+
+
+<div class="col-lg-12">
+    <div class="card">
+        <div class="card-header pb-0">
+            <div class="mb-2">
+                <div class="d-flex justify-content-between">
+                    <h3 class="title">
+                        انواع کالا
+                    </h3>
+                    <div class="d-flex justify-content-end">
+                        <a class="btn btn-primary rounded mx-2" onclick="createCategory();"><i class="fa-solid fa-plus me-2"></i>دسته جدید</a>
+                        <a class="btn btn-success rounded" onclick="createproduct('');"><i class="fa-solid fa-plus me-2"></i> کالا جدید</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-body pt-0">
+            <div class="row">
+                <div id="data-table_filter" class="dataTables_filter col-12">
+                    <form id="formFilter" asp-action="Products" method="get">
+                        <input name="p" id="pageNumber" hidden />
+                        <div class="form-body">
+                            <div class="row gy-4">
+                                <div class="form-group col-md-3 ">
+                                    <label>جستجو</label>
+                                    <div class="input-group">
+                                        <input asp-for="Filter.Search" type="text" placeholder="نام کالا/نام سردسته" class="form-control">
+                                    </div>
+                                </div>
+                                <div class="form-group col-md-3">
+                                    <label>سرفصل</label>
+                                    <select asp-for="Filter.GeneralCargoProductType" asp-items="Html.GetEnumSelectList<GeneralCargoProductType>()" class="form-control select2">
+                                        <option value="">همه سرفصل‌ها</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-1">
+                                    <div class="d-flex justify-content-around " style="margin-top:28px">
+                                        <button style="border-radius:5px" class="alert-icon btn btn-success " type="submit"><p class="px-3">فیلتر</p></button>
+                                    </div>
+                                </div>
+                                <div class="col-md-2"></div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="table-responsive mt-4">
+                <table class="table table-sm table-bordered table-hover table-striped" id="data-table">
+                    <thead class="bg-primary">
+                        <tr>
+                            <th>ردیف</th>
+                            <th> سرفصل </th>
+                            <th> زیرگروه </th>
+                            <th> دسته بندی </th>
+                            <th> کالا </th>
+                            <th> عملیات </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                        @foreach (var item in Model.List)
+                        {
+                            <tr>
+                                <td class="align-middle">@(i++)</td>
+                                <td class="align-middle">@item.GeneralCargoProductTypeTitle</td>
+                                <td class="align-middle">@item.CargoHandlingTitle</td>
+                                <td class="align-middle">@item.ProductCategoryName</td>
+
+                                <td class="align-middle">@item.ProductName</td>
+                                <td>
+                                    <a class="btn btn-warning btn-sm btn-icon curve px-2" onclick="editproduct('@item.ProductId')"><i class="icon-pencil fs-6 align-middle"></i></a>
+                                    <a id="DeleteProduct@(i)" onclick="ShowQAlert(event,'DeleteProduct@(i)');" class="btn btn-danger btn-sm btn-icon curve btn-questions px-2"
+                                       asp-action="DeleteProduct" asp-route-ProductId="@item.ProductId" asp-route-returnPage="100">
+                                        <i class="icon-trash fa-flip-horizontal fs-6 align-middle"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+
+                    </tbody>
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+
+<div id="generalmodal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" tabindex="-1">
+    <div id="modalbody" class="modal-dialog modal-dialog-centered">
+        <partial name="_CreateProductCategory" model="@(new CreateProductCategoryDto { ReturnPage = 100 })" />
+    </div>
+</div>
+
+
+<div id="generalmodal2" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" tabindex="-1">
+    <div id="modalbody2" class="modal-dialog modal-dialog-centered">
+    </div>
+</div>
+
+@section script {
+    <script>
+        $(document).ready(function () {
+            $('.select2').select2();
+        });
+
+        function createCategory() {
+            $("#Name").val('');
+            $("#Id").val('');
+
+            if ($("#btnCategoryDeleteId"))
+                $("#btnCategoryDeleteId").html('');
+
+            $("#generalmodal").modal('show');
+
+        }
+        function editCategory(id) {
+
+            $.post("@Url.Action("GetProductCategoryById", "Product")", { categoryId: id })
+                .done(function (res) {
+                    $("#modalbody").html(res);
+                    $("#generalmodal").modal('show');
+                });
+        }
+
+
+        function createproduct(id) {
+
+            $("#ProductName").val('');
+            $("#Id").val('');
+
+
+            $.post("@Url.Action("GetNewProduct", "Product")", { categoryId: id, returnPage: 100 })
+                .done(function (res) {
+                    $("#modalbody2").html(res);
+
+                    $("#generalmodal2").modal('show');
+                });
+
+        }
+        function editproduct(id) {
+
+            $.post("@Url.Action("GetProductById", "Product")", { productId: id, returnPage: 100 })
+                .done(function (res) {
+                    $("#modalbody2").html(res);
+                    $("#generalmodal2").modal('show');
+
+                }).fail(function (xhr, status, error) {
+                        location.reload();
+                        });
+        }
+    </script>
+}
+

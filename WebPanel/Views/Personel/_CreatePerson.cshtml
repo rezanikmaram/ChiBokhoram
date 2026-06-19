@@ -1,0 +1,142 @@
+@model CreatePersonelPageDto
+
+<link href="~/assets/plugins/select2/dist/css/select2.min.css" rel="stylesheet">
+
+<form asp-action="CreatePersonel" method="post">
+	<input asp-for="CreatePeronelDto.Id" type="hidden" />
+
+	<div class="card-body pt-0">
+
+		<div class="form-body">
+			<div class="row">
+				<div class="col-sm-12">
+					<div class="form-group  ">
+						<label>نوع کاربر</label>
+						<div class="input-group">
+							<select class="form-control select2" asp-for="CreatePeronelDto.Type"
+									asp-items="Html.GetEnumSelectList<UserMobileType>().OrderBy(x => x.Text)"
+									style="width:100%!important;">
+							</select>
+						</div>
+						<span asp-validation-for="CreatePeronelDto.Type" class="text-danger"></span>
+					</div>
+				</div>
+
+				<div class="col-sm-6 mt-4">
+					<div class="form-group  ">
+						<label>نام</label>
+						<div class="input-group">
+							<input type="text" asp-for="CreatePeronelDto.FirstName" class="form-control" required>
+						</div>
+						<span asp-validation-for="CreatePeronelDto.FirstName" class="text-danger"></span>
+					</div>
+				</div>
+
+				<div class="col-sm-6 mt-4">
+					<div class="form-group  ">
+						<label>نام خانوادگی</label>
+						<div class="input-group">
+							<input type="text" asp-for="CreatePeronelDto.LastName" class="form-control" required>
+						</div>
+						<span asp-validation-for="CreatePeronelDto.LastName" class="text-danger"></span>
+					</div>
+				</div>
+
+				<div class="col-sm-6 my-3">
+					<div class="form-group  ">
+						<label>شماره موبایل</label>
+						<div class="input-group">
+							<input type="tel" class="form-control" asp-for="CreatePeronelDto.Phone" required>
+							<span asp-validation-for="CreatePeronelDto.Phone" class="text-danger"></span>
+						</div>
+					</div>
+				</div>
+
+
+				<div class="col-sm-6 my-3">
+					<div class="form-group">
+						<label>کدملی</label>
+						<div class="input-group">
+							<input type="tel" class="form-control" asp-for="CreatePeronelDto.MeliCode">
+							<span asp-validation-for="CreatePeronelDto.MeliCode" class="text-danger"></span>
+						</div>
+					</div>
+				</div>
+
+				<div class="col-sm-12">
+					<div class="form-group ">
+						<label> شرکت</label>
+						<div class="input-group">
+							<select class="form-control select2" asp-for="CreatePeronelDto.CompanyId"
+									asp-items="Model.Companies" style="width:100%!important;">
+							</select>
+							<span asp-validation-for="CreatePeronelDto.CompanyId" class="text-danger"></span>
+						</div>
+					</div>
+				</div>
+
+				<div class="col-sm-12">
+					<div class="form-group ">
+						<label>قرارداد</label>
+						<div class="input-group">
+							<select class="form-control select2" asp-for="CreatePeronelDto.ContractId"
+									asp-items="Model.Contracts" style="width:100%!important;">
+								<option value="">بدون قرارداد</option>
+							</select>
+						</div>
+					</div>
+				</div>
+
+				<div class="col-sm-12 mt-4">
+					<div class="input-group activeor">
+						<label>
+							<input type="checkbox" asp-for="CreatePeronelDto.IsActive" class="normal">
+							فعال/غیرفعال
+						</label>
+					</div>
+				</div>
+
+			</div>
+
+			<div class="modal-footer px-0 border-0">
+				<button type="submit" class="btn btn-success btn-round">ذخیره</button>
+				<button type="button" class="btn btn-danger btn-round" data-bs-dismiss="modal">بازگشت</button>
+			</div>
+		</div>
+
+
+
+
+	</div>
+
+</form>
+
+<script src="~/assets/js/validation/jquery.validate.min.js"></script>
+<script src="~/assets/js/validation/jquery.validate.unobtrusive.min.js"></script>
+
+
+<script>
+	$(document).ready(function () {
+
+		selectRefresh();
+
+	});
+
+
+	function selectRefresh() {
+
+		$("#CreatePeronelDto_CompanyId").select2({
+			dropdownParent: $('#generalmodal')
+		});
+		$("#CreatePeronelDto_Type").select2({
+			dropdownParent: $('#generalmodal')
+		});
+		$("#CreatePeronelDto_ContractId").select2({
+			dropdownParent: $('#generalmodal')
+		});
+
+		$("#CreatePeronelDto_CompanyId").trigger('change');
+		$("#CreatePeronelDto_Type").trigger('change');
+		$("#CreatePeronelDto_ContractId").trigger('change');
+	}
+</script>

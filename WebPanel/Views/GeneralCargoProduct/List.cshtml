@@ -1,0 +1,130 @@
+﻿@model GeneralCargoProductPageDto
+
+@{
+    ViewData["Title"] = "تعرفه باربری کالای غیر کانتینری";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+    int groupIndex = 1;
+}
+
+<div class="col-lg-12">
+    <div class="card">
+        <div class="card-header pb-0">
+            <div class="d-flex justify-content-between mb-4">
+                <h3 class="title">
+                    <button type="button" class="btn bg-transparent p-0 fs-6 text-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+                        <i class="fa-solid fa-right-to-bracket me-2"></i>
+                    </button>
+                    تعرفه باربری کالای غیر کانتینری
+                </h3>
+
+                <a class="btn btn-success d-md-block d-none" style="border-radius:5px" onclick="showCreateProductModal()">
+                    <i class="icon-plus"></i> ثبت زیر گروه
+                </a>
+            </div>
+            <form id="formFilter" asp-action="List" method="post">
+                <input name="p" id="pageNumber" hidden />
+                <div class="row gy-4">
+                    <div class="form-group col-md-3 m-0">
+                        <label>جستجو</label>
+                        <input asp-for="Filter.Search" class="form-control" placeholder="زیر گروه">
+                        <span asp-validation-for="Filter.Search" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-2 m-0">
+                        <button style="margin-top:30px; border-radius:5px" class="btn btn-success" type="submit">
+                            فیلتر
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="card-body pt-3">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover table-striped">
+                    <thead class="bg-primary">
+                        <tr>
+                            <th>ردیف</th>
+                            <th>سرفصل</th>
+                            <th>زیر گروه</th>
+                            <th>ویژگی ها</th>
+                            <th>تعرفه</th>
+                            <th>عملیات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var group in Model.Data)
+                        {
+                            var products = group.GeneralCargoProducts;
+                            var rowspan = products.Count;
+                            var typeName = group.GeneralCargoProductType.ToDisplay();
+
+                            for (int i = 0; i < rowspan; i++)
+                            {
+                                var product = products[i];
+                                <tr>
+                                    @if (i == 0)
+                                    {
+                                        <td class="align-middle" rowspan="@rowspan">@groupIndex</td>
+                                        <td class="align-middle" rowspan="@rowspan">@typeName</td>
+                                        groupIndex++;
+                                    }
+                                    <td class="align-middle">@product.Title</td>
+                                    <td class="align-middle">
+
+                                        @if (product.ProductPackingTitle?.Any() == true)
+                                        {
+                                            foreach (var pk in product.ProductPackingTitle)
+                                            {
+                                                <span class="bg-success my-1 border p-1 rounded">@(pk)</span>
+                                            }
+                                        }
+
+                                        @if (product.MinWeightTon > 0)
+                                        {
+                                            <span class="bg-warning my-1 border p-1 rounded">@($"حداقل تناژ: {product.MinWeightTon.ToPrice()}")</span>
+                                        }
+                                        @if (product.MaxWeightTon > 0)
+                                        {
+                                            <span class="bg-warning d-inline-block my-1 border p-1 rounded">@($"حداکثر تناژ: {product.MaxWeightTon.ToPrice()}")</span>
+                                        }
+                                    </td>
+                                    <td class="align-middle">
+                                        @if (product.GeneralCargoProductTariff != null)
+                                        {
+                                            <div>
+                                                <span>قیمت: @product.GeneralCargoProductTariff.Price.ToPrice() @product.GeneralCargoProductTariff.CurrencyTypeTitle</span><br />
+                                                <span>@product.GeneralCargoProductTariff.StartDateFa - @product.GeneralCargoProductTariff.EndDateFa</span>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <span>تعرفه ندارد</span>
+                                        }
+                                    </td>
+                                    <td class="align-middle">
+                                        <a class="btn btn-primary px-3 btn-sm" href="/GeneralCargoProductTariff/List?generalCargoProductId=@product.Id">
+                                            تعرفه‌ها
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+ 
+ 
+
+@section script {
+    <script>
+        $(document).ready(function () {
+
+            
+        });
+         
+    </script>
+}

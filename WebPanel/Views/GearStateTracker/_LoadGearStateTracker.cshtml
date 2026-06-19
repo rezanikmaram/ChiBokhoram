@@ -1,0 +1,170 @@
+﻿@model LoadGearStateTrackerDto
+
+<form id="personForm">
+    <div class="form-group" style="margin-bottom: 15px;">
+        <input type="text" id="gearSearch" class="form-control" placeholder="جستجو بر اساس نام تجهیز یا شماره اموال">
+    </div>
+    <table id="gearGrid" class="table table-striped">
+        <thead>
+            <tr>
+                <th><input type="checkbox" id="selectAll" /></th>
+                <th>نام تجهیز</th>
+                <th>وضعیت جاری</th>
+                <th>توضیحات</th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (int i = 0; i < Model.Gears.Count; i++)
+            {
+                <tr>
+                    <td>
+
+                        <input itemid="@i" type="checkbox" class="case" name="case" value="0" />
+
+
+                    </td>
+                    <td>
+                        @Model.Gears[i].GearName - @Model.Gears[i].PropertyNumber
+                        <input itemid="@i" class="gearInput" type="hidden" name="Gears[@i].GearId" value="@Model.Gears[i].GearId" />
+                    </td>
+                    <td>
+
+                        @Html.DropDownListFor(m => m.Gears[i].GearStateId, Model.States, new { name = $"Gears[{i}].GearStateId", @class = "form-control state", @itemId= i })
+
+
+                    </td>
+                    <td>
+                        <input itemid="@i" class="gearStateDescriptionInput form-control" type="text" name="Gears[@i].Description" value="@Model.Gears[i].GearStateTrackerDescription" />
+                    </td>
+
+                </tr>
+            }
+            <input class="targetDate" type="hidden" name="TargetDate" value="@Model.TargetDate" />
+        </tbody>
+    </table>
+</form>
+
+
+<script src="~/assets/js/validation/jquery.validate.min.js"></script>
+<script src="~/assets/js/validation/jquery.validate.unobtrusive.min.js"></script>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        let isSubmitting = false;
+
+        $('#selectAll').click(function (e) {
+                var isChecked = this.checked;
+            // Only select/deselect visible checkboxes
+            $('#gearGrid tbody tr:visible').find('td input:checkbox').prop('checked', isChecked);
+        });
+
+        $('.submit-button').click(function () {
+            if (isSubmitting) return;
+            isSubmitting = true;
+
+            var $button = $(this);
+
+            $button.prop('disabled', true);
+
+            var formData = $('#gearGrid').find('input.gearInput, input.targetDate, input.gearStateDescriptionInput, select').serializeArray();
+
+            formData = formData.map(function (item) {
+                if (item.value === "") {
+                    item.value = null; // Set empty strings to null
+                }
+                return item;
+            });
+
+
+            $.ajax({
+                url: '@Url.Action("UpdateGearStateTracker", "GearStateTracker")',
+                type: 'POST',
+                data: formData,
+                success: function (response) {
+                    isSubmitting = false;
+                    $button.prop('disabled', false);
+                   window.location.reload()
+                },
+                error: function () {
+                    alert('در ثبت کردن فرم خطایی پیش آمده است');
+                    isSubmitting = false;
+                    $button.prop('disabled', false);
+                }
+            });
+        });
+    });
+
+
+    function saveOnSelectedItems(){
+        var table = $('#gearGrid');
+        var inputcheckboxes = $('td input[type=checkbox]:checked', table);
+
+        inputcheckboxes.each(function (idx, inputCheckBox) {
+            var inputCheckBoxId = $(inputCheckBox).attr("itemid");
+
+            var inputState = $(`select[itemid="${inputCheckBoxId}"].state`).first();
+            var inputDescription = $(`input[itemid="${inputCheckBoxId}"].gearStateDescriptionInput`).first();
+            var modalDescription = $('#stateDescription').val();
+            if (modalDescription != undefined && modalDescription != '') {
+                inputDescription.val(modalDescription)
+            }
+            inputState.val($('#stateDropDown').val());
+
+            $('#changeStateModal').modal('hide')
+            
+        });
+
+        
+       
+    }
+
+    $('#gearSearch').on('keyup', function () {
+        var searchText = $(this).val().toLowerCase();
+
+        $('#gearGrid tbody tr').each(function () {
+            var gearInfo = $(this).find('td:eq(1)').text().toLowerCase(); // Second column contains GearName - PropertyNumber
+
+            if (gearInfo.indexOf(searchText) === -1) {
+                $(this).hide();
+            } else {
+                $(this).show();
+            }
+        });
+    });
+
+    function setDataFromPreviousDate() {
+
+        Swal.fire({
+            title: "آیا مطمعن هستید وضعیت های روز قبل را در امروز بارگذاری بفرمایید",
+            showDenyButton: true,
+            //showCancelButton: true,
+            confirmButtonText: "ذخیره",
+            denyButtonText: `انصراف`
+        }).then((result) => {
+            /* Read more about isConfirmed, isDenied below */
+            if (result.isConfirmed) {
+                var formData = new FormData()
+                formData.append("targetDate", currentDateSelected);
+
+                $.ajax({
+                    url: '@Url.Action("UpdateFromPreviousDate", "GearStateTracker")',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (response) {
+                        window.location.reload()
+                    },
+                    error: function () {
+                        alert('در ثبت کردن فرم خطایی پیش آمده است');
+                    }
+                });
+            } 
+        });
+
+
+        
+    }
+</script>

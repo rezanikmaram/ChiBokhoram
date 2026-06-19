@@ -1,0 +1,234 @@
+﻿@model AllocationEquPaymentsPageDto
+@{
+	ViewData["Title"] = "پرداختی ها";
+	Layout = "~/Views/Shared/AdminLayout.cshtml";
+	int i = ((Model.Payments?.PageNumber - 1) * Model.Payments?.PageSize) + 1 ?? 1;
+}
+
+
+@section style {
+
+}
+
+
+<div class="col-lg-12">
+	<div class="card p-4 bg-white box border shadow">
+		<div class="d-flex justify-content-between">
+			<h3 class="title">
+				<i class="icon-frane"></i> لیست واریزی ها
+			</h3>
+			<div class="d-none d-md-block">
+				<a class="btn btn-primary rounded"
+				   onclick="DownloadPaymentsFile()"><i class="fa-solid fa-download me-2"></i>دانلود فایل اکسل  </a>
+
+				<button type="submit" form="formFilter" formaction="GetAllocationPaymentsCompactFile"
+				        style="border-radius:5px; margin:0px 10px" class="btn btn-primary">
+					<i class="fa-solid fa-download me-2"></i>دانلود فایل اکسل خلاصه
+				</button>
+			</div>
+			
+			<!-- /.portlet-title -->
+			<!-- /.portlet-heading -->
+			<!-- /.portlet-body -->
+		</div>
+		<a class="btn btn-primary rounded w-100 my-3 d-md-none d-block"
+		   onclick="DownloadPaymentsFile()"><i class="fa-solid fa-download me-2"></i>دانلود فایل اکسل  </a>
+
+		<button type="submit" form="formFilter" formaction="GetAllocationPaymentsCompactFile"
+		        style="border-radius:5px;" class="btn btn-primary w-100 my-3 d-md-none d-block">
+			دانلود فایل اکسل خلاصه
+		</button>
+		<div class="portlet-body pt-4">
+			<form id="formFilter" asp-action="Payments" asp-route-p="" method="post">
+				<input name="p" id="pageNumber" hidden />
+				<div class="form-body ">
+
+					<div class="row gy-4">
+						<div class="col-md-3 col-sm-12">
+							<div class="form-group ">
+								<label>شرکت</label>
+								<div class="input-group">
+									<select class="form-control select2"
+											asp-for="Filter.CompanyId"
+											asp-items="Model.Companies">
+										<option value="">همه شرکت ها</option>
+									</select>
+								</div>
+							</div>
+						</div>
+
+						<div class="col-md-3 col-sm-12">
+							<div class="form-group ">
+								<label>نوع پرداخت</label>
+								<div class="input-group">
+									<select class="form-control select2"
+											asp-for="Filter.FileType"
+											asp-items="Model.FileTypes">
+									</select>
+								</div>
+							</div>
+						</div>
+
+
+						<div class="col-md-2 col-sm-12">
+							<div class="form-group">
+								<label>از تاریخ:</label>
+								<div class="input-group">
+									<input asp-for="Filter.DateFrom" type="text" class=" form-control" autocomplete="off">
+									<span asp-validation-for="Filter.DateFrom" class="text-danger"></span>
+								</div>
+							</div>
+						</div>
+
+
+						<div class="col-md-2 col-sm-12">
+							<div class="form-group">
+								<label>تا تاریخ:</label>
+								<div class="input-group">
+									<input asp-for="Filter.DateTo" type="text" class=" form-control" autocomplete="off">
+									<span asp-validation-for="Filter.DateTo" class="text-danger"></span>
+								</div>
+							</div>
+						</div>
+
+						<div class="form-group col-md-2 ">
+							<button style="border-radius:5px; margin-top:30px" class="alert-icon px-3 btn btn-success "
+									type="submit">
+								فیلتر
+							</button>
+						</div>
+
+					</div>
+
+
+
+
+
+
+
+
+
+				</div>
+			</form>
+
+			<div class="table-responsive mt-4">
+				<table class="table table-bordered table-hover table-striped" id="data-table">
+					<thead>
+						<tr>
+							<th>ردیف</th>
+
+							<th>تاریخ</th>
+							<td>شرکت</td>
+							<td>کشتی</td>
+							<td>نوع</td>
+							<td>شرح</td>
+							<td>مبلغ واریزی (ريال)</td>
+
+
+							<td>عملیات</td>
+						</tr>
+					</thead>
+					<tbody>
+						@foreach (var item in Model?.Payments?.Data)
+						{
+							<tr>
+								<td class="align-middle">@(i++)</td>
+								<td class="align-middle" dir="ltr">@item.DateFa</td>
+								<td class="align-middle">@item.CompanyName</td>
+								<td class="align-middle">@item.ShipName</td>
+								<td class="align-middle">@item.FileTypeTitle</td>
+								<td class="align-middle">@item.Description</td>
+								<td class="align-middle">@item.PriceTitle</td>
+
+
+								<td class="align-middle">
+									<a target="_blank" class="btn btn-primary rounded mx-2"
+									   asp-action="GetFileById" asp-controller="AllocationOfEquipment"
+									   asp-route-docFileId="@item.Id">دانلود  </a>
+								</td>
+							</tr>
+
+						}
+
+					</tbody>
+				</table>
+				<div class="mt-4">
+					<cs-pager cs-paging-pagesize="@Model.Payments.PageSize"
+							  cs-paging-pagenumber="@Model.Payments.PageNumber"
+							  cs-paging-totalitems="@Model.Payments.TotalItems"
+							  cs-paging-maxpageritems="10"
+							  cs-pagenumber-param="p"
+							  cs-show-first-last="true"
+							  cs-suppress-empty-nextprev="true"
+							  cs-suppress-inactive-firstlast="true"
+							  cs-show-numbered="true"
+							  cs-first-page-text="ابتدا"
+							  cs-last-page-text="انتها"
+							  cs-next-page-title="بعدی"
+							  cs-previous-page-title="قبلی"
+							  cs-first-page-title="ابتدا"
+							  cs-last-page-title="انتها"
+							  cs-next-page-text="بعدی"
+							  cs-previous-page-text="قبلی"
+							  cs-pager-li-current-class="page-item active"
+							  cs-pager-li-other-class="page-item"
+							  cs-pager-li-non-active-class="page-item disabled"
+							  cs-pager-link-current-class="page-link"
+							  cs-pager-link-other-class="page-link"
+							  asp-controller="Equipment"
+							  asp-action="Failure">
+					</cs-pager>
+				</div>
+
+			</div>
+			<!-- /.table-responsive -->
+		</div>
+		<!-- /.portlet -->
+	</div>
+
+
+
+</div>
+
+
+@section script {
+
+	<script>
+		$(document).ready(function () {
+
+			$("#Filter_CompanyId").select2().trigger('change');
+			$("#Filter_FileType").select2().trigger('change');
+		});
+
+
+		kamaDatepicker('Filter_DateFrom', customOptions);
+		kamaDatepicker('Filter_DateTo', customOptions);
+
+
+
+		$(".page-link").click(function (event) {
+			event.preventDefault(); // غیرفعال کردن عملکرد پیشفرض href
+
+			var hrefValue = $(this).attr("href");
+			$("#pageNumber").val(hrefValue.split("p=")[1]);
+			$("#formFilter").submit();
+		});
+
+		function DownloadPaymentsFile() {
+			let companyId = $("#Filter_CompanyId").val();
+			let fileType = $("#Filter_FileType").val();
+			let dateFrom = $("#Filter_DateFrom").val();
+			let dateTo = $("#Filter_DateTo").val();
+
+			let baseUrl = "@Url.Action("GetAllocationPaymentsFile", "AllocationOfEquipment")";
+			baseUrl = baseUrl + "?companyId=" + companyId;
+			baseUrl = baseUrl + "&FileType=" + fileType;
+			baseUrl = baseUrl + "&DateFrom=" + dateFrom;
+			baseUrl = baseUrl + "&DateTo=" + dateTo;
+			window.location = baseUrl;
+
+		}
+	</script>
+}
+
+

@@ -1,0 +1,89 @@
+﻿@model CreateShipDto
+
+<form asp-action="CreateShip" method="post">
+    <input asp-for="Id" type="hidden" />
+
+    <div class="card-body pt-0">
+
+        <div class="form-body">
+            <div class="row">
+
+                <div class="col-sm-6 my-3">
+                    <div class="form-group  ">
+                        <label> نام کشتی</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" asp-for="ShipName" required>
+                            <span asp-validation-for="ShipName" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-sm-6 my-3">
+                    <div class="form-group">
+                        <label> شناسه IMO  </label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" asp-for="ImoNumber">
+                            <span asp-validation-for="ImoNumber" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-sm-6 my-3">
+                    <div class="form-group  ">
+                        <label>طول  </label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" asp-for="ShipLength"   placeholder="X">
+                            <span asp-validation-for="ShipLength" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-sm-6 my-3">
+                    <div class="form-group">
+                        <label>عرض  </label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" asp-for="ShipWidth" placeholder="Y">
+                            <span asp-validation-for="ShipWidth" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-sm-6 my-3">
+                    <div class="form-group">
+                        <label> درفت سینه  </label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" asp-for="BreastAugmentation" placeholder="Y">
+                            <span asp-validation-for="BreastAugmentation" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-sm-6 my-3">
+                    <div class="form-group">
+                        <label>درفت پاشنه  </label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" asp-for="HeelAugmentation" placeholder="Y">
+                            <span asp-validation-for="HeelAugmentation" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="modal-footer px-0 border-0">
+                <button type="submit" class="btn btn-success btn-round">ذخیره</button>
+                <button type="button" class="btn btn-danger btn-round" data-bs-dismiss="modal">بازگشت</button>
+            </div>
+        </div>
+
+
+
+
+    </div>
+
+</form>
+
+  <script src="~/assets/js/validation/jquery.validate.min.js"></script>
+ <script src="~/assets/js/validation/jquery.validate.unobtrusive.min.js"></script>
+
+

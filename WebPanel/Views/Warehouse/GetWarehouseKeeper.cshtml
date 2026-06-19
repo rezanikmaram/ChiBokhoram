@@ -1,0 +1,105 @@
+﻿@model List<CreatePeronelDto>
+@{
+    ViewData["Title"] = "انباردار ها";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+    int i = 1;
+}
+
+<div class="col-lg-12">
+    <div class="card">
+        <div class="card-header">
+            <div class="d-flex">
+                <div class="d-flex justify-content-between">
+                    <h3 class="title">
+                        <a asp-controller="Company" asp-action="Details" asp-route-companyId="@ViewBag.companyId"><i class="fa-solid fa-right-to-bracket me-2"></i></a>
+                        <i class="icon-frane"></i> انبار دارهای شرکت (@ViewBag.company)
+                    </h3>
+                </div>
+               
+
+
+                <!-- /.portlet-title -->
+                <div class="buttons-box">
+                    
+                        <i class="icon-size-fullscreen"></i>
+                        <div class="paper-ripple">
+                            <div class="paper-ripple__background"></div>
+                            <div class="paper-ripple__waves"></div>
+                        </div>
+                </div>
+                <!-- /.buttons-box -->
+            </div>
+            <!-- /.portlet-heading -->
+            
+            <!-- /.portlet-body -->
+        </div>
+        <div class="card-body pt-0">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover table-striped" id="data-table">
+                    <thead class="bg-primary">
+                        <tr>
+                            <th>ردیف</th>
+                            <th>انباردار</th>
+                            <th>تلفن</th>
+                            <td>کد ملی</td>
+
+                            <th>وضعیت</th>
+                           @*  <td>عملیات</td> *@
+                        </tr>
+                    </thead>
+                    <tbody>
+
+
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td class="align-middle" >@(i++)</td>
+                                <td class="align-middle" >@item.FirstName @item.LastName</td>
+                                <td class="align-middle" >@item.Phone</td>
+                                <td class="align-middle" >@item.MeliCode</td>
+
+                                <td>
+                                    <span class="label px-2 py-1 rounded label-@(item.IsActive?"success":"danger")">@(item.IsActive ? "فعال" : "غیر فعال")</span>
+                                </td>
+                               @*  <td>
+
+                                    <div class="btn-group">
+
+                                        <div class="btn-group">
+                                            <button type="button" class="btn btn-default dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                                <i class="icon-options"></i>
+                                                <i class="icon-arrow-down"></i>
+                                                <div class="paper-ripple"><div class="paper-ripple__background" style="opacity: 0.00864;"></div><div class="paper-ripple__waves"></div></div>
+                                            </button>
+                                            <ul class="dropdown-menu" style="">
+                                                <li>
+                                                    <a asp-controller="Personel" asp-action="CreatePerson" asp-route-personId="@item.Id"><i class="icon-pencil"></i> ویرایش</a>
+                                                </li>
+                                                <li>
+                            <a id="DeleteCompany@(i)" onclick="ShowQAlert(event,'DeleteCompany@(i)');" asp-controller="Company" asp-action="DeleteCompany" asp-route-companyId="@item.Id"><i class="icon-trash fa-flip-horizontal"> </i> حذف</a>
+                                                </li>
+                                                <li>
+                                                    <a asp-action="EquipmentCompany" asp-route-companyId="@item.Id">مدیریت تجهیزات</a>
+                                                </li>
+
+                                            </ul>
+                                        </div><!-- /.btn-group -->
+                                    </div>
+                                </td> *@
+                            </tr>
+
+                        }
+
+
+
+                    </tbody>
+                </table>
+
+
+            </div>
+            <!-- /.table-responsive -->
+        </div>
+        <!-- /.portlet -->
+    </div>
+</div>
+

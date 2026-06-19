@@ -1,0 +1,49 @@
+@model TaliGearListPageDto
+
+@{
+    int row = 1;
+}
+
+<div id="taliGearListModal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" tabindex="-1">
+	<div class="modal-dialog modal-xl modal-dialog-centered">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h4 class="modal-title">لیست تجهیزات استفاده شده - بارنامه @Model.BillOfLadingNumberTitle (@Model.Product?.ProductName)</h4>
+				<button type="button" class="close btn-close rounded border" data-bs-dismiss="modal"></button>
+			</div>
+			<div class="modal-body" id="modalbody">
+
+				<div class="table-responsive">
+					<table class="table table-sm table-bordered table-hover table-striped" id="data-table">
+<thead class="bg-primary">
+							<tr>
+								<th class="px-1 text-center">#</th>
+								<th class="px-1 text-center">تاریخ</th>
+								<th class="px-1 text-center">نوع شمارش</th>
+								<th class="px-1 text-center">@(Model.IsSelfTransported ? "شماره شاسی" : "کامیون")</th>
+								<th class="px-1 text-center">گروه کارگری</th>
+								<th class="px-1 text-center">دسته بندی تجهیزات</th>
+								<th class="px-1 text-center">تجهیزات استفاده شده</th>
+							</tr>
+						</thead>
+						<tbody>
+@foreach (var item in Model.List)
+							{
+								<tr>
+									<td class="align-middle px-2 text-center">@(row++)</td>
+									<td class="align-middle px-2 text-center" dir="ltr">@item.DateFa</td>
+									<td class="align-middle px-2 text-center">@item.TaliTypeTitle</td>
+									<td class="align-middle px-2 text-center">@(Model.IsSelfTransported ? Model.VehicleIdentificationNumber : item.TruckTitle)</td>
+									<td class="align-middle px-2 text-center">@item.LaborWorkingGroupName</td>
+									<td class="align-middle px-2 text-center">@item.GearCategoriesTitle</td>
+									<td class="align-middle px-2 text-center">@item.GearNamesTitle</td>
+								</tr>
+							}
+						</tbody>
+					</table>
+				</div>
+
+			</div>
+		</div>
+	</div>
+</div>

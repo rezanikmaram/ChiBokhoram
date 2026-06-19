@@ -1,0 +1,23 @@
+﻿@model ProductManageDto
+
+@{
+	ViewData["Title"] = "مدیریت کالاها";
+	Layout = "~/Views/Shared/AdminLayout.cshtml";
+	ViewBag.IsModal = false;
+}
+
+@await Html.PartialAsync("_ProductManagePartial", Model)
+
+@section script {
+	<partial name="_ProductManageScripts" />
+	<script>
+		$(document).ready(function () {
+			if (window.seoProductManager) {
+				window.seoProductManager.init('#productManageWrapper', {
+					mode: 'page',
+					seoId: '@Model.SeoInfo.Id'
+				});
+			}
+		});
+	</script>
+}

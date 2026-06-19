@@ -1,0 +1,128 @@
+@model Entities.DTOs.Web.Hirman.VoyageWeightReportPageDto
+@{
+    ViewData["Title"] = "گزارش وضعیت تناژ شناور";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+    int i = 1;
+}
+
+@* <div class="card p-2 mb-4"> *@
+@*     <div class="row"> *@
+@*         <div class="col-md-1 align-middle align-content-center px-4"> *@
+@*             <i class="fa-solid fa-circle-info fs-4 align-middle"></i> *@
+@*         </div> *@
+@*         <div class="col-md-11 px-5"> *@
+@*             <div class="d-flex justify-content-between align-items-center"> *@
+@*                 <div class="glass-bg px-2 py-1"> *@
+@*                     <p class="fs-6 m-0"> @Model.VogageInfo?.ShipShipName </p> *@
+@*                 </div> *@
+@*                 <div> *@
+@*                     <p class="fs-6 m-0"> @Model.VogageInfo?.CompanyShippingCompanyName </p> *@
+@*                 </div> *@
+@*                 <div> *@
+@*                     <p class="fs-6 m-0">شماره سفر: @Model.VogageInfo?.VoyageNumber</p> *@
+@*                 </div> *@
+@*                 <div> *@
+@*                     <p class="fs-6 m-0">شماره دریایی: @Model.VogageInfo?.PmoNumber</p> *@
+@*                 </div> *@
+@*             </div> *@
+@*         </div> *@
+@*     </div> *@
+@* </div> *@
+
+<div class="card">
+    <div class="card-header pb-3 d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center">
+            <a asp-action="VoyageSeo" asp-route-voyageId="@Model.VoyageId" class="fs-6 text-dark">  <i class="fa-solid fa-right-to-bracket align-middle me-2 text-primary"></i>  </a>
+            <h3 class="title m-0">
+                گزارش وضعیت تناژ شناور 
+            </h3>
+            <div class="bg-info p-1 rounded ms-3 me-4 ">تناژ کل شناور: <strong>@(Model.VogageInfo?.Tonnage?.ToString("N0") ?? "-")</strong></div>
+            <div class="bg-info p-1 rounded mx-2">تعداد عملیات (SEO): <strong>@(Model.Items?.Count.ToString("N0"))</strong></div>
+        </div>
+        <div class="d-flex gap-2">
+            <a asp-action="ExportVoyageWeightReportExcel"
+               asp-route-voyageId="@Model.VoyageId"
+               asp-route-dateFromFa="@Model.Filter?.DateFromFa"
+               asp-route-dateToFa="@Model.Filter?.DateToFa"
+               class="btn btn-success">خروجی اکسل</a>
+        </div>
+    </div>
+    <div class="card-body pt-0">
+        <form id="formFilter" asp-action="VoyageWeightReport" method="get">
+            <input name="Filter.VoyageId" value="@Model.VoyageId" hidden />
+            <div class="form-body">
+                <div class="row gy-4">
+                    <div class="col-md-3 col-sm-12">
+                        <div class="form-group">
+                            <label>از تاریخ:</label>
+                            <div class="input-group d-flex flex-column">
+                                <input type="text" class="form-control" name="Filter.DateFromFa" id="DateFromFa" autocomplete="off" placeholder="از تاریخ" value="@Model.Filter?.DateFromFa">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-sm-12">
+                        <div class="form-group">
+                            <label>تا تاریخ:</label>
+                            <div class="input-group d-flex flex-column">
+                                <input type="text" class="form-control" name="Filter.DateToFa" id="DateToFa" autocomplete="off" placeholder="تا تاریخ" value="@Model.Filter?.DateToFa">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group col-md-2">
+                        <button style="border-radius:5px; margin-top:30px" class="alert-icon px-3 btn btn-success" type="submit">
+                            فیلتر
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+        
+        <div class="table-responsive mt-3">
+            <table class="table table-sm table-bordered table-hover table-striped" id="data-table">
+                <thead class="bg-primary">
+                    <tr>
+                        <th class="px-1 text-center">#</th>
+                        <th class="px-1 text-center">شماره سفر</th>
+                        <th class="px-1 text-center">شماره بارنامه (B/L)</th>
+                        <th class="px-1 text-center">تناژ کل شناور</th>
+                        <th class="px-1 text-center">تناژ کل بارنامه</th>
+                        <th class="px-1 text-center">تناژ باسکول (کیلوگرم)</th>
+                        <th class="px-1 text-center">اختلاف (کیلوگرم)</th>
+                        <th class="px-1 text-center">از تاریخ</th>
+                        <th class="px-1 text-center">تا تاریخ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Items != null)
+                    {
+                        foreach (var item in Model.Items)
+                        {
+                            <tr>
+                                <td class="align-middle px-2 text-center">@(i++)</td>
+                                <td class="align-middle px-2 text-center">@Model.VogageInfo?.VoyageNumber</td>
+                                <td class="align-middle px-2 text-center">@item.BlNumber</td>
+                                <td class="align-middle px-2 text-center">@((Model.VogageInfo?.Tonnage)?.ToString("N0") ?? "-")</td>
+                                <td class="align-middle px-2 text-center">@item.ShipTonnage.ToString("N0")</td>
+                                <td class="align-middle px-2 text-center">@item.BaskoolTonnage.ToString("N0")</td>
+                                <td class="align-middle px-2 text-center">@item.Difference.ToString("N0")</td>
+                                <td class="align-middle px-2 text-center">@item.DateFromFa</td>
+                                <td class="align-middle px-2 text-center">@item.DateToFa</td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section script {
+    <script src="~/assets/js/validation/jquery.validate.min.js"></script>
+    <script src="~/assets/js/validation/jquery.validate.unobtrusive.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            kamaDatepicker('DateFromFa', customOptions);
+            kamaDatepicker('DateToFa', customOptions);
+        });
+    </script>
+}

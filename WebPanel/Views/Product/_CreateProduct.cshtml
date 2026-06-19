@@ -1,0 +1,107 @@
+﻿@model CreateProductPageDto
+ 
+<div class="modal-content">
+    <div class="modal-header">
+        <h4 class="modal-title mx-2">کالا</h4>
+        <button type="button" class="close btn-close rounded border" data-bs-dismiss="modal"></button>
+    </div>
+    <div class="modal-body">
+        <form asp-action="CreateProduct" method="post">
+            <input asp-for="CreateDto.Id" type="hidden" />
+            <input asp-for="CreateDto.ReturnPage" type="hidden" />
+             
+            <div class="card-body pt-0 px-0">
+                <div class="row gy-4">
+                    <div class="col-md-6 mt-3">
+                        <label>دسته بندی</label>
+                        <div class="input-group ">
+                            <select class="form-control generalmodal2  select2 w-100" asp-for="CreateDto.ProductCategoryId"
+                                    asp-items="Model.Categories">
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mt-3">
+                        <label style="">شماره</label>
+                        <div class="input-group">
+                            <input asp-for="CreateDto.Number" type="text" class="form-control rounded w-100">
+                        </div>
+                    </div>
+                     
+                    <div class="col-md-12">
+                        <label style="">عنوان</label>
+                        <div class="input-group">
+                            <input asp-for="CreateDto.ProductName" type="text" class="form-control rounded w-100">
+                        </div>
+                    </div>
+
+                    <div class="col-md-12 mt-3">
+                        <label>سرفصل کالا</label>
+                        <div class="input-group ">
+                            <select class="form-control generalmodal2  select2 w-100" asp-for="CreateDto.GeneralCargoProductDataId"
+                                    asp-items="Model.GeneralCargoProducts">
+                            </select>
+                        </div>
+                    </div>
+                    
+
+                    <div class="col-md-6 mt-3">
+                        <label>نوع چک لیست</label>
+                        <div class="input-group ">
+                            <select class="form-control generalmodal2  select2 w-100" asp-for="CreateDto.CheckListId"
+                                    asp-items="Model.CheckLists">
+                                <option value="">بدون چک لیست</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label>تعداد روز منقضی</label>
+                        <div class="input-group w-100">
+                            <input asp-for="CreateDto.ExpireDayCount" type="number" class="form-control w-100 rounded" value="@Model.CreateDto.ExpireDayCount" />
+                        </div>
+                    </div>
+                     
+                    <div class="col-12">
+                        <div class="d-flex justify-content-end" style="margin-top: 28px;">
+                            <button type="submit" class="btn btn-info d-flex ms-2 align-items-center p-1 px-2">
+                                <i class="icon-check me-2"></i>
+                                <p class="m-1">ذخیره</p>
+                                <div class="paper-ripple"><div class="paper-ripple__background"></div><div class="paper-ripple__waves"></div></div>
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </form>
+    </div>
+
+    @if (Model.CreateDto.Id != Guid.Empty)
+    {
+        <div class="modal-footer justify-content-around">
+
+            <span>آیا میخواهید این کالا را حذف کنید؟</span>
+            <a id="Deleteproduct@(Model.CreateDto.Id)" onclick="ShowQAlert(event,'Deleteproduct@(Model.CreateDto.Id)' , 'حذف کالا' , 'آیا از حذف این کالا مطمئن هستید');"
+               class="btn btn-danger px-2 btn-sm btn-icon curve btn-questions my-1"
+               asp-action="DeleteProduct" asp-route-productId="@Model.CreateDto.Id">
+                <i class="icon-trash fs-6 align-middle fa-flip-horizontal"></i>
+                حذف کالا
+            </a>
+
+        </div>
+    }
+
+</div>
+
+
+<script src="~/assets/js/validation/jquery.validate.min.js"></script>
+<script src="~/assets/js/validation/jquery.validate.unobtrusive.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $('select[class*="generalmodal2"].select2').select2({
+            dropdownParent: $('#generalmodal2')
+        });
+    })
+
+</script>

@@ -1,0 +1,218 @@
+﻿@model CounterUnloadServicePageDto
+@{
+    ViewData["Title"] = "سرویس های بارشمار";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+    int i = ((Model.UnloadServices.PageNumber - 1) * Model.UnloadServices.PageSize) + 1;
+    var seoId = (Guid)ViewBag.seoId;
+
+}
+
+@section style {
+    
+}
+
+<div class="col-lg-12">
+    <div class="card">
+        <div class="card-header">
+            <div class="d-flex">
+                <div class="d-flex justify-content-between">
+                    <h3 class="title">
+                        <i class="icon-frane"></i>
+                        <a asp-controller="Seo" asp-action="SeoPortOperatorPage" asp-route-seoId="@((Guid)ViewBag.seoId)"><i class="fa-solid fa-right-to-bracket me-2"></i></a>
+                        سرویس های بارشمار
+                        <span class="label rounded p-2 mx-2 label-primary">@ViewBag.seocode</span>
+                    </h3>
+                    <span class="label p-2 rounded label-info align-content-center">@(((TransportType)ViewBag.seotype).ToDisplay(DisplayProperty.Name))</span>
+                    @if (Model.UnloadServices.Data.Count > 0)
+                    {
+                        <a class="btn btn-success label" asp-controller="Report" asp-action="CounterService" asp-route-seoId="@seoId">دریافت فایل Excel</a>
+                    }
+                </div>
+                @* <a class="alert-icon btn btn-success round" asp-controller="Company" asp-action="CreateCompany">شرکت جدید</a>*@
+
+
+                <!-- /.portlet-title -->
+                <div class="buttons-box">
+
+                    <i class="icon-size-fullscreen"></i>
+                    <div class="paper-ripple">
+                        <div class="paper-ripple__background"></div>
+                        <div class="paper-ripple__waves"></div>
+                    </div>
+                </div>
+                <!-- /.buttons-box -->
+            </div>
+            <!-- /.portlet-heading -->
+
+        </div>
+        <div class="card-body pt-0">
+            <div class="table-responsive vh-100">
+                <div class=" no-footer">
+
+                    <div id="data-table_filter" class="dataTables_filter mb-5">
+                        <form id="formFilter" asp-action="Counter" asp-route-seoId="@Model.FilterDto.SeoId" method="post">
+                            <input name="p" id="pageNumber" hidden />
+                            <input asp-for="FilterDto.SeoId" type="hidden" />
+                            <div class="form-body">
+                                <div class="row">
+                                    <div class="form-group col-md-2 ">
+                                        <label>جستجو</label>
+                                        <div class="input-group">
+                                            <input asp-for="FilterDto.Search" type="text" placeholder="کامیون/راننده/انبار" class="form-control">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group col-md-2">
+                                        <label> از تاریخ:</label>
+                                        <div class="input-group">
+
+                                            <input asp-for="FilterDto.FromDate" type="text" class=" form-control">
+                                            <span asp-validation-for="FilterDto.FromDate" class="text-danger"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group col-md-2">
+                                        <label> از ساعت:</label>
+                                        <div class="input-group clockpicker">
+                                            <input type="text" class="form-control" asp-for="FilterDto.FromTime">
+                                            <span class="input-group-addon">
+                                                <span class="glyphicon glyphicon-time"></span>
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group col-md-2">
+                                        <label>تا تاریخ:</label>
+                                        <div class="input-group">
+                                            <input asp-for="FilterDto.ToDate" type="text" class=" form-control">
+                                            <span asp-validation-for="FilterDto.ToDate" class="text-danger"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group col-md-2">
+                                        <label> تا ساعت:</label>
+                                        <div class="input-group clockpicker">
+
+                                            <input type="text" class="form-control" asp-for="FilterDto.ToTime">
+                                            <span class="input-group-addon">
+                                                <span class="glyphicon glyphicon-time"></span>
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-2">
+                                        <div class="d-flex justify-content-around " style="margin-top:28px">
+                                            <button style="border-radius:5px" class="alert-icon btn btn-success " type="submit"><p class="px-3">فیلتر</p></button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <table class="table table-bordered table-hover table-striped" id="data-table">
+                        <thead class="bg-primary">
+                            <tr>
+                                <th>#</th>
+                                <th>کامیون</th>
+                                <td>تاریخ</td>
+
+                                <td>ساعت</td>
+                                <td>کاربر بارشمار</td>
+                                <td>راننده</td>
+                                <td>انبار</td>
+
+                            </tr>
+                        </thead>
+                        <tbody>
+
+
+                            @foreach (var item in Model.UnloadServices.Data)
+                            {
+                                <tr>
+                                    <td class="align-middle">@(i++)</td>
+                                    <td class="align-middle">@item.TruckNumberId</td>
+                                    <td class="align-middle">@item.DateServiceFa</td>
+
+                                    <td class="align-middle">@item.TimeService</td>
+
+                                    <td class="align-middle">@item.UserBarshomarName</td>
+                                    <td class="align-middle">@item.DriverName</td>
+                                    <td class="align-middle">@item.WarehouseName</td>
+
+                                </tr>
+
+                            }
+
+
+
+                        </tbody>
+                    </table>
+                    <div class="mt-4">
+                        <cs-pager cs-paging-pagesize="@Model.UnloadServices.PageSize"
+                                  cs-paging-pagenumber="@Model.UnloadServices.PageNumber"
+                                  cs-paging-totalitems="@Model.UnloadServices.TotalItems"
+                                  cs-paging-maxpageritems="20"
+                                  cs-pagenumber-param="p"
+                                  asp-route-seoId="@seoId"
+                                  cs-show-first-last="true"
+                                  cs-suppress-empty-nextprev="true"
+                                  cs-suppress-inactive-firstlast="true"
+                                  cs-show-numbered="true"
+                                  cs-first-page-text="ابتدا"
+                                  cs-last-page-text="انتها"
+                                  cs-next-page-title="بعدی"
+                                  cs-previous-page-title="قبلی"
+                                  cs-first-page-title="ابتدا"
+                                  cs-last-page-title="انتها"
+                                  cs-next-page-text="بعدی"
+                                  cs-previous-page-text="قبلی"
+                                  cs-pager-li-current-class="page-item active"
+                                  cs-pager-li-other-class="page-item"
+                                  cs-pager-li-non-active-class="page-item disabled"
+                                  cs-pager-link-current-class="page-link"
+                                  cs-pager-link-other-class="page-link"
+                                  asp-controller="SeoService"
+                                  asp-action="Counter">
+                        </cs-pager>
+                    </div>
+                </div>
+
+
+            </div>
+            <!-- /.table-responsive -->
+        </div>
+        <!-- /.portlet-body -->
+        <!-- /.portlet -->
+    </div>
+</div>
+
+
+@section script {
+
+
+    <script>
+        $(document).ready(function () {
+            $('.clockpicker').clockpicker({
+                placement: 'bottom',
+                align: 'left',
+                donetext: 'تایید'
+            });
+
+            kamaDatepicker('FilterDto_FromDate', customOptions);
+            kamaDatepicker('FilterDto_ToDate', customOptions);
+
+
+
+            $(".page-link").click(function (event) {
+                event.preventDefault(); // غیرفعال کردن عملکرد پیشفرض href
+
+                var hrefValue = $(this).attr("href");
+                $("#pageNumber").val(hrefValue.split("p=")[1]);
+                $("#formFilter").submit();
+            });
+
+        });
+
+    </script>
+}

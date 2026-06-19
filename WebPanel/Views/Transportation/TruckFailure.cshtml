@@ -1,0 +1,244 @@
+﻿@model TruckFailurePageDto
+@{
+    ViewData["Title"] = "خرابی کامیون ها";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+    int i = ((Model.FailureList.PageNumber - 1) * Model.FailureList.PageSize) + 1;
+}
+
+
+@section style {
+    
+}
+
+
+<div class="col-lg-12">
+    <div class="card">
+        <div class="card-header pb-0">
+            <div class="d-flex justify-content-between">
+                <h3 class="title">
+                    <i class="icon-frane"></i>
+                    @if (ViewBag.seoId != null)
+                    {
+                        <a asp-controller="Seo" asp-action="SeoPortOperatorPage" asp-route-seoId="@((Guid)ViewBag.seoId)"><i class="fa-solid fa-right-to-bracket me-2"></i></a>
+                    }
+                    لیست خرابی کامیون ها
+                </h3>
+            </div>
+
+        </div>
+        <div class="card-body pt-0">
+
+
+            <form id="formFilter" asp-action="TruckFailure" asp-route-p="" method="post">
+                <input name="p" id="pageNumber" hidden />
+                <div class="form-body">
+                    <div class="row">
+                        <div class="row col-md-8">
+                            <div class="form-group col-md-6 ">
+                                <label>شرکت</label>
+                                <div class="input-group">
+                                    <select class="form-control select2"
+                                            asp-for="Filter.CompanyId"
+                                            asp-items="Model.TransportationCompanies">
+                                        <option value="">همه شرکت ها</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group col-sm-6 ">
+                                <label>CHO</label>
+                                <div class="input-group">
+                                    <select class="form-control select2"
+                                            asp-for="Filter.SeoId"
+                                            asp-items="Model.Seos">
+                                        <option value="">همه CHO</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row">
+
+                                <div class="form-group col-sm-3 ms-2">
+                                    <label>از تاریخ:</label>
+                                    <div class="input-group">
+                                        <input asp-for="Filter.DateFrom" type="text" class=" form-control" autocomplete="off">
+                                        <span asp-validation-for="Filter.DateFrom" class="text-danger"></span>
+                                    </div>
+                                </div>
+
+                                <div class="form-group col-sm-3 ">
+                                    <label>تا تاریخ:</label>
+                                    <div class="input-group">
+                                        <input asp-for="Filter.DateTo" type="text" class=" form-control" autocomplete="off">
+                                        <span asp-validation-for="Filter.DateTo" class="text-danger"></span>
+                                    </div>
+                                </div>
+
+                                <div class="col-sm-2 d-flex justify-content-center align-content-center flex-wrap">
+                                    <div class="">
+                                        <button style="margin-top:30px; border-radius:5px" class="alert-icon btn btn-success " type="submit"><p class="px-3">فیلتر</p></button>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label>کامیون</label>
+                            <div class="input-group">
+                                <select class="form-control select2" multiple
+                                        asp-for="Filter.TruckIds"
+                                        asp-items="Model.Trucks">
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+
+            <!-- /.portlet-title -->
+            <div class="buttons-box">
+
+                <i class="icon-size-fullscreen"></i>
+                <div class="paper-ripple">
+                    <div class="paper-ripple__background"></div>
+                    <div class="paper-ripple__waves"></div>
+                </div>
+            </div>
+            <!-- /.buttons-box -->
+        </div>
+        <div class="table-responsive px-3 vh-100">
+            <table class="table table-bordered table-hover table-striped" id="data-table">
+                <thead class="bg-primary">
+                    <tr>
+                        <th>ردیف</th>
+                        <th>نام کامیون</th>
+                        <td>شناسه کامیون</td>
+                        <td> شماره پلاک </td>
+                        <td>شرکت</td>
+                        <td>CHO</td>
+                        <td>تاریخ خرابی</td>
+                        <td> شرح</td>
+
+                        <td>عملیات</td>
+                    </tr>
+                </thead>
+                <tbody>
+
+
+                    @foreach (var item in Model.FailureList.Data)
+                    {
+                        <tr>
+                            <td>@(i++)</td>
+                            <td>@item.Truck.TruckName</td>
+                            <td>@item.Truck.TruckNumberId</td>
+                            <td>@item.Truck.CarPlates</td>
+                            <td>@item.Truck.CompanyCompanyName</td>
+                            <td>@item.SeoSeoCode</td>
+
+
+                            <td>@item.DateFailureFa</td>
+                            <td>@item.Description</td>
+
+                            <td>
+                                <a class="btn px-2 btn-warning btn-icon curve"
+                                   asp-action="CreateTruck" asp-controller="Transportation"
+                                   asp-route-companyId="@item.Truck.CompanyId"
+                                   asp-route-truckId="@item.Truck.Id"><i class="icon-pencil fs-6 align-middle"></i></a>
+                            </td>
+                        </tr>
+
+
+
+                    }
+
+
+
+                </tbody>
+            </table>
+            <div class="mt-4">
+                <cs-pager cs-paging-pagesize="@Model.FailureList.PageSize"
+                          cs-paging-pagenumber="@Model.FailureList.PageNumber"
+                          cs-paging-totalitems="@Model.FailureList.TotalItems"
+                          cs-paging-maxpageritems="10"
+                          cs-pagenumber-param="p"
+                          cs-show-first-last="true"
+                          cs-suppress-empty-nextprev="true"
+                          cs-suppress-inactive-firstlast="true"
+                          cs-show-numbered="true"
+                          cs-first-page-text="ابتدا"
+                          cs-last-page-text="انتها"
+                          cs-next-page-title="بعدی"
+                          cs-previous-page-title="قبلی"
+                          cs-first-page-title="ابتدا"
+                          cs-last-page-title="انتها"
+                          cs-next-page-text="بعدی"
+                          cs-previous-page-text="قبلی"
+                          cs-pager-li-current-class="page-item active"
+                          cs-pager-li-other-class="page-item"
+                          cs-pager-li-non-active-class="page-item disabled"
+                          cs-pager-link-current-class="page-link"
+                          cs-pager-link-other-class="page-link"
+                          asp-controller="Transportation"
+                          asp-action="TruckFailure">
+                </cs-pager>
+            </div>
+
+        </div>
+        <!-- /.table-responsive -->
+    </div>
+    <!-- /.portlet -->
+</div>
+
+
+
+
+
+@section script {
+
+
+    <script>
+        $(document).ready(function () {
+        @*val('@ViewData["CategoryProductId"]')*@
+                $("#Filter_CompanyId").select2().trigger('change');
+            var cId = $("#Filter_CompanyId").val();
+            $("#Filter_CompanyId").change(function () {
+
+                var url = "@Url.Action("GetTruckListAsJson", "Transportation")";
+                $.getJSON(url, { companyId: $("#Filter_CompanyId").val() }, function (data) {
+
+                    var item = '';
+
+                    $("#Filter_TruckIds").empty();
+                    $.each(data, function (i, val) {
+                        if (val == null) {
+                            $("#Filter_TruckIds").empty();
+                        }
+                        else {
+                            item += "<option value='" + val.id + "'>" + val.title + "</option>";
+                        }
+
+                    });
+                    $("#Filter_TruckIds").html(item);
+                });
+
+            });
+
+
+
+
+        });
+
+        kamaDatepicker('Filter_DateFrom', customOptions);
+        kamaDatepicker('Filter_DateTo', customOptions);
+
+
+        $(".page-link").click(function (event) {
+            event.preventDefault(); // غیرفعال کردن عملکرد پیشفرض href
+
+            var hrefValue = $(this).attr("href");
+            $("#pageNumber").val(hrefValue.split("=")[1]);
+            $("#formFilter").submit();
+        });
+    </script>
+}
+
+

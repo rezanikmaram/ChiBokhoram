@@ -1,0 +1,133 @@
+﻿@model CreateWarehouseDto
+
+ <div class="col-lg-12">
+    <div class="card">
+        <form asp-action="CreateWarehouse" method="post">
+            <input asp-for="Id" type="hidden" />
+
+            <div class="card-body pt-0"> 
+                <div class="form-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>نام انبار</label>
+                                <div class="input-group">
+                                    <input type="text" asp-for="Name" class="form-control rounded" required>
+                                </div>
+                                <span asp-validation-for="Name" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>سایت</label>
+                                <div class="input-group">
+                                    <select class="form-control rounded select2" style=" cursor: pointer;" asp-for="SiteId" asp-items="ViewBag.site">
+                                        <option value="">نامشخص</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group row my-4">
+                        <div class="col-md-2">
+                            <label>حداکثر ظرفیت</label>
+                            <div class="input-group ">
+                                <input asp-for="MaxCapacity" class="form-control rounded">
+                                <span asp-validation-for="MaxCapacity" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <label>ظرفیت فعلی</label>
+                            <div class="input-group ">
+                                <input asp-for="CurrentCapacity" class="form-control rounded">
+                                <span asp-validation-for="CurrentCapacity" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <label>ظرفیت خالی</label>
+                            <div class="input-group">
+                                <input asp-for="EmptyCapacity" class="form-control rounded">
+                                <span asp-validation-for="EmptyCapacity" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label>موقعیت جغرافیایی</label>
+                            <div class="form-group d-flex justify-content-start">
+                                <div>
+                                    <div class="input-group">
+                                        <input asp-for="LonX" class="form-control rounded" placeholder="X">
+                                        <span asp-validation-for="LonX" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="mx-3">
+                                    <div class="input-group">
+                                        <input asp-for="LatY" class="form-control rounded" placeholder="Y">
+                                        <span asp-validation-for="LatY" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-12 mt-4">
+                            <div class="form-group">
+                                <label> نوع انبار</label>
+                                <div class="input-group">
+                                    <select class="form-control select2" asp-for="WarehouseStorageType"
+                                            asp-items="@Html.GetEnumSelectList<WarehouseStorageType>()"
+                                            style="width:100%!important;">
+                                        
+                                    </select>
+                                    <span asp-validation-for="WarehouseStorageType"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div>
+                                <div class="form-group">
+                                    <label>نوع کالا</label>
+                                    <div class="input-group">
+                                        <select class="form-control rounded select2" asp-for="ProductCategoryId" asp-items="ViewBag.product">
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div>
+                                <div class="form-group">
+                                    <label>  شرکت</label>
+                                    <div class="input-group">
+                                        <select class="form-control rounded select2" asp-for="CompanyId" asp-items="ViewBag.Companies">
+                                            <option value="">نامشخص</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                </div>
+            </div>
+            <div class="form-actions text-end m-4">
+                <a asp-controller="Warehouse" asp-action="Warehouses" asp-route-companyId="@Model.CompanyId" class="btn btn-warning btn-round">
+                    بازگشت
+                    <i class="icon-close align-middle"></i>
+                    <div class="paper-ripple"><div class="paper-ripple__background"></div><div class="paper-ripple__waves"></div></div>
+                </a>
+                <button type="submit" class="btn mx-2 btn-info btn-round">
+                    <i class="icon-check align-middle"></i>
+                    ذخیره
+                    <div class="paper-ripple"><div class="paper-ripple__background"></div><div class="paper-ripple__waves"></div></div>
+                </button>
+            </div>
+        </form>
+        <section class="fix"></section>
+
+    </div>
+</div>

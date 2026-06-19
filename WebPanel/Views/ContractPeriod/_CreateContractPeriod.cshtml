@@ -1,0 +1,73 @@
+@model CreateContractPeriodDto
+
+<form asp-action="Create" method="post">
+    <input asp-for="Id" type="hidden" />
+    <div class="row gy-4 px-3">
+        <div class="col-md-12">
+            <label>عنوان</label>
+            <input type="text" asp-for="Title" class="form-control" autocomplete="off" />
+            <span asp-validation-for="Title" class="text-danger"></span>
+        </div>
+
+        <div class="col-md-6">
+            <label>تاریخ شروع</label>
+            <input type="text" asp-for="StartDateFa" class="form-control" autocomplete="off" />
+            <span asp-validation-for="StartDateFa" class="text-danger"></span>
+        </div>
+
+        <div class="col-md-6">
+            <label>تاریخ پایان</label>
+            <input type="text" asp-for="EndDateFa" class="form-control" autocomplete="off" />
+            <span asp-validation-for="EndDateFa" class="text-danger"></span>
+        </div>
+    </div>
+    <div class="row mt-4 px-3">
+        <div class="col-md-12">
+            <button type="submit" class="btn btn-success w-100">ثبت</button>
+        </div>
+    </div>
+</form>
+
+<script src="~/assets/js/validation/jquery.validate.min.js"></script>
+<script src="~/assets/js/validation/jquery.validate.unobtrusive.min.js"></script>
+
+<script>
+    $(document).ready(function () {
+        kamaDatepicker('StartDateFa', customOptions);
+        kamaDatepicker('EndDateFa', customOptions);
+
+        // Handle form submission
+        $('form').on('submit', function (e) {
+            e.preventDefault();
+            var form = $(this);
+            
+            // Client-side validation
+            if (!form.valid()) {
+                return;
+            }
+            
+            $.ajax({
+                url: form.attr('action'),
+                type: 'POST',
+                data: form.serialize(),
+                success: function (result) {
+                    $('#contractPeriodModal').modal('hide');
+                    location.reload();
+                },
+                error: function (xhr, status, error) {
+                    // Handle validation errors by updating the form
+                    if (xhr.status === 400) {
+                        $('#modalBody').html(xhr.responseText);
+                        // Re-initialize date pickers
+                        kamaDatepicker('StartDateFa', customOptions);
+                        kamaDatepicker('EndDateFa', customOptions);
+                        // Re-attach form validation
+                        $.validator.unobtrusive.parse($('form'));
+                    } else {
+                        alert('خطایی در انجام عملیات رخ داد. لطفا مجددا تلاش کنید.');
+                    }
+                }
+            });
+        });
+    });
+</script>

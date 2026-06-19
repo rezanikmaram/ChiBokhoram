@@ -1,0 +1,181 @@
+﻿@model ProductVoyageManageDto
+@{
+    ViewData["Title"] = "محصولات سفر";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+    int i = 1;
+}
+
+
+@* <div class="card p-2 mb-4"> *@
+@*     <div class="row"> *@
+@*         <div class="col-md-1 align-middle align-content-center px-4"> *@
+@*             <i class="fa-solid fa-circle-info fs-4 align-middle"></i> *@
+@*         </div> *@
+@*         <div class="col-md-11 px-5"> *@
+@*             <div class="d-flex justify-content-between align-items-center"> *@
+@*                 <div class="glass-bg px-2 py-1"> *@
+@*                     <p class="fs-6 m-0"> @Model.VoyageInfo?.ShipShipName </p> *@
+@*                 </div> *@
+@*                 <div> *@
+@*                     <p class="fs-6 m-0"> شماره سفر(دریایی): @($"{Model.VoyageInfo?.VoyageNumber} {(string.IsNullOrWhiteSpace(Model.VoyageInfo?.PmoNumber) ? "" : $"({Model.VoyageInfo?.PmoNumber})")}") </p> *@
+@*                 </div> *@
+@*                 <div> *@
+@*                     <p class="fs-6 m-0">@Model.VoyageInfo?.TransportTypeTitle</p> *@
+@*                 </div> *@
+@*                 <div> *@
+@*                     <p class="fs-6 m-0">تعداد بارنامه: @(Model.VoyageInfo?.CountOfSeo?.ToPrice() ?? "0")</p> *@
+@*                 </div> *@
+@*             </div> *@
+@*         </div> *@
+@*     </div> *@
+@* </div> *@
+
+<div class="col-lg-12">
+    <div class="card">
+        <div class="card-header pb-1">
+            <div class="d-flex justify-content-between">
+
+                <h3 class="title">
+                    <i class="icon-frane"></i>
+                    <a asp-action="VoyageSeo" asp-controller="Voyage" asp-route-VoyageId="@Model.Filter.VoyageId"><i class="fa-solid fa-right-to-bracket me-2"></i></a>
+                    محصولات نیاز به تجهیزات ویژه
+                </h3>
+            </div>
+        </div>
+        <div class="card-body pt-0">
+
+            <form id="formFilter" asp-action="VoyageProduct" asp-route-voyageId="@Model.Filter.VoyageId" asp-route-p="" method="post">
+                <input name="p" id="pageNumber" hidden />
+                <input type="hidden" asp-for="Filter.VoyageId" name="filter.voyageId" />
+                <div class="form-body ">
+
+                    <div class="row gy-4">
+
+                        <div class="col-md-3 col-sm-12">
+                            <div class="form-group">
+                                <label>  جستجو:</label>
+                                <div class="input-group">
+                                    <input asp-for="Filter.Search" type="text" class="rounded form-control" placeholder="بارنامه، کالا، نام فارسی، نام انگلیسی">
+                                    <span asp-validation-for="Filter.Search" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4 col-sm-12">
+                            <div class="form-group">
+                                <label>صاحب کالا</label>
+                                <div class="input-group">
+                                    <select class="form-control select2 "
+                                            asp-for="Filter.CompanyId"
+                                            asp-items="Model.Companies">
+                                        <option value="">همه صاحب کالاها</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group col-md-2 ">
+                            <button style="border-radius:5px; margin-top:30px" class="alert-icon px-3 btn btn-success "
+                                    type="submit">
+                                فیلتر
+                            </button>
+                        </div>
+
+                    </div>
+
+                </div>
+            </form>
+
+            <div class="table-responsive mt-4">
+                <table class="table table-sm table-bordered table-hover table-striped" id="data-table">
+                    <thead class="bg-primary">
+                        <tr>
+                            <th>ردیف</th>
+                            <th>بارنامه</th>
+                            <th>صاحب کالا   </th>
+                            <th>کالا</th>
+                            <th>نام فارسی</th>
+                            <th>نام انگلیسی</th>
+                            <th>تعداد</th>
+                            <th>وزن ناخالص</th>
+                            
+                            <th> حجم  </th>
+                            <th>نیاز به تجهیزات ویژه</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                        @foreach (var item in Model.SeoProducts)
+                        {
+                            <tr>
+                                <td class="align-middle">@(i++)</td>
+                                <td class="align-middle"> @item.BillOfLadingNumber </td>
+                                <td class="align-middle">@item.OwnerName</td>
+                                <td class="align-middle">@item.ProductTitle  </td>
+                                <td class="align-middle">@item.NameFa  </td>
+                                <td class="align-middle">@item.NameEn  </td>
+                                <td class="align-middle">@item.CountTitle  </td>
+                                <td class="align-middle">@item.WeightGrossTitle   </td>
+                                 
+                                <td class="align-middle">@item.VolumeTitle  </td>
+                                <td class="align-middle px-2 text-center">
+                                    <div class="input-group activeor justify-content-center">
+                                        <label>
+                                            <input type="checkbox"
+                                                   class="normal seoProductNeedsSpecialEquipment"
+                                                   data-id="@item.Id"
+                                                   @(item.IsNeedsSpecialEquipment ? "checked" : "") />
+                                            نیاز به تجهیزات ویژه
+                                        </label>
+                                    </div>
+                                </td>
+
+                            </tr>
+                        }
+
+                    </tbody>
+                </table>
+
+
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+
+
+@section script {
+
+
+    <script>
+        $(document).ready(function () {
+            $('.select2').select2();
+
+        });
+
+         $(document).on('change', '.seoProductNeedsSpecialEquipment', function () {
+
+            const checkbox = $(this);
+            const seoProductId = checkbox.data('id');
+
+            $.ajax({
+                url: '/Voyage/ChangeSeoProductNeedsSpecialEquipment',
+                type: 'POST',
+                data: {
+                    seoProductId: seoProductId
+                },
+                success: function () {
+                },
+                error: function () {
+                    // طبق خواسته‌ات: در صورت خطا کل صفحه رفرش شود
+                    location.reload();
+                }
+            });
+        });
+
+    </script>
+}
+

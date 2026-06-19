@@ -1,0 +1,235 @@
+﻿@model AllocationOfEquServicePageDto
+@{
+    int j = 1;
+}
+
+
+
+<div class="card-header">
+    <div class="d-flex justify-content-between">
+
+        <h3 class="title">
+            @if(Model.SeoId != null)
+            {
+                <a asp-action="SeoAllocationPage" asp-controller="Seo"
+                   asp-route-seoId="@Model.SeoId">
+                    <i class="fa-solid fa-right-to-bracket me-2 align-middle"></i>
+                </a>
+            }
+            else if(Model.VoyageId != null)
+            {
+                <a asp-action="VoyageAllocationPage" asp-controller="Voyage" asp-route-voyageId="@Model.VoyageId">
+                    <i class="fa-solid fa-right-to-bracket me-2 align-middle"></i>
+                </a>
+            }
+           
+            لیست سرویس/خدمات این درخواست
+        </h3>
+        
+        <div>
+            @if (Model.CanChangeService)
+            {
+                <a style="border-radius:5px; margin:0px 10px" class="btn btn-primary btn-sm" onclick="AddEquipment();">
+                    <i class="icon-plus"></i>
+                    ثبت سرویس/خدمات
+                </a>
+            }
+
+            @if (Model.CanChangeService && Model.List?.Any() == true)
+            {
+                <a id="EndAllocationId"
+                   style="border-radius:5px; margin:0px 10px" class="btn btn-success mx-0 btn-sm"
+                   onclick="EndAllocation(event, '@Model.AllocationOfEquId');">اتمام تخصیص </a>
+            }
+            else if (Model?.CanChangeService == false && Model?.List?.Any() == true
+                                                      && (Model.State > AllocationEquipmentState.Pending && Model.State <= AllocationEquipmentState.CompletingEnd))
+            {
+                <a id="BackToPendingStateId" style="border-radius:5px; margin:0px 10px" class="btn btn-success btn-sm mx-0" onclick="BackToPendingState(event, '@Model.AllocationOfEquId');"> ویرایش پیش فاکتور </a>
+            }
+        </div>
+    </div>
+    <div class="d-flex justify-content-between align-items-end mt-3">
+        <div>
+
+            <div class="input-group d-flex align-items-center">
+                @if (Model?.State != null
+                && Model?.State == AllocationEquipmentState.Pending)
+                {
+                    <form asp-action="SaveCreditorPrice" method="post">
+                        <input asp-for="AllocationOfEquId" hidden />
+                        <div class="d-flex align-items-center">
+                            <p dir="rtl" class="m-0 pe-2">بستانکاری صاحب کالا (ريال) </p>
+                            <div class="d-flex">
+                                <input name="RedirectPage" type="number" value="0" hidden />
+                                <price-input asp-for="CreditorPrice" placeholder="به ریال"></price-input>
+                                <button class="btn btn-primary rounded px-2 mx-2 w-50" type="submit"> ثبت </button>
+                            </div>
+                        </div>
+
+                    </form>
+                }
+                else
+                {
+                    <p class="m-0 pe-2 ms-1">  بستانکاری صاحب کالا: <span class="fw-bold mx-2 text-success">@Model.CreditorPriceTitle  ریال</span> </p>
+                }
+
+
+            </div>
+        </div>
+        <div class=" text-md-end text-center px-0">
+            @if (Model.AllocationOfEquId != Guid.Empty
+            && Model?.List?.Any() == true
+            && Model?.State != null)
+            {
+                if (Model?.State != AllocationEquipmentState.Pending)
+                {
+                    <span id="ReportLinkId" class="">
+                        <a class="btn btn-sm px-2 btn-primary rounded"
+                           asp-controller="AllocationOfEquipment"
+                           asp-action="GetFile"
+                           asp-route-allocationOfEquId="@Model?.AllocationOfEquId"
+                           asp-route-type="@AllocationEquFileType.PreFactorOrg">
+                            <i class="fa-solid fa-download align-middle mx-1"></i> پیش فاکتور سازمان
+                        </a>
+
+                        <a class="btn btn-sm px-2 btn-primary rounded"
+                           asp-controller="AllocationOfEquipment"
+                           asp-action="GetFile"
+                           asp-route-allocationOfEquId="@Model?.AllocationOfEquId"
+                           asp-route-type="@AllocationEquFileType.PreFactorCompany">
+                            <i class="fa-solid fa-download align-middle mx-1"></i> پیش فاکتور شرکت
+                        </a>
+                    </span>
+
+
+                    @if (Model?.State <= AllocationEquipmentState.AwaitingPayment)
+                    {
+                        <span class="px-0">
+                            <a id="AcceptPaymentGoToStartId"
+                               class="btn btn-sm px-3 btn-success rounded"
+                               onclick="AcceptPaymentShowModal(event);">
+                                تایید پرداخت
+                            </a>
+                        </span>
+                    }
+                }
+
+                else if (Model?.State == AllocationEquipmentState.Pending)
+                {
+                    <span class="">
+                        <a class="btn btn-sm px-2 btn-primary rounded mx-2"
+                           asp-controller="AllocationOfEquipment"
+                           asp-action="GetPreviewFactor"
+                           asp-route-AllocationEquId="@Model?.AllocationOfEquId"
+                           asp-route-PreviewFactor="@PreviewFactor.PrefactorOrganization">
+                            <i class="fa-solid fa-download align-middle mx-1"></i> پیش نمایش سازمان
+                        </a>
+
+                        <a class="btn btn-sm px-2 btn-primary rounded"
+                           asp-controller="AllocationOfEquipment"
+                           asp-action="GetPreviewFactor"
+                           asp-route-AllocationEquId="@Model?.AllocationOfEquId"
+                           asp-route-PreviewFactor="@PreviewFactor.PreFactorCompany">
+                            <i class="fa-solid fa-download align-middle mx-1"></i> پیش نمایش شرکت
+                        </a>
+                    </span>
+                }
+
+            }
+
+
+
+          
+
+            <!-- /.portlet-title -->
+            <div class="buttons-box">
+
+                <i class="icon-size-fullscreen"></i>
+                <div class="paper-ripple">
+                    <div class="paper-ripple__background"></div>
+                    <div class="paper-ripple__waves"></div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <!-- /.portlet-heading -->
+</div>
+
+
+<div class="card-body pt-0">
+    <div class="table-responsive">
+        <table class="table table-sm table-bordered table-hover table-striped" id="data-table">
+            <thead class="bg-primary">
+                <tr>
+                    <th class="align-middle px-2 text-center" style="width: 5%">ردیف</th>
+
+                    <th class="align-middle px-2 text-center">شرح کالا/خدمات</th>
+                    <th class="align-middle px-2 text-center">ضریب</th>
+                    <th class="align-middle px-2 text-center">تعداد/مقدار</th>
+                    <th class="align-middle px-2 text-center">تناژ/حجم</th>
+                    <th class="align-middle px-2 text-center">قیمت واحد-ريال</th>
+                    <th class="align-middle px-2 text-center">قیمت کل</th>
+                    <th class="align-middle px-2 text-center">درصد سهم شرکت</th>
+
+                    <th class="align-middle px-2 text-center">مبلغ شرکت</th>
+                    <th class="align-middle px-2 text-center">مبلغ سازمان</th>
+                    <th>جمع تعرفه مشارکت</th>
+
+                    <td class="align-middle px-2 text-center">عملیات</td>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model?.List?.Any() == true)
+                {
+                    foreach (var item in Model?.List)
+                    {
+                        <tr>
+                            <td class="align-middle px-2 text-center">@(j++)</td>
+                            <td class="align-middle px-2 text-center">@item.Description </td>
+                            <td class="align-middle px-2 text-center">@item.Zarib</td>
+                            <td class="align-middle px-2 text-center">@item.Count.ToPrice()</td>
+                            <td class="align-middle px-2 text-center">@item.LargerWeightOrVolume.ToPrice()</td>
+
+                            <td class="align-middle px-2 text-center">@item.PriceOne.ToPrice()</td>
+                            <td class="align-middle px-2 text-center">@item.SumPrice.ToPrice()</td>
+                            <td class="align-middle px-2 text-center">@item.PercentCompany</td>
+
+
+                            <td class="align-middle px-2 text-center">@item.TotalPriceCompany.ToPrice()</td>
+                            <td class="align-middle px-2 text-center">@item.TotalPriceOrg.ToPrice()</td>
+                            <td class="align-middle px-2 text-center">@item.TotalPriceMosharekat.ToPrice()</td>
+
+                            <td class="align-middle px-2 text-center">
+                                @if (Model.CanChangeService)
+                                {
+                                    <a class="btn btn-warning px-2 btn-sm btn-icon curve" onclick="editEquipment('@item.Id');"><i class="icon-pencil fs-6 align-middle"></i></a>
+
+                                    <a onclick="DeleteEquService(event, '@item.Id');" class="btn btn-danger btn-sm btn-icon curve px-2 btn-questions">
+                                        <i class="icon-trash fs-6 align-middle active fa-flip-horizontal"></i>
+                                    </a>
+                                }
+                            </td>
+                        </tr>
+                    }
+                }
+
+
+
+
+            </tbody>
+        </table>
+
+    </div>
+</div>
+
+
+@if (Model.State != null && Model.State != AllocationEquipmentState.Pending)
+{
+    <p class="m-4">
+        <span class="label fw-bold rounded px-2 py-1 label-warning">وضعیت تخصیص اجازه ویرایش سرویس ها را نمی دهد. وضعیت فعلی : @Model.StateTitle</span>
+    </p>
+}
+
+
+

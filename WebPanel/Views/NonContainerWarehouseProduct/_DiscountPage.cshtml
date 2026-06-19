@@ -1,0 +1,80 @@
+﻿@model NonContainerWarehouseProductDiscountPageDto
+
+@{
+	int i = 1;
+}
+
+<div id="DiscountPageModal" class="modal fade " data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog">
+	<div class="modal-dialog modal-xl modal-dialog-centered">
+		<div class="modal-content">
+			<div class="modal-header">
+				<div class="d-flex align-items-center">
+					<h4 class="modal-title">مدیریت تخفیف ها</h4>
+					<a class="btn btn-success mx-2 d-md-block py-1" style="border-radius:5px" onclick="showDiscountCreate()">
+						<i class="icon-plus align-middle"></i> افزودن تخفیف
+					</a>
+				</div>
+				<button type="button" class="close btn-close rounded border" data-bs-dismiss="modal"></button>
+			</div>
+			<div class="modal-body" id="modalBody">
+				 <div>
+				
+					<br />
+				 </div>
+				<div class="col-lg-12">
+					<div class="table-responsive">
+						<div id="DiscountListId">
+							<partial name="_DiscountList" model="@Model" />
+						 </div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div id="discountCreateId"></div>
+ 
+ 
+<script src="~/assets/js/validation/jquery.validate.min.js"></script>
+<script src="~/assets/js/validation/jquery.validate.unobtrusive.min.js"></script>
+
+<script>
+
+	function showDiscountCreate(discountId)
+	   {
+		   $.post("@Url.Action("GetDiscountCreate", "NonContainerWarehouseProduct")",
+				   {
+					   discountId
+				   })
+				   .done(function (res) {
+					   $("#createDiscountModal").modal('hide');
+					   $("#discountCreateId").html(res);
+					   $("#createDiscountModal").modal('show');
+				   })
+				   .fail(function (xhr, status, error) {
+					   location.reload();
+				   });
+	   }
+
+	   async function DeleteDiscount(event, discountId) {
+			event.preventDefault();
+			let result = await ShowQAlert2(event);
+
+			if (result === true) {
+				$.post("@Url.Action("DeleteDiscount", "NonContainerWarehouseProduct")",
+					{
+						discountId
+					})
+					.done(function (res) {
+						$("#DiscountPageModal").modal('hide');
+						showDiscountPage();
+					})
+					.fail(function (xhr, status, error) {
+						location.reload();
+					});
+			}
+
+		}
+
+</script>

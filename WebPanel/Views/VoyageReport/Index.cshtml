@@ -1,0 +1,549 @@
+@model Entities.DTOs.Web.Hirman.VoyageReport.VoyageReportPageDto
+@{
+    ViewData["Title"] = "گزارش عملکرد سفرها";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+@section style {
+    <link rel="stylesheet" href="~/assets/css/voyage-report.css" asp-append-version="true" />
+    <style>
+        .filter-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 16px;
+            padding: 2px;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.1);
+        }
+        
+        .filter-container {
+            background: white;
+            border-radius: 14px;
+            padding: 1.5rem;
+        }
+        
+        .filter-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #f8f9fa;
+        }
+        
+        .filter-title {
+            display: flex;
+            align-items: center;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .filter-title i {
+            color: #667eea;
+            margin-left: 0.5rem;
+        }
+        
+        .filter-actions {
+            margin-right: auto;
+        }
+        
+        .filter-label {
+            display: flex;
+            align-items: center;
+            font-weight: 500;
+            color: #495057;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+        
+        .filter-label i {
+            color: #667eea;
+            font-size: 0.8rem;
+        }
+        
+        .filter-input-group {
+            position: relative;
+        }
+        
+        .filter-input {
+            width: 100%;
+            padding: 0.75rem 2.5rem 0.75rem 1rem;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+            text-align: right;
+        }
+        
+        .filter-input:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        }
+        
+        .filter-input-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6c757d;
+            font-size: 0.9rem;
+            pointer-events: none;
+            z-index: 10;
+        }
+        
+        .filter-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .btn-search {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 10px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            flex: 1;
+        }
+        
+        .btn-search:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn-clear {
+            border: 2px solid #e9ecef;
+            background: white;
+            color: #6c757d;
+            padding: 0.75rem;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            width: 48px;
+        }
+        
+        .btn-clear:hover {
+            border-color: #667eea;
+            color: #667eea;
+            background: #f8f9ff;
+        }
+        
+        @@media (max-width: 768px) {
+            .filter-section {
+                margin: 1rem -1rem 2rem -1rem;
+                border-radius: 0;
+            }
+            
+            .filter-container {
+                border-radius: 0;
+                padding: 1rem;
+            }
+            
+            .filter-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+            
+            .filter-buttons {
+                flex-direction: column;
+            }
+            
+            .btn-clear {
+                width: 100%;
+            }
+        }
+    </style>
+}
+
+<!-- Header Section -->
+<div class="voyage-report-header">
+    <div class="row align-items-center">
+        <div class="col-md-6">
+            <div class="d-flex align-items-center">
+                <div class="header-icon">
+                    <i class="fa-solid fa-chart-line"></i>
+                </div>
+                <div class="header-content">
+                    <h1 class="header-title">گزارش عملکرد سفرها</h1>
+                    <p class="header-subtitle">تحلیل جامع عملیات سفرها در بازه زمانی انتخاب شده</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 text-md-end">
+        </div>
+    </div>
+</div>
+
+<!-- Filter Section -->
+<div class="filter-section">
+    <div class="filter-container">
+        <div class="filter-header">
+            <div class="filter-title">
+                <i class="fa-solid fa-filter"></i>
+                <span>فیلتر گزارش</span>
+            </div>
+            <div class="filter-actions">
+                <button type="submit" form="exportForm" class="btn btn-success btn-sm">
+                    <i class="fa-solid fa-file-excel me-2"></i>خروجی Excel
+                </button>
+            </div>
+        </div>
+        
+        <form id="filterForm" asp-action="Index" method="get" class="filter-form">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <label class="filter-label">
+                        <i class="fa-solid fa-calendar-from me-1"></i>
+                        از تاریخ
+                    </label>
+                    <div class="filter-input-group">
+                        <input asp-for="Filter.DateFromFa" type="text" class="filter-input" autocomplete="off" placeholder="انتخاب تاریخ" />
+                        <span class="filter-input-icon">
+                            <i class="fa-solid fa-calendar"></i>
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="col-md-3">
+                    <label class="filter-label">
+                        <i class="fa-solid fa-calendar-to me-1"></i>
+                        تا تاریخ
+                    </label>
+                    <div class="filter-input-group">
+                        <input asp-for="Filter.DateToFa" type="text" class="filter-input" autocomplete="off" placeholder="انتخاب تاریخ" />
+                        <span class="filter-input-icon">
+                            <i class="fa-solid fa-calendar"></i>
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <label class="filter-label">
+                        <i class="fa-solid fa-search me-1"></i>
+                        جستجو
+                    </label>
+                    <div class="filter-input-group">
+                        <input asp-for="Filter.Search" type="text" class="filter-input" placeholder="شماره سفر، کشتی یا شرکت کشتیرانی..." />
+                        <span class="filter-input-icon">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="col-md-2">
+                    <div class="filter-buttons">
+                        <button type="submit" class="btn btn-primary btn-search">
+                            <i class="fa-solid fa-search me-1"></i>
+                            جستجو
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary btn-clear" onclick="clearFilters()">
+                            <i class="fa-solid fa-redo"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="stats-section">
+    <div class="row g-4">
+        <div class="col-lg-3 col-md-6">
+            <div class="stat-card primary">
+                <div class="stat-icon">
+                    <i class="fa-solid fa-ship"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-value">@Model.Voyages.Count</div>
+                    <div class="stat-label">کل سفرهای عملیاتی</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="stat-card success">
+                <div class="stat-icon">
+                    <i class="fa-solid fa-clipboard-check"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-value">@Model.Voyages.Sum(v => v.SeoCount)</div>
+                    <div class="stat-label">کل بارنامه‌ها</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="stat-card warning">
+                <div class="stat-icon">
+                    <i class="fa-solid fa-weight-hanging"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-value">@Model.Voyages.Sum(v => v.TaliCount)</div>
+                    <div class="stat-label">کل تالی‌ها</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="stat-card info">
+                <div class="stat-icon">
+                    <i class="fa-solid fa-warehouse"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-value">@Model.Voyages.Sum(v => v.WarehouseReceiptCount)</div>
+                    <div class="stat-label">کل قبوض انبار</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Voyages List -->
+<div class="voyages-section">
+    <div class="section-header">
+        <h3 class="section-title">لیست سفرها</h3>
+        <div class="section-info">
+            <span class="badge bg-info">@Model.TotalCount سفر</span>
+        </div>
+    </div>
+
+    @if (Model.Voyages.Any())
+    {
+        <div class="voyages-grid">
+            @foreach (var voyage in Model.Voyages)
+            {
+                <div class="voyage-card @(voyage.IsOperated ? "operated" : "non-operated")" onclick="window.location.href='@Url.Action("VoyageDetail", new { voyageId = voyage.VoyageId })'">
+                    <div class="voyage-header">
+                        <div class="voyage-number">
+                            <i class="fa-solid fa-hashtag"></i>
+                            <span>@voyage.VoyageNumber</span>
+                        </div>
+                        <div class="voyage-status">
+                            <span class="badge @(voyage.VoyageState == Common.enumeration.VoyageState.Open ? "bg-success" : "bg-secondary")">
+                                @voyage.VoyageStateTitle
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="voyage-info">
+                        <div class="info-row">
+                            <div class="info-item">
+                                <i class="fa-solid fa-ship"></i>
+                                <span>@voyage.ShipName</span>
+                            </div>
+                            <div class="info-item">
+                                <i class="fa-solid fa-building"></i>
+                                <span>@voyage.ShippingCompany</span>
+                            </div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-item">
+                                <i class="fa-solid fa-calendar-days"></i>
+                                <span>@voyage.StartDateFa</span>
+                            </div>
+                            @if (!string.IsNullOrEmpty(voyage.EndDateFa))
+                            {
+                                <div class="info-item">
+                                    <i class="fa-solid fa-calendar-check"></i>
+                                    <span>@voyage.EndDateFa</span>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="voyage-stats">
+                        <div class="stats-grid">
+                            <div class="stat-item">
+                                <div class="stat-number">@voyage.SeoCount</div>
+                                <div class="stat-text">بارنامه</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number">@voyage.TaliCount</div>
+                                <div class="stat-text">تالی</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number">@voyage.WarehouseReceiptCount</div>
+                                <div class="stat-text">قبض انبار</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number">@voyage.CompletionPercentage.ToString("F0")%</div>
+                                <div class="stat-text">تکمیل</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="voyage-progress">
+                        <div class="progress-label">
+                            <span>پیشرفت عملیات</span>
+                            <span>@voyage.CompletedSeoCount/@voyage.SeoCount</span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated @(voyage.CompletionPercentage >= 80 ? "bg-success" : voyage.CompletionPercentage >= 50 ? "bg-warning" : "bg-danger")"
+                                 role="progressbar" 
+                                 style="width: @voyage.CompletionPercentage%"
+                                 aria-valuenow="@voyage.CompletionPercentage" 
+                                 aria-valuemin="0" 
+                                 aria-valuemax="100">
+                            </div>
+                        </div>
+                        <div class="progress-label mt-2">
+                            <span>پیشرفت تالی اسکله</span>
+                            <span>@voyage.TaliCount/@voyage.SeoProductCount</span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar @(voyage.TaliProgressPercentage >= 100 ? "bg-success" : voyage.TaliProgressPercentage >= 50 ? "bg-warning" : "bg-danger")"
+                                 role="progressbar" 
+                                 style="width: @voyage.TaliProgressPercentage%"
+                                 aria-valuenow="@voyage.TaliProgressPercentage" 
+                                 aria-valuemin="0" 
+                                 aria-valuemax="100">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="voyage-footer">
+                        <div class="operation-indicators">
+                            @if (voyage.HasTaliRecords)
+                            {
+                                <span class="indicator success" title="دارای تالی">
+                                    <i class="fa-solid fa-weight-hanging"></i>
+                                </span>
+                            }
+                            @if (voyage.HasSeos)
+                            {
+                                <span class="indicator info" title="دارای بارنامه">
+                                    <i class="fa-solid fa-clipboard"></i>
+                                </span>
+                            }
+                            @if (voyage.HasWarehouseReceipts)
+                            {
+                                <span class="indicator warning" title="دارای قبض انبار">
+                                    <i class="fa-solid fa-warehouse"></i>
+                                </span>
+                            }
+                        </div>
+                        <div class="view-details">
+                            <i class="fa-solid fa-arrow-left"></i>
+                            <span>مشاهده جزئیات</span>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Pagination -->
+        @if (Model.TotalPages > 1)
+        {
+            <div class="pagination-wrapper">
+                <nav aria-label="Voyage Report Pagination">
+                    <ul class="pagination justify-content-center">
+                        @if (Model.PageNumber > 1)
+                        {
+                            <li class="page-item">
+                                <a class="page-link" href="@Url.Action("Index", new { page = Model.PageNumber - 1, dateFromFa = Model.Filter.DateFromFa, dateToFa = Model.Filter.DateToFa, search = Model.Filter.Search })">
+                                    <i class="fa-solid fa-chevron-right"></i>
+                                </a>
+                            </li>
+                        }
+
+                        @for (int i = Math.Max(1, Model.PageNumber - 2); i <= Math.Min(Model.TotalPages, Model.PageNumber + 2); i++)
+                        {
+                            <li class="page-item @(i == Model.PageNumber ? "active" : "")">
+                                <a class="page-link" href="@Url.Action("Index", new { page = i, dateFromFa = Model.Filter.DateFromFa, dateToFa = Model.Filter.DateToFa, search = Model.Filter.Search })">
+                                    @i
+                                </a>
+                            </li>
+                        }
+
+                        @if (Model.PageNumber < Model.TotalPages)
+                        {
+                            <li class="page-item">
+                                <a class="page-link" href="@Url.Action("Index", new { page = Model.PageNumber + 1, dateFromFa = Model.Filter.DateFromFa, dateToFa = Model.Filter.DateToFa, search = Model.Filter.Search })">
+                                    <i class="fa-solid fa-chevron-left"></i>
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </nav>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="empty-state">
+            <div class="empty-icon">
+                <i class="fa-solid fa-search"></i>
+            </div>
+            <h4>هیچ سفری یافت نشد</h4>
+            <p>در بازه زمانی انتخاب شده هیچ سفر عملیاتی یافت نشد است.</p>
+        </div>
+    }
+</div>
+
+<!-- Export Form (Hidden) -->
+<form id="exportForm" asp-action="ExportVoyageReportExcel" method="post" style="display: none;">
+    <input asp-for="Filter.DateFromFa" />
+    <input asp-for="Filter.DateToFa" />
+    <input asp-for="Filter.Search" />
+</form>
+
+@section script {
+    <script>
+        // Initialize Persian date pickers
+        $(document).ready(function() {
+            // Initialize datepickers
+            kamaDatepicker('Filter_DateFromFa', {
+                buttons: true,
+                markToday: true,
+                markHolidays: true,
+                highlightHolidays: true,
+                gotoToday: true,
+                onChange: function(year, month, day) {
+                    // Update the input field when date changes
+                    var dateStr = year + '/' + String(month).padStart(2, '0') + '/' + String(day).padStart(2, '0');
+                    $('#Filter_DateFromFa').val(dateStr);
+                }
+            });
+            kamaDatepicker('Filter_DateToFa', {
+                buttons: true,
+                markToday: true,
+                markHolidays: true,
+                highlightHolidays: true,
+                gotoToday: true,
+                onChange: function(year, month, day) {
+                    // Update the input field when date changes
+                    var dateStr = year + '/' + String(month).padStart(2, '0') + '/' + String(day).padStart(2, '0');
+                    $('#Filter_DateToFa').val(dateStr);
+                }
+            });
+        });
+
+        function clearFilters() {
+            document.getElementById('filterForm').reset();
+            document.getElementById('filterForm').submit();
+        }
+        
+        function syncExportForm() {
+            // Sync export form with filter form values
+            const filterForm = document.getElementById('filterForm');
+            const exportForm = document.getElementById('exportForm');
+            
+            // Sync date values
+            const dateFrom = filterForm.querySelector('[name="Filter.DateFromFa"]');
+            const dateTo = filterForm.querySelector('[name="Filter.DateToFa"]');
+            const search = filterForm.querySelector('[name="Filter.Search"]');
+            
+            if (dateFrom) exportForm.querySelector('[name="Filter.DateFromFa"]').value = dateFrom.value;
+            if (dateTo) exportForm.querySelector('[name="Filter.DateToFa"]').value = dateTo.value;
+            if (search) exportForm.querySelector('[name="Filter.Search"]').value = search.value;
+        }
+        
+        // Sync export form before any submission
+        document.getElementById('filterForm').addEventListener('submit', syncExportForm);
+        document.querySelector('button[form="exportForm"]').addEventListener('click', function() {
+            syncExportForm();
+        });
+    </script>
+}

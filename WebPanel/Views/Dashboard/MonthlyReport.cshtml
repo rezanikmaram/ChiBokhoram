@@ -1,0 +1,336 @@
+@model MonthlyDashboardReportDto
+
+@{
+	ViewData["Title"] = "گزارش ماهانه داشبورد";
+	Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+@section style {
+	<style>
+		.time-filter {
+			display: flex;
+			justify-content: center;
+			gap: 10px;
+			flex-wrap: wrap;
+			margin-bottom: 20px;
+		}
+
+		.time-filter .btn {
+			padding: 8px 16px;
+			border-radius: 10px;
+			font-size: 14px;
+			font-weight: 600;
+			transition: all 0.25s ease;
+		}
+
+		.time-filter .btn.active {
+			transform: translateY(-1px);
+			box-shadow: 0 3px 8px rgba(0, 76, 153, 0.2);
+		}
+
+		.report-card {
+			background: #ffffff;
+			border-radius: 12px;
+			padding: 16px;
+			box-shadow: 0 4px 10px rgba(0, 51, 102, 0.08);
+			border: 1px solid #e9ecef;
+			transition: all 0.25s ease;
+			margin-bottom: 15px;
+		}
+
+		.report-card:hover {
+			transform: translateY(-3px);
+			box-shadow: 0 6px 14px rgba(0, 51, 102, 0.12);
+		}
+
+		.report-card h5 {
+			font-size: 13.5px;
+			color: #004C99;
+			margin-bottom: 10px;
+			font-weight: 600;
+		}
+
+		.report-card .value {
+			font-size: 22px;
+			font-weight: 700;
+			color: #003366;
+		}
+
+		.report-card.warning .value {
+			color: #d32f2f;
+		}
+	</style>
+}
+
+<div class="col-lg-12 pt-4">
+	<div class="row gy-4">
+		<div class="col-12">
+			<div class="card mb-0">
+				<div class="card-body p-2">
+					<div class="row mx-0 p-2 gy-4">
+						<div class="col-12 border-bottom">
+							<div class="d-flex align-items-center justify-content-between">
+								<div>
+									<i class="fas fa-chart-line me-2 text-primary"></i>
+									<span class="h4 mb-0">گزارش ماهانه داشبورد</span>
+								</div>
+							</div>
+						</div>
+
+						<!-- Time Filter Buttons -->
+						<div class="col-12">
+							<div class="time-filter">
+								<button type="button" class="btn btn-outline-primary active" data-months="1">
+									<i class="fas fa-calendar-alt me-1"></i> ۱ ماه
+								</button>
+								<button type="button" class="btn btn-outline-primary" data-months="2">
+									<i class="fas fa-calendar-alt me-1"></i> ۲ ماه
+								</button>
+								<button type="button" class="btn btn-outline-primary" data-months="3">
+									<i class="fas fa-calendar-alt me-1"></i> ۳ ماه
+								</button>
+								<button type="button" class="btn btn-outline-primary" data-months="6">
+									<i class="fas fa-calendar-alt me-1"></i> ۶ ماه
+								</button>
+								<button type="button" class="btn btn-outline-primary" data-months="12">
+									<i class="fas fa-calendar-alt me-1"></i> ۱ سال
+								</button>
+								<button type="button" class="btn btn-outline-primary" data-months="24">
+									<i class="fas fa-calendar-alt me-1"></i> ۲ سال
+								</button>
+							</div>
+						</div>
+
+						<!-- Monthly Report Cards -->
+						<div class="col-md-3">
+							<div class="report-card">
+								<h5><i class="fas fa-truck me-2"></i> کامیون‌های بارگیری‌شده</h5>
+								<div class="value" id="loadedTrucks">@Model.LoadedTrucksCount.ToString("N0")</div>
+							</div>
+						</div>
+
+						<div class="col-md-3">
+							<div class="report-card @(Model.WeightDifference > 0 ? "warning" : "")">
+								<h5><i class="fas fa-balance-scale me-2"></i> اختلاف توزین و بارنامه (تن)</h5>
+								<div class="value" id="weightDifference">@(Model.WeightDifference > 0 ? "+" : "")@Model.WeightDifference.ToString("N2")</div>
+							</div>
+						</div>
+
+						<div class="col-md-3">
+							<div class="report-card">
+								<h5><i class="fas fa-file-invoice me-2"></i> بارنامه‌های واردشده</h5>
+								<div class="value" id="importedSeos">@Model.ImportedSeosCount.ToString("N0")</div>
+							</div>
+						</div>
+
+						<div class="col-md-3">
+							<div class="report-card">
+								<h5><i class="fas fa-exchange-alt me-2"></i> حمل یک‌سره</h5>
+								<div class="value" id="directTransport">@Model.DirectTransportCount.ToString("N0")</div>
+							</div>
+						</div>
+
+						<div class="col-md-3">
+							<div class="report-card">
+								<h5><i class="fas fa-ship me-2"></i> حمل مستقیم</h5>
+								<div class="value" id="directShipment">@Model.DirectShipmentCount.ToString("N0")</div>
+							</div>
+						</div>
+
+						<div class="col-md-3">
+							<div class="report-card">
+								<h5><i class="fas fa-ticket-alt me-2"></i> بیجک خروجی – یک‌سره</h5>
+								<div class="value" id="outboundDirect">@Model.OutboundReceiptDirectCount.ToString("N0")</div>
+							</div>
+						</div>
+
+						<div class="col-md-3">
+							<div class="report-card">
+								<h5><i class="fas fa-ticket-alt me-2"></i> بیجک خروجی – مستقیم</h5>
+								<div class="value" id="outboundWarehouse">@Model.OutboundReceiptWarehouseCount.ToString("N0")</div>
+							</div>
+						</div>
+
+						<div class="col-md-3">
+							<div class="report-card">
+								<h5><i class="fas fa-box me-2"></i> کانتینر پر در محوطه</h5>
+								<div class="value" id="fullContainers">@Model.FullContainersInYard.ToString("N0")</div>
+							</div>
+						</div>
+
+						<div class="col-md-3">
+							<div class="report-card">
+								<h5><i class="fas fa-box-open me-2"></i> کانتینر خالی در محوطه</h5>
+								<div class="value" id="emptyContainers">@Model.EmptyContainersInYard.ToString("N0")</div>
+							</div>
+						</div>
+
+						<div class="col-md-3">
+							<div class="report-card">
+								<h5><i class="fas fa-clock me-2"></i> میانگین ماندگاری در انبار (روز)</h5>
+								<div class="value" id="avgStay">@Model.AverageOfDayInWarehouse.ToString("N1")</div>
+							</div>
+						</div>
+
+						<div class="col-md-3">
+							<div class="report-card">
+								<h5><i class="fas fa-money-bill-wave me-2"></i> درآمد یک‌سره (میلیارد)</h5>
+								<div class="value" id="directRevenue">@((Model.DirectTransportRevenue / 1000000000m).ToString("N2"))</div>
+							</div>
+						</div>
+
+						<div class="col-md-3">
+							<div class="report-card">
+								<h5><i class="fas fa-coins me-2"></i> درآمد کل (میلیارد)</h5>
+								<div class="value" id="totalRevenue">@((Model.TotalRevenue / 1000000000m).ToString("N2"))</div>
+							</div>
+						</div>
+
+						<div class="col-md-3">
+							<div class="report-card">
+								<h5><i class="fas fa-ship me-2"></i> شناورهای ورودی</h5>
+								<div class="value" id="incomingVessels">@Model.IncomingVesselsCount.ToString("N0")</div>
+							</div>
+						</div>
+
+						<div class="col-md-3">
+							<div class="report-card">
+								<h5><i class="fas fa-weight me-2"></i> تنا‌ژ تخلیه‌شده</h5>
+								<div class="value" id="dischargedTonnage">@Model.DischargedTonnage.ToString("N0")</div>
+							</div>
+						</div>
+
+						<div class="col-md-3">
+							<div class="report-card">
+								<h5><i class="fas fa-warehouse me-2"></i> رسید انبار</h5>
+								<div class="value" id="warehouseReceipts">@Model.WarehouseReceiptsCount.ToString("N0")</div>
+							</div>
+						</div>
+
+						<div class="col-md-3">
+							<div class="report-card">
+								<h5><i class="fas fa-dolly me-2"></i> رسید خروجی انبار</h5>
+								<div class="value" id="outboundReceipts">@Model.OutboundWarehouseReceiptsCount.ToString("N0")</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+@section script {
+	<script>
+		// Convert Persian digits to English digits
+		function faToEnDigits(str) {
+			var map = {'۰':'0','۱':'1','۲':'2','۳':'3','۴':'4','۵':'5','۶':'6','۷':'7','۸':'8','۹':'9'};
+			return String(str).replace(/[۰-۹]/g, function(d) { return map[d]; });
+		}
+
+		// Format a JS Date as Persian calendar yyyy/MM/dd with English digits
+		function formatAsPersianYMD(date) {
+			var fmt = new Intl.DateTimeFormat('fa-IR-u-ca-persian', { year: 'numeric', month: '2-digit', day: '2-digit' });
+			var s = fmt.format(date); // e.g. ۱۴۰۳/۰۸/۲۱
+			return faToEnDigits(s);  // -> 1403/08/21
+		}
+
+		// Calculate date range for the last N months (relative to today)
+		function getPersianDateRange(months) {
+			var to = new Date();
+			// Subtract N months in Gregorian calendar (acceptable for rolling range)
+			var from = new Date(to.getFullYear(), to.getMonth() - parseInt(months, 10), to.getDate());
+			return {
+				fromDate: formatAsPersianYMD(from),
+				toDate: formatAsPersianYMD(to)
+			};
+		}
+
+		function loadMonthlyReportByMonths(months) {
+			var dateRange = getPersianDateRange(months);
+			// Show loading state
+			$('.report-card .value').html('<i class="fas fa-spinner fa-spin"></i>');
+			// Fetch updated report data
+			$.ajax({
+				url: '@Url.Action("GetMonthlyReportData", "Dashboard")',
+				method: 'GET',
+				data: {
+					'FilterDate.FromDate': dateRange.fromDate,
+					'FilterDate.ToDate': dateRange.toDate
+				},
+					success: function (data) {
+					var loadedTrucksCount = data.loadedTrucksCount ?? data.LoadedTrucksCount ?? 0;
+					$('#loadedTrucks').text(loadedTrucksCount.toLocaleString('fa-IR'));
+
+					var weightDiff = (data.weightDifference ?? data.WeightDifference) || 0;
+					$('#weightDifference').text((weightDiff > 0 ? '+' : '') + weightDiff.toLocaleString('fa-IR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+					$('#weightDifference').closest('.report-card').toggleClass('warning', weightDiff > 0);
+
+					var importedSeosCount = data.importedSeosCount ?? data.ImportedSeosCount ?? 0;
+					$('#importedSeos').text(importedSeosCount.toLocaleString('fa-IR'));
+
+					var directTransportCount = data.directTransportCount ?? data.DirectTransportCount ?? 0;
+					$('#directTransport').text(directTransportCount.toLocaleString('fa-IR'));
+
+					var directShipmentCount = data.directShipmentCount ?? data.DirectShipmentCount ?? 0;
+					$('#directShipment').text(directShipmentCount.toLocaleString('fa-IR'));
+
+					var outboundReceiptDirectCount = data.outboundReceiptDirectCount ?? data.OutboundReceiptDirectCount ?? 0;
+					$('#outboundDirect').text(outboundReceiptDirectCount.toLocaleString('fa-IR'));
+
+					var outboundReceiptWarehouseCount = data.outboundReceiptWarehouseCount ?? data.OutboundReceiptWarehouseCount ?? 0;
+					$('#outboundWarehouse').text(outboundReceiptWarehouseCount.toLocaleString('fa-IR'));
+
+					var fullContainersInYard = data.fullContainersInYard ?? data.FullContainersInYard ?? 0;
+					$('#fullContainers').text(fullContainersInYard.toLocaleString('fa-IR'));
+
+					var emptyContainersInYard = data.emptyContainersInYard ?? data.EmptyContainersInYard ?? 0;
+					$('#emptyContainers').text(emptyContainersInYard.toLocaleString('fa-IR'));
+
+					var avgStay = data.averageOfDayInWarehouse ?? data.AverageOfDayInWarehouse ?? 0;
+					$('#avgStay').text(avgStay.toLocaleString('fa-IR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }));
+
+					var directRevenue = data.directTransportRevenue ?? data.DirectTransportRevenue ?? 0;
+					$('#directRevenue').text((directRevenue / 1000000000).toLocaleString('fa-IR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+
+					var totalRevenue = data.totalRevenue ?? data.TotalRevenue ?? 0;
+					$('#totalRevenue').text((totalRevenue / 1000000000).toLocaleString('fa-IR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+
+					var incomingVesselsCount = data.incomingVesselsCount ?? data.IncomingVesselsCount ?? 0;
+					$('#incomingVessels').text(incomingVesselsCount.toLocaleString('fa-IR'));
+
+					var dischargedTonnage = data.dischargedTonnage ?? data.DischargedTonnage ?? 0;
+					$('#dischargedTonnage').text(dischargedTonnage.toLocaleString('fa-IR'));
+
+					var warehouseReceiptsCount = data.warehouseReceiptsCount ?? data.WarehouseReceiptsCount ?? 0;
+					$('#warehouseReceipts').text(warehouseReceiptsCount.toLocaleString('fa-IR'));
+
+					var outboundWarehouseReceiptsCount = data.outboundWarehouseReceiptsCount ?? data.OutboundWarehouseReceiptsCount ?? 0;
+					$('#outboundReceipts').text(outboundWarehouseReceiptsCount.toLocaleString('fa-IR'));
+				},
+				error: function (xhr, status, error) {
+					console.error('Error loading monthly report:', error);
+					alert('خطا در بارگذاری گزارش');
+					location.reload();
+				}
+			});
+		}
+
+		// Time filter button click handler
+		$(document).on('click', '.time-filter button', function () {
+			$('.time-filter button').removeClass('active');
+			$(this).addClass('active');
+			var months = $(this).data('months');
+			loadMonthlyReportByMonths(months);
+		});
+
+		// Load default (1 month) on page ready
+		$(function () {
+			var $defaultBtn = $('.time-filter button[data-months="1"]');
+			if ($defaultBtn.length) {
+				$defaultBtn.addClass('active');
+				loadMonthlyReportByMonths(1);
+			}
+		});
+	</script>
+}

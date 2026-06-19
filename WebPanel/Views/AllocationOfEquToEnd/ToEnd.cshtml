@@ -1,0 +1,675 @@
+﻿@model AllocationOfEquToEndPageDto
+@{
+    ViewData["Title"] = "تکمیل اطلاعات عملیات";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+
+@section style {
+
+}
+
+
+@* اطلاعات پایه *@
+
+<div class="col-lg-12">
+    <div class="card">
+        <div class="card-header">
+            <div class="d-flex justify-content-between">
+                <h3 class="title">
+                    <a asp-action="SeoAllocationPage" asp-route-seoid="@Model.SeoId" asp-controller="Seo"><i class="fa-solid align-middle fa-right-to-bracket me-2"></i></a>
+                    @Model.PageTitle
+                </h3>
+
+                <div>
+                    <a class="btn btn-success rounded-3 mx-1"
+                       asp-action="GetAllocationEquOperationExcelFile"
+                       asp-route-allocationEquId="@Model.AllocationEquId">
+                        <i class="icon-printer"></i>
+                        گزارش اکسل
+                    </a>
+
+                    @if (Model != null && Model?.State == AllocationEquipmentState.InOperation)
+                    {
+                        <a id="AcceptEndOperation"
+                           class="btn btn-success rounded-3 mx-1"
+                           onclick="ShowQAlert(event, 'AcceptEndOperation');"
+                           asp-action="AcceptEndOperation" asp-route-allocationEquId="@Model.AllocationEquId">
+                            <i class="icon-plus"></i>
+                            ثبت اتمام عملیات
+                        </a>
+                    }
+                </div>
+            </div>
+
+            <!-- /.portlet-title -->
+            <div class="buttons-box">
+
+                <i class="icon-size-fullscreen"></i>
+                <div class="paper-ripple">
+                    <div class="paper-ripple__background"></div>
+                    <div class="paper-ripple__waves"></div>
+                </div>
+                <!-- /.buttons-box -->
+            </div>
+            <!-- /.portlet-heading -->
+            <!-- /.portlet-body -->
+        </div>
+    </div>
+</div>
+
+
+
+@* مقدار تناژ *@
+<partial name="_ValueTonnagePage" model="Model.ValueTonnagePage" />
+
+
+@* اجاره ساعتی *@
+<partial name="_RentalPage" model="Model.RentalPage" />
+
+
+@* تعداد جابجایی تجهیز  *@
+<partial name="_CountDisPage" model="Model.CountDisPage" />
+
+
+@* تعداد جابجایی درب انبار  *@
+<partial name="_MovingDoorPage" model="Model.MovingDoorPage" />
+
+
+@* خسارت وارد شده به تجهیزات  *@
+<partial name="_DamagedPage" model="Model.DamagedPage" />
+
+@* توضیحات  *@
+<partial name="_DescriptionPage" model="Model.DescriptionPage" />
+
+
+@* افزودن تجهیز جدید *@
+<partial name="_NewEqupment" />
+
+
+
+@section script {
+    <script src="~/assets/js/validation/jquery.validate.min.js"></script>
+    <script src="~/assets/js/validation/jquery.validate.unobtrusive.min.js"></script>
+
+
+    <script>
+        $(document).ready(function () {
+
+            $('.clockpicker').clockpicker({
+                placement: 'bottom',
+                align: 'left',
+                donetext: 'تایید'
+            });
+
+            $("#CreateValueTonnageDto_SeoEquipmentId").select2({
+                dropdownParent: $('#valueTonnagemodal')
+            });
+
+            $("#CreateRentalDto_SeoEquipmentId").select2({
+                dropdownParent: $('#rentalmodal')
+            });
+
+            $("#CreateCountDisDto_SeoEquipmentId").select2({
+                dropdownParent: $('#CountDismodal')
+            });
+
+            $("#CreateMovingDoorDto_SeoEquipmentId").select2({
+                dropdownParent: $('#MovingDoormodal')
+            });
+
+            $("#CreateDamagedDto_SeoEquipmentId").select2({
+                dropdownParent: $('#Damagedmodal')
+            });
+
+        });
+
+
+
+        kamaDatepicker('CreateCountDisDto_DateFa', customOptions);
+        kamaDatepicker('CreateDamagedDto_DateFa', customOptions);
+        kamaDatepicker('CreateDescriptionDto_DateFa', customOptions);
+        kamaDatepicker('CreateMovingDoorDto_DateFa', customOptions);
+        kamaDatepicker('CreateRentalDto_DateFa', customOptions);
+        kamaDatepicker('CreateValueTonnageDto_DateFa', customOptions);
+    </script>
+
+
+
+    @* value tonnage *@
+    <script>
+
+        function valueTonnageShowModal() {
+            $('#CreateValueTonnageDto_Id').val('');
+            $('#CreateValueTonnageDto_Tonnage').val('0');
+            $('#CreateValueTonnageDto_DateFa').val('');
+            $("#valueTonnagemodal").modal('show');
+        }
+
+        function addOrUpdateValueTonnage() {
+            let allocationEquipmentId = $('#CreateValueTonnageDto_AllocationEquipmentId').val();
+            let id = $('#CreateValueTonnageDto_Id').val();
+            let tonnage = $('#CreateValueTonnageDto_Tonnage').val();
+            let seoEquipmentId = $("#CreateValueTonnageDto_SeoEquipmentId").val();
+
+            let dateFa = $('#CreateValueTonnageDto_DateFa').val();
+
+            $("#valueTonnagemodal").modal('hide');
+            $.post("@Url.Action("AddOrUpdateValueTonnage", "AllocationOfEquToEnd")",
+                {
+                    allocationEquipmentId,
+                    id,
+                    tonnage,
+                    dateFa,
+                    seoEquipmentId
+                })
+                .done(function (res) {
+
+                    $("#ValueTonnageListId").html(res);
+                })
+                .fail(function (xhr, status, error) {
+                    location.reload();
+                });
+        }
+
+        function editValueTonnage(row) {
+            // let allocationEquipmentId = $('#CreateValueTonnageDto_AllocationEquipmentId').val();
+            let id = $('#vt_id' + row).text();
+            let tonnage = $('#vt_Tonnage' + row).text();
+            let seoEquId = $("#vt_SeoEquipmentId" + row).text();
+            let dateFa = $('#vt_DateFa' + row).text();
+
+
+            $('#CreateValueTonnageDto_Id').val(id);
+            $('#CreateValueTonnageDto_Tonnage').val(tonnage);
+            $('#CreateValueTonnageDto_SeoEquipmentId').val(seoEquId)
+            $('#CreateValueTonnageDto_DateFa').val(dateFa);
+
+            $("#CreateValueTonnageDto_SeoEquipmentId").select2({
+                dropdownParent: $('#valueTonnagemodal')
+            });
+            $("#CreateValueTonnageDto_SeoEquipmentId").trigger('change');
+
+            $("#valueTonnagemodal").modal('show');
+        }
+
+
+        async function DeleteValueTonnage(event, valueTonnageId) {
+            event.preventDefault();
+            let result = await ShowQAlert2(event);
+
+            if (result === true) {
+                $.post("@Url.Action("DeleteValueTonnage", "AllocationOfEquToEnd")",
+                    {
+                        valueTonnageId
+                    })
+                    .done(function (res) {
+
+                        $("#ValueTonnageListId").html(res);
+                    })
+                    .fail(function (xhr, status, error) {
+                        location.reload();
+                    });
+            }
+
+        }
+
+    </script>
+
+
+
+    @* rental  اجاره ساعتی / تناژی *@
+    <script>
+        function rentalShowModal() {
+            $('#CreateRentalDto_Id').val('');
+            $('#CreateRentalDto_Location').val('');
+            $('#CreateRentalDto_Rental').val('0');
+            $('#CreateRentalDto_TonnageTanzif').val('0');
+            $('#CreateRentalDto_TonnageDepo').val('0');
+            $('#CreateRentalDto_Tonnage').val('0');
+            $('#CreateRentalDto_DateFa').val('');
+            $("#rentalmodal").modal('show');
+        }
+
+        function addOrUpdateRental() {
+            let allocationEquipmentId = $('#CreateRentalDto_AllocationEquipmentId').val();
+            let id = $('#CreateRentalDto_Id').val();
+            let seoEquipmentId = $("#CreateRentalDto_SeoEquipmentId").val();
+            let location = $('#CreateRentalDto_Location').val();
+
+            let rental = $('#CreateRentalDto_Rental').val();
+            let tonnageTanzif = $('#CreateRentalDto_TonnageTanzif').val();
+            let tonnageDepo = $('#CreateRentalDto_TonnageDepo').val();
+
+            let tonnage = $('#CreateRentalDto_Tonnage').val();
+            let dateFa = $('#CreateRentalDto_DateFa').val();
+
+
+
+            $("#rentalmodal").modal('hide');
+            $.post("@Url.Action("AddOrUpdateRental", "AllocationOfEquToEnd")",
+                {
+                    allocationEquipmentId,
+                    id,
+                    seoEquipmentId,
+
+                    location,
+                    rental,
+                    tonnageTanzif,
+                    tonnageDepo,
+                    tonnage,
+
+                    dateFa
+                })
+                .done(function (res) {
+
+                    $("#RentalListId").html(res);
+                })
+                .fail(function (xhr, status, error) {
+                    location.reload();
+                });
+        }
+
+        function editRental(row) {
+
+            let id = $('#rental_id' + row).text();
+            let seoEquipmentId = $("#rental_SeoEquipmentId" + row).text();
+            let location = $('#rental_Location' + row).text();
+
+            let rental = $('#rental_Rental' + row).text();
+            let tonnageTanzif = $('#rental_TonnageTanzif' + row).text();
+            let tonnageDepo = $('#rental_TonnageDepo' + row).text();
+
+            let tonnage = $('#rental_Tonnage' + row).text();
+
+            let dateFa = $('#rental_DateFa' + row).text();
+
+
+            $('#CreateRentalDto_Id').val(id);
+            $('#CreateRentalDto_SeoEquipmentId').val(seoEquipmentId);
+            $('#CreateRentalDto_Location').val(location);
+
+            $('#CreateRentalDto_Rental').val(Number(rental));
+            $('#CreateRentalDto_TonnageTanzif').val(Number(tonnageTanzif));
+            $('#CreateRentalDto_TonnageDepo').val(Number(tonnageDepo));
+
+            $('#CreateRentalDto_Tonnage').val(Number(tonnage));
+            $('#CreateRentalDto_DateFa').val(dateFa);
+
+
+            $("#CreateRentalDto_SeoEquipmentId").select2({
+                dropdownParent: $('#rentalmodal')
+            });
+            $("#CreateRentalDto_SeoEquipmentId").trigger('change');
+
+            $("#rentalmodal").modal('show');
+        }
+
+        async function DeleteRental(event, rentalId) {
+            event.preventDefault();
+            let result = await ShowQAlert2(event);
+
+            if (result === true) {
+                $.post("@Url.Action("DeleteRental", "AllocationOfEquToEnd")",
+                    {
+                        rentalId
+                    })
+                    .done(function (res) {
+
+                        $("#RentalListId").html(res);
+                    })
+                    .fail(function (xhr, status, error) {
+                        location.reload();
+                    });
+            }
+
+        }
+    </script>
+
+
+    @* Count Displacements - تعداد جابجایی تجهیز *@
+    <script>
+
+        function countDisShowModal() {
+            $('#CreateCountDisDto_Id').val('');
+            $('#CreateCountDisDto_CountDisplacements').val('0');
+            $('#CreateCountDisDto_DateFa').val('');
+            $("#CountDismodal").modal('show');
+        }
+
+        function addOrUpdateCountDis() {
+            let allocationEquipmentId = $('#CreateCountDisDto_AllocationEquipmentId').val();
+            let id = $('#CreateCountDisDto_Id').val();
+            let seoEquipmentId = $("#CreateCountDisDto_SeoEquipmentId").val();
+            let countDisplacements = $('#CreateCountDisDto_CountDisplacements').val();
+            let dateFa = $('#CreateCountDisDto_DateFa').val();
+
+
+            $("#CountDismodal").modal('hide');
+            $.post("@Url.Action("AddOrUpdateCountDis", "AllocationOfEquToEnd")",
+                {
+                    allocationEquipmentId,
+                    id,
+                    countDisplacements,
+                    dateFa,
+                    seoEquipmentId
+                })
+                .done(function (res) {
+
+                    $("#CountDisListId").html(res);
+                })
+                .fail(function (xhr, status, error) {
+                    location.reload();
+                });
+        }
+
+        function editCountDis(row) {
+            let id = $('#cd_id' + row).text();
+            let seoEquipmentId = $("#cd_SeoEquipmentId" + row).text();
+            let countDis = $('#cd_CountDis' + row).text();
+            let dateFa = $('#cd_DateFa' + row).text();
+
+            $('#CreateCountDisDto_Id').val(id);
+            $('#CreateCountDisDto_SeoEquipmentId').val(seoEquipmentId);
+            $('#CreateCountDisDto_CountDisplacements').val(Number(countDis));
+            $('#CreateCountDisDto_DateFa').val(dateFa);
+
+            $("#CreateCountDisDto_SeoEquipmentId").select2({
+                dropdownParent: $('#CountDismodal')
+            });
+            $("#CreateCountDisDto_SeoEquipmentId").trigger('change');
+
+            $("#CountDismodal").modal('show');
+        }
+
+        async function DeleteCountDis(event, countDisId) {
+            event.preventDefault();
+            let result = await ShowQAlert2(event);
+
+            if (result === true) {
+                $.post("@Url.Action("DeleteCountDis", "AllocationOfEquToEnd")",
+                    {
+                        countDisId
+                    })
+                    .done(function (res) {
+
+                        $("#CountDisListId").html(res);
+                    })
+                    .fail(function (xhr, status, error) {
+                        location.reload();
+                    });
+            }
+
+        }
+    </script>
+
+
+
+    @* Moving Warehouse Door - تعداد جابجایی درب انبار *@
+    <script>
+
+        function movingDoorShowModal() {
+            $('#CreateMovingDoorDto_Id').val('');
+            $('#CreateMovingDoorDto_CountMoving').val('0');
+            $('#CreateMovingDoorDto_DateFa').val('');
+            $("#MovingDoormodal").modal('show');
+        }
+
+        function addOrUpdateMovingDoor() {
+            let allocationEquipmentId = $('#CreateMovingDoorDto_AllocationEquipmentId').val();
+            let id = $('#CreateMovingDoorDto_Id').val();
+            let seoEquipmentId = $("#CreateMovingDoorDto_SeoEquipmentId").val();
+            let countMoving = $('#CreateMovingDoorDto_CountMoving').val();
+            let dateFa = $('#CreateMovingDoorDto_DateFa').val();
+
+            $("#MovingDoormodal").modal('hide');
+            $.post("@Url.Action("AddOrUpdateMovingDoor", "AllocationOfEquToEnd")",
+                {
+                    allocationEquipmentId,
+                    id,
+                    countMoving,
+                    dateFa,
+                    seoEquipmentId
+                })
+                .done(function (res) {
+
+                    $("#MovingDoorListId").html(res);
+                })
+                .fail(function (xhr, status, error) {
+                    location.reload();
+                });
+        }
+
+        function editMovingDoor(row) {
+            let id = $('#md_id' + row).text();
+            let seoEquipmentId = $("#md_SeoEquipmentId" + row).text();
+            let countMoving = $('#md_CountMoving' + row).text();
+            let dateFa = $('#md_DateFa' + row).text();
+
+
+            $('#CreateMovingDoorDto_Id').val(id);
+            $('#CreateMovingDoorDto_SeoEquipmentId').val(seoEquipmentId);
+            $('#CreateMovingDoorDto_CountMoving').val(Number(countMoving));
+            $('#CreateMovingDoorDto_DateFa').val(dateFa);
+
+            $("#CreateMovingDoorDto_SeoEquipmentId").select2({
+                dropdownParent: $('#MovingDoormodal')
+            });
+            $("#CreateMovingDoorDto_SeoEquipmentId").trigger('change');
+
+            $("#MovingDoormodal").modal('show');
+        }
+
+        async function DeleteMovingDoor(event, movingDoorId) {
+            event.preventDefault();
+            let result = await ShowQAlert2(event);
+
+            if (result === true) {
+                $.post("@Url.Action("DeleteMovingDoor", "AllocationOfEquToEnd")",
+                    {
+                        movingDoorId
+                    })
+                    .done(function (res) {
+
+                        $("#MovingDoorListId").html(res);
+                    })
+                    .fail(function (xhr, status, error) {
+                        location.reload();
+                    });
+            }
+
+        }
+    </script>
+
+
+    @* Damaged Equipment - خسارت وارد شده به تجهیزات *@
+    <script>
+
+        function damagedShowModal() {
+            $('#CreateDamagedDto_Id').val('');
+            $('#CreateDamagedDto_Description').val('');
+            $('#CreateDamagedDto_Price').val('0');
+            $('#CreateDamagedDto_PayByCompanyOwner').prop("checked", true);
+            $('#CreateDamagedDto_DateFa').val('');
+            $("#Damagedmodal").modal('show');
+        }
+
+        function addOrUpdateDamaged() {
+            let allocationEquipmentId = $('#CreateDamagedDto_AllocationEquipmentId').val();
+            let id = $('#CreateDamagedDto_Id').val();
+            let seoEquipmentId = $("#CreateDamagedDto_SeoEquipmentId").val();
+            let description = $('#CreateDamagedDto_Description').val();
+            let price = $('#CreateDamagedDto_Price').val();
+            let dateFa = $('#CreateDamagedDto_DateFa').val();
+
+
+            $("#Damagedmodal").modal('hide');
+            $.post("@Url.Action("AddOrUpdateDamaged", "AllocationOfEquToEnd")",
+                {
+                    allocationEquipmentId,
+                    id,
+                    seoEquipmentId,
+                    description,
+                    price,
+                    dateFa,
+                    payByCompanyOwner: document.getElementById("CreateDamagedDto_PayByCompanyOwner").checked
+                })
+                .done(function (res) {
+
+                    $("#DamagedListId").html(res);
+                })
+                .fail(function (xhr, status, error) {
+                    location.reload();
+                });
+        }
+
+        function editDamaged(row) {
+            let id = $('#damaged_id' + row).text();
+            let seoEquipmentId = $("#damaged_SeoEquipmentId" + row).text();
+            let description = $('#damaged_Description' + row).text();
+            let price = $('#damaged_Price' + row).text();
+            let payOwner = Number($('#damaged_PayOwner' + row).text());
+            let dateFa = $('#damaged_DateFa' + row).text();
+
+
+            $('#CreateDamagedDto_Id').val(id);
+            $('#CreateDamagedDto_SeoEquipmentId').val(seoEquipmentId);
+            $('#CreateDamagedDto_Description').val(description);
+            $('#CreateDamagedDto_Price').val(Number(price));
+            $('#CreateDamagedDto_DateFa').val(dateFa);
+
+            if (payOwner == 1)
+                $('#CreateDamagedDto_PayByCompanyOwner').prop("checked", true);
+            else
+                $('#CreateDamagedDto_PayByCompanyOwner').prop("checked", false);
+
+            $("#CreateDamagedDto_SeoEquipmentId").select2({
+                dropdownParent: $('#Damagedmodal')
+            });
+            $("#CreateDamagedDto_SeoEquipmentId").trigger('change');
+
+            $("#Damagedmodal").modal('show');
+        }
+
+        async function DeleteDamage(event, damagedId) {
+            event.preventDefault();
+            let result = await ShowQAlert2(event);
+
+            if (result === true) {
+                $.post("@Url.Action("DeleteDamaged", "AllocationOfEquToEnd")",
+                    {
+                        damagedId
+                    })
+                    .done(function (res) {
+
+                        $("#DamagedListId").html(res);
+                    })
+                    .fail(function (xhr, status, error) {
+                        location.reload();
+                    });
+            }
+
+        }
+    </script>
+
+
+    @* Description - توضیحات *@
+    <script>
+
+        function descriptionShowModal() {
+            $('#CreateDescriptionDto_Id').val('');
+            $('#CreateDescriptionDto_Description').val('');
+            $('#CreateDescriptionDto_DateFa').val('');
+            $("#Descriptionmodal").modal('show');
+        }
+
+        function addOrUpdateDescription() {
+            let allocationEquipmentId = $('#CreateDescriptionDto_AllocationEquipmentId').val();
+            let id = $('#CreateDescriptionDto_Id').val();
+            let description = $('#CreateDescriptionDto_Description').val();
+            let dateFa = $('#CreateDescriptionDto_DateFa').val();
+
+            $("#Descriptionmodal").modal('hide');
+            $.post("@Url.Action("AddOrUpdateDescription", "AllocationOfEquToEnd")",
+                {
+                    allocationEquipmentId,
+                    id,
+                    dateFa,
+                    description
+                })
+                .done(function (res) {
+
+                    $("#DescriptionListId").html(res);
+                })
+                .fail(function (xhr, status, error) {
+                    location.reload();
+                });
+        }
+
+        function editDescription(row) {
+            let id = $('#description_id' + row).text();
+            let description = $('#description_des' + row).text();
+            let dateFa = $('#description_DateFa' + row).text();
+
+            $('#CreateDescriptionDto_Id').val(id);
+            $('#CreateDescriptionDto_Description').val(description.trim());
+            $('#CreateDescriptionDto_DateFa').val(dateFa);
+
+
+            $("#Descriptionmodal").modal('show');
+        }
+
+        async function DeleteDescription(event, descriptionId) {
+            event.preventDefault();
+            let result = await ShowQAlert2(event);
+
+            if (result === true) {
+                $.post("@Url.Action("DeleteDescription", "AllocationOfEquToEnd")",
+                    {
+                        descriptionId
+                    })
+                    .done(function (res) {
+
+                        $("#DescriptionListId").html(res);
+                    })
+                    .fail(function (xhr, status, error) {
+                        location.reload();
+                    });
+            }
+
+        }
+
+    </script>
+
+
+    @* افزودن تجهیز جدید *@
+    <script>
+        function newEquipment() {
+            let allocationEquEndReportType = $('#AllocationEquEndReportTypeId').val();
+            let EquipmentName = $('#EquipmentNameId').val();
+
+
+            $.post("@Url.Action("NewEquipment", "AllocationOfEquToEnd")",
+                {
+                    allocationEquEndReportType,
+                    EquipmentName
+                })
+                .done(function (res) {
+                    location.reload();
+                })
+                .fail(function (xhr, status, error) {
+                    location.reload();
+                });
+
+        }
+
+
+        function showNewEquipmentModal(type, parentModalId) {
+            $('#AllocationEquEndReportTypeId').val(type);
+
+            $("#" + parentModalId).modal('hide');
+            $("#NewEquModal").modal('show');
+        }
+
+    </script>
+}

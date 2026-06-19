@@ -1,0 +1,96 @@
+﻿@model CreateDeviceRadioDto
+
+<form asp-action="CreateDeviceradio" method="post">
+    <input asp-for="Id" type="hidden" />
+    <input asp-for="DeviceId" type="hidden" />
+    <div class="card-body pt-0">
+        <div class="col-md-12">
+            <div class="form-body">
+
+                <div class="form-group row gy-3">
+                    <div class="col-md-6">
+                        <label> نام</label>
+                        <div class="input-group">
+                            <input type="text" asp-for="Name" class="form-control" required>
+                        </div>
+                        <span asp-validation-for="Name" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label> توضیحات </label>
+                        <div class="input-group">
+                            <input type="text" asp-for="Description" class="form-control">
+                        </div>
+                        <span asp-validation-for="Description" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label> کد مخصوص دستگاه FPN </label>
+                        <div class="input-group">
+                            <input type="text" asp-for="CodeNameForFpn" class="form-control" required>
+                        </div>
+                        <span asp-validation-for="CodeNameForFpn" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="control-label">نوع جهت</label>
+                        <select asp-for="Direction"
+                                asp-items="Html.GetEnumSelectList<FpnDirectionType>()"
+                                class="js-example-basic-single w-100">
+                        </select>
+                        <span asp-validation-for="Direction" class="text-danger"></span>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label> Ip  رادیو </label>
+                        <div class="input-group">
+                            <input type="text" asp-for="Ip" class="form-control">
+                        </div>
+                        <span asp-validation-for="Ip" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label> شماره پورت </label>
+                        <div class="input-group">
+                            <input type="number" asp-for="PortNumber" class="form-control">
+                        </div>
+                        <span asp-validation-for="PortNumber" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label> طول موقعیت جغرافیایی    </label>
+                        <div class="input-group ">
+                            <input asp-for="LonX" class="form-control " placeholder="X">
+                            <span asp-validation-for="LonX" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label> عرض موقعیت جغرافیایی    </label>
+                        <div class="input-group ">
+                            <input asp-for="LatY" class="form-control" placeholder="Y">
+                            <span asp-validation-for="LatY" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-12 d-flex my-3">
+                    <div>
+                        <div class="input-group activeor">
+                            <label>
+                                <input type="checkbox" asp-for="IsActive" class="normal">
+                                فعال/غیرفعال
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="modal-footer p-0 border-0">
+                    <button type="submit" class="btn btn-success btn-round">ذخیره</button>
+                    <button type="button" class="btn btn-danger btn-round" data-bs-dismiss="modal">بازگشت</button>
+                </div>
+            </div>
+
+
+
+        </div>
+    </div>
+
+</form>
+
+  <script src="~/assets/js/validation/jquery.validate.min.js"></script>
+ <script src="~/assets/js/validation/jquery.validate.unobtrusive.min.js"></script>

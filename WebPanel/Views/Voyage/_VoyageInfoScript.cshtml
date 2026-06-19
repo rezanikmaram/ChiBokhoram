@@ -1,0 +1,14 @@
+﻿<script>
+	function GetVoyageInfo(voyageId, cotextSelecttor = "#voyageInfoContext") {
+
+		$.post("@Url.Action("GetVoyageInfo", "Voyage")",
+			{ voyageId: voyageId })
+			.done(function (res) {
+				$(cotextSelecttor).empty().html('');
+				$(cotextSelecttor).html(res);
+				 
+				$("#voyageInfoModal").modal('show');
+			});
+	}
+
+</script>

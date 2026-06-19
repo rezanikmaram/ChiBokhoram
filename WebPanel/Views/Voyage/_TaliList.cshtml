@@ -1,0 +1,117 @@
+﻿@model TaliOneProductPageDto
+
+@{
+	int taliRow = 1;
+}
+
+<div id="taliListModal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" tabindex="-1">
+	<div class="modal-dialog modal-xl modal-dialog-centered">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h4 class="modal-title">لیست تالی - بارنامه  @Model.BillOfLadingNumberTitle (@Model.Product?.ProductName)</h4>
+				<button type="button" class="close btn-close rounded border" data-bs-dismiss="modal"></button>
+			</div>
+			<div class="modal-body" id="modalbody">
+				<div class="table-responsive">
+					<table class="table table-sm table-bordered table-hover table-striped" id="data-table">
+						<thead class="bg-primary">
+							<tr>
+								<th class="px-1 text-center">#</th>
+								<th class="px-1 text-center">تاریخ</th>
+								<th class="px-1 text-center">نوع شمارش</th>
+								<th class="px-1 text-center">@(Model.IsSelfTransported ? "شماره شاسی" : "کامیون") </th>
+								@if(Model.IsSelfTransported )
+								{
+									<th class="px-1 text-center">تالی خودرو</th>
+								}
+
+								<th class="px-1 text-center">نوع حمل</th>
+								<th class="px-1 text-center">چند سره بودن</th>
+								<th class="px-1 text-center">تفکیک یا صفافی</th>
+								<th class="px-1 text-center">انبار کشتی</th>
+								<th class="px-1 text-center">  گروه کارگری</th>
+
+								<th class="px-1 text-center">  دبل کرن</th>
+								<th class="px-1 text-center">کاربر</th>
+								<th class="px-1 text-center">تعداد   </th>
+								<th class="px-1 text-center">وزن بار   </th>
+
+								<th class="px-1 text-center">توضیحات</th>
+								<th class="px-1 text-center">مشکل دار</th>
+								<th class="px-1 text-center">فایل ها</th>
+
+
+							</tr>
+						</thead>
+						<tbody>
+
+
+							@foreach (var item in Model.List)
+							{
+								<tr>
+									<td class="d-none">
+										<div class="d-none">
+											<input type="hidden" name="taliId" value="@item.TaliId" />
+										</div>
+									</td>
+									<td class="align-middle px-2 text-center">@(taliRow++)</td>
+									<td class="align-middle px-2 text-center" dir="ltr">  @item.DateFa </td>
+									<td class="align-middle px-2 text-center" dir="ltr">  @item.TaliTypeTitle </td>
+									<td class="align-middle px-2 text-center"> @(Model.IsSelfTransported ? Model.VehicleIdentificationNumber : item.TruckTitle)  </td>
+									@if (Model.IsSelfTransported)
+									{
+										<td class="align-middle px-2 text-center"> @(item.IsSelfTransported == true ? "بله" : "خیر") </td>
+									}
+
+									<td class="align-middle px-2 text-center"> @item.UnLoadTypeTitle </td>
+									<td class="align-middle px-2 text-center"> @item.UnloadingStageCount  </td>
+									<td class="align-middle px-2 text-center"> @(item.IsSeparatedOrSorted == true ? "بله" : "خیر") </td>
+									<td class="align-middle px-2 text-center"> @item.ShipWarehouseNumber </td>
+									<td class="align-middle px-2 text-center"> @item.LaborWorkingGroupName </td>
+
+									<td class="align-middle px-2 text-center"> @(item.IsUsingDualCrane == true ? "بله" : "خیر") </td>  
+									<td class="align-middle px-2 text-center"> @item.UserFullName </td>
+									<td class="align-middle px-2 text-center"> @item.Count.ToPrice() </td>
+									<td class="align-middle px-2 text-center btn btn-secondary w-100" onclick="ShowModalWeightTaliList('@item.TaliId')"> @item.WeightLoad.ToPrice() </td>
+
+									<td class="align-middle px-2 text-center"> @item.Description </td>
+
+									<td class="align-middle px-2 d-flex justify-content-center text-center">
+										<span class="label px-2 py-1 rounded label-@(!item.IsProblem?"success":"danger")">
+											@(!item.IsProblem ? "سالم" : $" {item.CountProblem.ToPrice()} مشکل دار")
+										</span>
+									</td>
+
+									<td class="align-middle px-2 text-center">
+										@if (item.Files?.Any() == true)
+										{
+											for (int fileIndex = 0; fileIndex < item.Files.Count; fileIndex++)
+											{
+												<a asp-action="TaliFile"
+												   asp-route-TaliProductId="@item.TaliProductId"
+												   asp-route-FileName="@item.Files[fileIndex].FileName"
+												   class="btn btn-primary p-2 py-0 mb-1" target="_blank">فایل @(fileIndex + 1)</a>
+											}
+
+										}
+
+
+
+									</td>
+
+								</tr>
+							}
+
+
+
+						</tbody>
+					</table>
+
+
+
+				</div>
+
+			</div>
+		</div>
+	</div>
+</div>

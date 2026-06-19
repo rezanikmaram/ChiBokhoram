@@ -1,0 +1,522 @@
+﻿@model OtherIncomeInvoicePageDto
+@{
+	ViewData["Title"] = "سایر درآمد ها";
+	Layout = "~/Views/Shared/AdminLayout.cshtml";
+	int i = ((Model.List?.PageNumber - 1) * Model.List?.PageSize) + 1 ?? 1;
+}
+
+
+
+
+
+@section style {
+
+	<link href="~/assets/plugins/select2/dist/css/select2.min.css" rel="stylesheet">
+}
+
+
+<div class="col-lg-12">
+	<div class="card">
+		<div class="card-header">
+			<div class="d-flex justify-content-between">
+
+				<h3 class="title">
+					<i class="fa fa-money-bill text-success me-2"></i> سایر درآمد ها
+				</h3>
+
+				<div>
+					<a class="btn btn-success rounded" onclick="createInvoice();"> +   درآمد جدید</a>
+
+
+					<!-- /.portlet-title -->
+					<div class="buttons-box">
+
+						<i class="icon-size-fullscreen"></i>
+						<div class="paper-ripple">
+							<div class="paper-ripple__background"></div>
+							<div class="paper-ripple__waves"></div>
+						</div>
+
+					</div>
+				</div>
+				<!-- /.buttons-box -->
+			</div>
+			<!-- /.portlet-heading -->
+
+
+		</div>
+		<div class="card-body pt-0">
+
+			<form id="formFilter" asp-action="index" asp-route-p="" method="post">
+				<input name="p" id="pageNumber" hidden />
+				<div class="form-body ">
+
+					<div class="row gy-4">
+
+						<div class="col-md-3 col-sm-12">
+							<div class="form-group">
+								<label>  جستجو:</label>
+								<div class="input-group">
+									<input asp-for="Filter.Search" type="text" class="rounded form-control">
+									<span asp-validation-for="Filter.Search" class="text-danger"></span>
+								</div>
+							</div>
+						</div>
+
+
+						<div class="col-md-3 col-sm-12">
+							<div class="form-group ">
+								<label>نوع درآمد</label>
+								<div class="input-group">
+									<select class="form-control select2"
+											asp-for="Filter.Type"
+											asp-items="@Html.GetEnumSelectList<OtherIncomeInvoiceType>()">
+										<option value="">همه نوع</option>
+									</select>
+								</div>
+							</div>
+						</div>
+
+						<div class="col-md-3 col-sm-12">
+							<div class="form-group ">
+								<label>شرکت</label>
+								<div class="input-group">
+									<select class="form-control select2"
+											asp-for="Filter.CompanyId"
+											asp-items="Model.Companies">
+										<option value="">همه شرکت ها</option>
+									</select>
+								</div>
+							</div>
+						</div>
+
+						<div class="col-md-3 col-sm-12">
+							<div class="form-group ">
+								<label>شناور</label>
+								<div class="input-group">
+									<select class="form-control select2"
+											asp-for="Filter.ShipId"
+											asp-items="Model.Ships">
+										<option value="">همه شناور ها</option>
+									</select>
+								</div>
+							</div>
+						</div>
+
+
+						<div class="col-md-2 col-sm-12">
+							<div class="form-group">
+								<label>از تاریخ:</label>
+								<div class="input-group">
+									<input asp-for="Filter.DateFrom" type="text" class=" form-control" autocomplete="off">
+									<span asp-validation-for="Filter.DateFrom" class="text-danger"></span>
+								</div>
+							</div>
+						</div>
+
+
+
+
+						<div class="col-md-2 col-sm-12">
+							<div class="form-group">
+								<label>تا تاریخ:</label>
+								<div class="input-group">
+									<input asp-for="Filter.DateTo" type="text" class=" form-control" autocomplete="off">
+									<span asp-validation-for="Filter.DateTo" class="text-danger"></span>
+								</div>
+							</div>
+						</div>
+
+						<div class="col-md-2 col-sm-12 align-content-end">
+							<div class="form-check form-switch">
+								<input type="checkbox" asp-for="Filter.RemainderPrice" class="form-check-input" role="switch" />
+								<label class="form-check-label ms-2" for="Filter.RemainderPrice">فقط داری بدهی </label>
+								<span asp-validation-for="Filter.RemainderPrice" class="text-danger"></span>
+							</div>
+						</div>
+
+						<div class="form-group col-md-2 ">
+							<button style="border-radius:5px; margin-top:30px" class="alert-icon px-3 btn btn-success "
+									type="submit">
+								فیلتر
+							</button>
+						</div>
+
+					</div>
+
+
+
+
+
+
+
+
+
+				</div>
+			</form>
+
+			<div class="table-responsive mt-5">
+				<table class="table table-sm table-bordered table-hover table-striped" id="data-table">
+					<thead class="bg-primary">
+						<tr>
+							<th>ردیف</th>
+							<th>شماره</th>
+							<th>نوع   </th>
+							<th>محموله</th>
+							<th>مبلغ</th>
+							<th>باقی مانده</th>
+							<th>طرف حساب</th>
+							<th>شناور</th>
+							<th>جزئیات</th>
+
+							<th>عملیات</th>
+						</tr>
+					</thead>
+					<tbody>
+
+
+						@foreach (var item in Model.List.Data)
+						{
+							<tr>
+								<td class="align-middle">@(i++)</td>
+								<td class="align-middle"> @item.NumberOperation </td>
+								<td class="align-middle">@item.TypeTitle</td>
+								<td class="align-middle">@item.CargoName  </td>
+								<td class="align-middle">@item.PriceTitle  </td>
+								<td class="align-middle">@item.RemainderPriceTitle  </td>
+								<td class="align-middle">@item.CompanyCompanyName  </td>
+								<td class="align-middle">@item.ShipShipName  </td>
+								<td class="align-middle">
+									<button class="btn btn-success w-100">
+										<a class="text-white" asp-action="Details" asp-route-invoiceId="@item.Id">جزئیات</a>
+									</button>
+								</td>
+
+								<td class="align-middle px-2 text-center">
+									<a class="btn btn-warning px-2 btn-sm btn-icon curve" onclick="editInvoice('@item.Id');"><i class="icon-pencil align-middle fs-6"></i></a>
+									<a id="DeleteInvoice@(i)" onclick="ShowQAlert(event,'DeleteInvoice@(i)');" class="btn btn-danger px-2 btn-sm btn-icon curve btn-questions"
+									   asp-action="DeleteInvoice" asp-route-invoiceId="@item.Id">
+										<i class="icon-trash fs-6 align-middle fa-flip-horizontal"></i>
+									</a>
+								</td>
+							</tr>
+						}
+
+					</tbody>
+				</table>
+
+				<div class="mt-4">
+					<cs-pager cs-paging-pagesize="@Model.List.PageSize"
+							  cs-paging-pagenumber="@Model.List.PageNumber"
+							  cs-paging-totalitems="@Model.List.TotalItems"
+							  cs-paging-maxpageritems="10"
+							  cs-pagenumber-param="p"
+							  cs-show-first-last="true"
+							  cs-suppress-empty-nextprev="true"
+							  cs-suppress-inactive-firstlast="true"
+							  cs-show-numbered="true"
+							  cs-first-page-text="ابتدا"
+							  cs-last-page-text="انتها"
+							  cs-next-page-title="بعدی"
+							  cs-previous-page-title="قبلی"
+							  cs-first-page-title="ابتدا"
+							  cs-last-page-title="انتها"
+							  cs-next-page-text="بعدی"
+							  cs-previous-page-text="قبلی"
+							  cs-pager-li-current-class="page-item active"
+							  cs-pager-li-other-class="page-item"
+							  cs-pager-li-non-active-class="page-item disabled"
+							  cs-pager-link-current-class="page-link"
+							  cs-pager-link-other-class="page-link"
+							  asp-controller="OtherIncomeInvoice"
+							  asp-action="Index">
+					</cs-pager>
+				</div>
+
+			</div>
+
+		</div>
+
+	</div>
+</div>
+
+
+<div id="generalmodal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" tabindex="-1">
+	<div class="modal-dialog modal-lg modal-dialog-centered">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h4 class="modal-title">ثبت درآمد</h4>
+				<button type="button" class="close btn-close rounded border" data-bs-dismiss="modal"></button>
+			</div>
+			<div class="modal-body" id="modalbody">
+
+
+				<form asp-action="CreateOtherIncomeInvoice" method="post">
+					<input asp-for="CreateDto.Id" type="hidden" />
+
+					<div class="card-body pt-0">
+						<div class="col-md-12">
+							<div class="form-body">
+
+								<div class="row gy-4">
+									<div class="form-group d-flex col-md-6">
+										<div class="w-100">
+											<div class=" form-group">
+												<label>  نوع درآمد  </label>
+												<div class="input-group">
+													<select style="width:500px !important" class="form-control  select2" asp-for="CreateDto.Type"
+															asp-items="Html.GetEnumSelectList<OtherIncomeInvoiceType>()">
+													</select>
+													<span asp-validation-for="CreateDto.Type" class="text-danger"></span>
+												</div>
+											</div>
+										</div>
+
+									</div>
+
+									<div class="form-group d-flex col-md-6">
+										<div class="w-100">
+											<div class=" form-group">
+												<label>  طرف حساب  </label>
+												<div class="input-group">
+													<select style="width:500px !important" class="form-control  select2" asp-for="CreateDto.CompanyId"
+															asp-items="@Model.Companies">
+													</select>
+													<span asp-validation-for="CreateDto.CompanyId" class="text-danger"></span>
+												</div>
+											</div>
+										</div>
+									</div>
+
+									<div class="form-group d-flex col-md-6">
+										<div class="w-100">
+											<div class=" form-group">
+												<label>  شناور  </label>
+												<div class="input-group">
+													<select style="width:500px !important" class="form-control  select2" asp-for="CreateDto.ShipId"
+															asp-items="@Model.Ships">
+													</select>
+													<span asp-validation-for="CreateDto.ShipId" class="text-danger"></span>
+												</div>
+											</div>
+										</div>
+									</div>
+
+									<div class="form-group d-flex justify-content-between col-md-6">
+										<div class="">
+											<label> محموله  </label>
+											<div class="input-group">
+												<input type="text" asp-for="CreateDto.CargoName" class="form-control" required>
+											</div>
+											<span asp-validation-for="CreateDto.CargoName" class="text-danger"></span>
+										</div>
+										<div class="ms-3">
+											<label> تناژ </label>
+											<div class="input-group">
+												<price-input asp-for="CreateDto.Tonnage"></price-input>
+											</div>
+											<span asp-validation-for="CreateDto.Tonnage" class="text-danger"></span>
+										</div>
+									</div>
+
+									<div class="col-md-6 d-flex justify-content-between">
+										<div class="  form-group pe-2">
+											<label>تاریخ </label>
+											<div class="input-group d-block">
+												<input asp-for="CreateDto.DateFa" type="text" class=" form-control w-100 rounded" autocomplete="off">
+												<span asp-validation-for="CreateDto.DateFa" class="text-danger"></span>
+											</div>
+										</div>
+
+										<div class="col-md-6 col-sm-12">
+											<div class="  form-group pe-1">
+												<label>شماره گزارش عملیات </label>
+												<div class="input-group d-block">
+													<input asp-for="CreateDto.NumberOperation" type="text" class=" form-control w-100 rounded" autocomplete="off">
+													<span asp-validation-for="CreateDto.NumberOperation" class="text-danger"></span>
+												</div>
+											</div>
+										</div>
+
+									</div>
+									<div class="form-group d-flex justify-content-around col-md-6 my-4">
+										<div class=" w-100">
+											<div class="form-check form-switch">
+												<input type="checkbox" asp-for="CreateDto.NeedTax" class="form-check-input" role="switch" />
+												<label class="form-check-label ms-2" for="CreateDto.NeedTax">ارزش افزوده محاسبه شود؟ </label>
+												<span asp-validation-for="CreateDto.NeedTax" class="text-danger"></span>
+											</div>
+											<div class="align-items-center d-flex input-group">
+												<input type="number" asp-for="CreateDto.TaxPercentage" min="0" max="100" class="form-control rounded" required placeholder="درصد مورد نظر را وارید کنید" disabled>
+												<span class="ms-3"> % </span>
+											</div>
+											<span asp-validation-for="CreateDto.TaxPercentage" class="text-danger"></span>
+										</div>
+									</div>
+
+
+
+									@*  <div class="col-md-4 col-sm-12 align-content-end my-4">
+                                    <div class="form-check form-switch">
+                                    <input type="checkbox" asp-for="CreateDto.NeedTax" class="form-check-input" role="switch" />
+                                    <label class="form-check-label ms-2" for="CreateDto.NeedTax">ارزش افزوده محاسبه شود؟ </label>
+                                    <span asp-validation-for="CreateDto.NeedTax" class="text-danger"></span>
+                                    </div>
+                                    </div> *@
+
+
+
+									<div class="col-sm-12 mt-4">
+										<div class="form-group">
+											<label> توضیحات  </label>
+											<div class="input-group">
+												<textarea rows="4" asp-for="CreateDto.Description" class="form-control"></textarea>
+											</div>
+
+										</div>
+									</div>
+								</div>
+
+
+
+								<div class="modal-footer px-2 border-0 px-0">
+									<button type="submit" class="btn btn-success btn-round">ذخیره</button>
+									<button type="button" class="btn btn-danger btn-round" data-bs-dismiss="modal">بازگشت</button>
+								</div>
+							</div>
+
+
+
+						</div>
+					</div>
+
+				</form>
+
+
+			</div>
+		</div>
+	</div>
+</div>
+
+
+@section script {
+
+
+
+
+
+	<script>
+		$(document).ready(function () {
+			//$('.select2').select2();
+			$("#CreateDto_Type").select2({
+				dropdownParent: $('#generalmodal')
+			});
+
+			$("#CreateDto_CompanyId").select2({
+				dropdownParent: $('#generalmodal')
+			});
+
+			$("#CreateDto_ShipId").select2({
+				dropdownParent: $('#generalmodal')
+			});
+
+			$("#Filter_CompanyId").select2().trigger('change');
+			$("#Filter_ShipId").select2().trigger('change');
+			$("#Filter_Type").select2().trigger('change');
+
+			kamaDatepicker('CreateDto_DateFa', customOptions);
+			kamaDatepicker('Filter_DateFrom', customOptions);
+			kamaDatepicker('Filter_DateTo', customOptions);
+
+			let switchL = document.getElementById("CreateDto.NeedTax").value;
+			console.log(switchL);
+		});
+
+		$(document).ready(function () {
+			// Bind change event to checkbox
+			$("#CreateDto_NeedTax").change(function () {
+				// Check if the checkbox is checked
+				if ($(this).prop("checked")) {
+					// Enable the input if checked
+					$("#CreateDto_TaxPercentage").prop("disabled", false);
+				} else {
+					// Disable the input if unchecked
+					$("#CreateDto_TaxPercentage").prop("disabled", true);
+				}
+			});
+
+			// Initialize the state of the input field based on checkbox state on page load
+			if ($("#CreateDto_NeedTax").prop("checked")) {
+				$("#CreateDto_TaxPercentage").prop("disabled", false);  // Enable if the checkbox is checked
+			} else {
+				$("#CreateDto_TaxPercentage").prop("disabled", true);  // Disable if the checkbox is not checked
+			}
+		});
+
+
+		function createInvoice() {
+			$("#CreateDto_Id").val('');
+			$("#CreateDto_Type").val('');
+			$("#CreateDto_CompanyId").val('');
+			$("#CreateDto_ShipId").val('');
+			$("#CreateDto_CargoName").val('');
+			SetNumber(0, 'CreateDto_Tonnage');
+			$("#CreateDto_DateFa").val('');
+			$("#CreateDto_TaxPercentage").val('@Model.CreateDto.TaxPercentage');
+			$("#CreateDto_Description").val('');
+			$("#CreateDto_NumberOperation").val('');
+
+			$("#CreateDto_Type").trigger('change');
+			$("#CreateDto_CompanyId").trigger('change');
+			$("#CreateDto_ShipId").trigger('change');
+
+
+			$("#CreateDto_NeedTax").prop('checked', true);
+			$("#generalmodal").modal('show');
+
+		}
+
+		function editInvoice(id) {
+
+			$.post("@Url.Action("GetIncomeInvoiceById", "OtherIncomeInvoice")", { invoiceId: id })
+				.done(function (res) {
+					//$("#modalbody").html(res);
+					$("#CreateDto_Id").val(res.id);
+					$('#CreateDto_CargoName').val(res.cargoName);
+					SetNumber(res.tonnage, 'CreateDto_Tonnage');
+
+					$("#CreateDto_Type").val(res.type);
+					$("#CreateDto_Type").trigger('change');
+
+					$("#CreateDto_CompanyId").val(res.companyId);
+					$("#CreateDto_CompanyId").trigger('change');
+
+					$("#CreateDto_ShipId").val(res.shipId);
+					$("#CreateDto_ShipId").trigger('change');
+
+					$("#CreateDto_DateFa").val(res.dateFa);
+					$("#CreateDto_Description").val(res.description);
+					$("#CreateDto_TaxPercentage").val(res.taxPercentage);
+					$("#CreateDto_NumberOperation").val(res.numberOperation);
+
+					$("#CreateDto_NeedTax").prop('checked', res.needTax);
+
+					$("#generalmodal").modal('show');
+				})
+				.fail(function (xhr, status, error) {
+					location.reload();
+				});
+		}
+
+
+		$(".page-link").click(function (event) {
+			event.preventDefault(); // غیرفعال کردن عملکرد پیشفرض href
+
+			var hrefValue = $(this).attr("href");
+			$("#pageNumber").val(hrefValue.split("p=")[1]);
+			$("#formFilter").submit();
+		});
+
+	</script>
+}
+

@@ -1,0 +1,205 @@
+﻿@model OtherInvoiceServicePageDto
+
+@{
+	ViewData["Title"] = "صدور پیش فاکتور";
+	Layout = "~/Views/Shared/AdminLayout.cshtml";
+
+}
+
+<div id="listService" class="card">
+	<partial name="_PreFactorListService" model="Model" />
+</div>
+
+
+<div id="generalmodal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" tabindex="-1">
+	<div class="modal-dialog modal-dialog-centered">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h4 class="modal-title">ثبت  کالا/خدمات</h4>
+				<button type="button" class="close btn-close rounded border" data-bs-dismiss="modal" data-bs-original-title="" title=""></button>
+			</div>
+			<div class="modal-body" id="modalbody">
+
+				<div class="card-body pt-0">
+
+					<div class="form-body">
+						<input asp-for="CreateService.Type" value="@AllocationEquServiceType.PreFactor" hidden />
+						<input asp-for="CreateService.Id" hidden />
+						<input value="@Model.OtherIncomeInvoiceId" id="CreateService_OtherIncomeInvoiceId" hidden />
+						<div class="row gy-4">
+							<div class="col-sm-12">
+								<div class="form-group">
+									<label>شرح کالا/خدمات</label>
+									<div class="input-group">
+										<input type="text" class="form-control" asp-for="CreateService.Description" required>
+										<span asp-validation-for="CreateService.Description"></span>
+									</div>
+								</div>
+							</div>
+
+
+							<div class="col-sm-6">
+								<div class="form-group">
+									<label>تعداد/مقدار</label>
+									<div class="input-group">
+										<price-input asp-for="CreateService.Count"></price-input>
+										<span asp-validation-for="CreateService.Count"></span>
+									</div>
+								</div>
+							</div>
+
+							<div class="col-sm-6">
+								<div class="form-group">
+									<label>قیمت واحد</label>
+									<div class="input-group">
+										<price-input asp-for="CreateService.PriceOne"></price-input>
+										<span asp-validation-for="CreateService.PriceOne"></span>
+									</div>
+								</div>
+							</div>
+
+						</div>
+
+
+						<div class="modal-footer px-0 border-0">
+							<a onclick="createService()" class="btn btn-success btn-round">ذخیره</a>
+							<button type="button" class="btn btn-danger btn-round" data-bs-dismiss="modal">بازگشت</button>
+						</div>
+
+					</div>
+
+				</div>
+
+			</div>
+		</div>
+	</div>
+</div>
+
+
+
+<script src="~/assets/js/validation/jquery.validate.min.js"></script>
+<script src="~/assets/js/validation/jquery.validate.unobtrusive.min.js"></script>
+
+
+
+
+@section script {
+
+	<script>
+		function AddService() {
+			$("#CreateService_Description").val('');
+
+			$("#CreateService_Id").val('');
+			SetNumber(0, 'CreateService_Count');
+			SetNumber(0, 'CreateService_PriceOne');
+
+			$("#generalmodal").modal('show');
+
+		}
+
+
+		function editService(id) {
+
+			$.post("@Url.Action("GetInvoiceServiceById", "OtherIncomeInvoice")",
+				{ invoiceServiceId: id })
+				.done(function (res) {
+					//$("#modalbody").html(res);
+
+					$('#CreateService_Description').val(res.description);
+					$("#CreateService_Id").val(res.id);
+					SetNumber(res.count, 'CreateService_Count');
+					SetNumber(res.priceOne, 'CreateService_PriceOne');
+
+					$("#generalmodal").modal('show');
+				})
+				.fail(function (xhr, status, error) {
+					location.reload();
+				});
+		}
+
+		function createService() {
+
+			let otherIncomeInvoiceId = $('#CreateService_OtherIncomeInvoiceId').val();
+			let id = $('#CreateService_Id').val();
+			let description = $('#CreateService_Description').val();
+
+			let count = $("#CreateService_Count").val();
+			let priceOne = $("#CreateService_PriceOne").val();
+
+			$.post("@Url.Action("CreatePreService", "OtherIncomeInvoice")",
+				{
+					otherIncomeInvoiceId,
+					id,
+					description,
+					count,
+					priceOne,
+				})
+				.done(function (res) {
+					$("#generalmodal").modal('hide');
+					$("#listService").html(res);
+				})
+				.fail(function (xhr, status, error) {
+					location.reload();
+				});
+		}
+
+
+		async function DeleteService(event, id) {
+			let result = await ShowQAlert2(event);
+
+			if (result === true) {
+				$.post("@Url.Action("DeletePreService", "OtherIncomeInvoice")", {
+					invoiceServiceId: id
+				})
+					.done(function (res) {
+						$("#listService").html(res);
+						$("#generalmodal").modal('hide');
+					})
+					.fail(function (xhr, status, error) {
+						location.reload();
+					});
+			}
+		}
+
+		async function EndPreFactor(event, id) {
+
+			let result = await ShowQAlert2(event);
+
+			if (result === true) {
+				document.getElementById("EndPreFactorId").classList.add("disabled");
+
+				$.post("@Url.Action("EndPreFactor", "OtherIncomeInvoice")", {
+					invoiceId: id
+				}).done(function (res) {
+					location.reload();
+				}).fail(function (xhr, status, error) {
+					location.reload();
+				});
+			}
+		}
+
+		async function BackToPendingState(event, id) {
+			event.preventDefault();
+			let result = await ShowQAlert2(event);
+
+			if (result === true) {
+				document.getElementById("BackToPendingStateId").classList.add("disabled");
+
+				$.post("@Url.Action("BackToPendingState", "OtherIncomeInvoice")", {
+					invoiceId: id
+				}).done(function (res) {
+					location.reload();
+				}).fail(function (xhr, status, error) {
+					location.reload();
+				});
+			}
+		}
+
+
+
+	</script>
+
+
+
+}
+

@@ -1,0 +1,277 @@
+﻿@model BaskoolPageDto
+@{
+    ViewData["Title"] = "باسکول ها";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+    int i = 1;
+}
+
+
+
+
+
+@section style{
+
+    <link href="~/assets/plugins/select2/dist/css/select2.min.css" rel="stylesheet">
+}
+
+
+<div class="col-lg-12">
+    <div class="card">
+        <div class="card-header">
+            <div class="d-flex justify-content-between">
+            
+                    <h3 class="title">
+                        <i class="icon-frane"></i> باسکول ها
+                    </h3>
+                
+                    <div>
+
+                    <a class="btn btn-primary rounded" onclick="createBaskool();"><i class="fa-solid fa-plus me-2"></i>باسکول جدید</a>
+
+                    <!-- /.portlet-title -->
+                    <div class="buttons-box">
+
+                        <i class="icon-size-fullscreen"></i>
+                        <div class="paper-ripple">
+                            <div class="paper-ripple__background"></div>
+                            <div class="paper-ripple__waves"></div>
+                        </div>
+                    </div>
+
+                    </div>
+                <!-- /.buttons-box -->
+            </div>
+            <!-- /.portlet-heading -->
+
+
+        </div>
+        <div class="card-body pt-0">
+            <div class="table-responsive">
+                <table class="table table-sm table-bordered table-hover table-striped" id="data-table">
+                    <thead class="bg-primary">
+                        <tr>
+                            <th>ردیف</th>
+                            <th>نام</th>
+                            <th>کد مخصوص دستگاه FPN </th>
+                            <th>شرکت</th>
+                            <th>وضعیت</th>
+                            <th>عملیات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+
+                        @foreach (var item in Model.Baskools)
+                        {
+                            <tr>
+                                <td class="align-middle" >@(i++)</td>
+                                <td class="align-middle" > @item.Name </td>
+                                <td class="align-middle" >@item.CodeNameForFpn</td>
+                                <td class="align-middle" >@(item.CompanyCompanyName ?? "---")</td>
+                                <td class="align-middle" >
+                                    <a id="ActivationBaskool@(i)" onclick="ShowQAlert(event,'ActivationBaskool@(i)');"
+                                       asp-action="ActivationBaskool"
+                                       asp-route-baskoolId="@item.Id">
+                                        <span class="label px-2 py-1 rounded label-@(item.IsActive?"success":"danger")">
+                                            @(item.IsActive ? "فعال" : "غیر فعال")
+                                        </span>
+                                    </a>
+                                </td>
+
+                                <td class="align-middle px-1 text-center">
+                                    <a class="btn btn-warning px-2 btn-sm btn-icon curve" onclick="editBaskool('@item.Id');"><i class="icon-pencil fs-6 align-middle"></i></a>
+                                    <a id="DeleteBaskool@(i)" onclick="ShowQAlert(event,'DeleteBaskool@(i)');" class="btn btn-danger px-2 btn-sm btn-icon curve btn-questions"
+                                       asp-action="DeleteBaskool" asp-route-baskoolId="@item.Id">
+                                        <i class="icon-trash align-middle fs-6 fa-flip-horizontal"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+
+                    </tbody>
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+<div id="generalmodal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">ثبت باسکول</h4>
+                <button type="button" class="close btn-close rounded border" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="modalbody">
+
+
+                <form asp-action="CreateBaskool" method="post">
+                    <input asp-for="CreateBaskoolDto.Id" type="hidden" />
+
+                    <div class="card-body pt-0">
+                            <div class="form-body">
+                                <div class="form-group row gy-3">
+                                    
+                                    <div class="col-md-6">
+                                        <label> نام باسکول</label>
+                                        <div class="input-group">
+                                            <input type="text" asp-for="CreateBaskoolDto.Name" class="form-control" required>
+                                        </div>
+                                        <span asp-validation-for="CreateBaskoolDto.Name" class="text-danger"></span>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label> کد مخصوص دستگاه FPN</label>
+                                        <div class="input-group">
+                                            <input type="text" asp-for="CreateBaskoolDto.CodeNameForFpn" class="form-control" required>
+                                        </div>
+                                        <span asp-validation-for="CreateBaskoolDto.CodeNameForFpn" class="text-danger"></span>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label> شرکت</label>
+                                        <div class="input-group">
+                                            <select style="width:500px !important" class="form-control  select2" asp-for="CreateBaskoolDto.CompanyId"
+                                                    asp-items="@Model.Companies">
+                                                <option value="">نامشخص</option>
+                                            </select>
+                                            <span asp-validation-for="CreateBaskoolDto.CompanyId" class="text-danger"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label> نوع</label>
+                                        <div class="input-group">
+                                            <select style="width:500px !important" class="form-control  select2" asp-for="CreateBaskoolDto.BaskoolType"
+                                                    asp-items="Html.GetEnumSelectList<BaskoolType>()">
+                                                <option value="">نامشخص</option>
+                                            </select>
+                                            <span asp-validation-for="CreateBaskoolDto.BaskoolType" class="text-danger"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label> مالکیت</label>
+                                        <div class="input-group">
+                                            <select style="width:500px !important" class="form-control  select2" asp-for="CreateBaskoolDto.BaskoolOwner"
+                                                    asp-items="Html.GetEnumSelectList<BaskoolOwner>()">
+                                                <option value="">نامشخص</option>
+                                            </select>
+                                            <span asp-validation-for="CreateBaskoolDto.BaskoolOwner" class="text-danger"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label>ظرفیت</label>
+                                        <div class="input-group">
+                                            <input type="number" class="form-control" asp-for="CreateBaskoolDto.Capacity" placeholder="0" value="CreateBaskoolDto.Capacity">
+                                            <span asp-validation-for="CreateBaskoolDto.Capacity" class="text-danger"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label>طول جغرافیایی</label>
+                                        <div class="input-group">
+                                            <input class="form-control" asp-for="CreateBaskoolDto.LonX" placeholder="X">
+                                            <span asp-validation-for="CreateBaskoolDto.LonX" class="text-danger"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label>عرض جغرافیایی</label>
+                                        <div class="input-group ">
+                                            <input class="form-control" asp-for="CreateBaskoolDto.LatY" placeholder="Y">
+                                            <span asp-validation-for="CreateBaskoolDto.LatY" class="text-danger"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="input-group activeor">
+                                            <label>
+                                                <input type="checkbox" asp-for="CreateBaskoolDto.IsActive" class="form-check-input">
+                                                فعال/غیرفعال
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="modal-footer px-0 border-0">
+                                    <button type="button" class="btn btn-danger btn-round" data-bs-dismiss="modal">بازگشت</button>
+                                    <button type="submit" class="btn btn-success btn-round">ذخیره</button>
+                                </div>
+                            </div>
+                    </div>
+
+                </form>
+
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section script {
+
+
+    <script src="~/assets/plugins/select2/dist/js/select2.full.min.js"></script>
+    <script src="~/assets/plugins/select2/dist/js/i18n/fa.js"></script>
+    <script src="~/assets/js/pages/select2.js"></script>
+
+
+    @*   <script src="~/assets/js/validation/jquery.validate.min.js"></script>
+     <script src="~/assets/js/validation/jquery.validate.unobtrusive.min.js"></script>*@
+
+    <script>
+        $(document).ready(function () {
+            //$('.select2').select2();
+            $("#CreateBaskoolDto_CompanyId").select2({
+                dropdownParent: $('#generalmodal')
+            });
+ 
+        });
+
+
+        function createBaskool() {
+            $("#CreateBaskoolDto_Name").val('');
+            $("#CreateBaskoolDto_CodeNameForFpn").val('');
+            $("#CreateBaskoolDto_Id").val('');
+            $("#CreateBaskoolDto_CompanyId").val('');
+            $("#CreateBaskoolDto_CompanyId").trigger('change');
+            $("#CreateBaskoolDto_LonX").val('0');
+            $("#CreateBaskoolDto_LatY").val('0');
+            $("#CreateBaskoolDto_IsActive").prop('checked', true);
+            $("#generalmodal").modal('show');
+
+        }
+
+        function editBaskool(id) {
+
+            $.post("@Url.Action("GetBaskoolById","Baskool")", { baskoolId: id })
+                .done(function (res) {
+                    //$("#modalbody").html(res);
+
+                    $('#CreateBaskoolDto_Name').val(res.name);
+                    $("#CreateBaskoolDto_CodeNameForFpn").val(res.codeNameForFpn);
+                    $("#CreateBaskoolDto_Id").val(res.id);
+                    $("#CreateBaskoolDto_CompanyId").val(res.companyId);
+                    $("#CreateBaskoolDto_CompanyId").trigger('change');
+                    $("#CreateBaskoolDto_LonX").val(res.lonX);
+                    $("#CreateBaskoolDto_LatY").val(res.latY);
+                    $("#CreateBaskoolDto_Capacity").val(res.capacity);
+                    $("#CreateBaskoolDto_BaskoolOwner").val(res.baskoolOwner);
+                    $("#CreateBaskoolDto_BaskoolType").val(res.baskoolType);
+
+                    $("#CreateBaskoolDto_IsActive").prop('checked', res.isActive);
+
+                    $("#generalmodal").modal('show');
+                });
+        }
+
+
+
+    </script>
+}
+

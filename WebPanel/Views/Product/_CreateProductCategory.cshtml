@@ -1,0 +1,78 @@
+﻿@model CreateProductCategoryDto
+
+
+
+
+<div class="modal-content">
+    <div class="modal-header">
+        <h4 class="modal-title">سردسته کالا</h4>
+        <button type="button" class="close btn-close rounded border" data-bs-dismiss="modal"></button>
+    </div>
+    <div class="modal-body">
+        <form asp-action="CreateProductCategory" method="post">
+            <input asp-for="Id" type="hidden" />
+            <input asp-for="ReturnPage" type="hidden" />
+            <div class="card-body pt-0 px-0">
+                <div class="row gy-4">
+                    <div class="col-md-12">
+                        <label>عنوان</label>
+                        <div class="input-group w-100">
+                            <input asp-for="Name" type="text" class="form-control w-100 rounded">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label>نوع</label>
+                        <div class="input-group ">
+                            <select class="form-control  select2 w-100" asp-for="TrafficType"
+                                    asp-items="@Html.GetEnumSelectList<TrafficType>()">
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label>تعداد روز منقضی</label>
+                        <div class="input-group w-100">
+                            <input asp-for="ExpireDayCount" type="number" class="form-control w-100 rounded " value="@Model.ExpireDayCount" />
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <div class="form-actions d-flex justify-content-end">
+                            <button type="submit" class="btn btn-info d-flex ms-2 align-items-center p-1 px-2">
+                                <i class="icon-check me-2"></i>
+                                <p class="m-1">ذخیره</p>
+                                <div class="paper-ripple"><div class="paper-ripple__background"></div><div class="paper-ripple__waves"></div></div>
+                            </button>
+
+                        </div>
+                    </div>
+                </div>
+             </div>
+        </form>
+    
+    </div>
+
+    <div id="btnCategoryDeleteId">
+        @if (Model.Id != Guid.Empty)
+        {
+            <div class="modal-footer justify-content-around">
+
+                <span>آیا میخواهید این سردسته را حذف کنید؟</span>
+                <a id="DeleteProductCategory@(Model.Id)" onclick="ShowQAlert(event,'DeleteProductCategory@(Model.Id)' , 'حذف سردسته' , 'آیا از حذف این سردسته کالا مطمئن هستید');"
+                   class="btn btn-danger px-2 btn-sm btn-icon curve btn-questions my-1"
+                   asp-action="DeleteProductCategory" asp-route-productCategoryId="@Model.Id">
+                    <i class="icon-trash fs-6 align-middle fa-flip-horizontal"></i>
+                    حذف سردسته
+                </a>
+
+            </div>
+        }
+    </div>
+
+
+
+</div>
+
+
+<script src="~/assets/js/validation/jquery.validate.min.js"></script>
+<script src="~/assets/js/validation/jquery.validate.unobtrusive.min.js"></script>

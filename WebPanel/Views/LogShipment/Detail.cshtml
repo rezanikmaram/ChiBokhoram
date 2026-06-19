@@ -1,0 +1,92 @@
+@model LogShipmentListDto
+@{
+    ViewData["Title"] = "جزئیات درخواست";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+<div class="col-lg-12">
+    <div class="card">
+        <div class="card-header pb-0">
+            <h3 class="title">
+                <i class="icon-info"></i> جزئیات درخواست @Model.Method
+            </h3>
+        </div>
+        <div class="card-body pt-0">
+            <div class="row gy-3 pt-3">
+                <div class="col-md-4 col-sm-12">
+                    <label>تاریخ درخواست</label>
+                    <p>@Model.RequestTimeFa</p>
+                </div>
+                <div class="col-md-4 col-sm-12">
+                    <label>تاریخ پاسخ</label>
+                    <p>@Model.ResponseTimeFa</p>
+                </div>
+                <div class="col-md-4 col-sm-12">
+                    <label>مدت (میلی‌ثانیه)</label>
+                    <p>@(Model.DurationMs.HasValue ? Model.DurationMs.Value.ToString("N0") : "-")</p>
+                </div>
+                <div class="col-md-4 col-sm-12">
+                    <label>کد وضعیت</label>
+                    <p>@Model.StatusCode</p>
+                </div>
+                <div class="col-md-4 col-sm-12">
+                    <label>وضعیت</label>
+                    <p><span class="badge @(Model.IsSuccess ? "badge-success" : "badge-danger")">@Model.StatusTitle</span></p>
+                </div>
+                <div class="col-md-4 col-sm-12">
+                    <label>کاربر</label>
+                    <p>@(string.IsNullOrWhiteSpace(Model.UserName) ? "---" : Model.UserName)</p>
+                </div>
+                <div class="col-md-6 col-sm-12">
+                    <label>آدرس</label>
+                    <p dir="ltr" class="text-break">@Model.Url</p>
+                </div>
+                <div class="col-md-3 col-sm-12">
+                    <label>روش</label>
+                    <p>@Model.Method</p>
+                </div>
+                <div class="col-md-3 col-sm-12">
+                    <label>آی‌پی</label>
+                    <p>@(string.IsNullOrWhiteSpace(Model.ClientIp) ? "---" : Model.ClientIp)</p>
+                </div>
+                @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+                {
+                    <div class="col-12">
+                        <label>پیام خطا</label>
+                        <p class="text-danger">@Model.ErrorMessage</p>
+                    </div>
+                }
+                @if (!string.IsNullOrWhiteSpace(Model.ExceptionDetail))
+                {
+                    <div class="col-12">
+                        <label>جزئیات استثناء</label>
+                        <pre dir="ltr" class="bg-light border rounded p-3 text-wrap">@Model.ExceptionDetail</pre>
+                    </div>
+                }
+                <div class="col-md-6 col-sm-12">
+                    <label>هدرهای درخواست</label>
+                    <pre dir="ltr" class="bg-light border rounded p-3 text-wrap" style="color:#000;">@(!string.IsNullOrWhiteSpace(Model.RequestHeaders) ? Model.RequestHeaders : "---")</pre>
+                </div>
+                <div class="col-md-6 col-sm-12">
+                    <label>هدرهای پاسخ</label>
+                    <pre dir="ltr" class="bg-light border rounded p-3 text-wrap" style="color:#000;">@(!string.IsNullOrWhiteSpace(Model.ResponseHeaders) ? Model.ResponseHeaders : "---")</pre>
+                </div>
+                <div class="col-md-6 col-sm-12">
+                    <label>بدنه درخواست</label>
+                    <pre dir="ltr" class="bg-light border rounded p-3 text-wrap" style="color:#000;">@(!string.IsNullOrWhiteSpace(Model.RequestBody) ? Model.RequestBody : "---")</pre>
+                </div>
+                <div class="col-md-6 col-sm-12">
+                    <label>بدنه پاسخ</label>
+                    <pre dir="ltr" class="bg-light border rounded p-3 text-wrap" style="color:#000;">@(!string.IsNullOrWhiteSpace(Model.ResponseBody) ? Model.ResponseBody : "---")</pre>
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col-12">
+                    <a asp-action="Index" class="btn btn-secondary">
+                        بازگشت
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

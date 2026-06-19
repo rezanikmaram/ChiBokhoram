@@ -1,0 +1,61 @@
+﻿@model NonContainerWarehouseProductDiscountPageDto
+
+@{
+	int i = 1;
+}
+
+<div class="table-responsive">
+	<table class="table table-bordered table-hover table-striped">
+		<thead class="bg-primary">
+			<tr>
+				<th>ردیف</th>
+				<th>عنوان</th>
+				<th>رویه گمرکی</th>
+				<th>درصد تخفیف</th>
+				<th>روز معافیت</th>
+				<th>  استثنا</th>
+				<th>  عملیات</th>
+			</tr>
+		</thead>
+		<tbody>
+			@foreach (var item in Model.Discounts)
+			{
+				<tr>
+					<td class="align-middle">@(i++)</td>
+					<td class="align-middle">@item.Title</td>
+					<td class="align-middle">@item.CustomsProcedureTitle</td>
+					<td class="align-middle">@item.DiscountPercentage</td>
+					<td class="align-middle">@item.WarehouseExemptionDays</td>
+					<td class="align-middle">
+						@if (item.ExceptionsInt?.Any() == true)
+						{
+							<div class="d-flex gap-2 my-2">
+								@foreach (var exception in item.ExceptionsInt)
+								{
+									<span class="p-1 bg-primary rounded px-2"> @exception.ToDisplay()  </span>
+									<br />
+								}
+							</div>
+						}
+						else
+						{
+							<span>استثنا ندارد</span>
+						}
+					</td>
+
+
+					<td class="d-flex justify-content-start align-items-center gap-2 flex-nowrap">
+
+						<a class="btn btn-warning px-2 btn-sm btn-icon curve" onclick="showDiscountCreate('@item.Id');"><i class="icon-pencil align-middle fs-6"></i></a>
+
+						<a onclick="DeleteDiscount(event, '@item.Id')" class="btn btn-danger px-2 btn-sm btn-icon curve btn-questions">
+							<i class="icon-trash fs-6 align-middle fa-flip-horizontal"></i>
+						</a>
+					</td>
+
+				</tr>
+
+			}
+		</tbody>
+	</table>
+</div>

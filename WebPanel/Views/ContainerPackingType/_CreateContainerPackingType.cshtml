@@ -1,0 +1,72 @@
+﻿@model CreateContainerPackingTypeDto
+
+
+<form asp-action="CreateContainerPackingType" method="post">
+	<input asp-for="Id" type="hidden" />
+	<div class="card-body pt-0">
+
+		<div class="row">
+			<div class="col-md-12">
+				<div class="form-body">
+
+					<div class="justify-content-between row gy-4">
+
+						<div class="col-md-6">
+							<div class="form-group">
+								<label>کد بسته بندی کانتینر</label>
+								<div class="input-group">
+									<input type="text" class="form-control rounded" asp-for="Code">
+									<span asp-validation-for="Code" class="text-danger"></span>
+								</div>
+							</div>
+						</div>
+
+						<div class="col-md-6">
+							<div class="form-group">
+								<label>نام بسته بندی کانتینر</label>
+								<div class="input-group">
+									<input type="text" class="form-control rounded" asp-for="Name">
+									<span asp-validation-for="Name" class="text-danger"></span>
+								</div>
+							</div>
+						</div>
+
+						<div class="col-md-6">
+							<div class="form-group">
+								<label>نام انگلیسی بسته بندی کانتینر</label>
+								<div class="input-group">
+									<input type="text" class="form-control rounded" asp-for="NameEn">
+									<span asp-validation-for="NameEn" class="text-danger"></span>
+								</div>
+							</div>
+						</div>
+						
+						
+					</div>
+
+
+
+
+					<div class="modal-footer border-0 px-0">
+						<button type="submit" class="btn btn-success btn-round">ذخیره</button>
+						<button type="button" class="btn btn-danger btn-round" data-bs-dismiss="modal">بازگشت</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+</form>
+
+
+<script src="~/assets/js/validation/jquery.validate.min.js"></script>
+<script src="~/assets/js/validation/jquery.validate.unobtrusive.min.js"></script>
+<script>
+	 
+	$(document).ready(function () {
+		$('select[class*="generalmodal"].select2').select2({
+				dropdownParent: $('#generalmodal')
+		});
+		
+	});
+</script>

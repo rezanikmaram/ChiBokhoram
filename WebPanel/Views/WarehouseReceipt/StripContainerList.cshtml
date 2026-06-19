@@ -1,0 +1,184 @@
+﻿@model SwrStripContainerProductsPageDto
+
+@{
+	ViewData["Title"] = "استریپ کانتینر - لیست کالا ها";
+	Layout = "~/Views/Shared/AdminLayout.cshtml";
+	int i = 1;
+}
+
+<div class="col-md-12">
+	<div class="p-3 bg-white rounded-3 border-0">
+		<div class="d-flex justify-content-between">
+			<div>
+				<span>
+					<i class="icon-frane"></i>
+					<partial name="_BackButton" />
+					استریپ کانتینر - لیست کالا ها
+				</span>
+
+				<span class="label label-primary p-1 rounded mx-2">
+					شماره قبض: @Model.WarehouseReceiptMaster.Number
+				</span>
+
+				<span class="label label-info p-1 rounded mx-2">
+					تاریخ قبض: @Model.WarehouseReceiptMaster.CreatedDateFa
+				</span>
+
+				<span class="label label-info p-1 rounded mx-2">
+					صاحب کالا: @Model.WarehouseReceiptMaster.CompanyOwnerCompanyName
+				</span>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="mt-4">
+	<div class="col-md-12">
+		<div class="card rounded-3 min-height-600">
+			<div class="card-header pb-0">
+				<div class="d-flex justify-content-between">
+					<h3 class="title m-0">
+						<i class="icon-speech"></i>
+						لیست کانتینرها پر برای استریپ
+					</h3>
+					@if (Model.HasSplitWarehouseReceipt)
+					{
+						<a class="btn btn-primary rounded" onclick="FinalWarehouserReciept(event,'@Model.WarehouseReceiptMaster.Id')"
+						   id="finalizeButton">تایید نهایی </a>
+					}
+				</div>
+			</div>
+			<div class="card-body mt-0">
+				<table class="table table-bordered">
+					<thead class="bg-primary">
+						<tr>
+							<th style="width: 5%">ردیف</th>
+							<th>نام کالا</th>
+							<th>کد کالا</th>
+
+							<th>تعداد </th>
+							<th>وزن خالص </th>
+							<th>وزن ناخالص </th>
+
+							<th>  انبار</th>
+							<th>وضعیت استریپ </th>
+							<th>عملیات</th>
+						</tr>
+					</thead>
+					<tbody>
+						@foreach (var item in Model.FullContainerProducts)
+						{
+							<tr>
+								<td class="align-middle">@(i++)</td>
+								<td>@item.ProductFullTitle</td>
+								<td>@item.ProductHSCodeTitle</td>
+
+								<td>@item.Count.ToPrice()</td>
+								<td>@item.WeightNet.ToPrice()</td>
+								<td>@item.WeightGross.ToPrice()</td>
+
+								<td>@item.WarehouseTitle</td>
+								<td>@(item.IsStrip ? "استریپ شده" : "پلمپ")</td>
+
+								<td class="align-middle px-1 text-center">
+									<a asp-action="StripContainer" asp-route-swrProductId="@item.Id" asp-route-seoId="@((Guid?)ViewBag.seoId)" class="btn btn-warning px-2 btn-sm btn-icon curve">
+										استریپ
+									</a>
+								</td>
+							</tr>
+						}
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+</div>
+
+@foreach (var receipt in Model.WarehouseReceipts)
+{
+	<div class="mt-4">
+		<div class="col-md-12">
+			<div class="card rounded-3 min-height-600">
+				<div class="card-header pb-0 ">
+					<h3 class="title m-0">
+						<i class="icon-speech"></i>
+						قبض برای شرکت: @receipt.CompanyOwnerCompanyName
+					</h3>
+				</div>
+				<div class="card-body mt-0">
+
+					<table class="table table-bordered">
+						<thead class="bg-primary">
+							<tr>
+								<th style="width: 5%">ردیف</th>
+								<th>نام کالا</th>
+								<th>کد کالا</th>
+								<th>تعداد</th>
+								<th>وزن ناخالص</th>
+								<th>وزن خالص</th>
+								<th>حجم</th>
+								<th>  انبار</th>
+								@* <th>عملیات</th> *@
+							</tr>
+						</thead>
+						<tbody>
+							@{
+								int j = 1;
+							}
+							@foreach (var item in receipt.Products)
+							{
+								<tr>
+									<td class="align-middle">@(j++)</td>
+									<td>@item.ProductFullTitle</td>
+									<td>@item.ProductHSCodeTitle</td>
+									<td>@item.Count.ToPrice()</td>
+									<td>@item.WeightGross.ToPrice()</td>
+									<td>@item.WeightNet.ToPrice()</td>
+									<td>@item.Volume.ToPrice()</td>
+									<td>@item.WarehouseTitle</td>
+									@* <td class="align-middle px-1 text-center">
+										<a id="DeleteProduct@(i)" onclick="ShowQAlert(event,'DeleteProduct@(i)');" asp-action="DeleteProductWarehouseReceiptSplit"
+										   asp-route-seoWarehouseReceiptProductId="@item.Id"><i class="icon-trash fa-flip-horizontal"> </i> حذف</a>
+									</td> *@
+								</tr>
+							}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+}
+
+
+ 
+@section script {
+	<script>
+		 
+
+		async function FinalWarehouserReciept(event, seoWarehouseReceiptId) {
+			event.preventDefault();
+			let result = await ShowQAlert2(event, 'بعد از تایید نهایی امکان ویرایش وجود ندارد', 'تایید نهایی');
+			let seoId = '@((Guid?)ViewBag.seoId)';
+
+			if (result === true) {
+				document.getElementById("finalizeButton").classList.add("disabled");
+
+				$.post("@Url.Action("EndStrip", "WarehouseReceipt")", {
+					seoWarehouseReceiptId,
+					seoId
+				}).done(function (res) {
+					window.location.href = "@Url.Action("List", "WarehouseReceipt")";
+				}).fail(function (xhr, status, error) {
+					location.reload();
+				});
+			}
+		}
+
+		$(document).ready(function () {
+			$(".select2").select2({
+				dropdownParent: $('#productModal')
+			});
+		});
+	</script>
+}

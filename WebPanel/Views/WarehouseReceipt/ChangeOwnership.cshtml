@@ -1,0 +1,243 @@
+﻿@model WarehouseReceiptChangeOwnershipPageDto
+@{
+    ViewData["Title"] = "تغییر مالکیت قبض انبار";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+    int i = 1;
+    var item = Model.WarehouseReceiptMaster;
+}
+
+<div class="card">
+    <div class="card-body">
+        <div class="d-flex justify-content-between">
+
+            <h3 class="title mb-4">
+                <i class="icon-frane"></i>
+                <partial name="Partials/_BackButtonTolistSwr" />
+                تغییر مالکیت قبض انبار به شماره (@Model.WarehouseReceiptMaster.Number)
+            </h3>
+
+        </div>
+
+        <form asp-action="NewOwnership" method="post" id="postForm">
+            <input asp-for="NewOwnership.WarehouseReceiptId" type="hidden" />
+            <input name="seoId" value="@((Guid?)ViewBag.seoId)" type="hidden" />
+            <input name="exportId" value="@((Guid?)ViewBag.exportId)" type="hidden" />
+            <div class="row gy-4">
+                <div class="col-sm-12">
+                    <div class="form-group">
+
+                        <div class="input-group row gy-4">
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label> مالک جدید  </label>
+                                    <select class="form-control select2"
+                                            asp-for="NewOwnership.CompanyOwnerId"
+                                            asp-items="Model.OwnerCompanies">
+                                    </select>
+                                    <span asp-validation-for="NewOwnership.CompanyOwnerId" class="w-100 text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>توضیحات پایین </label>
+                                    <div class="input-group">
+                                        <textarea class="form-control" asp-for="NewOwnership.OtherInfo.Description" cols="4"></textarea>
+                                        <span asp-validation-for="NewOwnership.OtherInfo.Description"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label> شماره نامه گمرک   </label>
+                                    <div class="input-group">
+                                        <input class="form-control" asp-for="NewOwnership.OtherInfo.NumberGomrok" />
+                                        <span asp-validation-for="NewOwnership.OtherInfo.NumberGomrok"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-sm-2">
+                                <div class="form-group">
+                                    <label> تاریخ صدور نامه  </label>
+                                    <div class="input-group">
+                                        <input asp-for="NewOwnership.OtherInfo.DateGomrokFa" type="text" class=" form-control" autocomplete="off">
+                                        <span asp-validation-for="NewOwnership.OtherInfo.DateGomrokFa" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-sm-2">
+                                <div class="form-group">
+                                    <label> شماره کارت بازرگانی   </label>
+                                    <div class="input-group">
+                                        <input class="form-control" asp-for="NewOwnership.OtherInfo.NumberBazargani" />
+                                        <span asp-validation-for="NewOwnership.OtherInfo.NumberBazargani"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-2 d-flex align-items-end">
+                                <a class="btn mb-2 float-end btn-success text-white label rounded" id="finalizeButton" onclick="ChangeOwnership(event);">تغییر مالکیت</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+
+        </form>
+
+    </div>
+</div>
+
+<div class="col-lg-12">
+    <div class="card">
+        <div class="card-header">
+            <p class="fs-5 fw-bold mb-0"> مشخصات قبض جاری </p>
+        </div>
+        <div class="table-responsive vh-100 px-3">
+            <table class="table table-bordered table-hover table-striped" id="data-table">
+                <thead class="bg-primary">
+                    <tr>
+                        <th class="align-middle"> شماره قبض  </th>
+                        <td class="align-middle">شماره بارنامه</td>
+                        <th class="align-middle">کشتی</th>
+                        <th class="align-middle">صاحب کالا</th>
+                        <td class="align-middle">تاریخ صدور  </td>
+
+                        <th class="align-middle">کالا</th>
+                        <th class="px-0"><div class="px-3">تعداد</div> <hr class="my-1" /> <div class="px-3">باقیمانده</div></th>
+                        <th class="px-0"><div class="px-3"> وزن ناخالص </div> <hr class="my-1" /> <div class="px-3">باقیمانده</div></th>
+                        <th class="px-0"><div class="px-3"> وزن خالص </div> <hr class="my-1" /> <div class="px-3">باقیمانده</div></th>
+                        <th class="px-0"><div class="px-3"> حجم </div> <hr class="my-1" /> <div class="px-3">باقیمانده</div></th>
+
+                        <td class="align-middle">انبار</td>
+                        <td class="align-middle">بخش انبار</td>
+
+
+                    </tr>
+                </thead>
+                <tbody>
+
+                    <tr>
+                        <td rowspan="@item.Products.Count" class="align-middle ">@item.Number</td>
+                        <td rowspan="@item.Products.Count" class="align-middle ">
+                            <a target="_blank" asp-action="seoAccessPage" asp-controller="Seo"
+                               asp-route-seoId="@item.SeoId">
+                                @item.BillOfLadingNumber
+                            </a>
+                        </td>
+                        <td rowspan="@item.Products.Count" class="align-middle ">@item.SeoShipShipName</td>
+                        <td rowspan="@item.Products.Count" class="align-middle ">@item.CompanyOwnerCompanyName</td>
+                        <td rowspan="@item.Products.Count" class="align-middle ">@item.CreatedDateFa</td>
+
+                        <!-- سلول‌های بدون rowspan -->
+                        <td class="align-middle">@item.Products[0].ProductTitle</td>
+                        <td class="align-middle px-0 py-4">
+                            <div class="mb-1 px-3">@item.Products[0].Count.ToPrice()</div>
+                            <hr class="my-1" />
+                            <div class="px-3">@item.Products[0].RemainingCount.ToPrice()</div>
+                        </td>
+                        <td class="align-middle px-0 py-4">
+                            <div class="mb-1 px-3">@item.Products[0].WeightGross.ToPrice()</div>
+                            <hr class="my-1" />
+                            <div class="px-3">@item.Products[0].RemainingWeightGross.ToPrice()</div>
+                        </td>
+                        <td class="align-middle px-0 py-4">
+                            <div class="mb-1 px-3">@item.Products[0].WeightNet.ToPrice()</div>
+                            <hr class="my-1" />
+                            <div class="px-3">@item.Products[0].RemainingWeightNet.ToPrice()</div>
+                        </td>
+                        <td class="align-middle px-0 py-4">
+                            <div class="mb-1 px-3">@item.Products[0].Volume.ToPrice()</div>
+                            <hr class="my-1" />
+                            <div class="px-3">@item.Products[0].RemainingVolume.ToPrice()</div>
+                        </td>
+
+                        <td class="align-middle">
+                            <div class="px-3">@item.Products[0].Warehouse?.Name</div>
+                        </td>
+
+                        <td class="align-middle">
+                            <div class="px-3">@item.Products[0].WarehouseSegment?.Name</div>
+                        </td>
+                    </tr>
+
+                    <!-- سطرهای بعدی برای آیتم‌های باقی‌مانده -->
+                    @if (item.Products?.Any() == true)
+                    {
+                        for (int p = 1; p < item.Products?.Count; p++)
+                        {
+                            <tr>
+                                <td class="align-middle">@item.Products[p].ProductTitle</td>
+                                <td class="align-middle px-0 py-4">
+                                    <div class="px-3">@item.Products[p].Count.ToPrice()</div>
+                                    <hr class="my-1" />
+                                    <div class="px-3">@item.Products[p].RemainingCount.ToPrice()</div>
+                                </td>
+                                <td class="align-middle px-0 py-4">
+                                    <div class="px-3">@item.Products[p].WeightGross.ToPrice()</div>
+                                    <hr class="my-1" />
+                                    <div class="px-3">@item.Products[p].RemainingWeightGross.ToPrice()</div>
+                                </td>
+                                <td class="align-middle px-0 py-4">
+                                    <div class="px-3">@item.Products[p].WeightNet.ToPrice()</div>
+                                    <hr class="my-1" />
+                                    <div class="px-3">@item.Products[p].RemainingWeightNet.ToPrice()</div>
+                                </td>
+                                <td class="align-middle px-0 py-4">
+                                    <div class="px-3">@item.Products[p].Volume.ToPrice()</div>
+                                    <hr class="my-1" />
+                                    <div class="px-3">@item.Products[p].RemainingVolume.ToPrice()</div>
+                                </td>
+
+                                <td class="align-middle px-0 py-4">
+                                    <div class="px-3">@item.Products[p].Warehouse?.Name</div>
+                                </td>
+
+                                <td class="align-middle px-0 py-4">
+                                    <div class="px-3">@item.Products[p].WarehouseSegment?.Name</div>
+                                </td>
+
+                            </tr>
+                        }
+                    }
+
+
+
+                </tbody>
+            </table>
+
+        </div>
+        <!-- /.portlet -->
+    </div>
+
+</div>
+
+
+
+@section script {
+
+    <script>
+        kamaDatepicker('NewOwnership_OtherInfo_DateGomrokFa', customOptions);
+
+        $(document).ready(function () {
+            $('.select2').select2();
+        });
+
+        async function ChangeOwnership(event) {
+            event.preventDefault();
+            let result = await ShowQAlert2(event, 'بعد از تایید نهایی امکان ویرایش وجود ندارد', 'تایید نهایی');
+
+            if (result === true) {
+                document.getElementById("finalizeButton").classList.add("disabled");
+                $("#postForm").submit();
+            }
+        }
+    </script>
+}
+
+

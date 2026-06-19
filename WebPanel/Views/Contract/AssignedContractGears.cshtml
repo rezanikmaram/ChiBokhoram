@@ -1,0 +1,156 @@
+@model GetAssignedContractGearsDto
+@{
+    ViewData["Title"] = $"تجهیزات قرارداد ({Model.ContractNumber})";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+<div class=" bg-white card-header p-15 rounded-3 shadow-sm ">
+    <div class="d-flex justify-content-between">
+        <h3 class="title m-0">
+            <a asp-action="Index">
+                <i class="fa-solid fa-right-to-bracket align-middle me-2"></i>
+            </a>
+            تجهیزات قرارداد (@Model.ContractNumber)
+        </h3>
+        <div class="buttons-box">
+            <i class="icon-size-fullscreen"></i>
+            <div class="paper-ripple">
+                <div class="paper-ripple__background"></div>
+                <div class="paper-ripple__waves"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-3">
+    <div class="col-md-6">
+        <div class="card rounded-3 min-height-600">
+            <div class="card-header">
+                <div class="d-flex justify-content-between">
+                    <h3 class="title m-0">
+                        <i class="icon-user"></i>
+                        انتخاب تجهیزات برای قرارداد
+                    </h3>
+                    <form asp-action="AssignGearsToContract" method="post" id="assignGearsForm">
+                        <a class="btn mb-2 float-end btn-success rounded text-white label py-2" onclick="assignGears();">+  اضافه کردن انتخاب شده ها  </a>
+                        <input id="assignIds" name="Ids" type="hidden" />
+                        <input name="ContractId" type="hidden" value="@Model.ContractId" />
+                    </form>
+                </div>
+            </div>
+            <div class="card-body pt-0">
+                <form asp-action="GetAssignedGears" method="post" id="filterFormLeft">
+                    <input type="hidden" asp-for="ContractId" />
+                    <div class="form-body mb-4">
+                        <div class="row">
+                            <div class="form-group col-lg-6">
+                                <label>جستجو</label>
+                                <div class="input-group">
+                                    <input asp-for="Filter.Search" type="text" class="form-control">
+                                </div>
+                            </div>
+                            <div class="col-lg-3 d-flex align-items-end">
+                                <button class="btn btn-success rounded label w-100" type="submit"><p class="m-0">فیلتر</p></button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+
+                <div class="table-responsive w-100">
+                    <table class="table table-bordered">
+                        <thead class="bg-primary">
+                            <tr>
+                                <th style="width:30px"></th>
+                                <th>نام تجهیز</th>
+                                <th>نوع</th>
+                                <th>مدل</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        @foreach (var item in Model.UnAssignedGears)
+                        {
+                            <tr>
+                                <td><input type="checkbox" value="@item.Id" name="unassignedGearId" /></td>
+                                <td>@item.Name</td>
+                                <td>@item.GearTypeTitle</td>
+                                <td>@item.GearModelTitle</td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card rounded-3">
+            <div class="card-header d-flex justify-content-between">
+                <h3 class="title m-0">
+                    <i class="icon-speech"></i>
+                    تجهیزات متصل به قرارداد
+                </h3>
+                <form asp-action="RemoveGearsFromContract" method="post" id="removeGearsForm">
+                    <a class="btn btn-danger text-white label rounded" onclick="removeGears();"><i class="fas fa-trash"></i>  حذف انتخاب شده ها</a>
+                    <input id="removeIds" name="Ids" type="hidden" />
+                    <input name="ContractId" type="hidden" value="@Model.ContractId" />
+                </form>
+            </div>
+            <div class="card-body pt-0">
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <thead class="bg-primary">
+                            <tr>
+                                <th style="width:30px"></th>
+                                <th>نام تجهیز</th>
+                                <th>نوع</th>
+                                <th>مدل</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        @foreach (var item in Model.AssignedGears)
+                        {
+                            <tr>
+                                <td><input type="checkbox" value="@item.Id" name="assignedGearId" /></td>
+                                <td>@item.Name</td>
+                                <td>@item.GearTypeTitle</td>
+                                <td>@item.GearModelTitle</td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section script {
+<script>
+    function assignGears() {
+        var ids = "";
+        $("#assignIds").val('');
+        $("input:checkbox[name=unassignedGearId]:checked").each(function () {
+            ids = ids ? (ids + ',' + $(this).val()) : $(this).val();
+        });
+        if (ids) {
+            $("#assignIds").val(ids);
+            $("#assignGearsForm").submit();
+        } else {
+            showAlert2('تجهیزی انتخاب نشده است', 1);
+        }
+    }
+    function removeGears() {
+        var ids = "";
+        $("#removeIds").val('');
+        $("input:checkbox[name=assignedGearId]:checked").each(function () {
+            ids = ids ? (ids + ',' + $(this).val()) : $(this).val();
+        });
+        if (ids) {
+            $("#removeIds").val(ids);
+            $("#removeGearsForm").submit();
+        } else {
+            showAlert2('تجهیزی انتخاب نشده است', 1);
+        }
+    }
+</script>
+}

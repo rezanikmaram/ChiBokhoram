@@ -1,0 +1,470 @@
+﻿@model SeoFactorServicePageDto
+
+@{
+	ViewData["Title"] = "صدور صورتحساب";
+	Layout = "~/Views/Shared/AdminLayout.cshtml";
+	bool isContainerSeo = Model.SeoInfo.TrafficType == TrafficType.Container;
+
+	int carryingPercent = isContainerSeo ? 20 : 40;
+	int evacuationPercent = isContainerSeo ? 50 : 25;
+	int safafPercent = isContainerSeo ? 15 : 10;
+	int loadingPercent = isContainerSeo ? 15 : 25;
+}
+
+<div id="listService" class="card">
+	<partial name="_FactorListService" model="Model" />
+</div>
+
+<input asp-for="DateFirstTaliFa" type="hidden" />
+<div id="modalAddService"></div>
+
+
+<script src="~/assets/js/validation/jquery.validate.min.js"></script>
+<script src="~/assets/js/validation/jquery.validate.unobtrusive.min.js"></script>
+
+ 
+@section script {
+
+	<script>
+
+		 function select2Config()
+		 {
+			 // $('.select2').select2();
+
+			 $('select[class*="generalmodal"].select2').select2({
+				 dropdownParent: $('#generalmodal')
+			 });
+
+		 }
+
+		$("#modalAddService").on("change", "#CreateService_SeoWarehouseReceiptProductId", function () {
+			var selected = $(this).find(':selected');
+			var warehouseDate = selected.data('warehouse-date');
+
+			if (warehouseDate)
+				$('#CreateService_WarehousingStartFa').val(warehouseDate);
+		});
+
+
+		$("#modalAddService").on("change", "#CreateService_Type", function () {
+			let selectedValue = parseInt($(this).val());
+			let seoFactorServiceId = $("#CreateService_Id").val();
+
+			$("#generalmodal").modal('hide');
+			showAddServiceModal(selectedValue, seoFactorServiceId);
+		});
+
+		$("#modalAddService").on("change", "#CreateService_IsCalculateAuto", function () {
+			if ($(this).is(":checked")) {
+				$("#CalculateAuto").addClass("d-none");
+				$("#CalculateAuto2").addClass("d-none");
+			} else {
+				$("#CalculateAuto").removeClass("d-none");
+				$("#CalculateAuto2").removeClass("d-none");
+			}
+		});
+
+		function showAddServiceModal(seoFactorType = null, seoFactorServiceId = null)
+		{
+			let seoFactorId = '@Model.SeoFactorId';
+
+			$.post("@Url.Action("GetModalAddService", "SeoFactor")",
+				{
+					FactorId :seoFactorId,
+					SeoFactorType: seoFactorType,
+					SeoFactorServiceId: seoFactorServiceId
+				})
+				.done(function (res) {
+					$("#modalAddService").html(res);
+					initModalControls();
+					$("#generalmodal").modal('show');
+				})
+				.fail(function (xhr, status, error) {
+					location.reload();
+				});
+		}
+
+		$("#modalAddService").on("change", "#DiscountTypeId", function () {
+			var selectedValue = $(this).val();
+
+			if (selectedValue === "1") {
+				 $("#DiscountPercentId").removeClass("d-none");
+				 $("#DiscountPriceId").addClass("d-none");
+				 SetNumber(0, 'CreateService_DiscountPrice');
+			} else {
+				 $("#DiscountPercentId").addClass("d-none");
+				 $("#DiscountPriceId").removeClass("d-none");
+				 $("#CreateService_DiscountPercent").val('');
+			}
+		});
+
+
+		function initModalControls() {
+			select2Config();
+
+			try{
+				kamaDatepicker('CreateService_WarehousingStartFa', customOptions);
+				kamaDatepicker('CreateService_WarehousingEndFa', customOptions);
+
+				$("#CreateService_SeoWarehouseReceiptProductId").trigger('change');
+			}
+			catch {}
+		}
+
+
+		 function AddService() {
+			  showAddServiceModal();
+		 }
+
+		 function editService(id) {
+			 showAddServiceModal(null, id );
+		 }
+
+		 function setPrice(price){
+			 if(typeof price === "number")
+				 SetNumber(price, 'CreateService_DiscountPrice');
+			 else
+				 SetNumber('0', 'CreateService_DiscountPrice');
+		 }
+
+		function createService(e) {
+			e.preventDefault();
+
+			let $form = $("#FormAddService");
+			let type = parseInt($("#CreateService_Type").val());
+			let warehousingStartFa = $('#CreateService_WarehousingStartFa').val();
+			let warehousingEndFa = $('#CreateService_WarehousingEndFa').val();
+			let count = $("#CreateService_Count").val();
+			let largerWeightOrVolume = $('#CreateService_LargerWeightOrVolume').val();
+			let priceOne = $("#CreateService_PriceOne").val();
+			let isCalculateAuto = $("#CreateService_IsCalculateAuto").is(":checked");
+
+			@{
+				bool hasSwrServer = Model.SeoWarehouseReceiptId != null;
+			}
+
+			let hasSwr = @hasSwrServer.ToString().ToLower();
+
+			if (type === @((int)SeoFactorType.Anbardary) && hasSwr) {
+
+				if ( !warehousingStartFa && !isCalculateAuto) {
+					showAlert("لطفاً تاریخ شروع انبارداری را وارد کنید");
+					return false;
+				}
+
+				if ( !warehousingEndFa) {
+					showAlert("لطفاً تاریخ پایان انبارداری را وارد کنید");
+					return false;
+				}
+			}
+
+			if (count <= 0) {
+				showAlert("تعداد را درست وارد کنید");
+				return false;
+			}
+
+			if (largerWeightOrVolume <= 0) {
+				showAlert("حجم/تناژ/ضریب را درست وارد کنید");
+				return false;
+			}
+
+			if (priceOne <= 0 && !isCalculateAuto) {
+				showAlert("قیمت تعرفه را درست وارد کنید");
+				return false;
+			}
+
+			let formData = $form.serialize();
+
+			$.post("@Url.Action("CreateFactorService", "SeoFactor")", formData)
+				.done(function (res) {
+					$("#generalmodal").modal('hide');
+					$("#listService").html(res);
+				})
+				.fail(function () {
+					location.reload();
+				});
+
+			return false;
+		}
+
+
+		 async function DeleteService(event, id) {
+			 let result = await ShowQAlert2(event);
+
+			 if (result === true) {
+				 $.post("@Url.Action("DeleteFactorService", "SeoFactor")", {
+					 seoFactorServiceId: id
+				 })
+				.done(function (res) {
+						 $("#listService").html(res);
+						 $("#generalmodal").modal('hide');
+					 })
+					 .fail(function (xhr, status, error) {
+						 location.reload();
+					 });
+			 }
+		 }
+
+		 async function DeleteAllServices(event) {
+			 let result = await ShowQAlert2(event);
+
+			 if (result === true) {
+				 $.post("@Url.Action("DeleteAllFactorServices", "SeoFactor")", {
+					 seoFactorId: '@Model.SeoFactorId'
+				 })
+				.done(function (res) {
+						 $("#listService").html(res);
+					 })
+					 .fail(function (xhr, status, error) {
+						 location.reload();
+					 });
+			 }
+		 }
+
+		 async function EndFactor(event, id) {
+
+			 let result = await ShowQAlert2(event);
+
+			 if (result === true) {
+				 document.getElementById("EndFactorId").classList.add("disabled");
+
+				 $.post("@Url.Action("EndFactor", "SeoFactor")", {
+					 factorId: id
+				 }).done(function (res) {
+					 location.reload();
+				 }).fail(function (xhr, status, error) {
+					 location.reload();
+				 });
+			 }
+		 }
+
+		 async function BackToPendingState(event, id) {
+			 event.preventDefault();
+			 let result = await ShowQAlert2(event);
+
+			 if (result === true) {
+				 document.getElementById("BackToPendingStateId").classList.add("disabled");
+
+				 $.post("@Url.Action("BackToPendingState", "SeoFactor")", {
+					 factorId: id
+				 }).done(function (res) {
+					 location.reload();
+				 }).fail(function (xhr, status, error) {
+					 location.reload();
+				 });
+			 }
+		 }
+
+		 function GetPrice(e) {
+			 @if (Model.SeoWarehouseReceiptId != null)
+		 {
+			 <text>
+				  let type = parseInt($('#CreateService_Type').val());
+
+				 if (type === @((int)SeoFactorType.Loading))
+					 GetPriceBarbari(e);
+				 else if (type === @((int)SeoFactorType.Anbardary))
+					 GetPriceWarehouse(e);
+				 else if (type === @((int)SeoFactorType.StripContainer))
+					 GetPriceStrip(e);
+				 else if (type === @((int)SeoFactorType.LoadingChadory))
+					 GetPriceLoadingChadory(e);
+			 </text>
+		 }
+		 else
+		 {
+			 <text>
+			 	 GetPriceGeneralCargoProductTariff(e);
+			 </text>
+		 }
+
+		 }
+
+
+		 function GetPriceBarbari(e)
+		 {
+			 var seoWarehouseReceiptProductId = $('#CreateService_SeoWarehouseReceiptProductId').val();
+			 var isCarrying = document.getElementById("CreateService_IsCarrying").checked;
+			 var isEvacuation = document.getElementById("CreateService_IsEvacuation").checked;
+			 var isSafaf = document.getElementById("CreateService_IsSafaf").checked;
+			 var isLoading = document.getElementById("CreateService_IsLoading").checked;
+			 let khankaryType = $('#CreateService_KhankaryType').val();
+
+
+			 if (!seoWarehouseReceiptProductId) {
+				 return;
+			 }
+
+			 $.post('@Url.Action("GetGeneralCargoProductTariffPrice", "SeoFactor")', {
+				 seoWarehouseReceiptProductId ,
+				 isCarrying: isCarrying,
+				 isEvacuation,
+				 isSafaf,
+				 isLoading,
+				 khankaryType
+			 })
+				 .done(function (res) {
+
+					 if (res && res.calculatePrice !== undefined) {
+						 SetPriceTariff(res.calculatePrice);
+
+						 $("#CreateService_LargerWeightOrVolumeType").val(res.product.largerWeightOrVolumeType);
+						 $("#CreateService_LargerWeightOrVolumeType").trigger('change');
+						 SetNumber(res.product.largerWeightOrVolume, 'CreateService_LargerWeightOrVolume');
+						 SetNumber(res.product.count, 'CreateService_Count');
+					 }
+					 else
+					{
+						showAlert("تعرفه ای یافت نشد");
+						$("#CreateService_PriceOne").val(Number('0'));
+					}
+				 })
+				 .fail(function () {
+					 location.reload();
+				 });
+		 }
+
+		 function GetPriceWarehouse(e)
+		 {
+			 var seoWarehouseReceiptProductId = $('#CreateService_SeoWarehouseReceiptProductId').val();
+			 var warehousingStartFa = $('#CreateService_WarehousingStartFa').val() ;
+			 var warehousingEndFa =$('#CreateService_WarehousingEndFa').val() ;
+
+			 if (!seoWarehouseReceiptProductId) {
+				 showAlert("کالایی از قبض انبار انتخاب نشده است");
+				 e.preventDefault();
+				 return false;
+			 }
+
+			 if (!warehousingStartFa || !warehousingEndFa) {
+				 showAlert("لطفاً تاریخ شروع و پایان انبارداری را وارد کنید");
+				 e.preventDefault();
+				 return false;
+			 }
+
+			 $.post('@Url.Action("GetTariffWarehousePrice", "SeoFactor")', {
+				 seoWarehouseReceiptProductId ,
+				 warehousingStartFa: warehousingStartFa,
+				 warehousingEndFa
+			 })
+				 .done(function (res) {
+					 if (res && res.calculatePrice !== undefined) {
+						 SetPriceTariff(res.calculatePrice);
+
+						 $("#CreateService_LargerWeightOrVolumeType").val(res.product.largerWeightOrVolumeType);
+						 $("#CreateService_LargerWeightOrVolumeType").trigger('change');
+						 SetNumber(res.product.largerWeightOrVolume, 'CreateService_LargerWeightOrVolume');
+						 SetNumber(res.product.count, 'CreateService_Count');
+					 }
+					 else
+					{
+						showAlert("تعرفه ای یافت نشد");
+						$("#CreateService_PriceOne").val(Number('0'));
+					}
+				 })
+				 .fail(function () {
+					 location.reload();
+				 });
+		 }
+
+		 function GetPriceStrip(e)
+		 {
+			 var seoWarehouseReceiptProductId = $('#CreateService_SeoWarehouseReceiptProductId').val();
+
+			 let containerStripType = $('#ContainerStripTypeId').val();
+
+
+			 if (!seoWarehouseReceiptProductId) {
+				 return;
+			 }
+
+			 $.post('@Url.Action("GetTariffStripPrice", "SeoFactor")', {
+				 seoWarehouseReceiptProductId ,
+				 containerStripType
+			 })
+				 .done(function (res) {
+
+					 if (res && res.containerStripTariff.calculatePrice !== undefined) {
+						 SetPriceTariff(res.containerStripTariff.calculatePrice);
+
+						 $("#CreateService_LargerWeightOrVolumeType").val(res.product.largerWeightOrVolumeType);
+						 $("#CreateService_LargerWeightOrVolumeType").trigger('change');
+						 SetNumber(res.product.largerWeightOrVolume, 'CreateService_LargerWeightOrVolume');
+						 SetNumber(res.product.count, 'CreateService_Count');
+					 }
+					 else
+					{
+						showAlert("تعرفه ای یافت نشد");
+						$("#CreateService_PriceOne").val(Number('0'));
+					}
+				 })
+				 .fail(function () {
+					 location.reload();
+				 });
+		 }
+
+		  function GetPriceLoadingChadory(e)
+		 {
+			 var seoWarehouseReceiptProductId = $('#CreateService_SeoWarehouseReceiptProductId').val();
+
+			 $.post('@Url.Action("GetTariffLoadingChadory", "SeoFactor")', {
+				 seoWarehouseReceiptProductId
+			 })
+				 .done(function (res) {
+
+					 if (res && res.tariff.calculatePrice !== undefined) {
+						 SetNumber(1, 'CreateService_LargerWeightOrVolume');
+						 SetPriceTariff(res.tariff.calculatePrice);
+					 }
+					 else
+					{
+						showAlert("تعرفه ای یافت نشد");
+						$("#CreateService_PriceOne").val(Number('0'));
+					}
+				 })
+				 .fail(function () {
+					 location.reload();
+				 });
+		 }
+
+		function GetPriceGeneralCargoProductTariff(e)
+		 {
+			 var generalCargoProductTariffId = $('#CreateService_GeneralCargoProductTariffId').val();
+
+				 $.post('@Url.Action("GetGeneralCargoProductTariffPriceWithoutSwr", "SeoFactor")', {
+					 generalCargoProductTariffId,
+					 seoId: '@Model.SeoInfo.Id'
+			 })
+				 .done(function (res) {
+
+					 if (res && res.tariff.calculatePrice !== undefined) {
+						 SetPriceTariff(res.tariff.calculatePrice);
+						 $("#CreateService_LargerWeightOrVolumeType").val(res.product.largerWeightOrVolumeType);
+						 $("#CreateService_LargerWeightOrVolumeType").trigger('change');
+						 SetNumber(res.product.largerWeightOrVolume, 'CreateService_LargerWeightOrVolume');
+						 $("#TariffDescriptionId").text(res.description);
+					 }
+					 else
+					{
+						showAlert("تعرفه ای یافت نشد");
+						$("#CreateService_PriceOne").val(Number('0'));
+					}
+				 })
+				 .fail(function () {
+					 location.reload();
+				 });
+		 }
+
+		 function SetPriceTariff(price)
+		 {
+			 if(price == 0)
+				showAlert("قیمت تعرفه صفر است.");
+			SetNumber(price, 'CreateService_PriceOne');
+		 }
+
+	</script>
+
+
+
+}
+

@@ -1,0 +1,155 @@
+@model ManagePanelUserContractsDto
+@{
+    ViewData["Title"] = $"قراردادهای کاربر ({Model.FullName})";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+<div class="card">
+    <div class="card-body">
+        <div class="d-flex justify-content-between">
+            <h3 class="title m-0">
+                <a asp-action="PanelUsers">
+                    <i class="fa-solid fa-right-to-bracket align-middle me-2"></i>
+                </a>
+                قراردادهای کاربر (@Model.FullName)
+            </h3>
+            <div>
+                <span class="badge bg-light text-dark">نام کاربری: @Model.UserName</span>
+                <span class="badge bg-info text-white me-2">بندر: @Model.PortName</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-5">
+    <div class="col-md-6">
+        <div class="card rounded-3 min-height-600">
+            <div class="card-header">
+                <div class="d-flex justify-content-between">
+                    <h3 class="title m-0">
+                        <i class="icon-layers"></i>
+                        قراردادهای قابل اتصال
+                    </h3>
+                    <form asp-action="AssignContractsToPanelUser" method="post" id="assignContractsForm">
+                        <a class="btn mb-2 float-end btn-success rounded text-white label" onclick="assignContracts();">اضافه کردن انتخاب شده ها</a>
+                        <input id="assignContractIds" name="Ids" type="hidden" />
+                        <input name="UserId" type="hidden" value="@Model.UserId" />
+                    </form>
+                </div>
+            </div>
+            <div class="card-body pt-0">
+                <form asp-action="ManageUserContracts" method="post" id="filterContractsForm">
+                    <input type="hidden" asp-for="UserId" />
+                    <div class="form-body mb-4">
+                        <div class="row">
+                            <div class="form-group col-lg-6">
+                                <label>جستجو</label>
+                                <div class="input-group">
+                                    <input asp-for="Filter.Search" type="text" class="form-control" placeholder="شماره/عنوان/شرکت">
+                                </div>
+                            </div>
+                            <div class="col-lg-3 d-flex align-items-end">
+                                <button class="btn btn-success rounded label w-100" type="submit"><p class="m-0">فیلتر</p></button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+
+                <div class="table-responsive w-100">
+                    <table class="table table-bordered">
+                        <thead class="bg-primary">
+                            <tr>
+                                <th style="width:30px"></th>
+                                <th>شماره قرارداد</th>
+                                <th>عنوان</th>
+                                <th>شرکت</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        @foreach (var item in Model.AvailableContracts)
+                        {
+                            <tr>
+                                <td><input type="checkbox" value="@item.Id" name="availableContractId" /></td>
+                                <td>@item.ContractNumber</td>
+                                <td>@item.Title</td>
+                                <td>@item.CompanyName</td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card rounded-3">
+            <div class="card-header d-flex justify-content-between">
+                <h3 class="title m-0">
+                    <i class="icon-book-open"></i>
+                    قراردادهای متصل به کاربر
+                </h3>
+                <form asp-action="RemoveContractsFromPanelUser" method="post" id="removeContractsForm">
+                    <a class="btn btn-danger text-white label rounded" onclick="removeContracts();">حذف انتخاب شده ها</a>
+                    <input id="removeContractIds" name="Ids" type="hidden" />
+                    <input name="UserId" type="hidden" value="@Model.UserId" />
+                </form>
+            </div>
+            <div class="card-body pt-0">
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <thead class="bg-primary">
+                            <tr>
+                                <th style="width:30px"></th>
+                                <th>شماره قرارداد</th>
+                                <th>عنوان</th>
+                                <th>شرکت</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        @foreach (var item in Model.AssignedContracts)
+                        {
+                            <tr>
+                                <td><input type="checkbox" value="@item.Id" name="assignedContractId" /></td>
+                                <td>@item.ContractNumber</td>
+                                <td>@item.Title</td>
+                                <td>@item.CompanyName</td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section script {
+<script>
+    function assignContracts() {
+        var ids = "";
+        $("#assignContractIds").val('');
+        $("input:checkbox[name=availableContractId]:checked").each(function () {
+            ids = ids ? (ids + ',' + $(this).val()) : $(this).val();
+        });
+        if (ids) {
+            $("#assignContractIds").val(ids);
+            $("#assignContractsForm").submit();
+        } else {
+            showAlert2('قراردادی انتخاب نشده است', 1);
+        }
+    }
+    function removeContracts() {
+        var ids = "";
+        $("#removeContractIds").val('');
+        $("input:checkbox[name=assignedContractId]:checked").each(function () {
+            ids = ids ? (ids + ',' + $(this).val()) : $(this).val();
+        });
+        if (ids) {
+            $("#removeContractIds").val(ids);
+            $("#removeContractsForm").submit();
+        } else {
+            showAlert2('قراردادی انتخاب نشده است', 1);
+        }
+    }
+</script>
+}

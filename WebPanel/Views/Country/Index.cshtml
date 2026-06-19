@@ -1,0 +1,221 @@
+@model Entities.DTOs.Web.Common.CountryPageDto
+@{
+    ViewData["Title"] = "لیست کشورها";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+    int i = ((Model.Countries.PageNumber - 1) * Model.Countries.PageSize) + 1;
+}
+
+<div class="col-lg-12">
+    <div class="card">
+        <div class="card-header pb-1">
+            <div class="d-flex justify-content-between">
+                <h3 class="title">
+                    <i class="icon-frane"></i> لیست کشورها ( تعداد کل @Model.AllCountryCount.ToPrice() )
+                </h3>
+                <div>
+                    <button type="button" class="alert-icon btn btn-primary round btn-add-country"> <i class="icon-plus align-middle"></i> کشور جدید </button>
+                </div>
+            </div>
+        </div>
+        <div class="card-body pt-0">
+            <form id="formFilter" asp-action="Index" asp-route-p="" method="post">
+                <input name="p" id="pageNumber" hidden />
+                <div class="form-body">
+                    <div class="row col-md-12">
+                        <div class="form-group col-md-4">
+                            <label>جستجو</label>
+                            <div class="input-group">
+                                <input type="text" asp-for="Filter.Search" class="form-control"/>
+                            </div>
+                        </div>
+                        <div class="form-group col-md-2 d-flex justify-content-center flex-wrap align-content-center">
+                            <button style="border-radius:5px; margin-top:30px"
+                                    class="alert-icon btn btn-success"
+                                    type="submit">
+                                <p class="px-3"> فیلتر</p>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+            <div id="table-container">
+                @await Html.PartialAsync("_CountryTable", Model)
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for Create/Edit Country -->
+<div class="modal fade" id="countryModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">ثبت/ویرایش کشور</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body"></div>
+        </div>
+    </div>
+</div>
+
+@section script {
+    <script>
+        var currentPage = @Model.Countries.PageNumber;
+        var currentSortColumn = '@(Model.Filter?.SortColumn ?? "countrynamefa")';
+        var currentSortDirection = '@(Model.Filter?.SortDirection ?? "asc")';
+
+        function getFilterData() {
+            return {
+                'filter.Search': $("#Filter_Search").val(),
+                'filter.SortColumn': currentSortColumn,
+                'filter.SortDirection': currentSortDirection
+            };
+        }
+
+        function loadTable(page) {
+            currentPage = page || 1;
+            var data = Object.assign({ p: currentPage }, getFilterData());
+            $.get('@Url.Action("Table","Country")', data)
+                .done(function (html) {
+                    $("#table-container").html(html);
+                });
+        }
+
+        function loadTableWithSort(sortColumn, sortDirection) {
+            currentSortColumn = sortColumn;
+            currentSortDirection = sortDirection;
+            loadTable(1);
+        }
+
+        function openCountryModal(url) {
+            $.get(url).done(function (html) {
+                var $modal = $("#countryModal");
+                $modal.find('.modal-body').html(html);
+                if ($.validator && $.validator.unobtrusive) {
+                    $.validator.unobtrusive.parse($modal);
+                }
+                var modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('countryModal'));
+                modal.show();
+            });
+        }
+
+        $(document).on('submit', '#formFilter', function (e) {
+            e.preventDefault();
+            loadTable(1);
+        });
+
+        $(document).on('click', '#table-container .page-link', function (e) {
+            e.preventDefault();
+            var hrefValue = $(this).attr("href") || '';
+            var match = hrefValue.match(/p=(\d+)/);
+            var p = match ? parseInt(match[1]) : 1;
+            loadTable(p);
+        });
+
+        $(document).on('click', '.btn-add-country', function () {
+            openCountryModal('@Url.Action("CreateCountryModal","Country")');
+        });
+
+        $(document).on('click', '.btn-edit-country', function () {
+            var id = $(this).data('id');
+            openCountryModal('@Url.Action("CreateCountryModal","Country")' + '?countryId=' + id);
+        });
+
+        $(document).on('submit', '#countryModal form', function (e) {
+            e.preventDefault();
+            var $form = $(this);
+            var $btn = $form.find('button[type="submit"]');
+            $btn.prop('disabled', true).html('<i class="icon-spinner fa-spin"></i> در حال ذخیره...');
+            
+            var action = $form.attr('action') || '@Url.Action("SaveCountry","Country")';
+            console.log('Submitting form to:', action);
+            console.log('Form data:', $form.serialize());
+            $.ajax({
+                url: action,
+                type: 'POST',
+                data: $form.serialize(),
+                headers: {
+                    'RequestVerificationToken': $form.find('input[name="__RequestVerificationToken"]').val()
+                }
+            }).done(function (resp, status, xhr) {
+                console.log('Response:', resp);
+                console.log('Status:', status);
+                if (typeof resp === 'object' && resp !== null && resp.success) {
+                    var modalEl = document.getElementById('countryModal');
+                    var modal = bootstrap.Modal.getInstance(modalEl);
+                    modal.hide();
+                    loadTable(currentPage);
+                    updateCountryCount();
+                    showAlert(resp.message, 0);
+                } else {
+                    var errorMsg = resp.message || 'خطا در ثبت اطلاعات';
+                    showAlert(errorMsg, 1);
+                    $("#countryModal .modal-body").html(resp);
+                    if ($.validator && $.validator.unobtrusive) {
+                        $.validator.unobtrusive.parse('#countryModal');
+                    }
+                    // Re-enable submit button on error
+                    $('#btnSaveCountry').prop('disabled', false).html('<i class="icon-check"></i> ذخیره');
+                }
+            }).fail(function (xhr, status, error) {
+                console.error('Error:', error);
+                console.error('Status:', status);
+                console.error('Response:', xhr.responseText);
+                showAlert('خطا در ارسال درخواست: ' + error, 1);
+                // Re-enable submit button on error
+                $('#btnSaveCountry').prop('disabled', false).html('<i class="icon-check"></i> ذخیره');
+            });
+        });
+
+        $(document).on('click', '.btn-delete-country', function () {
+            var id = $(this).data('id');
+            var name = $(this).data('name');
+            
+            Swal.fire({
+                title: 'آیا از حذف کشور "' + name + '" مطمئن هستید؟',
+                text: "این عملیات قابل بازگشت نیست!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'بله، حذف کن',
+                cancelButtonText: 'انصراف'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    deleteCountry(id);
+                }
+            });
+        });
+
+        function deleteCountry(id) {
+            $.ajax({
+                url: '@Url.Action("DeleteCountry", "Country")',
+                type: 'POST',
+                data: { countryId: id },
+                headers: {
+                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').first().val()
+                }
+            }).done(function (resp) {
+                if (resp.success) {
+                    loadTable(currentPage);
+                    updateCountryCount();
+                    showAlert(resp.message, 0);
+                } else {
+                    showAlert(resp.message, 1);
+                }
+            }).fail(function (xhr, status, error) {
+                console.error('Error:', error);
+                showAlert('خطا در حذف کشور: ' + error, 1);
+            });
+        }
+
+        function updateCountryCount() {
+            $.get('@Url.Action("GetCountryCount", "Country")')
+                .done(function (resp) {
+                    if (resp.count !== undefined) {
+                        $('.title').html('<i class="icon-frane"></i> لیست کشورها ( تعداد کل ' + resp.count.toLocaleString('fa-IR') + ' )');
+                    }
+                });
+        }
+    </script>
+}

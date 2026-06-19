@@ -1,0 +1,41 @@
+﻿@model CreateAreaDto
+
+<form asp-action="CreateArea" method="post">
+    <input asp-for="Id" type="hidden" />
+    <input asp-for="AreaCategoryId" type="hidden" />
+    <div class="form-body">
+
+        <div class="d-flex col-md-12">
+            <div class="col-md-12">
+                <div class="form-group m-l-60 ">
+                    <label>نام ناحیه</label>
+                    <div class="input-group">
+                        <input type="text" asp-for="Name" class="form-control rounded">
+                        <span asp-validation-for="Name"></span>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+        
+        <div class="mt-3">
+            <div>
+                <div class="input-group">
+                    <label>
+                        <input asp-for="IsActive" class="normal">
+                        فعال/غیرفعال
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-footer border-0 px-0">
+            <button type="submit" class="btn btn-success btn-round">ذخیره</button>
+            <button type="button" class="btn btn-danger btn-round" data-bs-dismiss="modal">بازگشت</button>
+        </div>
+    </div>
+
+</form>
+
+  <script src="~/assets/js/validation/jquery.validate.min.js"></script>
+ <script src="~/assets/js/validation/jquery.validate.unobtrusive.min.js"></script>

@@ -1,0 +1,536 @@
+﻿@model AllocationOfEquServicePageDto
+
+@{
+	ViewData["Title"] = "صدور پیش فاکتور تجهیزات";
+	Layout = "~/Views/Shared/AdminLayout.cshtml";
+
+}
+
+<div id="listEqupmentService" class="card">
+	<partial name="_ListEqupmentService" model="Model" />
+</div>
+
+
+<div id="generalmodal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" tabindex="-1">
+	<div class="modal-dialog modal-lg  modal-dialog-centered">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h4 class="modal-title">ثبت  کالا/خدمات</h4>
+				<button type="button" class="close btn-close rounded border" data-bs-dismiss="modal" data-bs-original-title="" title=""></button>
+			</div>
+			<div class="modal-body" id="modalbody">
+
+				<div class="card-body py-0">
+
+					<div class="form-body">
+						<input asp-for="CreateService.Type" value="@AllocationEquServiceType.PreFactor" hidden />
+						<input asp-for="CreateService.Id" hidden />
+						<input value="@Model.AllocationOfEquId" id="CreateAllocationEqu_Id" hidden />
+						<div class="row gy-4">
+							<div class="col-lg-8">
+								<div class="form-group">
+									<label>شرح کالا/خدمات</label>
+									<div class="input-group">
+										<input type="text" class="form-control" asp-for="CreateService.Description" required>
+										<span asp-validation-for="CreateService.Description"></span>
+									</div>
+								</div>
+							</div>
+
+							<div class="col-lg-4">
+								<div class="form-group">
+									<label> نام تجهیز ویژه</label>
+									<div class="input-group">
+										<select class="form-control rounded select2 generalmodal" asp-for="CreateService.GearId" asp-items="Model.AllocationGears">
+											<option value="">نامشخص</option>
+										</select>
+									</div>
+								</div>
+							</div>
+
+							<div class="col-lg-4">
+								<div class="form-group">
+									<label> نوع تجهیز عملیاتی</label>
+									<div class="input-group">
+										<select class="form-control rounded select2 generalmodal" asp-for="CreateService.GearInKhankaryTariffType" asp-items="@Html.GetEnumSelectList<GearInKhankaryTariffType>()">
+											<option value="">نامشخص</option>
+										</select>
+									</div>
+								</div>
+							</div>
+
+							<div class="col-lg-4">
+								<div class="form-group">
+									<label> تعرفه خن کاری</label>
+									<div class="input-group">
+										<select class="form-control rounded select2 generalmodal" asp-for="CreateService.KhankaryNonContainerTariffId" asp-items="Model.Khankarytariff">
+											<option value="">نامشخص</option>
+										</select>
+									</div>
+								</div>
+							</div>
+
+							<div class="col-lg-4">
+								<div class="form-group">
+									<label>تناژ تجهیز(تن)</label>
+									<div class="input-group">
+										<input type="number" class="form-control" asp-for="CreateService.TonnageGear">
+										 
+									</div>
+								</div>
+							</div>
+							
+							<div class="col-lg-6">
+								<div class="align-items-end d-flex gap-4 form-group h-100 justify-content-around">
+
+									<div class="activeor bg-light-dark border input-group justify-content-center py-2 rounded text-dark">
+										<label class="m-0" >
+											<input type="checkbox" asp-for="CreateService.IsSpecialProduct" class="normal">
+											محصول ترافیکی و حجیم
+										</label>
+									</div>
+									<div class="activeor bg-light-dark border input-group justify-content-center py-2 rounded text-dark">
+										<label class="m-0">
+											<input type="checkbox" asp-for="CreateService.IsEssentialProduct" class="normal">
+											کالای اساسی
+										</label>
+									</div>
+								</div>
+							</div>
+							
+							<div class="col-lg-2">
+								<div class="form-group">
+									<label>ضریب</label>
+									<div class="input-group">
+										<input type="number" class="form-control" asp-for="CreateService.Zarib">
+										<span asp-validation-for="CreateService.Zarib"></span>
+									</div>
+								</div>
+							</div>
+							
+							<div class="col-lg-4">
+								<div class="form-group ">
+									<span>
+										قیمت واحد
+									</span>
+									<div class="input-group mt-2">
+										<input type="number" class="form-control" asp-for="CreateService.PriceOne" min="0">
+										<span asp-validation-for="CreateService.PriceOne"></span>
+										<div class="align-items-center d-flex">
+											<a onclick="GetPrice()" class="btn btn-primary ms-3 px-2">دریافت تعرفه</a>
+										</div>
+									</div>
+								</div>
+							</div>
+							
+							
+							<div class="col-lg-2">
+								<div class="form-group">
+									<label>تعداد/مقدار</label>
+									<div class="input-group">
+										<input type="number" class="form-control" asp-for="CreateService.Count" min="1">
+										<span asp-validation-for="CreateService.Count"></span>
+									</div>
+								</div>
+							</div>
+
+							<div class="col-sm-3">
+								<div class="form-group">
+									<label id="LargerWeightOrVolumeLableId">حجم/تناژ</label>
+									<div class="input-group">
+										<price-input asp-for="CreateService.LargerWeightOrVolume"></price-input>
+										<span asp-validation-for="CreateService.LargerWeightOrVolume"></span>
+									</div>
+								</div>
+							</div>
+
+							<div class="col-sm-2 d-none">
+								<div class="form-group">
+									<label>نوع حجم/تناژ</label>
+									<div class="input-group">
+										<select class="form-control select2 generalmodal" asp-for="CreateService.LargerWeightOrVolumeType"
+												asp-items="@Html.GetEnumSelectList<LargerWeightOrVolumeType>()"
+												style="width:100%!important;">
+										</select>
+										<span asp-validation-for="CreateService.LargerWeightOrVolumeType"></span>
+									</div>
+								</div>
+							</div>
+							
+							 
+							<div class="col-lg-2">
+								<div class="form-group">
+									<label>درصد سهم شرکت</label>
+									<div class="input-group">
+										<input type="number" step="0.01" class="form-control" min="0.0" max="100.0"
+											   asp-for="CreateService.PercentCompany">
+										<span asp-validation-for="CreateService.PercentCompany"></span>
+									</div>
+								</div>
+							</div>
+
+							<div class="col-lg-2">
+								<div class="form-group">
+									<label>تعرفه مشارکت  </label>
+									<div class="input-group">
+										<input type="number" class="form-control" asp-for="CreateService.PriceMosharekat">
+										<span asp-validation-for="CreateService.PriceMosharekat"></span>
+									</div>
+								</div>
+							</div>
+
+							<div class="col-lg-6">
+								<div class="form-group">
+									<label> نوع تخلیه یا بارگیری</label>
+									<div class="input-group">
+										<select class="form-control rounded select2 generalmodal" asp-for="CreateService.SpecialGearTariffType" asp-items="@Html.GetEnumSelectList<SpecialGearTariffType>()">
+										</select>
+									</div>
+								</div>
+							</div>
+
+						</div>
+
+
+						<div class="modal-footer px-0 border-0 d-flex align-items-center">
+
+							 
+
+							<div>
+								<a onclick="createEquipment(event)" class="btn btn-success btn-round">ذخیره</a>
+								<button type="button" class="btn btn-danger btn-round" data-bs-dismiss="modal">بازگشت</button>
+							</div>
+
+						</div>
+
+					</div>
+
+				</div>
+
+			</div>
+		</div>
+	</div>
+</div>
+
+
+<div id="acceptPaymentModal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" tabindex="-1">
+	<div class="modal-dialog modal-dialog-centered">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h4 class="modal-title">تایید پرداخت</h4>
+				<button type="button" class="close btn-close rounded border" data-bs-dismiss="modal"></button>
+			</div>
+			<div class="modal-body" id="modalbody">
+
+				<div class="portlet-body">
+
+					<div class="form-body">
+						<form id="acceptPaymentFormId" asp-action="AcceptPaymentPreFactor" method="post">
+							<input asp-for="AllocationOfEquId" name="AllocationEquId" hidden />
+							<div class="row my-3">
+								<div class="col-sm-12">
+
+									<div class=" form-group relative">
+										<label>  نوع پرداخت</label>
+										<div class="input-group ">
+
+											<select class="form-control  " name="PayType" required
+													style="width:100%!important;">
+												<option value="1">پرداخت شده</option>
+												<option value="2">مجوز موقت عملیات  </option>
+											</select>
+
+										</div>
+
+										<span validation-for="PayType"
+											  class="text-danger"></span>
+									</div>
+
+
+								</div>
+							</div>
+
+							<div class="modal-footer px-0 border-0 pb-0">
+								<button type="submit" class="btn btn-success btn-round">تایید پرداخت</button>
+								<button type="button" class="btn btn-danger btn-round" data-bs-dismiss="modal">بازگشت</button>
+							</div>
+
+						</form>
+
+
+					</div>
+
+				</div>
+
+			</div>
+		</div>
+	</div>
+</div>
+
+<script src="~/assets/js/validation/jquery.validate.min.js"></script>
+<script src="~/assets/js/validation/jquery.validate.unobtrusive.min.js"></script>
+
+@if (Model.List?.Any() == true)
+{
+	<script>
+		ReportLinkDisplay("inline")
+	</script>
+}
+else
+{
+	<script>
+		ReportLinkDisplay("none")
+	</script>
+}
+
+
+@section script {
+
+	<script>
+		$(document).ready(function () {
+
+			$('.select2').select2();
+
+			$('select[class*="generalmodal"].select2').select2({
+				dropdownParent: $('#generalmodal')
+			});
+		});
+
+		function AddEquipment() {
+			$("#CreateService_Description").val('');
+			$("#CreateService_Zarib").val('1');
+			$("#CreateService_Id").val('');
+			$("#CreateService_Count").val('1');
+			$("#CreateService_PriceOne").val('0');
+			$("#CreateService_PercentCompany").val('@Model.PercentCompany');
+			$("#CreateService_PriceMosharekat").val('0');
+			SetNumber('1', 'CreateService_LargerWeightOrVolume');
+			$("#CreateService_LargerWeightOrVolumeType").val('0');
+
+			$("#CreateService_GearId").val('');
+			$("#CreateService_GearId").trigger('change');
+
+			$('#CreateService_TonnageGear').val('0');
+			$("#CreateService_GearInKhankaryTariffType").val('');
+			$("#CreateService_GearInKhankaryTariffType").trigger('change');
+			$("#CreateService_KhankaryNonContainerTariffId").val('');
+			$("#CreateService_KhankaryNonContainerTariffId").trigger('change');
+			$("#CreateService_SpecialGearTariffType").val('0');
+			$("#CreateService_SpecialGearTariffType").trigger('change');
+
+			$('select[class*="generalmodal"].select2').select2({
+				dropdownParent: $('#generalmodal')
+			});
+
+			$('#CreateService_IsSpecialProduct').prop("checked", false);
+			$('#CreateService_IsEssentialProduct').prop("checked", false);
+
+			$("#generalmodal").modal('show');
+
+		}
+
+
+		function editEquipment(id) {
+
+			$.post("@Url.Action("GetAllocationEquipmentServiceById", "AllocationOfEquipment")",
+				{ allocationOfEquServiceId: id })
+				.done(function (res) {
+					//$("#modalbody").html(res);
+
+					$('#CreateService_Description').val(res.description);
+					$("#CreateService_Zarib").val(res.zarib);
+					$("#CreateService_Id").val(res.id);
+					$("#CreateService_Count").val(res.count);
+					$("#CreateService_PriceOne").val(res.priceOne);
+					$("#CreateService_PercentCompany").val(res.percentCompany);
+					$("#CreateService_PriceMosharekat").val(res.priceMosharekat);
+					SetNumber(res.largerWeightOrVolume, 'CreateService_LargerWeightOrVolume');
+					$("#CreateService_LargerWeightOrVolumeType").val(res.largerWeightOrVolumeType);
+					$("#CreateService_LargerWeightOrVolumeType").trigger('change');
+
+					$("#CreateService_GearId").val(res.gearId);
+					$("#CreateService_GearId").trigger('change');
+					
+					$('#CreateService_IsSpecialProduct').prop("checked", res.isSpecialProduct);
+					$('#CreateService_IsEssentialProduct').prop("checked", res.isEssentialProduct);
+
+					$('#CreateService_TonnageGear').val(res.tonnageGear);
+					$("#CreateService_GearInKhankaryTariffType").val(res.gearInKhankaryTariffType);
+					$("#CreateService_GearInKhankaryTariffType").trigger('change');
+					$("#CreateService_KhankaryNonContainerTariffId").val(res.khankaryNonContainerTariffId);
+					$("#CreateService_KhankaryNonContainerTariffId").trigger('change');
+					$("#CreateService_SpecialGearTariffType").val(res.specialGearTariffType);
+					$("#CreateService_SpecialGearTariffType").trigger('change');
+
+					$('select[class*="generalmodal"].select2').select2({
+						dropdownParent: $('#generalmodal')
+					});
+					$("#generalmodal").modal('show');
+				});
+		}
+
+		function createEquipment(event) {
+
+			let allocationOfEquipmentId = $('#CreateAllocationEqu_Id').val();
+			let id = $('#CreateService_Id').val();
+			let description = $('#CreateService_Description').val();
+			let zarib = $("#CreateService_Zarib").val();
+			let count = $("#CreateService_Count").val();
+			let priceOne = $("#CreateService_PriceOne").val();
+			let percentCompany = $("#CreateService_PercentCompany").val();
+			let priceMosharekat = $("#CreateService_PriceMosharekat").val();
+			let gearId = $("#CreateService_GearId").val();
+			var tonnageGear = $('#CreateService_TonnageGear').val();
+			let gearInKhankaryTariffType = $('#CreateService_GearInKhankaryTariffType').val();
+			let khankaryNonContainerTariffId = $('#CreateService_KhankaryNonContainerTariffId').val();
+			let specialGearTariffType = $('#CreateService_SpecialGearTariffType').val();
+			let largerWeightOrVolume = $('#CreateService_LargerWeightOrVolume').val();
+			let largerWeightOrVolumeType = $('#CreateService_LargerWeightOrVolumeType').val();
+
+
+			if (!count || count < 1) {
+                event.preventDefault();
+                showAlert("تعداد باید بزرگتر از صفر باشد.");
+                return;
+           }
+
+			if (!largerWeightOrVolume || largerWeightOrVolume < 1) {
+				event.preventDefault();
+				showAlert("حجم/تناژ باید بزرگتر از صفر باشد.");
+				return;
+		   }
+
+			$.post("@Url.Action("CreateEquService", "AllocationOfEquipment")",
+				{
+					allocationOfEquipmentId,
+					id,
+					description,
+					zarib,
+					count,
+					priceOne,
+					percentCompany,
+					priceMosharekat,
+					isSpecialProduct: document.getElementById("CreateService_IsSpecialProduct").checked,
+					isEssentialProduct: document.getElementById("CreateService_IsEssentialProduct").checked,
+					gearId,
+					tonnageGear,
+					gearInKhankaryTariffType,
+					khankaryNonContainerTariffId,
+					specialGearTariffType,
+					largerWeightOrVolume,
+					largerWeightOrVolumeType
+				})
+				.done(function (res) {
+					$("#generalmodal").modal('hide');
+					$("#listEqupmentService").html(res);
+				})
+				.fail(function (xhr, status, error) {
+					location.reload();
+				});
+		}
+
+
+		async function DeleteEquService(event, id) {
+			let result = await ShowQAlert2(event);
+
+			if (result === true) {
+				$.post("@Url.Action("DeleteEquService", "AllocationOfEquipment")", {
+					equServiceId: id
+				})
+					.done(function (res) {
+						$("#listEqupmentService").html(res);
+						$("#generalmodal").modal('hide');
+					})
+					.fail(function (xhr, status, error) {
+						location.reload();
+					});
+			}
+		}
+
+		async function EndAllocation(event, id) {
+
+			let result = await ShowQAlert2(event);
+
+			if (result === true) {
+				document.getElementById("EndAllocationId").classList.add("disabled");
+
+				$.post("@Url.Action("EndAllocationPreFactor", "AllocationOfEquipment")", {
+					allocationEquId: id
+				}).done(function (res) {
+					location.reload();
+				});
+			}
+		}
+
+		async function BackToPendingState(event, id) {
+			event.preventDefault();
+			let result = await ShowQAlert2(event);
+
+			if (result === true) {
+				document.getElementById("BackToPendingStateId").classList.add("disabled");
+
+				$.post("@Url.Action("BackToPendingState", "AllocationOfEquipment")", {
+					allocationEquId: id
+				}).done(function (res) {
+					location.reload();
+				}).fail(function (xhr, status, error) {
+					location.reload();
+				});
+			}
+		}
+
+
+		function ReportLinkDisplay(display) {
+			document.getElementById("ReportLinkId").style.display = display;
+		}
+
+
+		function AcceptPaymentShowModal(e) {
+			$("#acceptPaymentModal").modal('show');
+		}
+
+		function GetPrice() {
+			var allocationOfEquId = $('#CreateAllocationEqu_Id').val();
+			var tonnageGear = $('#CreateService_TonnageGear').val();
+			let gearInKhankaryTariffTypeId = $('#CreateService_GearInKhankaryTariffType').val();
+			let KhankarytariffId = $('#CreateService_KhankaryNonContainerTariffId').val();
+			let specialGearTariffType = $('#CreateService_SpecialGearTariffType').val();
+			var isSpecialProduct = document.getElementById("CreateService_IsSpecialProduct").checked;
+			var isEssentialProduct = document.getElementById("CreateService_IsEssentialProduct").checked;
+			 
+
+			$.post('@Url.Action("GetSpecialGearPrice", "AllocationOfEquipment")', {
+				allocationOfEquId: allocationOfEquId,
+				tonnageGear: tonnageGear,
+				gearInKhankaryTariffType: gearInKhankaryTariffTypeId,
+				KhankaryTariffId: KhankarytariffId,
+				isSpecialProduct: isSpecialProduct,
+				isEssentialProduct: isEssentialProduct,
+				specialGearTariffType
+			})
+			.done(function (res) {
+
+				if (res && res.afterDiscountPrice !== undefined) {
+
+					if(res.afterDiscountPrice == 0)
+						showAlert("قیمت تعرفه صفر است.");
+					$("#CreateService_PriceOne").val(Number(res.afterDiscountPrice));
+					$("#CreateService_Count").val(Number(res.largerWeightOrVolume));
+				}
+				else
+				{
+					showAlert("تعرفه ای یافت نشد");
+					$("#CreateService_PriceOne").val(Number('0'));
+				}
+			})
+			.fail(function () {
+				 location.reload();
+			});
+		}
+
+	</script>
+
+
+
+}
+

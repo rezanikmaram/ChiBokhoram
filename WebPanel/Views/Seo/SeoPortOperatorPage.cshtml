@@ -1,0 +1,126 @@
+﻿@model SeoInfoDto
+
+@{
+    ViewData["Title"] = "عملیات بارشماری";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+
+    var color = "";
+    var imageSrc = "";
+    switch (Model.State)
+    {
+        case SeoState.Active:
+            color = "bg-primary";
+            imageSrc = "craneShip.png";
+            break;
+        case SeoState.Stoped:
+            color = "bg-warning";
+            imageSrc = "ship.png";
+            break;
+        case SeoState.Finish:
+            color = "bg-success2";
+            imageSrc = "Eship.png";
+            break;
+        default:
+            color = "bg-primary";
+            imageSrc = "craneShip.png";
+            break;
+
+    }
+}
+<div class="row">
+    <div class="card">
+        <div class="card-header pb-0 px-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <h3 class="title">
+                    <i class="icon-frane"></i>
+                    <a asp-action="SeoAccessPage" asp-route-seoId="@Model.Id"><i class="fa-solid fa-right-to-bracket me-2"></i></a>
+                    بارشماری
+                </h3>
+                <div class="d-flex align-items-center">
+                    <a asp-action="SeoView" asp-route-seoId="@Model.Id" class=" btn btn-primary"><i class="fa-regular fa-circle-info me-2 align-middle"></i> نمای کلی </a>
+                    <a asp-action="CreateSeo" asp-route-SeoId="@Model.Id" class="mx-2 btn btn-info"><i class="fa-regular fa-pen-to-square me-2 align-middle"></i> ویرایش </a>
+
+                    @if (Model.State != SeoState.Finish)
+                    {
+                        <a id="CloseSeo" onclick="ShowQAlert(event,'CloseSeo');" asp-controller="Seo" asp-action="ClosingSeo" asp-route-seoId="@Model.Id" class=" btn btn-success"><i class="fa-solid fa-check me-2 align-middle"></i>اتمام عملیات</a>
+                    }
+                </div>
+            </div>
+            <div class="row">
+            </div>
+        </div>
+        <div class="card-body pt-0 px-2">
+            <div class="bg-primary rounded-3 mt-4 p-3">
+                <div class="row gy-3 align-items-center">
+                    <div class="col-1">
+                        <img src="~/assets/images/@imageSrc" alt="" class="img-fluid">
+                    </div>
+                    <div class="col-3">
+                        <p class="fs-6 fw-bold">@Model.ShipShipName</p>
+                        <p class="fs-6 fw-bold">تاریخ شروع: @Model.StartFa</p>
+                    </div>
+                    <div class="col-3">
+                        <p class="fs-6 fw-bold">اسکله: @Model.WaterfrontWaterfrontName</p>
+                        <p class="fs-6 fw-bold">کالا: @Model.ProductProductName</p>
+                    </div>
+                    <div class="col-3">
+                        <p class="fs-6 fw-bold">تناژ: @Model.TonnageTitle</p>
+                        <p class="fs-6 fw-bold">صاحب کالا: @Model.ProductOwnerCompanyCompanyName</p>
+                    </div>
+                    <div class="col-2">
+                        <p class="fs-6 fw-bold">نوع عملیات: @Model.TransportTypeTitle</p>
+                        <p class="fs-6 fw-bold">وضعیت: @Model.StateTitle</p>
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-4 gy-3">
+                <div class="col-md-4">
+                    <div class="bg-light-dark p-3 rounded-3 h-100">
+                        <h3 class="text-dark mb-4 mt-2"> <i class="fa-solid fa-gears me-2 align-middle"></i>سرویس ها</h3>
+                        <a asp-controller="SeoService" asp-action="Counter" asp-route-seoId="@Model.Id" class="btn btn-light w-100 btn-air-light my-2 text-start fs-6 py-2"> <i class="fa-solid fa-gear align-middle mx-2"></i>سرویس های بار شمار </a>
+                        <a asp-controller="SeoService" asp-action="Warehouse" asp-route-seoId="@Model.Id" class="btn btn-light w-100 btn-air-light my-2 text-start fs-6 py-2"> <i class="fa-solid fa-gear align-middle mx-2"></i>سرویس های انباردار </a>
+                        <a asp-controller="SeoService" asp-action="CounterOneTime" asp-route-seoId="@Model.Id" class="btn btn-light w-100 btn-air-light my-2 text-start fs-6 py-2"> <i class="fa-solid fa-gear align-middle mx-2"></i>سرویس های حمل یکسره </a>
+                        <a asp-controller="SeoService" asp-action="Completed" asp-route-seoId="@Model.Id" class="btn btn-light w-100 btn-air-light my-2 text-start fs-6 py-2"> <i class="fa-solid fa-gear align-middle mx-2"></i>سرویس های تکمیل شده </a>
+                        <a asp-controller="SeoService" asp-action="FindOldService" asp-route-seoId="@Model.Id" class="btn btn-light w-100 btn-air-light my-2 text-start fs-6 py-2"> <i class="fa-solid fa-magnifying-glass align-middle mx-2"></i> پیدا کردن سرویس </a>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="bg-light-dark p-3 rounded-3 h-100">
+                        <h3 class="text-dark mb-4 mt-2"><i class="fa-solid fa-user-gear me-2 align-middle"></i> مدیریت </h3>
+                        <a asp-controller="Seo" asp-action="EquipmentManage" asp-route-seoId="@Model.Id" asp-route-returnPage="2" class="btn btn-light w-100 btn-air-light my-2 text-start fs-6 py-2"><i class="fa-solid fa-gear align-middle mx-2"></i> مدیریت تجهیزات </a>
+                        <a asp-controller="Seo" asp-action="TruckManage" asp-route-seoId="@Model.Id" class="btn btn-light w-100 btn-air-light my-2 text-start fs-6 py-2"><i class="fa-solid fa-truck align-middle mx-2"></i> مدیریت کامیون ها </a>
+                        <a asp-controller="Seo" asp-action="DriverManage" asp-route-seoId="@Model.Id" class="btn btn-light w-100 btn-air-light my-2 text-start fs-6 py-2"><i class="fa-solid fa-user align-middle mx-2"></i> مدیریت راننده ها </a>
+                        <a asp-controller="Seo" asp-action="SeoUserManage" asp-route-seoId="@Model.Id" class="btn btn-light w-100 btn-air-light my-2 text-start fs-6 py-2"><i class="fa-solid fa-users align-middle mx-2"></i> مدیریت کاربران </a>
+                        <a asp-controller="Seo" asp-action="ManageSeoWarehouse" asp-route-seoId="@Model.Id" class="btn btn-light w-100 btn-air-light my-2 text-start fs-6 py-2"><i class="fa-solid fa-users align-middle mx-2"></i> مدیریت انبارها </a>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="bg-light-dark p-3 rounded-3 h-100">
+                        <h3 class="text-dark mb-4 mt-2"><i class="fa-solid fa-anchor-circle-exclamation align-middle me-2"></i> خرابی ها </h3>
+                        <a asp-controller="Equipment" asp-action="Failure" asp-route-seoId="@Model.Id" class="btn btn-light w-100 btn-air-light my-2 text-start fs-6 py-2"><i class="fa-solid fa-gear align-middle mx-2"></i> خرابی تجهیزات </a>
+                        <a asp-controller="Transportation" asp-action="TruckFailure" asp-route-seoId="@Model.Id" class="btn btn-light w-100 btn-air-light my-2 text-start fs-6 py-2"><i class="fa-solid fa-truck align-middle mx-2"></i> خرابی کامیون ها </a>
+                        <a asp-controller="Seo" asp-action="SeoStopServiceLog" asp-route-seoId="@Model.Id" class="btn btn-light w-100 btn-air-light my-2 text-start fs-6 py-2"><i class="fa-solid fa-triangle-exclamation"></i> خرابی توقف ها </a>
+                    </div>
+                </div>
+            </div>
+
+            @*---------- lower section of btn  ----------*@
+
+            <div class="row mt-4 gy-3">
+                <div class="col-md-4">
+                    <div class="bg-light-dark p-3 rounded-3 h-100">
+                        <a asp-controller="Seo" asp-action="SeoRfidService" asp-route-seoId="@Model.Id" class="btn btn-light w-100 btn-air-light my-2 text-start fs-6 py-2"> <i class="fa-solid fa-gear align-middle mx-2"></i>سرویس های RFID </a>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="bg-light-dark p-3 rounded-3 h-100">
+                        <a asp-controller="Seo" asp-action="SeoUsers" asp-route-seoId="@Model.Id" class="btn btn-light w-100 btn-air-light my-2 text-start fs-6 py-2"><i class="fa-solid fa-user align-middle mx-2"></i> کاربران </a>
+                    </div>
+                </div>
+                 
+            </div>
+        </div>
+    </div>
+</div>
+
+

@@ -1,0 +1,78 @@
+﻿@model CreateSpecialGearTariffDto
+
+<form asp-action="CreateTariff" method="post">
+	<input asp-for="SpecialGearTariffRuleId" type="hidden" />
+	<input asp-for="Id" type="hidden" />
+	<div class="row gy-4 px-3">
+
+		<div class="col-md-6">
+			<label>هزینه تخلیه و بارگیری از کشتی</label>
+			<price-input asp-for="VoyagePrice"></price-input>
+			<span asp-validation-for="VoyagePrice" class="text-danger"></span>
+		</div>
+
+		<div class="col-md-6">
+			<label>هزینه تخلیه و بارگیری در محوطه</label>
+			<price-input asp-for="AreaPrice"></price-input>
+			<span asp-validation-for="AreaPrice" class="text-danger"></span>
+		</div>
+
+		<div class="col-md-6">
+			<div class="form-group">
+				<label>ارز</label>
+				<div class="input-group">
+					<select class="form-control select2 tariffModal" asp-for="CurrencyType"
+							asp-items="Html.GetEnumSelectList<CurrencyType>()">
+					</select>
+					<span asp-validation-for="CurrencyType" class="text-danger"></span>
+				</div>
+			</div>
+		</div>
+
+		<div class="col-md-6">
+			<div class="form-group">
+				<label>روش محاسبه</label>
+				<div class="input-group">
+					<select class="form-control select2 tariffModal" asp-for="TariffCalculationType"
+							asp-items="Html.GetEnumSelectList<TariffCalculationType>()">
+					</select>
+					<span asp-validation-for="TariffCalculationType" class="text-danger"></span>
+				</div>
+			</div>
+		</div>
+
+		
+		<div class="col-md-12">
+			<div class="form-group">
+				<label>دوره تعرفه</label>
+				<div class="input-group">
+					<select class="form-control select2 tariffModal" asp-for="ContractPeriodId" asp-items="Model.ContractPeriods?.ToSelectList()">
+						<option value="">انتخاب دوره تعرفه</option>
+					</select>
+				</div>
+			</div>
+		</div>
+
+		</div>
+
+	<div class="modal-footer mt-4 px-3">
+		<button type="submit" class="btn btn-success">ثبت</button>
+		<button type="button" class="btn btn-danger" data-bs-dismiss="modal">انصراف</button>
+	</div>
+</form>
+
+
+<script src="~/assets/js/validation/jquery.validate.min.js"></script>
+<script src="~/assets/js/validation/jquery.validate.unobtrusive.min.js"></script>
+
+<script>
+	$(document).ready(function () {
+		//$('.select2').select2();
+
+	});
+	$('select[class*="tariffModal"].select2').select2({
+		dropdownParent: $('#tariffModal')
+	});
+
+</script>
+

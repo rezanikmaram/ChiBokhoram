@@ -1,0 +1,134 @@
+﻿@model AllocationEquValueTonnagePageDto
+
+
+
+<div class="col-lg-12">
+    <div class="card">
+        <div class="card-header">
+            <div class="d-flex justify-content-between">
+
+                    <h3 class="title">
+                        <i class="icon-frane"></i>    مقدار تخلیه/بارگیری به تفکیک تجهیزات بکار گرفته شده
+                    </h3>
+
+
+                <div>
+
+                    <a class="btn btn-primary rounded"
+                       onclick="valueTonnageShowModal();">
+                        <i class="icon-plus align-middle"></i>
+                        مقدار جدید
+                    </a>
+
+                    <!-- /.portlet-title -->
+                    <div class="buttons-box">
+
+                        <i class="icon-size-fullscreen"></i>
+                        <div class="paper-ripple">
+                            <div class="paper-ripple__background"></div>
+                            <div class="paper-ripple__waves"></div>
+                        </div>
+                    </div>
+
+                </div>
+                <!-- /.buttons-box -->
+            </div>
+            <!-- /.portlet-heading -->
+            <!-- /.portlet-body -->
+        </div>
+        <div class="card-body pt-0">
+            <div id="ValueTonnageListId">
+                <partial name="_ValueTonnageList" model="Model.List" />
+            </div>
+
+        </div>
+        <!-- /.portlet -->
+    </div>
+</div>
+
+
+
+<div id="valueTonnagemodal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">  مقدار تناژ</h4>
+                <button type="button" class="close btn-close rounded border" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="modalbody">
+
+                <div class="card-body pt-0">
+
+                    <div class="form-body">
+
+
+                        <input asp-for="CreateValueTonnageDto.Id" hidden />
+                        <input asp-for="CreateValueTonnageDto.AllocationEquipmentId" hidden />
+                        <div class="row">
+
+                            <div class="col-sm-12">
+                                <div class="form-group">
+                                    <label>نوع تجهیز</label>
+                                    <div class="input-group col-sm-6" style="">
+                                        <select class="form-control select2 " asp-for="CreateValueTonnageDto.SeoEquipmentId"
+                                                asp-items="Model.EquipmentsTitle" style="width:100%!important;">
+                                        </select>
+
+                                       @*  <span class="input-group-btn">
+                                            <a class="btn btn-success px-2 mx-2"
+                                               onclick="showNewEquipmentModal('0', 'valueTonnagemodal')">
+                                                <i class="icon-plus align-middle"></i>
+                                             </a>
+                                        </span> *@
+
+                                    </div>
+                                    <span asp-validation-for="CreateValueTonnageDto.SeoEquipmentId"
+                                          class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-sm-6 my-4">
+                                <div class="form-group  ">
+                                    <label>مقدار تخلیه/بارگیری</label>
+                                    <div class="input-group">
+                                        <input type="number" asp-for="CreateValueTonnageDto.Tonnage" min="0" class="form-control">
+                                    </div>
+                                    <span asp-validation-for="CreateValueTonnageDto.Tonnage" class="text-danger"></span>
+                                </div>
+                            </div>
+
+
+                            <div class="col-sm-6 my-4">
+                                <div class="form-group  ">
+                                    <label>تاریخ</label>
+                                    <div class="input-group">
+                                        <input type="text" asp-for="CreateValueTonnageDto.DateFa" required autocomplete="off" class="form-control">
+                                    </div>
+                                    <span asp-validation-for="CreateValueTonnageDto.DateFa" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="modal-footer border-0 px-0">
+                            <a onclick="addOrUpdateValueTonnage()" class="btn btn-success btn-round">  ثبت</a>
+                            <button type="button" class="btn btn-danger btn-round" data-bs-dismiss="modal">بازگشت</button>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+

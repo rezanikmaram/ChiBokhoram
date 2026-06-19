@@ -1,0 +1,269 @@
+﻿@model CompletedPageDto
+@{
+    ViewData["Title"] = "سرویس های تکمیل شده";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+    int i = ((Model.Services.PageNumber - 1) * Model.Services.PageSize) + 1;
+    var seoId = (Guid)ViewBag.seoId;
+
+}
+
+
+@section style {
+   
+}
+
+<div class="col-lg-12">
+    <div class="card">
+        <div class="card-header ">
+            <div class="d-flex justify-content-between">
+
+                <h3 class="title">
+                    <i class="icon-frane"></i>
+                    <a asp-controller="Seo" asp-action="SeoPortOperatorPage" asp-route-seoId="@((Guid)ViewBag.seoId)"><i class="fa-solid fa-right-to-bracket me-2"></i></a>
+                    سرویس های تکمیل شده
+                    <span class="label p-2 rounded mx-2 label-primary">@ViewBag.seocode</span>
+                    <span class="label p-2 rounded  label-info">@(((TransportType)ViewBag.seotype).ToDisplay(DisplayProperty.Name))</span>
+                </h3>
+
+                <div>
+
+                    @if ((SeoState?)ViewBag.seoState != SeoState.Finish)
+                    {
+                        <a class="btn mx-2 btn-success" asp-controller="SeoService" asp-action="StartToComplet" asp-route-seoId="@seoId">همگام سازی</a>
+                    }
+
+                    @if (Model.Services.Data.Count > 0)
+                    {
+                        <a class="btn btn-success" asp-controller="Report" asp-action="CompletedService" asp-route-seoId="@seoId">دریافت فایل Excel</a>
+                    }
+
+                    @* <a class="alert-icon btn btn-success round" asp-controller="Company" asp-action="CreateCompany">شرکت جدید</a>*@
+
+
+                    <!-- /.portlet-title -->
+                    <div class="buttons-box">
+
+                        <i class="icon-size-fullscreen"></i>
+                        <div class="paper-ripple">
+                            <div class="paper-ripple__background"></div>
+                            <div class="paper-ripple__waves"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- /.buttons-box -->
+            </div>
+            <!-- /.portlet-heading -->
+        </div>
+
+        <div class="card-body pt-0">
+            <div class="table-responsive vh-100">
+                <div class=" no-footer">
+                    <div id="data-table_filter" class="dataTables_filter col-md-12">
+                        <form id="formFilter" asp-action="Completed" asp-route-seoId="@Model.FilterDto.SeoId" method="post">
+                            <input name="p" id="pageNumber" hidden />
+                            <input asp-for="FilterDto.SeoId" type="hidden" />
+                            <div class="form-body mb-5">
+                                <div class="row g-3">
+                                    <div class="form-group col-md-5 ">
+                                        <label>جستجو</label>
+                                        <div class="input-group">
+                                            <input asp-for="FilterDto.Search" type="text" placeholder="کامیون/راننده/انبار" class="form-control">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group col-md-5">
+                                        <label>فیلتر تاریخ</label>
+                                        <div class="input-group">
+                                            <select class="form-control select2"
+                                                    asp-for="FilterDto.IsFilterOnDateBarshomar">
+                                                <option value="false">فیلتر بر تاریخ انباردار</option>
+                                                <option value="true">فیلتر بر تاریخ بارشمار</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group col-md-3">
+                                        <label> از تاریخ:</label>
+                                        <div class="input-group">
+                                            <input asp-for="FilterDto.FromDate" type="text" class=" form-control" autocomplete="off">
+                                            <span asp-validation-for="FilterDto.FromDate" class="text-danger"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group col-md-2">
+                                        <label> از ساعت:</label>
+                                        <div class="input-group clockpicker">
+                                            <input type="text" class="form-control" asp-for="FilterDto.FromTime" autocomplete="off">
+                                            <span class="input-group-addon">
+                                                <span class="glyphicon glyphicon-time"></span>
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group col-md-3">
+                                        <label>تا تاریخ:</label>
+                                        <div class="input-group">
+                                            <input asp-for="FilterDto.ToDate" type="text" class=" form-control" autocomplete="off">
+                                            <span asp-validation-for="FilterDto.ToDate" class="text-danger"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group col-md-2">
+                                        <label> تا ساعت:</label>
+                                        <div class="input-group clockpicker">
+                                            <input type="text" class="form-control" asp-for="FilterDto.ToTime" autocomplete="off">
+                                            <span class="input-group-addon">
+                                                <span class="glyphicon glyphicon-time"></span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="d-flex justify-content-around " style="margin-top:28px">
+                                            <button style="border-radius:5px" class="alert-icon btn btn-success " type="submit"><p class="px-3">فیلتر</p></button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </form>
+                    </div>
+
+                    <table class="table table-bordered table-hover table-striped" id="data-table">
+                        <thead class="bg-primary">
+                            <tr>
+                                <th>#</th>
+                                <td>کامیون</td>
+
+                                <td>تاریخ باسکول</td>
+                                <td>ساعت باسکول</td>
+
+                                <td>ساعت بارشمار</td>
+                                <td>کاربر بارشمار</td>
+
+                                <td>وزن خالی</td>
+                                <td>وزن کامیون</td>
+                                <td>وزن بار</td>
+
+                                <td>ساعت انباردار</td>
+                                <td>کاربر انباردار</td>
+
+                                <td>زمان ورود به انبار</td>
+                                <td>زمان خروج از انبار</td>
+
+                                <td>مدت عملیات</td>
+                                <td>راننده</td>
+                                <td>انبار</td>
+
+                            </tr>
+                        </thead>
+                        <tbody>
+
+
+                            @foreach (var item in Model.Services.Data)
+                            {
+                                <tr>
+                                    <td class="align-middle">@(i++)</td>
+                                    <td class="align-middle">@item.TruckNumberId</td>
+
+                                    <td class="align-middle">@item.DateBaskoolWeightFa</td>
+                                    <td class="align-middle">@item.TimeBaskoolWeight</td>
+
+                                    <td class="align-middle">@item.BarshomarTimeService</td>
+                                    <td class="align-middle">@item.UserBarshomarName</td>
+
+                                    <td class="align-middle">@item.TonnageFree</td>
+                                    <td class="align-middle">@item.Tonnage</td>
+                                    <td class="align-middle">@item.TonnageLoad</td>
+
+                                    <td class="align-middle">@item.WarehouseTimeService</td>
+                                    <td class="align-middle">@item.UserWarehouseName</td>
+
+                                    <td class="align-middle">@item.DateWarehouseInputFpnTime</td>
+                                    <td class="align-middle">@item.DateWarehouseOutFpnTime</td>
+
+                                    <td class="align-middle">
+                                        <span class="btn btn-round btn-sm btn-danger" rel="tooltip" title="" data-bs-original-title="مدت زمان">
+                                            @item.ElapsedTime
+                                        </span>
+                                    </td>
+                                    <td class="align-middle">@item.DriverName</td>
+                                    <td class="align-middle">@item.WarehouseName</td>
+
+                                </tr>
+
+                            }
+
+
+
+                        </tbody>
+                    </table>
+                    <div class="mt-4">
+                        <cs-pager cs-paging-pagesize="@Model.Services.PageSize"
+                                  cs-paging-pagenumber="@Model.Services.PageNumber"
+                                  cs-paging-totalitems="@Model.Services.TotalItems"
+                                  cs-paging-maxpageritems="20"
+                                  cs-pagenumber-param="p"
+                                  asp-route-seoId="@seoId"
+                                  cs-show-first-last="true"
+                                  cs-suppress-empty-nextprev="true"
+                                  cs-suppress-inactive-firstlast="true"
+                                  cs-show-numbered="true"
+                                  cs-first-page-text="ابتدا"
+                                  cs-last-page-text="انتها"
+                                  cs-next-page-title="بعدی"
+                                  cs-previous-page-title="قبلی"
+                                  cs-first-page-title="ابتدا"
+                                  cs-last-page-title="انتها"
+                                  cs-next-page-text="بعدی"
+                                  cs-previous-page-text="قبلی"
+                                  cs-pager-li-current-class="page-item active"
+                                  cs-pager-li-other-class="page-item"
+                                  cs-pager-li-non-active-class="page-item disabled"
+                                  cs-pager-link-current-class="page-link"
+                                  cs-pager-link-other-class="page-link"
+                                  asp-controller="SeoService"
+                                  asp-action="Completed">
+                        </cs-pager>
+                    </div>
+
+                </div>
+            </div>
+            <!-- /.table-responsive -->
+        </div>
+        <!-- /.portlet-body -->
+        <!-- /.portlet -->
+    </div>
+</div>
+
+
+
+@section script {
+
+    <script>
+        $(document).ready(function () {
+            $('.clockpicker').clockpicker({
+                placement: 'bottom',
+                align: 'left',
+                donetext: 'تایید'
+            });
+
+
+            kamaDatepicker('FilterDto_FromDate', customOptions);
+            kamaDatepicker('FilterDto_ToDate', customOptions);
+
+
+
+            $(".page-link").click(function (event) {
+                event.preventDefault(); // غیرفعال کردن عملکرد پیشفرض href
+
+                var hrefValue = $(this).attr("href");
+                $("#pageNumber").val(hrefValue.split("p=")[1]);
+                $("#formFilter").submit();
+            });
+
+        });
+
+
+    </script>
+}

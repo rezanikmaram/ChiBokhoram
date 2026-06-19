@@ -1,0 +1,293 @@
+﻿@model AllocationOfEquIncomePageDto
+@{
+	ViewData["Title"] = "درآمد از اجاره تجهیزات ویژه";
+	Layout = "~/Views/Shared/AdminLayout.cshtml";
+	int i = ((Model.List?.PageNumber - 1) * Model.List?.PageSize) + 1 ?? 1;
+}
+
+<style>
+	.table-responsive {
+		overflow-x: auto;
+		width: 100%;
+		max-height: 70vh; /* Added to enable scrolling */
+	}
+
+	#data-table {
+		table-layout: auto;
+		width: max-content; /* Allows table to expand based on content */
+		min-width: 100%; /* Ensures it fits container if content is small */
+	}
+
+		#data-table th,
+		#data-table td {
+			white-space: nowrap; /* Prevents text wrapping */
+			padding: 8px; /* Adjusted padding for better spacing */
+			text-align: center;
+			vertical-align: middle;
+		}
+</style>
+
+
+
+<div class="col-lg-12">
+	<div class="card">
+		<div class="card-header pb-3">
+			<div class="d-flex justify-content-between">
+				<h3 class="title">
+					<i class="fa fa-money-bill me-2 text-success"></i> درآمد از اجاره تجهیزات ویژه
+				</h3>
+				<div class="d-none d-md-block">
+					<button id="reportButton" type="button"  
+							class="btn btn-success rounded">
+						<i class="fa-solid fa-download me-2"></i>دریافت گزارش اکسل
+					</button>
+				</div>
+			</div>
+
+			<button id="reportButton" type="button"  
+					class="btn btn-success rounded w-100 my-3 d-md-none d-block">
+				<i class="fa-solid fa-download me-2"></i>دریافت گزارش اکسل
+			</button>
+
+		</div>
+
+
+		<div class="card-body pt-0">
+			<form id="reportForm" action="@Url.Action("GetSpecialIncomeReport", "AllocationOfEquipment")" method="post" target="_blank" style="display:none;">
+			</form>
+
+			<form id="formFilter" asp-action="SpecialIncome" asp-route-p="" method="post">
+				<input name="p" id="pageNumber" hidden />
+				<div class="form-body ">
+
+					<div class="row gy-1">
+						<div class="col-md-3 col-sm-12">
+							<div class="form-group ">
+								<label>شرکت</label>
+								<div class="input-group">
+									<select class="form-control select2"
+											asp-for="Filter.OwnerId"
+											asp-items="Model.Companies">
+										<option value="">همه شرکت ها</option>
+									</select>
+								</div>
+							</div>
+						</div>
+
+						<div class="col-md-3 col-sm-12">
+							<div class="form-group ">
+								<label>سفر</label>
+								<div class="input-group">
+									<select class="form-control select2"
+											asp-for="Filter.VoyageId"
+											asp-items="Model.VoyageList">
+										<option value="">همه سفر ها</option>
+									</select>
+								</div>
+							</div>
+						</div>
+
+
+						<div class="col-md-2 col-sm-12">
+							<div class="form-group">
+								<label>از تاریخ:</label>
+								<div class="input-group">
+									<input asp-for="Filter.FilterDate.FromDate" type="text" class=" form-control" autocomplete="off">
+									<span asp-validation-for="Filter.FilterDate.FromDate" class="text-danger"></span>
+								</div>
+							</div>
+						</div>
+
+
+						<div class="col-md-2 col-sm-12">
+							<div class="form-group">
+								<label>تا تاریخ:</label>
+								<div class="input-group">
+									<input asp-for="Filter.FilterDate.ToDate" type="text" class=" form-control" autocomplete="off">
+									<span asp-validation-for="Filter.FilterDate.ToDate" class="text-danger"></span>
+								</div>
+							</div>
+						</div>
+
+						<div class="col-md-2 col-sm-12">
+							<div class="form-group ">
+								<label>نوع صورتحساب </label>
+								<div class="input-group">
+									<select class="form-control select2"
+											asp-for="Filter.OnlyFactorVoyage">
+										<option value="">شناور/بارنامه</option>
+										<option value="true">فقط شناور</option>
+										<option value="false">فقط بارنامه</option>
+									</select>
+								</div>
+							</div>
+						</div>
+
+						<div class="form-group col-md-2 ">
+							<button style="border-radius:5px; margin-top:30px" class="alert-icon px-3 mt-3 btn btn-success "
+									type="submit">
+								فیلتر
+							</button>
+						</div>
+
+					</div>
+				</div>
+			</form>
+
+			<div class="table-responsive mt-4">
+				<table class="table table-xl table-bordered table-hover table-striped" id="data-table">
+					<thead class="bg-primary position-sticky top-0">
+						<!-- Added position-sticky and top-0 -->
+						<tr>
+							<th class="fs-6 px-3 text-center">#</th>
+							<th class="fs-6 px-3 text-center">شماره صورتحساب</th>
+							<th class="fs-6 px-3 text-center">تاریخ صدور</th>
+							<th class="fs-6 px-3 text-center">کاربر صادرکننده </th>
+							<th class="fs-6 px-3 text-center"> صورتحساب شناور/بارنامه </th>
+							<th class="fs-6 px-3 text-center"> نام شرکت/شخص </th>
+							<th class="fs-6 px-3 text-center">کشتی</th>
+							<th class="fs-6 px-3 text-center">شماره بارنامه/شماره سفر </th>
+
+							<th class="fs-6 px-3 text-center"> مبلغ کل فاکتور (ريال)</th>
+
+							<th class="fs-6 px-3 text-center"> سهم شرکت </th>
+							<th class="fs-6 px-3 text-center"> واریزی شرکت </th>
+							<th class="fs-6 px-3 text-center"> باقی مانده شرکت </th>
+
+							<th class="fs-6 px-3 text-center"> سهم سازمان </th>
+							<th class="fs-6 px-3 text-center">  واریزی سازمان</th>
+							<th class="fs-6 px-3 text-center"> باقی مانده سازمان </th>
+
+							<th class="fs-6 px-3 text-center"> مالیات </th>
+							<th class="fs-6 px-3 text-center"> واریزی مالیات </th>
+							<th class="fs-6 px-3 text-center">باقی مانده مالیات</th>
+
+							<th class="fs-6 px-3 text-center"> کل باقی مانده </th>
+
+						</tr>
+					</thead>
+					<tbody>
+						@foreach (var item in Model.List.Data)
+						{
+							<tr>
+								<td class="align-middle">@(i++)</td>
+								<td class="align-middle">
+									@if (item.AllocationState <= AllocationEquipmentState.CompletingEnd)
+									{
+										<a target="_blank" asp-controller="AllocationOfEquipment" asp-action="PreFactor" asp-route-allocationEquId="@item.AllocationOfEquipmentId">
+											@item.NumberFactor
+										</a>
+									}
+									else
+									{
+										<a target="_blank" asp-controller="AllocationOfEquipmentFactor" asp-action="Factor" asp-route-allocationEquId="@item.AllocationOfEquipmentId">
+											@item.NumberFactor
+										</a>
+									}
+								</td>
+								<td class="align-middle">@item.DateFactorFa</td>
+								<td class="align-middle">@item.PanelUserFullName</td>
+								<td class="align-middle">@item.TypeTitle</td>
+								<td class="align-middle">@item.OwnerName</td>
+								<td class="align-middle">@item.ShipName</td>
+								<td class="align-middle">@(item.Type == AllocationEquipmentType.Seo ? item.SeoBillOfLadingNumber : item.VoyageNumber)</td>
+
+								<td class="align-middle">@item.PriceAllFactor.ToPrice()</td>
+
+								<td class="align-middle">@item.PriceCompany.ToPrice()</td>
+								<td class="align-middle">@item.SumPayedCompany.ToPrice()</td>
+								<td class="align-middle">@item.RemainderPriceCompany.ToPrice()</td>
+
+								<td class="align-middle">@item.PriceOrg.ToPrice()</td>
+								<td class="align-middle">@item.SumPayedOrg.ToPrice()</td>
+								<td class="align-middle">@item.RemainderPriceOrg.ToPrice()</td>
+
+								<td class="align-middle">@item.PriceTax.ToPrice()</td>
+								<td class="align-middle">@item.SumPayedTax.ToPrice()</td>
+								<td class="align-middle">@item.RemainderPriceTax.ToPrice()</td>
+
+								<td class="align-middle">@item.RemainderPriceAll.ToPrice()</td>
+							</tr>
+						}
+
+					</tbody>
+				</table>
+
+				<div class="mt-4">
+					<cs-pager cs-paging-pagesize="@Model.List.PageSize"
+							  cs-paging-pagenumber="@Model.List.PageNumber"
+							  cs-paging-totalitems="@Model.List.TotalItems"
+							  cs-paging-maxpageritems="10"
+							  cs-pagenumber-param="p"
+							  cs-show-first-last="true"
+							  cs-suppress-empty-nextprev="true"
+							  cs-suppress-inactive-firstlast="true"
+							  cs-show-numbered="true"
+							  cs-first-page-text="ابتدا"
+							  cs-last-page-text="انتها"
+							  cs-next-page-title="بعدی"
+							  cs-previous-page-title="قبلی"
+							  cs-first-page-title="ابتدا"
+							  cs-last-page-title="انتها"
+							  cs-next-page-text="بعدی"
+							  cs-previous-page-text="قبلی"
+							  cs-pager-li-current-class="page-item active"
+							  cs-pager-li-other-class="page-item"
+							  cs-pager-li-non-active-class="page-item disabled"
+							  cs-pager-link-current-class="page-link"
+							  cs-pager-link-other-class="page-link"
+							  asp-controller="AllocationOfEquipment"
+							  asp-action="SpecialIncome">
+					</cs-pager>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+
+@section script {
+	<script>
+		$(document).ready(function () {
+			$(".page-link").click(function (event) {
+				event.preventDefault(); // غیرفعال کردن عملکرد پیشفرض href
+
+				var hrefValue = $(this).attr("href");
+				$("#pageNumber").val(hrefValue.split("p=")[1]);
+				$("#formFilter").submit();
+			});
+
+			 $('.select2').select2();
+		});
+
+		kamaDatepicker('Filter_FilterDate_FromDate', customOptions);
+		kamaDatepicker('Filter_FilterDate_ToDate', customOptions);
+
+		$('#reportButton').click(function () {
+			var button = $(this);
+			var originalText = button.html();
+
+			button.prop('disabled', true).html('<i class="fa-solid fa-spinner fa-spin"></i> در حال دریافت');
+
+			// داده‌های فرم اصلی رو بردار و بریز تو فرم مخفی
+			var data = $('#formFilter').serializeArray();
+			var reportForm = $('#reportForm');
+			reportForm.empty(); // پاک کردن قبلی‌ها
+			$.each(data, function (i, field) {
+				reportForm.append(
+					$('<input>', { type: 'hidden', name: field.name, value: field.value })
+				);
+			});
+
+			// سابمیت به تب جدید
+			reportForm.submit();
+
+			// بعد از چند ثانیه دکمه برگرده
+			setTimeout(function () {
+				button.prop('disabled', false).html(originalText);
+			}, 2000);
+		});
+
+	</script>
+}

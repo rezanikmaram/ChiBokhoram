@@ -1,0 +1,22 @@
+@model WarehouseReceiptOutboundLoadingLicensePageDto
+
+<form onsubmit="return submitLoadingLicenseForm(this);">
+    <input type="hidden" name="SeoWarehouseReceiptOutboundId" value="@Model.PageInfo.Id" />
+
+    <div class="row gy-3">
+        <div class="form-group col-md-12">
+            <label>صورتحساب انبارداری</label>
+            <select class="form-control select2" name="SeoFactorId"
+                    asp-items="Model.Seofactors" required>
+            </select>
+        </div>
+    </div>
+</form>
+
+<script>
+    $(document).ready(function () {
+        $('#generalModal .select2').select2({
+            dropdownParent: $('#generalModal')
+        });
+    });
+</script>

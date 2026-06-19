@@ -1,0 +1,241 @@
+﻿@model VoyageFactorServicePageDto
+
+@{
+	ViewData["Title"] = "صدور صورتحساب";
+	Layout = "~/Views/Shared/AdminLayout.cshtml";
+
+}
+
+<div id="listService" class="card">
+	<partial name="_FactorListService" model="Model" />
+</div>
+
+
+<div id="modalAddService"></div>
+
+
+<script src="~/assets/js/validation/jquery.validate.min.js"></script>
+<script src="~/assets/js/validation/jquery.validate.unobtrusive.min.js"></script>
+
+
+@section script {
+
+	<script>
+		 function select2Config()
+		 {
+			 // $('.select2').select2();
+
+			 $('select[class*="generalmodal"].select2').select2({
+				 dropdownParent: $('#generalmodal')
+			 });
+		 }
+		 
+		$("#modalAddService").on("change", "#CreateService_Type", function () {
+			let selectedValue = parseInt($(this).val());
+			let seoFactorServiceId = $("#CreateService_Id").val();
+
+			$("#generalmodal").modal('hide');
+			showAddServiceModal(selectedValue, seoFactorServiceId);
+		});
+
+		$("#modalAddService").on("change", "#CreateService_IsCalculateAuto", function () {
+			if ($(this).is(":checked")) {
+				$("#CalculateAuto").addClass("d-none");
+			} else {
+				$("#CalculateAuto").removeClass("d-none");
+			}
+		});
+
+		$("#modalAddService").on("change", "#CreateService_Currency", function () {
+			let currency = parseInt($("#CreateService_Currency").val());
+
+			if (currency ===  @((int)CurrencyType.Rial)) {
+				$("#CurrencyRateBox").addClass("d-none");
+			} else {
+				$("#CurrencyRateBox").removeClass("d-none");
+			}
+		});
+
+		function showAddServiceModal(seoFactorType = null, seoFactorServiceId = null)
+		{
+			let seoFactorId = '@Model.SeoFactorId';
+
+			$.post("@Url.Action("GetModalAddService", "VoyageFactor")",
+				{
+					FactorId :seoFactorId,
+					SeoFactorType: seoFactorType,
+					SeoFactorServiceId: seoFactorServiceId
+				})
+				.done(function (res) {
+					$("#modalAddService").html(res);
+					initModalControls();
+					$("#generalmodal").modal('show');
+				})
+				.fail(function (xhr, status, error) {
+					location.reload();
+				});
+		}
+
+		$("#modalAddService").on("change", "#DiscountTypeId", function () {
+			var selectedValue = $(this).val();
+
+			if (selectedValue === "1") {
+				 $("#DiscountPercentId").removeClass("d-none");
+				 $("#DiscountPriceId").addClass("d-none");
+				 SetNumber(0, 'CreateService_DiscountPrice');
+			} else {
+				 $("#DiscountPercentId").addClass("d-none");
+				 $("#DiscountPriceId").removeClass("d-none");
+				 $("#CreateService_DiscountPercent").val('');
+			}
+		});
+
+
+		function initModalControls() {
+			select2Config();
+
+		}
+
+
+		 function AddService() {
+			  showAddServiceModal();
+		 }
+
+		 function editService(id) {
+			 showAddServiceModal(null, id );
+		 }
+
+		 function setPrice(price){
+			 if(typeof price === "number")
+				 SetNumber(price, 'CreateService_DiscountPrice');
+			 else
+				 SetNumber('0', 'CreateService_DiscountPrice');
+		 }
+
+		function createService(e) {
+			e.preventDefault();
+
+			let $form = $("#FormAddService");
+			let type = parseInt($("#CreateService_Type").val());
+
+			let count = $("#CreateService_Count").val();
+			let largerWeightOrVolume = $('#CreateService_LargerWeightOrVolume').val();
+			let priceOne = $("#CreateService_PriceOne").val();
+
+			if (count <= 0) {
+				showAlert("تعداد را درست وارد کنید");
+				return false;
+			}
+
+			if (largerWeightOrVolume <= 0) {
+				showAlert("حجم/تناژ/ضریب را درست وارد کنید");
+				return false;
+			}
+
+			if (priceOne <= 0 && !$("#CreateService_IsCalculateAuto").is(":checked")) {
+				showAlert("قیمت تعرفه را درست وارد کنید");
+				return false;
+			}
+
+			let formData = $form.serialize();
+
+			$.post("@Url.Action("CreateFactorService", "VoyageFactor")", formData)
+				.done(function (res) {
+					$("#generalmodal").modal('hide');
+					$("#listService").html(res);
+				})
+				.fail(function () {
+					location.reload();
+				});
+
+			return false;
+		}
+
+
+
+		 async function DeleteService(event, id) {
+			 let result = await ShowQAlert2(event);
+
+			 if (result === true) {
+				 $.post("@Url.Action("DeleteFactorService", "VoyageFactor")", {
+					 voyageFactorServiceId: id
+				 })
+					 .done(function (res) {
+						 $("#listService").html(res);
+						 $("#generalmodal").modal('hide');
+					 })
+					 .fail(function (xhr, status, error) {
+						 location.reload();
+					 });
+			 }
+		 }
+
+		 async function DeleteAllServices(event) {
+			 let result = await ShowQAlert2(event);
+
+			 if (result === true) {
+				 $.post("@Url.Action("DeleteAllFactorServices", "VoyageFactor")", {
+					 seoFactorId: '@Model.SeoFactorId'
+				 })
+					 .done(function (res) {
+						 $("#listService").html(res);
+					 })
+					 .fail(function (xhr, status, error) {
+						 location.reload();
+					 });
+			 }
+		 }
+
+		 async function EndFactor(event, id) {
+
+			 let result = await ShowQAlert2(event);
+
+			 if (result === true) {
+				 document.getElementById("EndFactorId").classList.add("disabled");
+
+				 $.post("@Url.Action("EndFactor", "VoyageFactor")", {
+					 factorId: id
+				 }).done(function (res) {
+					 location.reload();
+				 }).fail(function (xhr, status, error) {
+					 location.reload();
+				 });
+			 }
+		 }
+
+		 async function BackToPendingState(event, id) {
+			 event.preventDefault();
+			 let result = await ShowQAlert2(event);
+
+			 if (result === true) {
+				 document.getElementById("BackToPendingStateId").classList.add("disabled");
+
+				 $.post("@Url.Action("BackToPendingState", "VoyageFactor")", {
+					 factorId: id
+				 }).done(function (res) {
+					 location.reload();
+				 }).fail(function (xhr, status, error) {
+					 location.reload();
+				 });
+			 }
+		 }
+
+		 function GetPrice(e) {
+
+		 }
+
+
+
+		 function SetPriceTariff(price)
+		 {
+			 if(price == 0)
+				showAlert("قیمت تعرفه صفر است.");
+			SetNumber(price, 'CreateService_PriceOne');
+		 }
+
+	</script>
+
+
+
+}
+

@@ -1,0 +1,172 @@
+﻿@using Common.enumeration.Log
+@model VesselDashboardDto
+@{
+    ViewData["Title"] = "داشبورد تعیین وضعیت روزانه شناور";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+    int i = ((Model.List?.PageNumber - 1) * Model.List?.PageSize) + 1 ?? 1;
+}
+@section style {
+    <link href="~/assets/plugins/select2/dist/css/select2.min.css" rel="stylesheet">
+}
+
+<div class="col-lg-12">
+    <div class="card">
+        <div class="card-header border-0">
+            <div class="d-flex justify-content-between">
+
+                <h3 class="title">
+                    <i class="icon-frane"></i> تعیین وضعیت شناور ها
+                </h3>
+
+                <h3 class="title">
+                    @Model.LogDateFa
+                </h3>
+            </div>
+            <div class="row">
+                <div class="col-md-2 pt-2">
+                    @if(Model.VesselId!=null)
+                    {
+                        <a class="btn btn-warning btn-round" asp-action="DashboardEquipmentStatus" asp-controller="EquipmentLog" asp-route-Type="@EquipmentLogType.Vessel" asp-route-EntityId="@Model.VesselId">
+                            <i class="icon-arrow-left align-middle"></i>
+                            بازگشت
+                            <div class="paper-ripple"><div class="paper-ripple__background"></div><div class="paper-ripple__waves"></div></div>
+                        </a>
+                    }
+                    else
+                    {
+                        <a class="btn btn-warning btn-round" asp-action="DashboardEquipmentStatus" asp-controller="EquipmentLog" asp-route-Type="@EquipmentLogType.Vessel">
+                            <i class="icon-arrow-left align-middle"></i>
+                            بازگشت
+                            <div class="paper-ripple"><div class="paper-ripple__background"></div><div class="paper-ripple__waves"></div></div>
+                        </a>
+                    }
+
+                </div>
+            </div>
+
+            <!-- /.portlet-title -->
+            <!-- /.buttons-box -->
+        </div>
+        <!-- /.portlet-heading -->
+        <!-- /.portlet-body -->
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover table-striped" id="data-table">
+                <thead>
+                    <tr>
+                        <th>ردیف</th>
+                        <th>نام شناور</th>
+                        <th>بندر محل فعالیت</th>
+                        <th>قرارداد</th>
+                        <th>نوع شناور</th>
+                        <th>محل ساخت</th>
+                        <th>مالک</th>
+                        <th>وضعیت</th>
+                        <td>عملیات</td>
+                    </tr>
+                </thead>
+                <tbody>
+
+
+                    @foreach (var item in Model.List.Data)
+                    {
+                        string rowClass = item.IsCompleted!=null && item.IsCompleted.Value ? "table-success" : "";
+                        <tr class="@rowClass">
+                            <td class="align-middle">@(i++)</td>
+                            <td>@item.Name</td>
+                            <td>@item.PortPortName</td>
+                            <td>@item.Contract</td>
+                            <td>@item.PersianTypeOfVessel</td>
+                            <td>@item.PersianPlaceOfBuilt</td>
+                            <td>@item.Owner</td>
+                            <td>@item.ValueTitle</td>
+                            <td>
+                                <button id="ChangeStausVessel@(i)" onclick="ChangeStausVessel('@item.Id','@Model.LogDate');" class="btn btn-warning btn-sm btn-icon curve px-2" data-bs-toggle="tooltip" data-bs-placement="top" title="تغییر وضعیت"><i class="icon-pencil fs-6 align-middle"></i></button>
+                            </td>
+
+                        </tr>
+
+                    }
+
+
+
+                </tbody>
+            </table>
+            <div class="mt-3">
+                <cs-pager cs-paging-pagesize="@Model.List.PageSize"
+                          cs-paging-pagenumber="@Model.List.PageNumber"
+                          cs-paging-totalitems="@Model.List.TotalItems"
+                          cs-paging-maxpageritems="10"
+                          cs-pagenumber-param="p"
+                          cs-show-first-last="true"
+                          cs-suppress-empty-nextprev="true"
+                          cs-suppress-inactive-firstlast="true"
+                          cs-show-numbered="true"
+                          cs-first-page-text="ابتدا"
+                          cs-last-page-text="انتها"
+                          cs-next-page-title="بعدی"
+                          cs-previous-page-title="قبلی"
+                          cs-first-page-title="ابتدا"
+                          cs-last-page-title="انتها"
+                          cs-next-page-text="بعدی"
+                          cs-previous-page-text="قبلی"
+                          cs-pager-li-current-class="page-item active"
+                          cs-pager-li-other-class="page-item"
+                          cs-pager-li-non-active-class="page-item disabled"
+                          cs-pager-link-current-class="page-link"
+                          cs-pager-link-other-class="page-link"
+                          asp-controller="Vessel"
+                          asp-action="Index">
+                </cs-pager>
+            </div>
+
+        </div>
+        <!-- /.table-responsive -->
+    </div>
+    <!-- /.portlet -->
+</div>
+
+<div id="Statusmodal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">تغییر وضعیت شناور</h4>
+                <button type="button" class="btn-close rounded border" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="Statusmodalbody">
+
+                <partial name="_ChangeStatusVessel" model="new ChangeVesselStatusDto{ }" />
+            </div>
+        </div>
+    </div>
+</div>
+
+@section script {
+
+    <script>
+
+        function handleRowClick(url) {
+            window.location.href = url;
+        }
+
+        function ChangeStausVessel(id, date) {
+            debugger;
+            $.get("@Url.Action("GetVesselById", "Vessel")", { vesselId: id, date: date, isJustStatus: true })
+                .done(function (res) {
+                    $("#Statusmodalbody").html(res);
+                    $("#Statusmodal").modal('show');
+                });
+        }
+
+
+        $(".page-link").click(function (event) {
+            event.preventDefault(); // غیرفعال کردن عملکرد پیشفرض href
+
+            var hrefValue = $(this).attr("href");
+            $("#pageNumber").val(hrefValue.split("p=")[1]);
+            $("#formFilter").submit();
+        });
+
+    </script>
+}

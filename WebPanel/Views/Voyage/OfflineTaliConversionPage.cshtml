@@ -1,0 +1,122 @@
+@model OfflineTaliConversionPageDto
+@{
+    ViewData["Title"] = "تعیین تکلیف تالی آفلاین";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+@* <div class="card p-2 mb-4"> *@
+@*     <div class="row"> *@
+@*         <div class="col-md-1 align-middle align-content-center px-4"> *@
+@*             <i class="fa-solid fa-circle-info fs-4 align-middle"></i> *@
+@*         </div> *@
+@*         <div class="col-md-11 px-5"> *@
+@*             <div class="d-flex justify-content-between align-items-center"> *@
+@*                 <div class="glass-bg px-2 py-1"> *@
+@*                     <p class="fs-6 m-0"> @Model.VogageInfo?.ShipShipName </p> *@
+@*                 </div> *@
+@*                 <div> *@
+@*                     <p class="fs-6 m-0"> @Model.VogageInfo?.CompanyShippingCompanyName </p> *@
+@*                 </div> *@
+@*                 <div> *@
+@*                     <p class="fs-6 m-0">شماره سفر: @Model.VogageInfo?.VoyageNumber</p> *@
+@*                 </div> *@
+@*                 <div> *@
+@*                     <p class="fs-6 m-0">شماره دریایی: @Model.VogageInfo?.PmoNumber</p> *@
+@*                 </div> *@
+@*             </div> *@
+@*         </div> *@
+@*     </div> *@
+@* </div> *@
+
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center pb-0">
+        <a asp-action="VoyageSeo" asp-route-voyageId="@Model.VoyageId" class="fs-6 text-dark">  <i class="fa-solid fa-right-to-bracket text-primary align-middle me-2"></i>   تعیین تکلیف تالی آفلاین </a>
+    </div>
+    <div class="card-body">
+        @if (Model.List == null || !Model.List.Any())
+        {
+            <div class="alert alert-info">موردی برای تعیین تکلیف یافت نشد.</div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-striped align-middle">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>تاریخ</th>
+                            <th>پلاک</th>
+                            <th>اپراتور</th>
+                            <th>تعداد اقلام</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (int i = 0; i < Model.List.Count; i++)
+                        {
+                            var item = Model.List[i];
+                            <tr>
+                                <td>@(i + 1)</td>
+                                <td dir="ltr">@item.CreatedDate.ToShortPersianDateTimeString()</td>
+                                <td>@(item.TruckId != null ? (item.TruckCarPlates ?? item.CarPlates) : item.CarPlates)</td>
+                                <td>@item.PersonelFullName</td>
+                                <td>@item.ProductsCount</td>
+                                <td class="d-flex gap-2">
+                                    <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="collapse" data-bs-target="#prod-@i" aria-expanded="false" aria-controls="prod-@i">
+                                        اقلام
+                                    </button>
+                                    <a class="btn btn-primary btn-sm"
+                                       asp-action="OfflineTaliConversionDetail"
+                                       asp-route-voyageId="@Model.VoyageId"
+                                       asp-route-offlineTaliId="@item.OfflineTaliId">
+                                        تبدیل
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="6">
+                                    <div id="prod-@i" class="collapse">
+                                    @if (item.Products?.Any() == true)
+                                    {
+                                        <div class="table-responsive">
+                                            <table class="table table-sm table-bordered align-middle mb-0">
+                                                <thead>
+                                                    <tr>
+                                                        <th>کالا (SEO)</th>
+                                                        <th>تعداد</th>
+                                                        <th>تعداد مشکل</th>
+                                                        <th>انبار</th>
+                                                        <th>قطعه انبار</th>
+                                                        <th>توضیحات</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach (var p in item.Products)
+                                                    {
+                                                        <tr>
+                                                            <td>@p.SeoProductTitle</td>
+                                                            <td>@p.Count</td>
+                                                            <td>@p.CountProblem</td>
+                                                            <td>@p.WarehouseName</td>
+                                                            <td>@p.WarehouseSegmentName</td>
+                                                            <td>@p.Description</td>
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="alert alert-warning mb-0">برای این تالی، قلمی ثبت نشده است.</div>
+                                    }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>

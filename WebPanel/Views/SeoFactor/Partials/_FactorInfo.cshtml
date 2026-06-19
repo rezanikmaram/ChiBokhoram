@@ -1,0 +1,51 @@
+﻿@model SetInfoSeoFactorDto
+
+<div id="generalmodal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" tabindex="-1">
+	<div class="modal-dialog modal-dialog-centered  ">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h4 class="modal-title"> تکمیل اطلاعات </h4>
+				<button type="button" class="close btn-close rounded border" data-bs-dismiss="modal" data-bs-original-title="" title=""></button>
+			</div>
+			<div class="modal-body" id="modalbody">
+
+				<div class="card-body pt-0">
+					<form id="formSetInfo" asp-action="SetInfoSeoFactor" asp-controller="SeoFactor" method="post">
+						<div class="form-body">
+							<input asp-for="Id" hidden />
+							<div class="row gy-4">
+
+								<div class="col-sm-12">
+									<div class="form-group">
+										<label>شماره درخواست</label>
+										<div class="input-group w-100">
+											<input type="text" class="w-100 rounded border p-2" asp-for="PortRequestNumber" />
+											<span asp-validation-for="PortRequestNumber"></span>
+										</div>
+									</div>
+								</div>
+
+								<div class="col-sm-12">
+									<div class="form-group">
+										<label>توضیحات پایین فاکتور</label>
+										<div class="input-group">
+											<textarea class="form-control" asp-for="Description" cols="4" ></textarea>
+											<span asp-validation-for="Description"></span>
+										</div>
+									</div>
+								</div>
+							</div>
+
+							<div class="modal-footer px-0 border-0 mt-4">
+								<a onclick="SaveInfo(event)" class="btn btn-success btn-round">ذخیره</a>
+								<button type="button" class="btn btn-danger btn-round" data-bs-dismiss="modal">بازگشت</button>
+							</div>
+
+						</div>
+					</form>
+				</div>
+
+			</div>
+		</div>
+	</div>
+</div>

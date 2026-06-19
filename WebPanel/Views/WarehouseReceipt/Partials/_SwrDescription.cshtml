@@ -1,0 +1,76 @@
+﻿@model SwrDescriptionDto
+
+<div id="descriptionModal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" tabindex="-1">
+	<div class="modal-dialog modal-dialog-centered  ">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h4 class="modal-title"> تکمیل اطلاعات </h4>
+				<button type="button" class="close btn-close rounded border" data-bs-dismiss="modal" data-bs-original-title="" title=""></button>
+			</div>
+			<div class="modal-body" id="modalbody">
+
+				<div class="card-body pt-0">
+					<form id="SetSwrDescriptionId" asp-action="SetSwrDescription" asp-controller="WarehouseReceipt" method="post">
+						<div class="form-body">
+							<input asp-for="Id" hidden />
+							<div class="row gy-4">
+								 
+								<div class="col-sm-12">
+									<div class="form-group">
+										<label>توضیحات پایین </label>
+										<div class="input-group">
+											<textarea class="form-control" asp-for="Description" cols="4"></textarea>
+											<span asp-validation-for="Description"></span>
+										</div>
+									</div>
+								</div>
+
+								<div class="col-sm-6">
+									<div class="form-group">
+										<label> شماره نامه گمرک   </label>
+										<div class="input-group">
+											<input class="form-control" asp-for="NumberGomrok" />
+											<span asp-validation-for="NumberGomrok"></span>
+										</div>
+									</div>
+								</div>
+
+								<div class="col-sm-6">
+									<div class="form-group">
+										<label> تاریخ صدور نامه  </label>
+										<div class="input-group">
+											<input asp-for="DateGomrokFa" type="text" class=" form-control" autocomplete="off">
+											<span asp-validation-for="DateGomrokFa" class="text-danger"></span>
+										</div>
+									</div>
+								</div>
+
+								<div class="col-sm-6">
+									<div class="form-group">
+										<label> شماره کارت بازرگانی   </label>
+										<div class="input-group">
+											<input class="form-control" asp-for="NumberBazargani" />
+											<span asp-validation-for="NumberBazargani"></span>
+										</div>
+									</div>
+								</div>
+								 
+							</div>
+
+							<div class="modal-footer px-0 border-0 mt-4">
+								<a onclick="SaveSwrDesciption(event)" class="btn btn-success btn-round">ذخیره</a>
+								<button type="button" class="btn btn-danger btn-round" data-bs-dismiss="modal">بازگشت</button>
+							</div>
+
+						</div>
+					</form>
+				</div>
+
+			</div>
+		</div>
+	</div>
+</div>
+
+<script>
+	kamaDatepicker('DateGomrokFa', customOptions);
+</script>

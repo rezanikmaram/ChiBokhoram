@@ -1,0 +1,122 @@
+@model EquipmentManageWroDto
+@using Common.enumeration
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card rounded-3 min-height-600">
+            <div class="card-header pb-3">
+                <div class="d-flex justify-content-between">
+                    <h5 class="m-0">
+                        <i class="icon-speech"></i>
+                        انتخاب تجهیــز
+                    </h5>
+                    <button class="btn btn-success btn-sm" onclick="setEquipmentForWro()">
+                        <i class="fa-solid fa-plus"></i> اضافه کردن انتخاب شده ها
+                    </button>
+                </div>
+                <div class="mt-3">
+                    <div class="row">
+                        <div class="col-md-5">
+                            <input type="text" id="equipmentSearch" class="form-control" placeholder="نام" 
+                                   value="@Model.FilterDto.Search" onkeypress="if(event.keyCode==13) filterEquipment()">
+                        </div>
+                        <div class="col-md-4">
+                            <select id="equipmentTypeFilter" class="form-control select2" asp-items="Model.EquipmentTypes">
+                                <option value="">همه تجهیزات</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <button class="btn btn-primary w-100" onclick="filterEquipment()">
+                                <i class="fa-solid fa-filter"></i> فیلتر
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body pt-0">
+                <table id="TableUnSelected" class="table table-bordered">
+                    <thead class="bg-primary">
+                        <tr>
+                            <th><input type="checkbox" id="selectAllAvailable" /></th>
+                            <th>نام تجهیز</th>
+                            <th>نوع</th>
+                            <th>دسته بندی</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.Equipments)
+                        {
+                            <tr>
+                                <td style="width:30px;"><input type="checkbox" value="@item.Id" name="availableEquipmentId" class="row-selector" /></td>
+                                <td>@item.Name</td>
+                                <td>@item.EquipmentType.ToDisplay()</td>
+                                <td>@item.GearCategoryTitle</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card rounded-3">
+            <div class="card-header">
+                <div class="d-flex justify-content-between">
+                    <h5 class="m-0">
+                        <i class="icon-speech"></i>
+                        تجهیزات انتخاب شده (@Model.SelectedEquipment.Count)
+                    </h5>
+                    <button class="btn btn-danger btn-sm" onclick="removeEquipmentFromWro()">
+                        <i class="fa-solid fa-trash"></i> حذف انتخاب شده ها
+                    </button>
+                </div>
+            </div>
+            <div class="card-body pt-0">
+                <table id="TableSelected" class="table table-bordered">
+                    <tr class="bg-primary">
+                        <th><input type="checkbox" id="selectAllSelected" /></th>
+                        <th>نام تجهیز</th>
+                        <th>نوع</th>
+                        <th>دسته بندی</th>
+                        <th>وضعیت</th>
+                        <th>نمایش در</th>
+                    </tr>
+                    <tbody>
+                        @{ int i = 1; }
+                        @foreach (var item in Model.SelectedEquipment)
+                        {
+                            <tr>
+                                <td style="width:30px;"><input type="checkbox" value="@item.Id" name="selectedEquipmentId" class="row-selector" /></td>
+                                <td>@item.Name</td>
+                                <td>@item.EquipmentType.ToDisplay()</td>
+                                <td>@item.GearCategoryTitle</td>
+                                <td>
+                                    <a onclick="activationEquipment('@item.Id')">
+                                        <span class="label p-2 py-1 rounded label-@(item.IsActive ? "success" : "danger")">
+                                            @(item.IsActive ? "فعال" : "غیر فعال")
+                                        </span>
+                                    </a>
+                                </td>
+                                <td>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="checkbox" id="waterfront@(i)" 
+                                               @(item.UsedInWaterfrontSide ? "checked" : "") 
+                                               onchange="updateEquipmentSide('@item.Id', 'waterfront', this.checked)">
+                                        <label class="form-check-label" for="waterfront@(i)">سمت اسکله</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="checkbox" id="port@(i)" 
+                                               @(item.UsedInPortSide ? "checked" : "") 
+                                               onchange="updateEquipmentSide('@item.Id', 'port', this.checked)">
+                                        <label class="form-check-label" for="port@(i)">سمت محوطه</label>
+                                    </div>
+                                </td>
+                            </tr>
+                            i++;
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

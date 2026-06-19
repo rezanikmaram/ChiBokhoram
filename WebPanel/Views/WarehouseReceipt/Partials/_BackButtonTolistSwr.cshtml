@@ -1,0 +1,12 @@
+﻿@if ((Guid?)ViewBag.seoId != null)
+{
+	<a asp-controller="Seo" asp-action="SeoWarehouseReceipt" asp-route-seoId="@((Guid?)ViewBag.seoId)"><i class="fa-solid fa-right-to-bracket align-middle me-2"></i></a>
+}
+else if ((Guid?)ViewBag.exportId != null)
+{
+	<a asp-controller="InlandExportManifest" asp-action="ExportWarehouseReceipt" asp-route-ExportId="@((Guid?)ViewBag.exportId)"><i class="fa-solid fa-right-to-bracket align-middle me-2"></i></a>
+}
+else
+{
+	<a asp-action="List"><i class="fa-solid fa-right-to-bracket align-middle me-2"></i></a>
+}

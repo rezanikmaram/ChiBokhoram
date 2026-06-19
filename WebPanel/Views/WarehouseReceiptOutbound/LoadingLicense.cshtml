@@ -1,0 +1,126 @@
+﻿@using Common.enumeration.Hirman
+@model WarehouseReceiptOutboundLoadingLicensePageDto
+@{
+    ViewData["Title"] = "مجوزهای بارگیری";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+    int counter = 1;
+}
+
+
+<partial name="_WroInfo" model="Model.PageInfo" />
+
+<div class="card">
+    <div class="card-header">
+        <div class="d-flex justify-content-between">
+            <h3 class="title">
+                <a asp-action="Details"
+                   asp-route-wroId="@Model.PageInfo.Id">
+                    <i class="fa-solid fa-right-to-bracket me-2 align-middle"></i>
+                </a>
+                مجوزهای بارگیری
+            </h3>
+
+            <div>
+                <button class="btn btn-success rounded" onclick="showModal()">
+                    <i class="fa-solid fa-plus"></i> ثبت مجوز بارگیری
+                </button>
+
+                <div class="buttons-box">
+                    <i class="icon-size-fullscreen"></i>
+                    <div class="paper-ripple">
+                        <div class="paper-ripple__background"></div>
+                        <div class="paper-ripple__waves"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card-body pt-0">
+        <div class="table-responsive">
+            <table class="table table-sm table-bordered table-hover table-striped" id="documents-table">
+                <thead class="bg-primary">
+                    <tr>
+                        <th style="width: 5%">#</th>
+                        <th>شماره فاکتور</th>
+                        <th>تاریخ اعتبار</th>
+
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model?.List?.Any() == true)
+                    {
+                        foreach (var item in Model.List)
+                        {
+                            <tr>
+                                <td class="align-middle px-2 text-center">@(counter++)</td>
+                                <td class="align-middle px-2 text-center"><a asp-action="Details" asp-controller="SeoFactor" asp-route-factorId="@item.SeoFactorId" target="_blank">@item.SeoFactorNumberFactor</a> </td>
+                                <td class="align-middle px-2 text-center">@item.ExpiryDateFa</td>
+
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="8" class="text-center">هیچ مجوز بارگیری ثبت نشده است</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+</div>
+
+
+<!-- Add Document Modal -->
+<div id="addLoadingLicenseModal" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">مجوز بارگیری</h5>
+                <button type="button" class="close btn-close rounded border" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form asp-action="CreateLoadingLicense" method="post">
+                    <input type="hidden" asp-for="CreateDto.SeoWarehouseReceiptOutboundId" value="@Model.PageInfo.Id" />
+
+                    <div class="row gy-3">
+                        <div class="form-group col-md-12">
+                            <label>صورتحساب انبارداری</label>
+                            <select class="form-control select2 LoadingLicense" asp-for="CreateDto.SeoFactorId"
+                                    asp-items="Model.Seofactors" required>
+                            </select>
+                            <span asp-validation-for="CreateDto.SeoFactorId" class="text-danger"></span>
+                        </div>
+
+
+
+
+                    </div>
+
+                    <div class="modal-footer px-0 border-0">
+                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">انصراف</button>
+                        <button type="submit" class="btn btn-success">افزودن</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section script {
+    <script>
+        function showModal() {
+            $('#addLoadingLicenseModal').modal('show');
+        }
+
+        $(document).ready(function () {
+              $('select[class*="LoadingLicense"].select2').select2({
+                dropdownParent: $('#addLoadingLicenseModal')
+            });
+        });
+    </script>
+}

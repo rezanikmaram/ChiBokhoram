@@ -1,0 +1,1089 @@
+@model VoyageSeoPageDto
+@{
+    ViewData["Title"] = "لیست بارنامه ها";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+    int i = 1;
+}
+
+
+<div id="CreateVoyageModal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">تعریف/ویرایش سفر</h4>
+                <button type="button" class="close btn-close rounded border" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="CreateVoyageModalBody"></div>
+        </div>
+    </div>
+</div>
+
+<div class="card p-2 mb-4">
+    <div class="row">
+        <div class="col-md-1 align-middle align-content-center px-4">
+            <a class="btn btn-outline-info px-1" onclick="GetVoyageInfo('@Model.VoyageId')">
+                <i class="fa-solid fa-circle-info fs-4 align-middle"></i>
+            </a>
+        </div>
+        <div class="col-md-11 px-5">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="">
+                    <p class="fs-6 m-0 px-3 btn btn-outline-info"> @Model.VogageInfo?.ShipShipName </p>
+                </div>
+                <div>
+                    <p class="fs-6 m-0"> @Model.VogageInfo?.CompanyShippingCompanyName </p>
+                </div>
+                <div>
+                    <p class="fs-6 m-0"> @(Model.VogageInfo?.WaterfrontWaterfrontName ?? "اسکله نامشخص") </p>
+                </div>
+                <div>
+                    <p class="fs-6 m-0">@Model.VogageInfo?.TransportTypeTitle</p>
+                </div>
+                <div>
+                    <p class="fs-6 m-0">شماره سفر: @Model.VogageInfo?.VoyageNumber</p>
+                </div>
+                <div>
+                    @if (Model.HasLogbook)
+                    {
+                        <span class="badge bg-info fs-6">
+                            <i class="fa-solid fa-book me-1"></i>
+                            @Model.LatestLogbook?.StatusTypeName
+                            <small class="text-light ms-2">@Model.LatestLogbook?.SubmittedDateFa</small>
+                        </span>
+                    }
+                </div>
+                <div>
+                    @if (!string.IsNullOrEmpty(Model.VogageInfo?.PmoNumber))
+                    {
+                        <p class="fs-6 m-0">
+                            شماره دریایی:
+                            <a href="~/amar/@(Model.VogageInfo?.PmoNumber).html" target="_blank" class="text-decoration-underline text-info">
+                                @Model.VogageInfo?.PmoNumber
+                            </a>
+                        </p>
+                    }
+                    else
+                    {
+                        <p class="fs-6 m-0">شماره دریایی: @Model.VogageInfo?.PmoNumber</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="card">
+        <div class="card-header py-3">
+            <div class="d-flex justify-content-between gy-4 ">
+
+                <div class="d-flex align-items-center">
+                    <h3 class="title mb-0">
+                        <a asp-action="Index"><i class="fa-solid fa-right-to-bracket me-2"></i></a>
+                        لیست بارنامه ها یک سفر
+                    </h3>
+                </div>
+
+                <div class="d-block d-lg-flex justify-content-end">
+
+                    @if (User.IsInRole("admin") || User.IsInRole("adminOnePort"))
+                    {
+
+                        if (Model.List?.Any() == true)
+                        {
+                            <a onclick="ErrorCanNotDeleteVoyage()" class="mx-1 px-2 btn btn-danger mx-2" data-bs-toggle="tooltip" data-bs-title="حذف سفر"><i class="icon-trash fa-flip-horizontal align-middle"></i></a>
+                        }
+                        else
+                        {
+                            <a id="DeleteVoyage" onclick="ShowQAlert(event,'DeleteVoyage', 'حذف سفر' , 'آیا از حذف این سفر مطمئن هستید');" asp-action="DeleteVoyage" asp-route-voyageId="@Model.VoyageId" class="mx-1 px-2 btn btn-danger"><i class="icon-trash fa-flip-horizontal"></i>   حذف سفر </a>
+                        }
+                    }
+
+                    <a asp-action="CreateVoyage" asp-route-VoyageId="@Model.VoyageId" class="mx-1 px-2 btn btn-info js-open-create-voyage " data-bs-toggle="tooltip" data-bs-title="ویرایش سفر"><i class="fa-regular fa-pen-to-square align-middle"></i> </a>
+
+                    <button style="border-radius:5px; margin:0px 10px"
+                            type="button"
+                            class="btn btn-primary mx-1 px-2"
+                            onclick="ShowCreateSeoModal(event)">
+                        <i class="icon-plus"></i>
+                        تعریف بارنامه
+                    </button>
+                    <a asp-action="VoyageSeoDetail" asp-route-voyageId="@Model.VoyageId" style="border-radius:5px; margin:0px 10px" class="mx-1 px-2 btn btn-info">
+                        <i class="fa-solid fa-clipboard-list me-2"></i>
+                        جزئیات بارنامه ها و کالاها
+                    </a>
+                    <button type="button" style="border-radius:5px; margin:0px 10px" class="btn mx-1 px-2 btn-success" onclick="openVoyageSeoImportExportModal()">
+                        <i class="fa-solid fa-file-excel me-2"></i>
+                        ورود/خروج Excel بارنامه ها
+                    </button>
+                    @if (User.IsInRole("admin") || User.IsInRole("adminOnePort") || User.IsInRole("AllocationEquToEnd"))
+                    {
+                        if (Model.VoyageState == VoyageState.Open)
+                        {
+                            if (Model.CanFastClose)
+                            {
+                                <a style="border-radius:5px; margin:0px 10px"
+                                   class="btn mx-1 px-2 btn-success" asp-action="FastCloseVoyage" asp-route-voyageId="@Model.VoyageId">
+                                    بستن سفر
+                                </a>
+                            }
+                            else
+                            {
+                                <a style="border-radius:5px; margin:0px 10px"
+                                   class="btn mx-1 px-2 btn-success" onclick="ShowModalCloseVoyage(event)">
+                                    بستن سفر
+                                </a>
+                            }
+                        }
+                    }
+                    <div class="buttons-box">
+                        <i class="icon-size-fullscreen"></i>
+                        <div class="paper-ripple">
+                            <div class="paper-ripple__background"></div>
+                            <div class="paper-ripple__waves"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-body py-3 border-top">
+            <div class="row gy-3 align-items-center">
+                <div class="col-xl-3 col-lg-4">
+                    <a asp-action="TruckManage" asp-route-voyageId="@Model.VoyageId" class="btn btn-light w-100 px-0 py-2">
+                        <i class="fa-solid fa-boxes-packing me-2"></i>
+                        مدیریت کامیون ها
+                    </a>
+                </div>
+                <div class="col-xl-3 col-lg-4">
+                    <a asp-action="ManageWarehouse" asp-route-voyageId="@Model.VoyageId" class="btn btn-light w-100 px-0 py-2">
+                        <i class="fa-solid fa-boxes-packing me-2"></i>
+                        مدیریت انبار ها
+                    </a>
+                </div>
+                <div class="col-xl-3 col-lg-4">
+                    <a asp-action="EquipmentManage" asp-route-voyageId="@Model.VoyageId" class="btn btn-light w-100 px-0 py-2">
+                        <i class="fa-solid fa-boxes-packing me-2"></i>
+                        مدیریت تجهیزات
+                    </a>
+                </div>
+                <div class="col-xl-3 col-lg-4">
+                    <a asp-action="ManageUser" asp-route-voyageId="@Model.VoyageId" class="btn btn-light w-100 px-0 py-2">
+                        <i class="fa-solid fa-boxes-packing me-2"></i>
+                        مدیریت کاربران
+                    </a>
+                </div>
+                <div class="col-xl-3 col-lg-4">
+                    <a asp-action="CompactTali" asp-route-voyageId="@Model.VoyageId" class="btn btn-light w-100 px-0 py-2">
+                        <i class="fa-solid fa-boxes-packing me-2"></i>
+                        خلاصه تالی
+                    </a>
+                </div>
+                <div class="col-xl-3 col-lg-4">
+                    <a asp-action="DetailTali" asp-route-voyageId="@Model.VoyageId" class="btn btn-light w-100 px-0 py-2">
+                        <i class="fa-solid fa-boxes-packing me-2"></i>
+                        ریز جزئیات تالی
+                    </a>
+                </div>
+                <div class="col-xl-3 col-lg-4">
+                    <a asp-action="DetailShipTali" asp-route-voyageId="@Model.VoyageId" class="btn btn-light w-100 px-0 py-2">
+                        <i class="fa-solid fa-boxes-packing me-2"></i>
+                        وضعیت انبار های کشتی
+                    </a>
+                </div>
+                <div class="col-xl-3 col-lg-4">
+                    <a asp-action="GetVoyageDocs" asp-route-voyageId="@Model.VoyageId" class="btn btn-light w-100 px-0 py-2">
+                        <i class="fa-solid fa-boxes-packing me-2"></i>
+                        مستندات سفر
+                    </a>
+                </div>
+                <div class="col-xl-3 col-lg-4">
+                    <a asp-action="GetEquipmentPerformance" asp-route-voyageId="@Model.VoyageId" class="btn btn-light w-100 px-0 py-2">
+                        <i class="fa-solid fa-boxes-packing me-2"></i>
+                        عملکرد تجهیزات
+                    </a>
+                </div>
+                <div class="col-xl-3 col-lg-4">
+                    <a asp-action="List" asp-controller="VoyageFactor" asp-route-voyageId="@Model.VoyageId" class="btn btn-light w-100 px-0 py-2">
+                        <i class="fa-solid fa-boxes-packing me-2"></i>
+                        صورتحساب ها
+                    </a>
+                </div>
+                <div class="col-xl-3 col-lg-4">
+                    <a asp-action="OfflineTaliConversionPage" asp-route-voyageId="@Model.VoyageId" class="btn btn-light w-100 px-0 py-2">
+                        <i class="fa-solid fa-database me-2"></i>
+                        تعیین تکلیف تالی آفلاین
+                    </a>
+                </div>
+                <div class="col-xl-3 col-lg-4">
+                    <a asp-action="VoyageWeightReport" asp-route-voyageId="@Model.VoyageId" class="btn btn-light w-100 px-0 py-2">
+                        <i class="fa-solid fa-scale-balanced me-2"></i>
+                        گزارش وضعیت تناژ شناور
+                    </a>
+                </div>
+
+                <div class="col-xl-3 col-lg-4">
+                    <a asp-action="VoyageProduct" asp-route-voyageId="@Model.VoyageId" class="btn btn-light w-100 px-0 py-2">
+                        <i class="fa-solid fa-scale-balanced me-2"></i>
+                        کالاهای نیاز به تجهیزات ویژه
+                    </a>
+                </div>
+                <div class="col-xl-3 col-lg-4">
+                    <a asp-action="VoyageSeoDetail" asp-route-voyageId="@Model.VoyageId" class="btn btn-light w-100 px-0 py-2">
+                        <i class="fa-solid fa-clipboard-list me-2"></i>
+                        جزئیات بارنامه ها و کالاها
+                    </a>
+                </div>
+                <div class="col-xl-3 col-lg-4">
+                    <a asp-action="VoyageLogbook" asp-route-voyageId="@Model.VoyageId" class="btn btn-light w-100 px-0 py-2">
+                        <i class="fa-solid fa-book me-2"></i>
+                        لاگ بوک سفر
+                        @if (Model.HasLogbook)
+                        {
+                            <span class="badge bg-info ms-1">@Model.LatestLogbook?.StatusTypeName</span>
+                        }
+                    </a>
+                </div>
+
+                <div class="col-xl-3 col-lg-4">
+                    <a asp-action="TaliGroupByDay" asp-route-voyageId="@Model.VoyageId" class="btn btn-light w-100 px-0 py-2">
+                        <i class="fa-solid fa-clipboard-list me-2"></i>
+                        تالی ها به تفکیک روز
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="card">
+        <div class="card-header pb-0 px-3">
+            <div class="d-flex justify-content-between align-items-start">
+                <div class="d-flex">
+                    <div class="mx-2">
+                        <input type="radio" name="tripType" id="loading" class="btn-check" autocomplete="off" checked>
+                        <label class="btn btn-outline-info px-2 d-flex align-items-center" for="loading">
+                            <i class="far fa-list me-2"></i><span class=" fw-bold"> نمایش لیستی </span>
+                        </label>
+                    </div>
+                    <div class="mx-2">
+                        <input type="radio" name="tripType" id="discharge" class="btn-check" autocomplete="off">
+                        <label class="btn btn-outline-primary px-2 d-flex align-items-center" for="discharge">
+                            <i class="far fa-box me-2"></i><span class=" fw-bold"> نمایش کاردی </span>
+                        </label>
+                    </div>
+                    <a class="mx-3 filter-collapse align-content-center" data-bs-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false" aria-controls="collapseExample">
+                        فیلتر ها <i class="fa-solid fa-angle-down mx-2 align-middle"></i>
+                    </a>
+                </div>
+                <div class="d-flex align-items-center">
+                    <span class="mx-2"><i class="fa-solid fa-circle text-primary mx-1 align-middle"></i>درحال عملیات</span>
+                    <span class="mx-2"><i class="fa-solid fa-circle text-warning mx-1 align-middle"></i>متوقف شده</span>
+                    <span class="mx-2"><i class="fa-solid fa-circle text-success2 mx-1 align-middle"></i>پایان یافته</span>
+                    <div class="d-flex justify-content-end">
+                        <a asp-action="ExportVoyageSeoExcel"
+                           asp-route-voyageId="@Model.VoyageId"
+                           class="btn btn-success btn-sm">
+                            <i class="fa-solid fa-file-excel me-2"></i>
+                            خروجی اکسل
+                        </a>
+                    </div>
+                    @if ((User.IsInRole("admin") || User.IsInRole("adminOnePort")) && Model.List?.Any() == true)
+                    {
+                        <a id="DeleteAllSeo" onclick="ShowQAlert(event,'DeleteAllSeo', 'حذف همه بارنامه ها' , 'آیا از حذف همه بارنامه ها مطمئن هستید');"
+                           asp-action="DeleteAllSeo"
+                           asp-route-voyageId="@Model.VoyageId"
+                           class="btn btn-danger btn-sm px-2 ms-1" data-bs-toggle="tooltip" data-bs-title="حذف همه بارنامه ها">
+                            <i class="icon-trash fa-flip-horizontal align-middle"></i>
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="collapse" id="collapseExample">
+            <div class="card-body">
+                <form id="formFilter" asp-action="VoyageSeo" asp-route-voyageId="@Model.VoyageId" asp-route-p="" method="post">
+                    <input name="p" id="pageNumber" hidden />
+                    <input name="VoyageId" value="@Model.VoyageId" hidden />
+                    <div class="form-body ">
+                        <div class="row gy-4">
+
+                            <div class="col-md-3 col-sm-12">
+                                <div class="form-group">
+                                    <label>  جستجو:</label>
+                                    <div class="input-group">
+                                        <input asp-for="Filter.Search" type="text" placeholder="شماره بارنامه/شماره دریایی/شماره سفر" class="rounded form-control">
+                                        <span asp-validation-for="Filter.Search" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-3 col-sm-12">
+                                <div class="form-group ">
+                                    <label>صاحب کالا</label>
+                                    <div class="input-group">
+                                        <select class="form-control FilterSeo select2" style="width:100%!important;"
+                                                asp-for="Filter.CompanyOwenerId"
+                                                asp-items="Model.Companies">
+                                            <option value="">همه شرکت ها</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-3 col-sm-12">
+                                <div class="form-group ">
+                                    <label>اسکله</label>
+                                    <div class="input-group">
+                                        <select class="form-control FilterSeo select2" style="width:100%!important;"
+                                                asp-for="Filter.WaterFrontId"
+                                                asp-items="Model.WaterFronts">
+                                            <option value="">همه اسکله ها</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-3 col-sm-12">
+                                <div class="form-group ">
+                                    <label>نوع عملیات</label>
+                                    <div class="input-group">
+                                        <select class="form-control FilterSeo select2" style="width:100%!important;"
+                                                asp-for="Filter.TransportType"
+                                                asp-items="Model.TransportTypes">
+                                            <option value=""> تخلیه / بارگیری</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-3 col-sm-12">
+                                <div class="form-group ">
+                                    <label>نوع محموله</label>
+                                    <div class="input-group">
+                                        <select class="form-control FilterSeo select2" style="width:100%!important;"
+                                                asp-for="Filter.TrafficType"
+                                                asp-items="Html.GetEnumSelectList<TrafficType>()">
+                                            <option value="">همه محموله ها</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-3 col-sm-12">
+                                <div class="form-group ">
+                                    <label>نوع ورود به بندر</label>
+                                    <div class="input-group">
+                                        <select class="form-control FilterSeo select2" style="width:100%!important;"
+                                                asp-for="Filter.EntryType"
+                                                asp-items="Html.GetEnumSelectList<EntryProductType>()">
+                                            <option value="">دریا / خشکی</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-3 col-sm-12">
+                                <div class="form-group ">
+                                    <label>وضعیت</label>
+                                    <div class="input-group">
+                                        <select class="form-control FilterSeo select2" style="width:100%!important;"
+                                                asp-for="Filter.StateInt"
+                                                asp-items="Model.SeoStates">
+                                            <option value="0">همه وضعیت ها</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-2 col-sm-12 mt-4">
+                                <div class="form-group">
+                                    <label>از تاریخ:</label>
+                                    <div class="input-group">
+                                        <input asp-for="Filter.DateFrom" type="text" class=" form-control" autocomplete="off">
+                                        <span asp-validation-for="Filter.DateFrom" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-2 col-sm-12 mt-4">
+                                <div class="form-group">
+                                    <label>تا تاریخ:</label>
+                                    <div class="input-group">
+                                        <input asp-for="Filter.DateTo" type="text" class=" form-control" autocomplete="off">
+                                        <span asp-validation-for="Filter.DateTo" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-2 col-sm-12 align-content-end">
+                                <div class="form-check form-switch">
+                                    <input type="checkbox" asp-for="Filter.IsInCompleted" class="form-check-input" role="switch" />
+                                    <label class="form-check-label ms-2" for="Filter.IsInCompleted">فیلتر تکمیل نشده </label>
+                                    <span asp-validation-for="Filter.IsInCompleted" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-12 mt-4">
+                                <div class="form-group align-content-center mb-3 text-end">
+                                    <button style="border-radius:5px;" class="alert-icon px-5 btn btn-success "
+                                            type="submit">
+                                        فیلتر
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="card-body pt-2 px-2">
+            <!-- نمایش کاردی -->
+            <div id="cardView" style="display: none;">
+                <div class="row gy-3">
+                    @if (Model.List != null)
+                    {
+                        @foreach (var item in Model.List)
+                        {
+                            var color = "";
+                            var imageSrc = "";
+                            switch (item.State)
+                            {
+                                case SeoState.Active:
+                                    color = "bg-primary";
+                                    imageSrc = "craneShip.png";
+                                    break;
+                                case SeoState.Stoped:
+                                    color = "bg-warning";
+                                    imageSrc = "ship.png";
+                                    break;
+                                case SeoState.Finish:
+                                    color = "bg-success2";
+                                    imageSrc = "Eship.png";
+                                    break;
+                                default:
+                                    color = "bg-primary";
+                                    imageSrc = "craneShip.png";
+                                    break;
+                            }
+                            <a asp-controller="Seo" asp-action="seoAccessPage" asp-route-seoId="@item.Id"
+                               asp-route-returnPage="100"
+                               class="col-xxl-2 col-xl-3 col-md-4 col-6  text-white" data-bs-toggle="tooltip" data-bs-html="true" data-bs-placement="bottom"
+                               title="
+                               تعداد : @item.Count.ToPrice() @item.ProductPackingName </br>
+                                            تعداد تالی : @item.TaliCount.ToPrice() </br>
+                                            وزن : @item.ShipTonnage.ToString("N0") </br>
+                                            حجم : @item.Volume.ToPrice() </br>
+                                            رویه گمرکی : @item.CustomsProcedureTitle </br>
+                                            تاریخ شروع : @item.Start </br>
+                                            تاریخ ورود : @item.ShipEntranceDate </br>
+                                            اخرین قبض انبار : @(item.LastSwrNumber )
+                                        ">
+                        <div class="@color rounded-3 p-3 pb-2 min-h-155px">
+                         <div class="row">
+                          <div class="col-4 align-content-center px-2 ">
+                           <img src="~/assets/images/@imageSrc" alt="" class="img-fluid">
+                           <div class=" text-truncate mt-2 text-center
+                                                        @(item.AllocationEquipmentState <= AllocationEquipmentState.InOperation ? "glass-bg" : "bg-success rounded")">
+                            <span class="fw-bold"></span> @item.TransportTypeTitle
+                           </div>
+                          </div>
+                          <div class="col-8 align-content-center">
+
+                           <div class=" gy-3">
+                            <div class="my-1 text-truncate text-white"><span class="fw-bold"></span> @item.ShipShipName </div>
+                            <div class=" text-truncate text-white"><span class="fw-bold"></span> @item.ProductProductName </div>
+                            <div class="my-1 text-truncate text-white"><span class="fw-bold"></span> @item.Start </div>
+                           </div>
+                          </div>
+                         </div>
+                         <div class="d-flex justify-content-end">
+                          <p style="direction: ltr"># @item.BillOfLadingNumber</p>
+                         </div>
+                         <div class="d-flex">
+                          <p class="text-truncate">  @item.ProductCompanyName</p>
+                         </div>
+                        </div>
+                       </a>
+                        }
+                    }
+                </div>
+            </div>
+
+            <!-- نمایش لیستی -->
+            <div id="tableView" class="position-sticky sticky-top">
+                @if (Model.List != null && Model.List.Any())
+                {
+                    <table class="table table-striped table-bordered">
+                        <thead>
+                            <tr>
+                                <th>ردیف</th>
+                                <th>شماره بارنامه</th>
+                                <th>صاحب کالا</th>
+
+                                <th>نام کالا</th>
+                                <th> تعداد </th>
+                                <th> وزن </th>
+                                <th> حجم </th>
+
+                                <th> تعداد تالی </th>
+                                <th> کالای ثبت شده </th>
+                                <th>رویه گمرکی</th>
+
+                                @*  <th>تاریخ شروع</th> *@
+                                <th>تاریخ ورود</th>
+
+                                <th>اخرین قبض انبار</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                                int tableIndex = 1;
+                            }
+                            @foreach (var item in Model.List)
+                            {
+                                <tr style="cursor: pointer;"
+                                    onclick="window.location.href='@Url.Action("seoAccessPage", "Seo", new { seoId = item.Id, returnPage = 100 })'">
+                                    <td>@(tableIndex++)</td>
+                                    <td>@item.Number</td>
+                                    <td>@item.ProductCompanyName</td>
+
+                                    <td>@item.ProductProductName</td>
+                                    <td>@item.Count.ToPrice() @item.ProductPackingName</td>
+                                    <td>@item.ShipTonnage.ToString("N0")</td>
+                                    <td>@item.Volume.ToPrice()</td>
+
+                                    <td>@item.TaliCount.ToPrice()</td>
+                                    <td>@item.SeoProductCount.ToPrice()</td>
+                                    <td>@item.CustomsProcedureTitle</td>
+
+                                    @* <td>@item.Start</td> *@
+                                    <td>@item.ShipEntranceDate</td>
+
+                                    <td>  @item.LastSwrNumber </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <div class="alert alert-info text-center">
+                        هیچ بارنامه ای یافت نشد
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="CreateSeoModal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">تعریف بارنامه</h4>
+                <button type="button" class="close btn-close rounded border" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="modalbody">
+                <div class="card-body pt-0">
+                    <form asp-action="CreateSeoFromVoyage" asp-controller="Seo" method="post" id="CreateSeoForm">
+                        <input type="hidden" name="VoyageId" value="@Model.VoyageId" />
+                        <input type="hidden" name="returnPage" value="100" />
+                        <div class="row gy-3">
+                            <div class="col-sm-12">
+                                <div class="form-group">
+                                    <label>شماره بارنامه</label>
+                                    <div class="input-group">
+                                        <input type="text" name="BillOfLadingNumber" id="billOfLadingInput" class="form-control" maxlength="100" required />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-12">
+                                <div class="form-group">
+                                    <label>صاحب کالا</label>
+                                    <div class="input-group">
+                                        <select class="form-control select2"
+                                                id="CreateSeo_ProductOwnerCompanyId"
+                                                name="ProductOwnerCompanyId"
+                                                asp-items="Model.ProductOwnerCompanies">
+                                            <option value="">نامشخص  </option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer px-0 pb-0 border-0">
+                            <button type="submit" class="btn btn-success btn-round">ایجاد و ادامه</button>
+                            <button type="button" class="btn btn-danger btn-round" data-bs-dismiss="modal">بازگشت</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="CloseVoyageModal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+
+                <h4 class="modal-title">بستن سفر</h4>
+                <button type="button" class="close btn-close rounded border" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="modalbody">
+
+                <div class="card-body pt-0">
+
+                    <div class="form-body">
+                        <form asp-action="CloseVoyage" asp-controller="Voyage" method="post">
+                            <input type="text" asp-for="VoyageId" hidden />
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label>تاریخ بستن (اتمام)</label>
+                                        <div class="input-group">
+                                            <input type="text" class="form-control"
+                                                   name="DateCloseVoyage" id="DateCloseVoyageId" value="@DateTimeOffset.Now.ToShortPersianDateString()"
+                                                   autocomplete="off" required>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                            <div class="modal-footer px-0 pb-0 border-0">
+                                <button type="submit" class="btn btn-success btn-round"> بستن سفر </button>
+                                <button type="button" class="btn btn-danger btn-round" data-bs-dismiss="modal">بازگشت</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="voyageInfoContext"></div>
+
+<!-- Import/Export Excel Modal -->
+<div id="voyageSeoImportExportModal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">ورود/خروج Excel بارنامه ها</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row gy-4">
+                    <div class="col-12">
+                        <div class="alert alert-info">
+                            <i class="fa-solid fa-info-circle me-2"></i>
+                            <strong>راهنما:</strong>
+                            <ul class="mb-0 mt-2">
+                                <li>برای <strong>ورود</strong> اطلاعات از Excel، فایل را انتخاب و دکمه بارگذاری را بزنید</li>
+                                <li>برای <strong>خروجی</strong> Excel، دکمه خروجی Excel را بزنید</li>
+                                <li>کد ملی شرکت صاحب کالا را وارد کنید (در صورت عدم وجود، شرکت جدید ایجاد می‌شود)</li>
+                                <li>برای بروزرسانی بارنامه موجود، شناسه آن را در فایل Excel وارد کنید</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="card border-primary">
+                            <div class="card-header bg-primary text-white">
+                                <i class="fa-solid fa-download me-2"></i> خروجی Excel
+                            </div>
+                            <div class="card-body text-center">
+                                <p class="text-muted">دریافت خروجی Excel از بارنامه های فعلی سفر</p>
+                                <a asp-action="ExportVoyageSeoDataExcel" asp-route-voyageId="@Model.VoyageId" class="btn btn-primary">
+                                    <i class="fa-solid fa-file-excel me-2"></i> دریافت خروجی
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="card border-warning">
+                            <div class="card-header bg-warning text-dark">
+                                <i class="fa-solid fa-upload me-2"></i> ورود از Excel
+                            </div>
+                            <div class="card-body">
+                                <form id="importVoyageSeoForm" enctype="multipart/form-data">
+                                    <input type="hidden" name="voyageId" value="@Model.VoyageId" />
+                                    <div class="form-group mb-3">
+                                        <label for="excelFile">فایل Excel:</label>
+                                        <input type="file" id="excelFile" name="excelFile" class="form-control" accept=".xlsx,.xls" required />
+                                        <small class="text-muted">فقط فایل‌های .xlsx و .xls مجاز هستند</small>
+                                    </div>
+                                    <div class="d-grid gap-2">
+                                        <a href="@Url.Action("DownloadVoyageSeoTemplate", "Voyage", new { voyageId = Model.VoyageId })" class="btn btn-outline-info btn-sm">
+                                            <i class="fa fa-download me-1"></i> دانلود قالب Excel
+                                        </a>
+                                        <button type="button" id="importVoyageSeoBtn" class="btn btn-warning" onclick="importVoyageSeoFromExcel()">
+                                            <i class="fa fa-upload me-2"></i> بارگذاری Excel
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lookup Tables for Import Fields -->
+                <div class="mt-4">
+                    <h5 class="mb-3"><i class="fa-solid fa-table-list me-2"></i>جدول کدهای مورد نیاز برای ورود اطلاعات:</h5>
+
+                    <div class="accordion" id="lookupTablesAccordion">
+                        <!-- TrafficType Lookup -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#trafficTypeLookup">
+                                    <i class="fa-solid fa-truck me-2"></i> نوع محموله (TrafficType)
+                                </button>
+                            </h2>
+                            <div id="trafficTypeLookup" class="accordion-collapse collapse" data-bs-parent="#lookupTablesAccordion">
+                                <div class="accordion-body p-0">
+                                    <table class="table table-sm table-bordered mb-0">
+                                        <thead class="table-light">
+                                            <tr><th>کد</th><th>نام</th></tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr><td>0</td><td>فله</td></tr>
+                                            <tr><td>1</td><td>کالای عمومی</td></tr>
+                                            <tr><td>2</td><td>کانتینری</td></tr>
+                                            <tr><td>3</td><td>نفتی</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- CustomsProcedure Lookup -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#customsProcedureLookup">
+                                    <i class="fa-solid fa-building-columns me-2"></i> رویه گمرکی (CustomsProcedure)
+                                </button>
+                            </h2>
+                            <div id="customsProcedureLookup" class="accordion-collapse collapse" data-bs-parent="#lookupTablesAccordion">
+                                <div class="accordion-body p-0">
+                                    <table class="table table-sm table-bordered mb-0">
+                                        <thead class="table-light">
+                                            <tr><th>کد</th><th>نام</th></tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr><td>0</td><td>واردات</td></tr>
+                                            <tr><td>1</td><td>صادرات</td></tr>
+                                            <tr><td>2</td><td>ترانزیت داخلی</td></tr>
+                                            <tr><td>3</td><td>ترانزیت خارجی</td></tr>
+                                            <tr><td>4</td><td>ترانشیپ داخلی</td></tr>
+                                            <tr><td>5</td><td>ترانشیپ خارجی</td></tr>
+                                            <tr><td>6</td><td>کاپوتاژ</td></tr>
+                                            <tr><td>7</td><td>برگشت از واردات</td></tr>
+                                            <tr><td>8</td><td>برگشت از صادرات</td></tr>
+                                            <tr><td>9</td><td>صادرات مجدد</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ProductPacking Lookup -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#productPackingLookup">
+                                    <i class="fa-solid fa-box me-2"></i> بسته بندی (ProductPacking)
+                                </button>
+                            </h2>
+                            <div id="productPackingLookup" class="accordion-collapse collapse" data-bs-parent="#lookupTablesAccordion">
+                                <div class="accordion-body p-0">
+                                    <div class="alert alert-info m-2">
+                                        <small>لیست بسته بندی‌های موجود در سیستم (از نام انگلیسی برای ورود استفاده کنید):</small>
+                                    </div>
+                                    <table class="table table-sm table-bordered mb-0" id="productPackingTable">
+                                        <thead class="table-light">
+                                            <tr><th>نام انگلیسی</th><th>نام فارسی</th></tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var packing in Model.ProductPackings ?? new List<SelectListItem>())
+                                            {
+                                                <tr>
+                                                    <td><code>@packing.Value</code></td>
+                                                    <td>@packing.Text</td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Progress/Result Area -->
+                    <div id="importVoyageSeoResult" class="mt-4" style="display: none;">
+                        <div class="alert" role="alert">
+                            <div id="importVoyageSeoMessage"></div>
+                            <div id="importVoyageSeoDetails" class="mt-2 small"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">بستن</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section script {
+    <partial name="~/Views/Voyage/_VoyageInfoScript.cshtml" />
+    <script>
+            kamaDatepicker('DateCloseVoyageId', customOptions);
+
+
+        $(document).ready(function () {
+            $('select[class*="FilterSeo"].select2').select2();
+
+        });
+
+            function ShowCreateSeoModal(event) {
+                event.preventDefault();
+                const form = $("#CreateSeoForm");
+                if (form.length) {
+                    form.trigger("reset");
+                    $('#CreateSeo_ProductOwnerCompanyId').val('').trigger('change');
+                    $('#CreateSeo_ProductOwnerCompanyId').select2({
+                    dropdownParent: $('#CreateSeoModal')
+                });
+                }
+                $("#CreateSeoModal").modal('show');
+            }
+
+            function ShowModalCloseVoyage(event) {
+                event.preventDefault();
+                $("#CloseVoyageModal").modal('show');
+            }
+
+            function ErrorCanNotDeleteVoyage() {
+                Toast.fire({
+                    icon: 'error',
+                    title: 'این سفر دارای عملیات می باشد. ابتدا عملیات را حذف کنید'
+                });
+            }
+
+            // کد برای تغییر حالت نمایش
+            $(document).ready(function () {
+
+                $('#billOfLadingInput').on('invalid', function() {
+                    if (this.validity.valueMissing) {
+                        this.setCustomValidity('لطفاً شماره بارنامه را وارد کنید');
+                    }
+                }).on('input', function() {
+                    this.setCustomValidity('');
+                });
+
+                // تنظیم حالت اولیه - نمایش لیستی
+                $('#cardView').hide();
+                $('#tableView').show();
+
+                $('#discharge').change(function() {
+                    if ($(this).is(':checked')) {
+                        $('#cardView').show();
+                        $('#tableView').hide();
+                    }
+                });
+
+                $('#loading').change(function() {
+                    if ($(this).is(':checked')) {
+                        $('#cardView').hide();
+                        $('#tableView').show();
+                    }
+                });
+
+                $('#CreateSeo_ProductOwnerCompanyId').select2({
+                    dropdownParent: $('#CreateSeoModal')
+                });
+
+                $(document).on('click', '.js-open-create-voyage', ShowCreateVoyageModal);
+            });
+
+            function ShowCreateVoyageModal(event) {
+                if (event) event.preventDefault();
+                var $link = $(event && event.currentTarget ? event.currentTarget : this);
+                var url = $($link).attr('href');
+                if (!url) return;
+                if (url.indexOf('isModal=true') === -1) {
+                    url += (url.indexOf('?') > -1 ? '&' : '?') + 'isModal=true';
+                }
+                $.ajax({
+                    url: url,
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    success: function (html) {
+                        $('#CreateVoyageModal .modal-body').html(html);
+                        initCreateVoyageModal();
+                        $('#CreateVoyageModal').modal('show');
+                        bindCreateVoyageForm();
+                    }
+                });
+            }
+
+            function initCreateVoyageModal() {
+                try {
+                    $('select[class*="CreateVoyageModal"].select2').select2({
+                     dropdownParent: $('#CreateVoyageModal')
+                 });
+
+                } catch (e) { }
+                try { kamaDatepicker('CreateDto_EntryDateFa', customOptions); } catch (e) { }
+                try { kamaDatepicker('CreateDto_BerthingDateFa', customOptions); } catch (e) { }
+                try {
+                    $('#CreateVoyageModal .clockpicker').clockpicker({
+                        placement: 'bottom',
+                        align: 'left',
+                        donetext: 'تایید',
+                        autoclose: true
+                    });
+                } catch (e) { }
+            }
+
+            function bindCreateVoyageForm() {
+                var form = $('#CreateVoyageForm');
+                if (!form.length) return;
+                form.off('submit').on('submit', function (e) {
+                    e.preventDefault();
+                    $.ajax({
+                        url: form.attr('action'),
+                        type: 'POST',
+                        data: form.serialize(),
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                        success: function (resp) {
+                            if (resp && resp.success) {
+                                window.location.href = '/Voyage/VoyageSeo?voyageId=' + resp.voyageId;
+                            } else {
+                                showVoyageError(resp && resp.message);
+                            }
+                        },
+                        error: function (xhr) {
+                            var msg = (xhr.responseJSON && xhr.responseJSON.message) || xhr.responseText;
+                            try { var obj = JSON.parse(msg); msg = obj && obj.Message ? obj.Message : msg; } catch (_) { }
+                            showVoyageError(msg);
+                        }
+                    });
+                });
+            }
+
+        function showVoyageError(message) {
+                if (typeof Toast !== 'undefined' && Toast.fire) {
+                    Toast.fire({ icon: 'error', title: message || 'خطا در ثبت' });
+                } else {
+                    alert(message || 'خطا در ثبت');
+                }
+            }
+
+            // Import/Export Excel Functions
+            function openVoyageSeoImportExportModal() {
+                const modalEl = document.getElementById('voyageSeoImportExportModal');
+                if (modalEl) {
+                    const modalInstance = bootstrap.Modal.getOrCreateInstance(modalEl);
+                    modalInstance.show();
+                }
+            }
+
+            function importVoyageSeoFromExcel() {
+                const form = document.getElementById('importVoyageSeoForm');
+                const fileInput = document.getElementById('excelFile');
+                const resultDiv = document.getElementById('importVoyageSeoResult');
+                const messageDiv = document.getElementById('importVoyageSeoMessage');
+                const detailsDiv = document.getElementById('importVoyageSeoDetails');
+                const btn = document.getElementById('importVoyageSeoBtn');
+
+                if (!fileInput.files || fileInput.files.length === 0) {
+                    if (typeof Toast !== 'undefined' && Toast.fire) {
+                        Toast.fire({ icon: 'error', title: 'لطفاً یک فایل Excel انتخاب کنید' });
+                    } else {
+                        alert('لطفاً یک فایل Excel انتخاب کنید');
+                    }
+                    return;
+                }
+
+                const formData = new FormData(form);
+
+                // Disable button and show loading
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i> در حال بارگذاری...';
+
+                // Hide previous results
+                resultDiv.style.display = 'none';
+
+                $.ajax({
+                    url: '@Url.Action("ImportVoyageSeoDataExcel", "Voyage")',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    dataType: 'json'
+                })
+                .done(function(response) {
+                    resultDiv.style.display = 'block';
+
+                    if (response.success) {
+                        resultDiv.className = 'mt-4 alert alert-success';
+                        messageDiv.innerHTML = '<i class="fa-solid fa-check-circle me-2"></i> ' + response.message;
+
+                        if (response.errorDetails && response.errorDetails.length > 0) {
+                            detailsDiv.innerHTML = '<strong>جزئیات خطاها:</strong><br/>' +
+                                response.errorDetails.map(e => '• ' + e).join('<br/>');
+                        } else {
+                            detailsDiv.innerHTML = '';
+                        }
+
+                        // Reload page after 2 seconds on success
+                        setTimeout(function() {
+                            window.location.reload();
+                        }, 2000);
+                    } else {
+                        resultDiv.className = 'mt-4 alert alert-danger';
+                        messageDiv.innerHTML = '<i class="fa-solid fa-exclamation-circle me-2"></i> ' + response.message;
+                        detailsDiv.innerHTML = '';
+                    }
+                })
+                .fail(function() {
+                    resultDiv.style.display = 'block';
+                    resultDiv.className = 'mt-4 alert alert-danger';
+                    messageDiv.innerHTML = '<i class="fa-solid fa-exclamation-circle me-2"></i> خطا در ارتباط با سرور';
+                    detailsDiv.innerHTML = '';
+                })
+                .always(function() {
+                    // Re-enable button
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fa fa-upload me-2"></i> بارگذاری Excel';
+                });
+            }
+
+            // Initialize date pickers for filter fields
+            $(document).ready(function() {
+
+
+                try {
+                    kamaDatepicker('Filter_DateFrom', {
+                        buttons: ["today", "clear"],
+                        markToday: true,
+                        markHolidays: true,
+                        holidays: ["فروردین", "اردیبهشت", "خرداد", "تیر", "مرداد", "شهریور", "مهر", "آبان", "آذر", "دی", "بهمن", "اسفند"]
+                    });
+                } catch (e) { }
+
+                try {
+                    kamaDatepicker('Filter_DateTo', {
+                        buttons: ["today", "clear"],
+                        markToday: true,
+                        markHolidays: true,
+                        holidays: ["فروردین", "اردیبهشت", "خرداد", "تیر", "مرداد", "شهریور", "مهر", "آبان", "آذر", "دی", "بهمن", "اسفند"]
+                    });
+                } catch (e) { }
+            });
+    </script>
+}

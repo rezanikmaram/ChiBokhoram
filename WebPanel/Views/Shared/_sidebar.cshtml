@@ -1,0 +1,1074 @@
+@using Microsoft.Extensions.Options;
+@inject IOptionsSnapshot<SiteSettings> settings;
+
+<div class="sidebar-wrapper">
+    <div>
+        <div class="logo-wrapper text-center">
+            <a href="#">
+                <img class="img-fluid for-light py-1 h-100 w-100 mt-2" src="~/assets/images/FPN.png?v=1" alt="">
+                <img class="img-fluid for-dark py-1 h-100 w-100 mt-2" src="~/assets/images/FPN.png?v=1" alt="">
+            </a>
+            <div class="back-btn"><i class="fa fa-angle-right"></i></div>
+        </div>
+        <div class="logo-icon-wrapper">
+            <a href="#">
+                <img class="img-fluid "
+                     src="~/assets/images/FPN.png?v=1" alt="">
+            </a>
+        </div>
+        <nav class="sidebar-main">
+            <div class="left-arrow" id="left-arrow"><i data-feather="arrow-left"></i></div>
+            <div id="sidebar-menu">
+                <ul class="sidebar-links" id="simple-bar">
+                    <li class="back-btn">
+                        <a href="#">
+                            @*  <img class="img-fluid" src="~/assets/images/logo-icon.png"
+                            alt=""> *@
+                        </a>
+                        @*  <div class="mobile-back text-end">
+                        <span>بازگشت</span><i class="fa fa-angle-left ps-2"
+                        aria-hidden="true"></i>
+                        </div> *@
+                    </li>
+
+                    @if (User.IsInRole("admin") || User.IsInRole("adminOnePort") || User.IsInRole("DashboardAdmin") || User.IsInRole("AllocationEquToEnd") || User.IsInRole("FinanceUser"))
+                    {
+                        <li id="Seo" class="sidebar-list">
+                            <a href="#" class="sidebar-link sidebar-title" id="mSeo">
+                                <i class="fa fa-list-alt"></i>
+                                عملیات بندری
+                            </a>
+                            <ul id="uSeo" class="sidebar-submenu">
+
+                                @if (User.IsInRole("admin") || User.IsInRole("adminOnePort") || User.IsInRole("AllocationEquToEnd") || User.IsInRole("FinanceUser"))
+                                {
+                                    <li>
+                                        <a href="~/Voyage/Index" mm="Seo" id="VoyageIndex">
+                                            <i class="fa fa-th-list"></i>
+                                            لیست سفر ها
+                                        </a>
+                                    </li>
+
+                                    <li>
+                                        <a href="~/Seo/Index" mm="Seo" id="SeoIndex">
+                                            <i class="fa fa-th-list"></i>
+                                            لیست بارنامه ها
+                                        </a>
+                                    </li>
+                                }
+
+                                @if (User.IsInRole("admin") || User.IsInRole("adminOnePort"))
+                                {
+                                    <li>
+                                        <a href="~/InlandExportManifest/Index" class="" mm="Seo" id="InlandExportManifestIndex">
+                                            <i class="fa fa-list-ol"></i>
+                                            مجوزهای صادرات از خشکی
+                                        </a>
+                                    </li>
+
+                                    @* <li>
+										<a href="~/ProductOwnerImasVessel/VesselList" class="" mm="AllocationOfEqu" id="ProductOwnerImasVesselVesselList">
+											<i class="fa fa-list-ol"></i>
+											درخواست های صاحب کالا
+										</a>
+									</li> *@
+
+                                    @* <li>
+										<a href="~/AllocationOfEquipment/Payments" class="" mm="AllocationOfEqu" id="AllocationOfEquipmentPayments">
+											<i class="fa fa-list-ol"></i>
+											واریزی ها
+										</a>
+									</li> *@
+
+                                    <li>
+                                        <a href="~/Gear/GearUseInAllocationOfEqu" mm="GearUseInAllocationOfEqu" id="GearUseInAllocationOfEqu">
+                                            <i class="fa fa-sitemap"></i>
+                                            ثبت تجهیزات عملیات
+                                        </a>
+                                    </li>
+
+                                    <li>
+                                        <a href="~/VesselAllocationNotice/Index" mm="VesselAllocationNotice" id="VesselAllocationNoticeIndex">
+                                            <i class="fa fa-ship"></i>
+                                            اعلام تخصیص شناور
+                                        </a>
+                                    </li>
+
+                                }
+
+
+
+                            </ul>
+                        </li>
+                    }
+
+                    @if (User.IsInRole("admin") || User.IsInRole("adminOnePort") || User.IsInRole("incomeReports") || User.IsInRole("FinanceUser"))
+                    {
+                        <li id="IncomeInvoice" class="sidebar-list">
+                            <a href="#" class="sidebar-link sidebar-title" id="mIncomeInvoice">
+                                <i class="fa fa-list-alt"></i>
+                                درآمد ها
+                            </a>
+                            <ul id="uIncomeInvoice" class="sidebar-submenu">
+
+                                <li>
+                                    <a href="~/Invoice/Index" class="" mm="IncomeInvoice" id="InvoiceIndex">
+                                        <i class="fa fa-list-ol"></i>
+                                        همه درآمدها
+                                    </a>
+                                </li>
+
+                                <li>
+                                    <a href="~/AllocationOfEquipment/SpecialIncome" class="" mm="IncomeInvoice" id="AllocationOfEquipmentSpecialIncome">
+                                        <i class="fa fa-list-ol"></i>
+                                        درآمد از اجاره تجهیزات
+                                    </a>
+                                </li>
+
+                                <li>
+                                    <a href="~/SeoFactor/ReportIncome" class="" mm="IncomeInvoice" id="SeoFactorReportIncome">
+                                        <i class="fa fa-list-ol"></i>
+                                        درآمد از خدمات بندری
+                                    </a>
+                                </li>
+
+                                @if (settings.Value.OrganizationInfo.Type == EnumOrganizationInfo.AriaBanader)
+                                {
+                                    <li>
+                                        <a href="~/OtherIncomeInvoice/Index" mm="IncomeInvoice" id="OtherIncomeInvoiceIndex">
+                                            <i class="fa fa-th-list"></i>
+                                            سایر درآمدها
+                                        </a>
+                                    </li>
+                                }
+
+
+                                <li>
+                                    <a href="~/OtherFactor/List" mm="IncomeInvoice" id="OtherFactorList">
+                                        <i class="fa fa-th-list"></i>
+                                        درآمد های خاص
+                                    </a>
+                                </li>
+
+
+                                <li>
+                                    <a href="~/PaymentReceiptReport/Index" mm="PaymentReceiptReportIndex" id="PaymentReceiptReportIndex">
+                                        <i class="fa fa-th-list"></i>
+                                        رسیدهای پرداخت آنلاین
+                                    </a>
+                                </li>
+
+
+                            </ul>
+                        </li>
+                    }
+
+                    @if (User.IsInRole("admin") || User.IsInRole("adminOnePort"))
+                    {
+                        <li id="ReportMenu" class="sidebar-list">
+                            <a href="#" class="sidebar-link sidebar-title" id="mReportMenu">
+                                <i class="fa fa-list-alt"></i>
+                                گزارشات
+                            </a>
+                            <ul id="uReportMenu" class="sidebar-submenu">
+
+                                <li>
+                                    <a href="~/SeoFactor/FeeExemptReport" class="" mm="ReportMenu" id="SeoFactorFeeExemptReport">
+                                        <i class="fa fa-list-ol"></i>
+                                        معافیت انبارداری
+                                    </a>
+                                </li>
+
+                                <li>
+                                    <a href="~/report/LaborWorkingGroupReport" class="" mm="ReportMenu" id="reportLaborWorkingGroupReport">
+                                        <i class="fa fa-list-ol"></i>
+                                        گروه کارگری
+                                    </a>
+                                </li>
+
+                                <li>
+                                    <a href="~/Voyage/DetailTaliDateRange" mm="DetailTaliDateRange" id="DetailTaliDateRange">
+                                        <i class="fa fa-sitemap"></i>
+                                        گزارش تالی
+                                    </a>
+                                </li>
+
+                                <li>
+                                    <a href="~/Voyage/AllVoyageWeightReport" mm="AllVoyageWeightReport" id="AllVoyageWeightReport">
+                                        <i class="fa fa-sitemap"></i>
+                                        گزارش تناژ همه سفرها
+                                    </a>
+                                </li>
+
+                                <li>
+                                    <a href="~/VoyageReport/Index" mm="VoyageReport" id="VoyageReport">
+                                        <i class="fa fa-sitemap"></i>
+                                       گزارش عملکرد سفر ها
+                                    </a>
+                                </li>
+
+                                
+
+                                <li>
+                                    <a href="~/Voyage/GearPerformanceReport" mm="GearPerformanceReport" id="GearPerformanceReport">
+                                        <i class="fa fa-truck-monster"></i>
+                                        گزارش عملکرد تجهیزات
+                                    </a>
+                                </li>
+
+                                @if (User.IsInRole("admin") || User.IsInRole("DashboardAdmin"))
+                                {
+                                    <li>
+                                        <a href="~/Dashboard/Index" mm="Seo" id="DashboardIndex">
+                                            <i class="fa fa-th-list"></i>
+                                            داشبورد
+                                        </a>
+                                    </li>
+                                }
+
+                                @if (User.IsInRole("admin") || User.IsInRole("DashboardAdmin"))
+                                {
+                                    <li>
+                                        <a href="~/Dashboard/MonthlyReport" mm="Seo" id="DashboardMonthlyReport">
+                                            <i class="fa fa-th-list"></i>
+                                            داشبورد ۲
+                                        </a>
+                                    </li>
+
+                                    <li>
+                                        <a href="~/Dashboard/Monitoring" mm="Seo" id="DashboardMonitoring">
+                                            <i class="fa fa-satellite-dish"></i>
+                                            مانیتورینگ لحظه‌ای
+                                        </a>
+                                    </li>
+                                }
+
+                            </ul>
+                        </li>
+                    }
+
+
+                    @if (User.IsInRole("admin") || User.IsInRole("adminOnePort"))
+                    {
+                        <li id="Base" class="sidebar-list">
+                            <a href="#" class="sidebar-link sidebar-title" id="mBase" type="button">
+                                <i class="fas fa-info-square"></i>
+                                اطلاعات پایه
+                            </a>
+                            <ul id="uBase" class="sidebar-submenu">
+                                <li>
+                                    <a href="~/Contract/Index" mm="Base" id="ContractIndex">
+                                        <i class="fa fa-cubes"></i>
+                                        قرارداد ها
+                                    </a>
+                                </li>
+
+
+                                <li>
+                                    <a href="~/Company/Index" mm="Base" id="CompanyIndex">
+                                        <i class="fa fa-cubes"></i>
+                                        لیست شرکت ها
+                                    </a>
+                                </li>
+
+                                <li>
+                                    <a href="~/Ship/Index" mm="Base" id="ShipIndex">
+                                        <i class="fa fa-cubes"></i>
+                                        لیست کشتی ها
+                                    </a>
+                                </li>
+
+
+                                <li>
+                                    <a href="~/Equipment/EquipmentCategories" mm="Base" id="EquipmentEquipmentCategories">
+                                        <i class="fa fa-cubes"></i>
+                                        دسته بندی تجهیزات
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="~/Product/Index" mm="Base" id="ProductIndex">
+                                        <i class="fa fa-cubes"></i>
+                                        کالاها
+                                    </a>
+
+                                </li>
+                                <li>
+                                    <a href="~/Product/Products" mm="Base" id="ProductIndex">
+                                        <i class="fa fa-cubes"></i>
+                                       2 کالاها
+                                    </a>
+
+                                </li>
+
+                                <li>
+                                    <a href="~/Product/HSCode" mm="Base" id="ProductHSCode">
+                                        <i class="fa fa-cubes"></i>
+                                        HS Code
+                                    </a>
+
+                                </li>
+
+                                <li>
+                                    <a href="~/Warehouse/Warehouses" mm="Base" id="WarehouseWarehouses">
+                                        <i class="fas fa-warehouse"></i>
+                                        انبارها
+                                    </a>
+
+                                </li>
+
+                                <li>
+                                    <a href="~/Waterfront/GetDistance" mm="Base" id="WaterfrontGetDistance">
+                                        <i class="fa fa-anchor"></i>
+                                        فاصله بین انبار تا اسکله
+                                    </a>
+
+                                </li>
+                                <li>
+                                    <a href="~/Common/AdminPhones" mm="Base" id="CommonAdminPhones">
+                                        <i class="fas fa-portrait"></i>
+                                        شماره تلفن ادمین ها
+                                    </a>
+
+                                </li>
+                                @if (User.IsInRole("admin"))
+                                {
+                                    <li>
+                                        <a href="~/Port/Ports" mm="Base" id="PortPorts">
+                                            <i class="fa fa-anchor"></i>
+                                            لیست بنادر
+                                        </a>
+                                    </li>
+                                }
+                                <li>
+                                    <a href="~/Waterfront/Index" mm="Base" id="WaterfrontIndex">
+                                        <i class="fa fa-anchor"></i>
+                                        لیست اسکله ها
+                                    </a>
+                                </li>
+
+                                <li>
+                                    <a href="~/Gate/Index" mm="Base" id="GateIndex">
+                                        <i class="fa fa-anchor"></i>
+                                        لیست دروازه ها
+                                    </a>
+                                </li>
+
+                                <li>
+                                    <a href="~/Warehouse/Site" mm="Base" id="WarehouseSite">
+                                        <i class="fab fa-megaport"></i>
+                                        سایت ها
+                                    </a>
+                                </li>
+
+                                <li>
+                                    <a href="~/Device/Index" mm="Base" id="DeviceIndex">
+                                        <i class="fas fa-microchip"></i>
+                                        دستگاه های FPN
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="~/SeoStopServiceType/Index" mm="Base" id="SeoStopServiceTypeIndex">
+                                        <i class="fas fa-exclamation-circle"></i>
+                                        انواع توقف سرویس
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="~/Baskool/Index" mm="Base" id="BaskoolIndex">
+                                        <i class="fa fa-sitemap"></i>
+                                        باسکول ها
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="~/Transportation/AllTruks" mm="Base" id="TransportationAllTruks">
+                                        <i class="fa fa-sitemap"></i>
+                                        مدیریت کامیون ها
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="~/AreaPoint/AreaCategories" mm="Base" id="AreaPointAreaCategories">
+                                        <i class="fa fa-sitemap"></i>
+                                        ناحیه ها
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="~/Simcard/Index" mm="Base" id="SimcardIndex">
+                                        <i class="fas fa-sim-card"></i>
+                                        سیم کارت ها
+                                    </a>
+                                </li>
+
+                                <li>
+                                    <a href="~/LaborWorkingGroup/Index" mm="Base" id="LaborWorkingGroupIndex">
+                                        <i class="fas fa-hands-helping"></i>
+                                        گروه کاری
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="~/Country/Index" mm="Base" id="CountryIndex">
+                                        <i class="fas fa-globe"></i>
+                                        کشورها
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="~/Province/Index" mm="Base" id="ProvinceIndex">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                        استانها
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="~/City/Index" mm="Base" id="CityIndex">
+                                        <i class="fas fa-city"></i>
+                                        شهرها
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                    }
+                    @if (User.IsInRole("admin"))
+                    {
+                        <li id="rawInfo" class="sidebar-list">
+                            <a href="#" class="sidebar-link sidebar-title" id="mrawInfo">
+                                <i class="fas fa-barcode"></i>
+                                آمار و اطلاعات خام
+                            </a>
+                            <ul class="sidebar-submenu" id="urawInfo">
+                                <li>
+                                    <a href="~/Imas/VesselList" mm="rawInfo" id="ImasVesselList">
+                                        <i class="fa fa-cubes"></i>
+                                        لیست شناور ها
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="~/Baskool/TrukInfoList" mm="rawInfo" id="BaskoolTrukInfoList">
+                                        <i class="fa fa-anchor"></i>
+                                        ورود خروج کامیون ها
+                                    </a>
+                                </li>
+
+                                <li>
+                                    <a href="~/Baskool/TruckInfoInOut" mm="rawInfo" id="BaskoolTruckInfoInOut">
+                                        <i class="fa fa-anchor"></i>
+                                        مدت زمان کامیون ها
+                                    </a>
+                                </li>
+
+
+                                <li>
+                                    <a href="~/Seo/BaskolData" mm="rawInfo" id="SeoBaskolData">
+                                        <i class="fa fa-anchor"></i>
+                                        آمار برنامه باسکول
+                                    </a>
+                                </li>
+
+                                <li>
+                                    <a href="~/Baskool/WeightByUserList" mm="rawInfo" id="BaskoolWeightByUserList">
+                                        <i class="fa fa-anchor"></i>
+                                        وزن های کاربر باسکول
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="~/Baskool/WeightList" mm="rawInfo" id="BaskoolWeightList">
+                                        <i class="fa fa-anchor"></i>
+                                        آمار FPN باسکول
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="~/Device/FpnDeviceLog" mm="rawInfo" id="DeviceFpnDeviceLog">
+                                        <i class="fa fa-anchor"></i>
+                                        تگ خوان FPN
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                    }
+
+
+                    @if (User.IsInRole("admin") || User.IsInRole("adminOnePort"))
+                    {
+                        <li id="Failure" class="sidebar-list">
+                            <a href="#" class="sidebar-link sidebar-title" id="mFailure">
+                                <i class="fa fa-exclamation-triangle"></i>
+                                گزارش خرابی و توقف ها
+                            </a>
+                            <ul id="uFailure" class="sidebar-submenu">
+                                <li>
+                                    <a href="~/Equipment/Failure" mm="Failure" id="EquipmentFailure">
+                                        <i class="fa fa-gear"></i>
+                                        خرابی تجهیزات
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="~/Transportation/TruckFailure" mm="Failure" id="TransportationTruckFailure">
+                                        <i class="fa fa-truck"></i>
+                                        خرابی کامیون ها
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="~/Seo/SeoStopServiceLog" mm="Failure" id="SeoSeoStopServiceLog">
+                                        <i class="fas fa-headset"></i>
+                                        گزارش توقف ها
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+
+                        <li id="WarehouseReceiptManager" class="sidebar-list">
+                            <a href="#" class="sidebar-link sidebar-title" id="mWarehouseReceiptManager">
+                                <i class="fas fa-receipt"></i>
+                                مدیریت قبض انبارها
+                            </a>
+                            <ul id="uWarehouseReceiptManager" class="sidebar-submenu">
+                                <li>
+                                    <a href="~/WarehouseReceipt/List" mm="PanelUser" id="WarehouseReceiptList">
+                                        <i class="fa fa-gear"></i>
+                                        قبض انبارها
+                                    </a>
+                                </li>
+
+                            </ul>
+                        </li>
+                    }
+
+                    @if (User.IsInRole("admin") || User.IsInRole("adminOnePort"))
+                    {
+                        <li id="WarehouseReceiptOutboundManager" class="sidebar-list">
+                            <a href="#" class="sidebar-link sidebar-title" id="mWarehouseReceiptOutboundManager">
+                                <i class="fas fa-receipt"></i>
+                                مدیریت خروج کالا
+                            </a>
+                            <ul id="uWarehouseReceiptOutboundManager" class="sidebar-submenu">
+                                <li>
+                                    <a href="~/WarehouseReceiptOutbound/List" mm="OutboundManager" id="WarehouseReceiptOutboundList">
+                                        <i class="fa fa-gear"></i>
+                                        مجوزهای خروجی گمرک
+                                    </a>
+                                </li>
+
+                                <li>
+                                    <a href="~/PortTruckExit/Index" mm="OutboundManager" id="PortTruckExitIndex">
+                                        <i class="fa fa-gear"></i>
+                                        بیجک خروج حمل یکسره
+                                    </a>
+                                </li>
+
+                                <li>
+                                    <a href="~/PortTruckExit/ArchivePage" mm="OutboundManager" id="PortTruckExitArchivePage">
+                                        <i class="fa fa-gear"></i>
+                                        بیجک های صادرشده حمل یکسره
+                                    </a>
+                                </li>
+
+                                <li>
+                                    <a href="~/PortTruckExit/TaliWithoutWeight" mm="OutboundManager" id="PortTruckExitArchivePage">
+                                        <i class="fa fa-gear"></i>
+                                        تالی های فاسد
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                    }
+
+                    @if (User.IsInRole("admin") || User.IsInRole("adminOnePort"))
+                    {
+                        <li id="PanelGear" class="sidebar-list">
+                            <a href="#" class="sidebar-link sidebar-title" id="mPanelUser">
+                                <i class="fas fa-wrench"></i>
+                                تجهیزات
+                            </a>
+                            <ul id="uPanelGear" class="sidebar-submenu">
+
+
+                                <li>
+                                    <a href="~/GearType/Index" mm="GearTypeIndex" id="GearTypeIndex">
+                                        <i class="fa fa-sitemap"></i>
+                                        انواع تجهیزات
+                                    </a>
+                                </li>
+                                                                @* <li>
+                                    <a href="~/GearState/Index" mm="GearStateIndex" id="GearStateIndex">
+                                        <i class="fa fa-sitemap"></i>
+                                        وضعیت تجهیزات
+                                    </a>
+                                </li> *@
+                                <li>
+                                    <a href="~/Gear/Index" mm="GearPanel" id="GearIndex">
+                                        <i class="fa fa-sitemap"></i>
+                                        تجهیزات
+                                    </a>
+                                </li>
+
+                                <li>
+                                    <a href="~/GearStateTracker/Index" mm="GearStateTracker" id="GearStateTrackerIndex">
+                                        <i class="fa fa-sitemap"></i>
+                                        ثبت گزارش عملیات تجهیزات
+                                    </a>
+                                </li>
+
+                                <li>
+                                    <a href="~/GearStateTracker/GetGearStateList" mm="GetGearStateList" id="GetGearStateList">
+                                        <i class="fa fa-sitemap"></i>
+                                        آماده به کاری تجهیزات
+                                    </a>
+                                </li>
+
+                                <li>
+                                    <a href="~/GearWorkSession/Index" mm="GearWorkSession" id="GearWorkSession">
+                                        <i class="fa fa-sitemap"></i>
+                                        فعالیت روزانه تجهیز
+                                    </a>
+                                </li>
+
+
+
+                                @* <li>
+                                    <a href="~/GearProduce/Index" mm="Base" id="GearProduceIndex">
+                                        <i class="fa fa-sitemap"></i>
+                                        شرکت ساخت تجهیزات
+                                    </a>
+                                </li> *@
+
+                            </ul>
+                        </li>
+                    }
+
+                    @if (User.IsInRole("admin") || User.IsInRole("adminOnePort"))
+                    {
+                        <li id="PanelCheckList" class="sidebar-list">
+                            <a href="#" class="sidebar-link sidebar-title" id="mPanelUser">
+                                <i class="fas fa-clipboard-list"></i>
+                                چک لیست
+                            </a>
+                            <ul id="uPanelCheckList" class="sidebar-submenu">
+
+                                <li>
+                                    <a href="~/CheckList/Index" mm="CheckListIndex" id="CheckListIndex">
+                                        <i class="fa fa-sitemap"></i>
+                                        چک لیست ها
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="~/CheckListFactor/Index" mm="CheckListFactorIndex" id="CheckListFactorIndex">
+                                        <i class="fa fa-sitemap"></i>
+                                        شاخص چک لیست ها
+                                    </a>
+                                </li>
+
+                            </ul>
+                        </li>
+                    }
+
+                    @if (User.IsInRole("admin") || User.IsInRole("adminOnePort") || User.IsInRole("FinanceUser"))
+                    {
+                        <li id="PanelTarrif" class="sidebar-list">
+                            <a href="#" class="sidebar-link sidebar-title" id="mPanelTarrif">
+                                <i class="fas fa-clipboard-list"></i>
+                                مدیریت تعرفه
+                            </a>
+                            <ul id="uPanelTariff" class="sidebar-submenu">
+
+                                <li>
+                                    <a href="#" mm="Base" id="SpecialGearTariffRuleList" type="button" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+                                        <i class="fas fa-hands-helping"></i>
+                                        تعرفه های دریایی / بندری
+                                    </a>
+                                </li>
+
+                                <li>
+                                    <a href="~/ContractPeriod/List" mm="ContractPeriodList" id="ContractPeriodList">
+                                        <i class="fas fa-clock"></i>
+                                        دوره‌های تعرفه
+                                    </a>
+                                </li>
+
+                                <li>
+                                    <a href="#" mm="Base" id="moafTarrifModalTrigger" data-bs-toggle="modal" data-bs-target="#moafTarrifModal">
+                                        <i class="fas fa-hands-helping"></i>
+                                        معافیت تعرفه
+                                    </a>
+                                </li>
+
+                                <li>
+                                    <a href="#" mm="Base" id="OffTariffModalTrigger" data-bs-toggle="modal" data-bs-target="#offTariffModal">
+                                        <i class="fas fa-hands-helping"></i>
+                                        تخفیف تعرفه
+                                    </a>
+                                </li>
+
+                            </ul>
+                        </li>
+                    }
+
+
+
+                    @if (User.IsInRole("admin") || User.IsInRole("adminOnePort"))
+                    {
+                        <li id="PanelContainer" class="sidebar-list">
+                            <a href="#" class="sidebar-link sidebar-title" id="mPanelContainer">
+                                <i class="fas fa-clipboard-list"></i>
+                                کانتینر
+                            </a>
+                            <ul id="uPanelContainer" class="sidebar-submenu">
+
+
+                                <li>
+                                    <a href="~/ContainerGroup/Index" mm="ContainerGroupIndex" id="ContainerGroupIndex">
+                                        <i class="fa fa-sitemap"></i>
+                                        گروه کانتینر
+                                    </a>
+                                </li>
+
+                                <li>
+                                    <a href="~/ContainerType/Index" mm="ContainerTypeIndex" id="ContainerTypeIndex">
+                                        <i class="fa fa-sitemap"></i>
+                                        انواع کانتینر
+                                    </a>
+                                </li>
+
+                                <li>
+                                    <a href="~/ContainerPackingType/Index" mm="ContainerPackingTypeIndex" id="ContainerPackingTypeIndex">
+                                        <i class="fa fa-sitemap"></i>
+                                        بسته بندی کانتینر
+                                    </a>
+                                </li>
+
+
+
+                            </ul>
+                        </li>
+                    }
+
+                    @if (User.IsInRole("admin") || User.IsInRole("adminOnePort"))
+                    {
+                        <li id="ManagelUser" class="sidebar-list">
+                            <a href="#" class="sidebar-link sidebar-title" id="mManageUser">
+                                <i class="fas fa-users"></i>
+                                مدیریت کاربران
+                            </a>
+                            <ul id="uManageUser" class="sidebar-submenu">
+                                <li>
+                                    <a href="~/Personel/UserList" mm="ManagelUser" id="PersonelUserList">
+                                        <i class="icon-user"></i>
+                                        کاربران موبایل
+                                    </a>
+                                </li>
+
+                                @if (User.IsInRole("admin"))
+                                {
+                                    <li>
+                                        <a href="~/Account/PanelUsers" mm="ManagelUser" id="AccountPanelUsers">
+                                            <i class="fa fa-gear"></i>
+                                            کاربران پورتال
+                                        </a>
+                                    </li>
+                                }
+
+                            </ul>
+                        </li>
+                    }
+
+
+
+
+                    @if ((User.IsInRole("admin") || User.IsInRole("AppVersion")))
+                    {
+                        <li class="sidebar-list">
+                            <a href="~/AppVersion/ManageApp" class="sidebar-link sidebar-title link-nav">
+                                <i data-feather="smartphone"></i><span>مدیریت سوخت </span>
+                            </a>
+                        </li>
+
+                        <li class="sidebar-list">
+                            <a href="~/AppVersion/ManageApp" class="sidebar-link sidebar-title link-nav">
+                                <i data-feather="smartphone"></i><span>مدیریت نسخه اپ </span>
+                            </a>
+                        </li>
+                    }
+
+                    @if (User.IsInRole("admin"))
+                    {
+                        <li class="sidebar-list">
+                            <a href="~/SystemSetting/Index" class="sidebar-link sidebar-title link-nav" id="SystemSettingIndex">
+                                <i class="fas fa-cog"></i>
+                                <span>تنظیمات سامانه</span>
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </div>
+            <!-- /#side-menu -->
+        </nav>
+        <!-- /.side-menu-container -->
+    </div>
+</div>
+
+<!-- Button trigger modal -->
+<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+    Launch demo modal
+</button>
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exampleModalLabel">  اطلاعات پایه  </h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row gy-4">
+                    <div class="col-md-3">
+                        <a href="~/Contract/Index" mm="Base" id="ContractIndex" class="btn btn-secondary-a rounded-5 fs-6 w-100 h-100 align-content-around   p-3 text-center">
+                            <i class="fa fa-cubes"></i>
+                            قرارداد ها
+                        </a>
+                    </div>
+
+
+                    @if (User.IsInRole("admin") || User.IsInRole("adminOnePort") || User.IsInRole("AllocationEquToEnd"))
+                    {
+                        <div class="col-md-3">
+                            <a href="~/Company/Index" mm="Base" id="CompanyIndex" class="btn btn-secondary-a rounded-5 fs-6 w-100 h-100 align-content-around   p-3 text-center">
+                                <i class="fa fa-cubes"></i>
+                                لیست شرکت ها
+                            </a>
+                        </div>
+
+                        <div class="col-md-3">
+                            <a href="~/Ship/Index" mm="Base" id="ShipIndex" class="btn btn-secondary-a rounded-5 fs-6 w-100 h-100 align-content-around   p-3 text-center">
+                                <i class="fa fa-cubes"></i>
+                                لیست کشتی ها
+                            </a>
+                        </div>
+
+                    }
+
+
+                    <div class="col-md-3">
+                        <a href="~/Equipment/EquipmentCategories" mm="Base" id="EquipmentEquipmentCategories" class="btn btn-secondary-a rounded-5 fs-6 w-100 h-100 align-content-around   p-3 text-center">
+                            <i class="fa fa-cubes"></i>
+                            دسته بندی تجهیزات
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="~/Product/Index" mm="Base" id="ProductIndex" class="btn btn-secondary-a rounded-5 fs-6 w-100 h-100 align-content-around   p-3 text-center">
+                            <i class="fa fa-cubes"></i>
+                            کالاها
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="~/Product/HSCode" mm="Base" id="ProductHSCode" class="btn btn-secondary-a rounded-5 fs-6 w-100 h-100 align-content-around  p-3 text-center">
+                            <i class="fa fa-cubes"></i>
+                            HS Code
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="~/Warehouse/Warehouses" mm="Base" id="WarehouseWarehouses" class="btn btn-secondary-a rounded-5 fs-6 w-100 h-100 align-content-around  p-3 text-center">
+                            <i class="fas fa-warehouse"></i>
+                            انبارها
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="~/Waterfront/GetDistance" mm="Base" id="WaterfrontGetDistance" class="btn btn-secondary-a rounded-5 fs-6 w-100 h-100 align-content-around  p-3 text-center">
+                            <i class="fa fa-anchor"></i>
+                            فاصله بین انبار تا اسکله
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="~/Common/AdminPhones" mm="Base" id="CommonAdminPhones" class="btn btn-secondary-a rounded-5 fs-6 w-100 h-100 align-content-around  p-3 text-center">
+                            <i class="fas fa-portrait"></i>
+                            شماره تلفن ادمین ها
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        @if (User.IsInRole("admin"))
+                        {
+                            <a href="~/Port/Ports" mm="Base" id="PortPorts" class="btn btn-secondary-a rounded-5 fs-6 w-100 h-100 align-content-around  p-3 text-center">
+                                <i class="fa fa-anchor"></i>
+                                لیست بنادر
+                            </a>
+                        }
+                    </div>
+                    <div class="col-md-3">
+                        <a href="~/Waterfront/Index" mm="Base" id="WaterfrontIndex" class="btn btn-secondary-a rounded-5 fs-6 w-100 h-100 align-content-around  p-3 text-center">
+                            <i class="fa fa-anchor"></i>
+                            لیست اسکله ها
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="~/Gate/Index" mm="Base" id="GateIndex" class="btn btn-secondary-a rounded-5 fs-6 w-100 h-100 align-content-around  p-3 text-center">
+                            <i class="fa fa-anchor"></i>
+                            لیست دروازه ها
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="~/Warehouse/Site" mm="Base" id="WarehouseSite" class="btn btn-secondary-a rounded-5 fs-6 w-100 h-100 align-content-around  p-3 text-center">
+                            <i class="fab fa-megaport"></i>
+                            سایت ها
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="~/Device/Index" mm="Base" id="DeviceIndex" class="btn btn-secondary-a rounded-5 fs-6 w-100 h-100 align-content-around  p-3 text-center">
+                            <i class="fas fa-microchip"></i>
+                            دستگاه های FPN
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="~/SeoStopServiceType/Index" mm="Base" id="SeoStopServiceTypeIndex" class="btn btn-secondary-a rounded-5 fs-6 w-100 h-100 align-content-around  p-3 text-center">
+                            <i class="fas fa-exclamation-circle"></i>
+                            انواع توقف سرویس
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="~/Baskool/Index" mm="Base" id="BaskoolIndex" class="btn btn-secondary-a rounded-5 fs-6 w-100 h-100 align-content-around  p-3 text-center">
+                            <i class="fa fa-sitemap"></i>
+                            باسکول ها
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="~/AreaPoint/AreaCategories" mm="Base" id="AreaPointAreaCategories" class="btn btn-secondary-a rounded-5 fs-6 w-100 h-100 align-content-around  p-3 text-center">
+                            <i class="fa fa-sitemap"></i>
+                            ناحیه ها
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="~/Simcard/Index" mm="Base" id="SimcardIndex" class="btn btn-secondary-a rounded-5 fs-6 w-100 h-100 align-content-around  p-3 text-center">
+                            <i class="fas fa-sim-card"></i>
+                            سیم کارت ها
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="~/LaborWorkingGroup/Index" mm="Base" id="LaborWorkingGroupIndex" class="btn btn-secondary-a rounded-5 fs-6 w-100 h-100 align-content-around  p-3 text-center">
+                            <i class="fas fa-hands-helping"></i>
+                            گروه کاری
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="~/Country/Index" mm="Base" id="CountryIndex" class="btn btn-secondary-a rounded-5 fs-6 w-100 h-100 align-content-around  p-3 text-center">
+                            <i class="fas fa-globe"></i>
+                            کشورها
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* offTarrifModal *@
+
+<div class="modal fade" id="offTariffModal" tabindex="-1" aria-labelledby="offTariffModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="offTariffModalLabel"> لیست تخفیف‌های قانونی </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div>
+                    <div class="table-responsive">
+                        <table class="table table-hover table-striped">
+                            <thead class="table-primary">
+                                <tr>
+                                    <th scope="col" class="text-center">عنوان</th>
+                                    <th scope="col" class="text-center">درصد تخفیف</th>
+                                    <th scope="col" class="text-center">شماره جدول</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>تخفیف برای شناورهای ایرانی</td>
+                                    <td class="discount text-center">۵۰٪</td>
+                                    <td class="text-center"><span class="badge bg-primary">جدول ۶</span></td>
+                                </tr>
+                                <tr>
+                                    <td>تخفیف برای شناورهای ایرانی در عملیات معکوس</td>
+                                    <td class="discount text-center fw-bold text-success">۲۵٪</td>
+                                    <td class="text-center">-</td>
+                                </tr>
+                                <tr>
+                                    <td>تخفیف برای شناورهای مسافربری ایرانی</td>
+                                    <td class="discount text-center fw-bold text-success">۳۰٪</td>
+                                    <td class="text-center">-</td>
+                                </tr>
+                                <tr>
+                                    <td>تخفیف برای کالاهای صادراتی</td>
+                                    <td class="discount text-center fw-bold text-success">۲۰٪</td>
+                                    <td class="text-center">-</td>
+                                </tr>
+                                <tr>
+                                    <td>تخفیف برای صادرات کالاهای اولویت‌دار</td>
+                                    <td class="discount text-center fw-bold text-success">۳۰٪</td>
+                                    <td class="text-center">-</td>
+                                </tr>
+                                <tr>
+                                    <td>تخفیف برای ترانشیپ داخلی</td>
+                                    <td class="discount text-center fw-bold text-success">۵۰٪</td>
+                                    <td class="text-center">-</td>
+                                </tr>
+                                <tr>
+                                    <td>تخفیف برای ترانشیپ خارجی</td>
+                                    <td class="discount text-center fw-bold text-success">۲۵٪</td>
+                                    <td class="text-center">-</td>
+                                </tr>
+                                <tr>
+                                    <td>تخفیف برای عملیات کابوتاژ</td>
+                                    <td class="discount text-center fw-bold text-success">۴۰٪</td>
+                                    <td class="text-center">-</td>
+                                </tr>
+                                <tr>
+                                    <td>تخفیف برای کابوتاژ مواد نفتی</td>
+                                    <td class="discount text-center fw-bold text-success">۵۰٪</td>
+                                    <td class="text-center">-</td>
+                                </tr>
+                                <tr>
+                                    <td>تخفیف برای عملیات در مناطق آزاد (قشم، کیش)</td>
+                                    <td class="discount text-center fw-bold text-success">۳۰٪</td>
+                                    <td class="text-center">-</td>
+                                </tr>
+                                <tr>
+                                    <td>تخفیف برای کالاهای پروژه‌های ملی</td>
+                                    <td class="discount text-center fw-bold text-success">۲۵٪</td>
+                                    <td class="text-center">-</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+@* moafTarrifModal  *@
+
+<div class="modal fade" id="moafTarrifModal" tabindex="-1" aria-labelledby="moafTarrifModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="moafTarrifModalLabel"> لیست معافیت قانونی </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="">
+                    <ul>
+                        <li class=" p-2 my-3 bg-light text-dark shadow-sm fs-6 border-end border-info border-3 rounded ">  <span> <i class="fas fa-check-circle text-primary align-middle"></i> </span> معافیت کامل از همه هزینه‌ها برای کمک‌های بشردوستانه</li>
+                        <li class=" p-2 my-3 bg-light text-dark shadow-sm fs-6 border-end border-info border-3 rounded "><span> <i class="fas fa-check-circle text-primary align-middle"></i> </span>معافیت کامل از آب‌بها و خدمات برای کشتی‌های نجات و امداد </li>
+                        <li class=" p-2 my-3 bg-light text-dark shadow-sm fs-6 border-end border-info border-3 rounded "><span> <i class="fas fa-check-circle text-primary align-middle"></i> </span> معافیت کامل برای کشتی‌های تحقیقاتی و نظامی</li>
+                        <li class=" p-2 my-3 bg-light text-dark shadow-sm fs-6 border-end border-info border-3 rounded "><span> <i class="fas fa-check-circle text-primary align-middle"></i> </span> معافیت از انبارداری برای کانتینرهای خالی (Empty)  </li>
+                        <li class=" p-2 my-3 bg-light text-dark shadow-sm fs-6 border-end border-info border-3 rounded "><span> <i class="fas fa-check-circle text-primary align-middle"></i> </span> معافیت از باربری و انبارداری در بندر چابهار (برای ترانزیت)</li>
+                        <li class=" p-2 my-3 bg-light text-dark shadow-sm fs-6 border-end border-info border-3 rounded "><span> <i class="fas fa-check-circle text-primary align-middle"></i> </span>معافیت از هزینه‌های اسنادی در منطقه آزاد قشم </li>
+                        <li class=" p-2 my-3 bg-light text-dark shadow-sm fs-6 border-end border-info border-3 rounded "> <span> <i class="fas fa-check-circle text-primary align-middle"></i> </span>معافیت از خدمات نظارتی در منطقه آزاد کیش</li>
+                        <li class=" p-2 my-3 bg-light text-dark shadow-sm fs-6 border-end border-info border-3 rounded "><span> <i class="fas fa-check-circle text-primary align-middle"></i> </span>معافیت از هزینه باربری برای کالاهای اورژانس پزشکی</li>
+                        <li class=" p-2 my-3 bg-light text-dark shadow-sm fs-6 border-end border-info border-3 rounded "><span> <i class="fas fa-check-circle text-primary align-middle"></i> </span>معافیت از هزینه باربری برای کالاهای بلایا (تأییدیه ستاد بحران)</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+<partial name="_ModalTariff" />

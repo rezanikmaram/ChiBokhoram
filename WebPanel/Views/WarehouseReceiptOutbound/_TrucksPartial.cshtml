@@ -1,0 +1,51 @@
+@model WroTruckPageDto
+
+<div class="d-flex justify-content-between mb-3">
+    <h5>لیست کامیون ها</h5>
+    <button class="btn btn-success rounded" onclick="showAddTruckModal()">
+        <i class="fa-solid fa-plus"></i> کامیون جدید
+    </button>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-sm table-bordered table-hover table-striped" id="trucks-table">
+        <thead class="bg-primary">
+            <tr>
+                <th style="width: 5%">#</th>
+                <th>پلاک کامیون</th>
+                <th>تاریخ ثبت</th>
+                <th>مجوز</th>
+                <th>عملیات</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model?.List?.Any() == true)
+            {
+                int i = 1;
+                foreach (var item in Model.List)
+                {
+                    <tr>
+                        <td class="align-middle px-2 text-center">@(i++)</td>
+                        <td class="align-middle px-2 text-center">@item.CarPlates</td>
+                        <td class="align-middle px-2 text-center">@item.CreatedDateFa</td>
+                        <td class="align-middle px-2 text-center">@(item.Document?.Number ?? "---")</td>
+                        <td class="align-middle px-2 text-center">
+                            <a class="btn btn-warning px-2 btn-sm btn-icon curve" onclick="editTruck('@item.Id');">
+                                <i class="icon-pencil align-middle fs-6"></i>
+                            </a>
+                            <a class="btn btn-danger px-2 btn-sm btn-icon curve" onclick="deleteTruck('@item.Id');">
+                                <i class="icon-trash fs-6 align-middle fa-flip-horizontal"></i>
+                            </a>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="5" class="text-center">هیچ کامیونی ثبت نشده است</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

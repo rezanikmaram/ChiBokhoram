@@ -1,0 +1,389 @@
+﻿
+@model GearWorkSessionPageDto
+@{
+    ViewData["Title"] = "گزارش فعالیت روزانه تجهیزات";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+@section style {
+    <link rel="stylesheet" href="/Bootstrap/css/bootstrap.min.css">
+    <style>
+        .table th, .table td {
+            vertical-align: middle;
+        }
+
+        .expandable-row {
+            cursor: pointer;
+        }
+
+        .expandable-content {
+            display: none;
+        }
+
+            .expandable-content.show {
+                display: table-row;
+            }
+
+        .p-6 {
+            padding: 6px;
+        }
+
+        .btn-sm {
+            padding: 0.25rem 0.5rem;
+        }
+
+        .chevron-up {
+            transform: rotate(180deg);
+        }
+    </style>
+}
+
+<div class="">
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center p-4">
+            <h3>گزارش فعالیت روزانه تجهیزات</h3>
+        </div>
+        <div class="card-body pt-0">
+            <!-- Filter Form -->
+            <form id="formFilter" asp-action="Index" method="post" class="mb-4">
+                <div class="row gy-4">
+                    <div class="form-group col-md-2">
+                        <label for="Filter_Date">تاریخ</label>
+                        <div class="input-group">
+                            <input asp-for="Filter.Date" id="Filter_Date" class="form-control" placeholder="YYYY/MM/DD" autocomplete="off" />
+                            <span asp-validation-for="Filter.Date" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="submit" class="btn btn-success btn-lg px-4 py-1 fs-6" style="border-radius:5px">فیلتر</button>
+                    </div>
+                </div>
+                <input type="hidden" id="pageNumber" name="p" value="@Model.Data.PageNumber" />
+            </form>
+
+            <!-- Main Table -->
+            <table class="table table-bordered table-hover">
+                <thead class="bg-primary text-white">
+                    <tr>
+                        <th>تجهیز</th>
+                        <th>نام پرسنل</th>
+                        <th>نوع عملیات</th>
+                        <th>نوع کار</th>
+                        <th>زمان شروع</th>
+                        <th>زمان پایان</th>
+                        <th>توضیحات</th>
+                        <th>عملیات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Data?.Data != null && Model.Data.Data.Any())
+                    {
+                        foreach (var item in Model.Data.Data)
+                        {
+                            <tr class="expandable-row" data-expand-target="collapse-@item.Id">
+                                <td>@item.Gear.Name (@item.Gear.Plaque)</td>
+                                <td>@item.Personel.FirstName @item.Personel.LastName</td>
+                                <td>@item.GearMaintenanceTypeTitle</td>
+                                <td>@item.GearTaskTypeTitle</td>
+                                <td>@item.StartTimeFa</td>
+                                <td>@item.EndTimeFa</td>
+                                <td>@item.Description</td>
+                                <td>
+                                    <i class="fa-solid fa-chevron-down"></i>
+                                    <button class="btn btn-sm btn-primary ms-2" onclick="printRow('@item.Id', '@item.Gear.Name', '@item.Gear.Plaque', '@item.Personel.FirstName @item.Personel.LastName', '@item.GearMaintenanceTypeTitle', '@item.GearTaskTypeTitle', '@item.StartTimeFa', '@item.EndTimeFa', '@item.Description', '@(item.GearWorkRepairOrder != null ? item.GearWorkRepairOrder.WorkRepairOrderTypeTitle : "")', '@(item.GearWorkRepairOrder != null ? item.GearWorkRepairOrder.SummaryDescription : "")', '@(System.Text.Json.JsonSerializer.Serialize(item.GearWorkRepairOrder?.GearWorkRepairOrderItems ?? new List<GetGearWorkRepairOrderItemWebDto>()))')">
+                                        <i class="fa-solid fa-print"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr class="expandable-content" id="collapse-@item.Id">
+                                <td colspan="8" class="p-0">
+                                    <div class="card card-body m-3">
+                                        @if (item.GearWorkRepairOrder != null)
+                                        {
+                                            <h6>جزئیات دستور کار تعمیر</h6>
+                                            <p><strong>نوع سرویس تعمیر:</strong> @item.GearWorkRepairOrder.WorkRepairOrderTypeTitle</p>
+                                            <p><strong>توضیحات:</strong> @item.GearWorkRepairOrder.SummaryDescription</p>
+                                            @if (item.GearWorkRepairOrder.GearWorkRepairOrderItems != null && item.GearWorkRepairOrder.GearWorkRepairOrderItems.Any())
+                                            {
+                                                <table class="table table-sm">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>نام آیتم</th>
+                                                            <th>تعداد</th>
+                                                            <th>واحد</th>
+                                                            <th>پرسنل</th>
+                                                            <th>نوع حرفه</th>
+                                                            <th>ساعات کار</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach (var repairItem in item.GearWorkRepairOrder.GearWorkRepairOrderItems)
+                                                        {
+                                                            <tr>
+                                                                <td>@repairItem.ItemName</td>
+                                                                <td>@repairItem.Count</td>
+                                                                <td>@repairItem.UnitTitle</td>
+                                                                <td>@repairItem.Personel.FirstName @repairItem.Personel.LastName</td>
+                                                                <td>@repairItem.WorkRepairOrderCareerTypeTitle</td>
+                                                                <td>@repairItem.WorkHour</td>
+                                                            </tr>
+                                                        }
+                                                    </tbody>
+                                                </table>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <p>بدون دستور کار تعمیر</p>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="8" class="text-center">داده‌ای برای نمایش وجود ندارد</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            <!-- Pagination -->
+            @if (Model.Data != null && Model.Data.TotalItems > Model.Data.PageSize)
+            {
+                <div class="mt-4">
+                    <cs-pager cs-paging-pagesize="@Model.Data.PageSize"
+                              cs-paging-pagenumber="@Model.Data.PageNumber"
+                              cs-paging-totalitems="@Model.Data.TotalItems"
+                              cs-paging-maxpageritems="10"
+                              cs-pagenumber-param="p"
+                              cs-show-first-last="true"
+                              cs-suppress-empty-nextprev="true"
+                              cs-suppress-inactive-firstlast="true"
+                              cs-show-numbered="true"
+                              cs-first-page-text="ابتدا"
+                              cs-last-page-text="انتها"
+                              cs-next-page-text="بعدی"
+                              cs-previous-page-text="قبلی"
+                              cs-first-page-title="ابتدا"
+                              cs-last-page-title="انتها"
+                              cs-next-page-title="بعدی"
+                              cs-previous-page-title="قبلی"
+                              cs-pager-li-current-class="page-item active"
+                              cs-pager-li-other-class="page-item"
+                              cs-pager-li-non-active-class="page-item disabled"
+                              cs-pager-link-current-class="page-link"
+                              cs-pager-link-other-class="page-link"
+                              asp-controller="GearWorkSession"
+                              asp-action="Index"
+                              cs-paging-querystring="Filter.Date=@Model.Filter.Date">
+                    </cs-pager>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section script {
+    <script>
+        // Initialize kamaDatepicker for Persian calendar
+        kamaDatepicker('Filter_Date', customOptions);
+
+        // Manual row expander script
+        document.querySelectorAll('.expandable-row').forEach(row => {
+            row.addEventListener('click', function () {
+                const targetId = this.getAttribute('data-expand-target');
+                const target = document.getElementById(targetId);
+                const chevron = this.querySelector('i.fa-solid.fa-chevron-down');
+                if (target) {
+                    target.classList.toggle('show');
+                    if (chevron) {
+                        chevron.classList.toggle('chevron-up');
+                    }
+                }
+            });
+        });
+
+        // Handle pagination link clicks
+        $(".page-link").click(function (e) {
+            e.preventDefault();
+            var page = new URL($(this).attr('href'), window.location.origin)
+                .searchParams.get('p') || "1";
+            $("#pageNumber").val(page);
+            $("#formFilter").submit();
+        });
+
+        // Print row function with improved style and horizontal layout
+        function printRow(id, gearName, gearPlaque, personel, maintenanceType, taskType, startTime, endTime, description, repairOrderType, repairOrderDescription, repairOrderItemsJson) {
+            const repairOrderItems = JSON.parse(repairOrderItemsJson);
+            let html = `
+                        <html>
+                        <head>
+                            <title>چاپ گزارش فعالیت روزانه</title>
+                            <style>
+                                body {
+                                    font-family: iransans, Roboto, sans-serif;
+                                    direction: rtl;
+                                    margin: 20px;
+                                    line-height: 1.6;
+                                    color: #333;
+                                }
+                                .header {
+                                    text-align: center;
+                                    border-bottom: 2px solid #005566;
+                                    padding-bottom: 10px;
+                                    margin-bottom: 20px;
+                                }
+                                .header h1 {
+                                    margin: 0;
+                                    font-size: 24px;
+                                    color: #005566;
+                                }
+                                .header .logo-placeholder {
+                                    font-size: 16px;
+                                    color: #555;
+                                }
+                                .main-details {
+                                    display: flex;
+                                    flex-wrap: wrap;
+                                    gap: 20px;
+                                    background-color: #f9f9f9;
+                                    padding: 15px;
+                                    border: 1px solid #ddd;
+                                    border-radius: 8px;
+                                    margin-bottom: 20px;
+                                }
+                                .main-details .detail-item {
+                                    flex: 1 1 200px;
+                                    min-width: 200px;
+                                }
+                                .main-details .detail-item strong {
+                                    display: block;
+                                    color: #005566;
+                                    font-weight: bold;
+                                }
+                                .section-title {
+                                    font-size: 18px;
+                                    color: #005566;
+                                    margin: 20px 0 10px;
+                                    border-bottom: 1px solid #ddd;
+                                    padding-bottom: 5px;
+                                }
+                                table {
+                                    width: 100%;
+                                    border-collapse: collapse;
+                                    margin-top: 10px;
+                                    background-color: #fff;
+                                }
+                                th, td {
+                                    border: 1px solid #ddd;
+                                    padding: 10px;
+                                    text-align: right;
+                                    font-size: 14px;
+                                }
+                                th {
+                                    background-color: #005566;
+                                    color: #fff;
+                                    font-weight: bold;
+                                }
+                                tr:nth-child(even) {
+                                    background-color: #f5f5f5;
+                                }
+                                p {
+                                    margin: 10px 0;
+                                }
+                                @@media print {
+                                    body {
+                                        margin: 0;
+                                    }
+                                    .header {
+                                        border-bottom: 2px solid #005566;
+                                    }
+                                    .main-details {
+                                        border: 1px solid #000;
+                                    }
+                                    table {
+                                        border-collapse: collapse;
+                                    }
+                                    th, td {
+                                        border: 1px solid #000;
+                                    }
+                                }
+                            </style>
+                        </head>
+                        <body>
+                            <div class="header">
+                                <h1>گزارش فعالیت روزانه تجهیزات</h1>
+                                <div class="logo-placeholder">[لوگوی شرکت]</div>
+                            </div>
+                            <div class="main-details">
+                                <div class="detail-item"><strong>تجهیز:</strong> ${gearName} (${gearPlaque})</div>
+                                <div class="detail-item"><strong>نام پرسنل:</strong> ${personel}</div>
+                                <div class="detail-item"><strong>نوع عملیات:</strong> ${maintenanceType}</div>
+                                <div class="detail-item"><strong>نوع کار:</strong> ${taskType}</div>
+                                <div class="detail-item"><strong>زمان شروع:</strong> ${startTime}</div>
+                                <div class="detail-item"><strong>زمان پایان:</strong> ${endTime}</div>
+                                <div class="detail-item"><strong>توضیحات:</strong> ${description}</div>
+                            </div>
+                    `;
+
+            if (repairOrderType && repairOrderDescription) {
+                html += `
+                            <h2 class="section-title">جزئیات دستور کار تعمیر</h2>
+                            <p><strong>نوع سرویس تعمیر:</strong> ${repairOrderType}</p>
+                            <p><strong>توضیحات:</strong> ${repairOrderDescription}</p>
+                        `;
+                if (repairOrderItems.length > 0) {
+                    html += `
+                                <h3 class="section-title">آیتم‌های دستور کار تعمیر</h3>
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>نام آیتم</th>
+                                            <th>تعداد</th>
+                                            <th>واحد</th>
+                                            <th>پرسنل</th>
+                                            <th>نوع حرفه</th>
+                                            <th>ساعات کار</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                            `;
+                    repairOrderItems.forEach(item => {
+                        html += `
+                                    <tr>
+                                        <td>${item.ItemName}</td>
+                                        <td>${item.Count}</td>
+                                        <td>${item.UnitTitle}</td>
+                                        <td>${item.Personel.FirstName} ${item.Personel.LastName}</td>
+                                        <td>${item.WorkRepairOrderCareerTypeTitle}</td>
+                                        <td>${item.WorkHour}</td>
+                                    </tr>
+                                `;
+                    });
+                    html += `
+                                    </tbody>
+                                </table>
+                            `;
+                }
+            } else {
+                html += `
+                            <h2 class="section-title">جزئیات دستور کار تعمیر</h2>
+                            <p>بدون دستور کار تعمیر</p>
+                        `;
+            }
+
+            html += `
+                        </body>
+                        </html>
+                    `;
+
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(html);
+            printWindow.document.close();
+            printWindow.print();
+        }
+    </script>
+}

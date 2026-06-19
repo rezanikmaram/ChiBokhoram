@@ -1,0 +1,684 @@
+@model TaliDetailPageDto
+@{
+    ViewData["Title"] = "جزئیات تالی ها";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+
+    var filterMode = ViewBag.FilterMode as string ?? "Voyage";
+    var isDateFilterMode = (filterMode ?? string.Empty).Trim().ToLowerInvariant() == "daterange";
+    var voyageInfo = Model?.VogageInfo;
+    var filter = Model?.Filter;
+    var hasSeoFilter = filter?.SeoId.HasValue == true && filter.SeoId.Value != Guid.Empty;
+    var defaultDateFa = DateTimeOffset.Now.ToShortPersianDateString();
+    var dateFromValue = !string.IsNullOrWhiteSpace(filter?.DateFromFa) ? filter?.DateFromFa : defaultDateFa;
+    var dateToValue = !string.IsNullOrWhiteSpace(filter?.DateToFa) ? filter?.DateToFa : defaultDateFa;
+    var voyageIdRoute = filter?.VoyageId.HasValue == true && filter.VoyageId.Value != Guid.Empty ? filter.VoyageId.Value.ToString() : null;
+    var seoIdRoute = filter?.SeoId.HasValue == true && filter.SeoId.Value != Guid.Empty ? filter.SeoId.Value.ToString() : null;
+
+    var returnPage = 0;
+    if (ViewBag.returnPage != null)
+    {
+        int.TryParse(ViewBag.returnPage.ToString(), out returnPage);
+    }
+
+    var pageHeading = isDateFilterMode ? "تالی ها بر اساس بازه زمانی" : $"تالی های سفر - {voyageInfo?.ShipShipName}";
+    var taliGroups = Model?.List ?? new List<TaliDetailGroupTruckDto>();
+
+    
+    bool isAriaBanader = ViewBag.IsAriaBanader == true ||
+                        (ViewBag.IsAriaBanader != null && string.Equals(ViewBag.IsAriaBanader.ToString(), "true", StringComparison.OrdinalIgnoreCase));
+}
+
+<style>
+    .table-responsive {
+        overflow-x: auto;
+        width: 100%;
+        max-height: 70vh;
+    }
+
+    #data-table {
+        table-layout: auto;
+        width: max-content;
+        min-width: 100%;
+    }
+
+        #data-table th,
+        #data-table td {
+            white-space: nowrap;
+            padding: 8px;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+
+</style>
+
+<div class="col-lg-12">
+    <div class="card">
+        <div class="card-header pb-0 mb-0">
+            <div class="row gy-4 ">
+                <div class="col-md-4 d-flex align-items-center">
+                    <h3 class="title">
+                        @if (!isDateFilterMode)
+                        {
+                            if (returnPage == 100 && hasSeoFilter)
+                            {
+                                <a asp-controller="Seo" asp-action="SeoWarehouseReceipt" asp-route-seoId="@filter?.SeoId">
+                                    <i class="fa-solid fa-right-to-bracket me-2"></i>
+                                </a>
+                            }
+                            if (returnPage == 200)
+                            {
+                                <a asp-controller="Seo" asp-action="SeoAccessPage" asp-route-seoId="@filter?.SeoId">
+                                    <i class="fa-solid fa-right-to-bracket me-2"></i>
+                                </a>
+                            }
+                        }
+                        @if (!isDateFilterMode && filter?.VoyageId.HasValue == true && filter.VoyageId.Value != Guid.Empty)
+                        {
+                            <a asp-controller="Voyage" asp-action="VoyageSeo" asp-route-voyageId="@filter.VoyageId.Value" class="ms-2">
+                                <i class="fa-solid fa-arrow-right me-1"></i>
+                            </a>
+                        }
+                        <i class="icon-frane"></i> @pageHeading
+                    </h3>
+                </div>
+                <div class="d-block d-lg-flex col-md-8 col-12 justify-content-end align-items-center gap-2">
+                    @if (isDateFilterMode)
+                    {
+                        <div class="mt-3 mt-lg-0">
+                            <a class="btn btn-success"
+                               asp-action="ExportDetailTaliDateRangeExcel"
+                               asp-route-DateFromFa="@dateFromValue"
+                               asp-route-DateToFa="@dateToValue"
+                               asp-route-VoyageId="@voyageIdRoute"
+                               asp-route-SeoId="@seoIdRoute"
+                               asp-route-Search="@filter?.Search"
+                               asp-route-ProductOwnerCompanyName="@filter?.ProductOwnerCompanyName"
+                               asp-route-ProductCategory="@filter?.ProductCategory"
+                               asp-route-TruckPlateOrChassis="@filter?.TruckPlateOrChassis"
+                               asp-route-ProductName="@filter?.ProductName"
+                               asp-route-DockTaliPersonelFirstName="@filter?.DockTaliPersonelFirstName"
+                               asp-route-AreaPersonelFirstName="@filter?.AreaPersonelFirstName"
+                               asp-route-AreaTaliWarehouseName="@filter?.AreaTaliWarehouseName"
+                               asp-route-ValidationStatus="@filter?.ValidationStatus">
+                                 <i class="fa-solid fa-file-excel me-2"></i>دانلود خروجی اکسل
+                             </a>
+                         </div>
+                     }
+                     else
+                     {
+                         <div class="mt-3 mt-lg-0">
+                             <a class="btn btn-success"
+                                asp-action="ExportDetailTaliExcel"
+                                asp-route-VoyageId="@voyageIdRoute"
+                                asp-route-SeoId="@seoIdRoute"
+                                asp-route-Search="@filter?.Search"
+                                asp-route-ProductOwnerCompanyName="@filter?.ProductOwnerCompanyName"
+                                asp-route-ProductCategory="@filter?.ProductCategory"
+                                asp-route-TruckPlateOrChassis="@filter?.TruckPlateOrChassis"
+                                asp-route-ProductName="@filter?.ProductName"
+                                asp-route-DockTaliPersonelFirstName="@filter?.DockTaliPersonelFirstName"
+                                asp-route-AreaPersonelFirstName="@filter?.AreaPersonelFirstName"
+                                asp-route-AreaTaliWarehouseName="@filter?.AreaTaliWarehouseName"
+                                asp-route-ValidationStatus="@filter?.ValidationStatus">
+                                <i class="fa-solid fa-file-excel me-2"></i>دانلود خروجی اکسل
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="card-body pt-1">
+            @if (isDateFilterMode)
+            {
+
+                <form asp-controller="Voyage" asp-action="DetailTaliDateRange" method="get" class="row gy-3 align-items-end">
+                    <div class="col-md-2 col-sm-6">
+                        <label class="form-label"><i class="fa-solid fa-calendar me-2 text-primary"></i> از تاریخ:</label>
+                        <input type="text" class="form-control" id="DateFromFa" name="DateFromFa" autocomplete="off" placeholder="از تاریخ" value="@dateFromValue" />
+                    </div>
+                    <div class="col-md-2 col-sm-6">
+                        <label class="form-label"><i class="fa-solid fa-calendar me-2 text-primary"></i> تا تاریخ:</label>
+                        <input type="text" class="form-control" id="DateToFa" name="DateToFa" autocomplete="off" placeholder="تا تاریخ" value="@dateToValue" />
+                    </div>
+                    <div class="col-md-2 col-sm-6">
+                        <label class="form-label"><i class="fa-solid fa-building me-2 text-primary"></i> صاحب کالا:</label>
+                        <input type="text" class="form-control" name="ProductOwnerCompanyName" placeholder="صاحب کالا" value="@filter?.ProductOwnerCompanyName" />
+                    </div>
+                    <div class="col-md-2 col-sm-6">
+                        <label class="form-label"><i class="fa-solid fa-box me-2 text-primary"></i> نوع کالا:</label>
+                        <input type="text" class="form-control" name="ProductCategory" placeholder="نوع کالا" value="@filter?.ProductCategory" />
+                    </div>
+                    <div class="col-md-2 col-sm-6">
+                        <label class="form-label"><i class="fa-solid fa-truck me-2 text-primary"></i> پلاک/شاسی:</label>
+                        <input type="text" class="form-control" name="TruckPlateOrChassis" placeholder="پلاک کامیون و شاسی" value="@filter?.TruckPlateOrChassis" />
+                    </div>
+                    <div class="col-md-2 col-sm-6">
+                        <label class="form-label"><i class="fa-solid fa-cube me-2 text-primary"></i> کالا:</label>
+                        <input type="text" class="form-control" name="ProductName" placeholder="کالا" value="@filter?.ProductName" />
+                    </div>
+                    <div class="col-md-2 col-sm-6">
+                        <label class="form-label"><i class="fa-solid fa-user me-2 text-primary"></i> کاربر اسکله:</label>
+                        <input type="text" class="form-control" name="DockTaliPersonelFirstName" placeholder="کاربر اسکله" value="@filter?.DockTaliPersonelFirstName" />
+                    </div>
+                    <div class="col-md-2 col-sm-6">
+                        <label class="form-label"><i class="fa-solid fa-user me-2 text-primary"></i> کاربر محوطه:</label>
+                        <input type="text" class="form-control" name="AreaPersonelFirstName" placeholder="کاربر محوطه" value="@filter?.AreaPersonelFirstName" />
+                    </div>
+                    <div class="col-md-2 col-sm-6">
+                        <label class="form-label"><i class="fa-solid fa-warehouse me-2 text-primary"></i> انبار:</label>
+                        <input type="text" class="form-control" name="AreaTaliWarehouseName" placeholder="انبار" value="@filter?.AreaTaliWarehouseName" />
+                    </div>
+                    <div class="col-md-2 col-sm-6">
+                        <label class="form-label"><i class="fa-solid fa-check-circle me-2 text-primary"></i> وضعیت تایید:</label>
+                        <select class="form-select" name="ValidationStatus">
+                            <option value="">همه</option>
+                            <option value="0" selected="@(filter?.ValidationStatus == 0)">معتبر</option>
+                            <option value="1" selected="@(filter?.ValidationStatus == 1)">غیرمعتبر</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2 col-sm-6">
+                        <button type="submit" class="btn btn-success">
+                            فیلتر
+                        </button>
+                    </div>
+                </form>
+
+            }
+            else
+            {
+                <form asp-controller="Voyage" asp-action="DetailTali" method="get" class="row gy-3 align-items-end mb-4">
+                    <input type="hidden" name="voyageId" value="@voyageIdRoute" />
+                    <input type="hidden" name="seoId" value="@seoIdRoute" />
+                    <div class="col-md-2 col-sm-6">
+                        <label class="form-label"><i class="fa-solid fa-building me-2 text-primary"></i> صاحب کالا:</label>
+                        <input type="text" class="form-control" name="ProductOwnerCompanyName" placeholder="صاحب کالا" value="@filter?.ProductOwnerCompanyName" />
+                    </div>
+                    <div class="col-md-2 col-sm-6">
+                        <label class="form-label"><i class="fa-solid fa-box me-2 text-primary"></i> نوع کالا:</label>
+                        <input type="text" class="form-control" name="ProductCategory" placeholder="نوع کالا" value="@filter?.ProductCategory" />
+                    </div>
+                    <div class="col-md-2 col-sm-6">
+                        <label class="form-label"><i class="fa-solid fa-truck me-2 text-primary"></i> پلاک/شاسی:</label>
+                        <input type="text" class="form-control" name="TruckPlateOrChassis" placeholder="پلاک کامیون و شاسی" value="@filter?.TruckPlateOrChassis" />
+                    </div>
+                    <div class="col-md-2 col-sm-6">
+                        <label class="form-label"><i class="fa-solid fa-cube me-2 text-primary"></i> کالا:</label>
+                        <input type="text" class="form-control" name="ProductName" placeholder="کالا" value="@filter?.ProductName" />
+                    </div>
+                    <div class="col-md-2 col-sm-6">
+                        <label class="form-label"><i class="fa-solid fa-user me-2 text-primary"></i> کاربر اسکله:</label>
+                        <input type="text" class="form-control" name="DockTaliPersonelFirstName" placeholder="کاربر اسکله" value="@filter?.DockTaliPersonelFirstName" />
+                    </div>
+                    <div class="col-md-2 col-sm-6">
+                        <label class="form-label"><i class="fa-solid fa-user me-2 text-primary"></i> کاربر محوطه:</label>
+                        <input type="text" class="form-control" name="AreaPersonelFirstName" placeholder="کاربر محوطه" value="@filter?.AreaPersonelFirstName" />
+                    </div>
+                    <div class="col-md-2 col-sm-6">
+                        <label class="form-label"><i class="fa-solid fa-warehouse me-2 text-primary"></i> انبار:</label>
+                        <input type="text" class="form-control" name="AreaTaliWarehouseName" placeholder="انبار" value="@filter?.AreaTaliWarehouseName" />
+                    </div>
+                    <div class="col-md-2 col-sm-6">
+                        <label class="form-label"><i class="fa-solid fa-check-circle me-2 text-primary"></i> وضعیت تایید:</label>
+                        <select class="form-select" name="ValidationStatus">
+                            <option value="">همه</option>
+                            <option value="0" selected="@(filter?.ValidationStatus == 0)">معتبر</option>
+                            <option value="1" selected="@(filter?.ValidationStatus == 1)">غیرمعتبر</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2 col-sm-6">
+                        <button type="submit" class="btn btn-success">
+                            فیلتر
+                        </button>
+                    </div>
+                </form>
+            }
+            <div class="table-responsive mt-4">
+                <table class="table table-bordered table-hover table-striped mb-5" id="data-table">
+                    <thead class="bg-primary position-sticky top-0" style="z-index: 99;">
+                        <tr>
+                            <th class="px-3 fs-6 text-center">#</th>
+                            <th class="px-3 fs-6 text-center">تاریخ</th>
+                            <th class="px-3 fs-6 text-center">نام شناور</th>
+                            <th class="px-3 fs-6 text-center">نوع شمارش</th>
+                            <th class="px-3 fs-6 text-center">نوع حمل</th>
+                            @if (!isAriaBanader)
+                            {
+                                <th class="px-3 fs-6 text-center">چند سره بودن</th>
+                            }
+                            <th class="px-3 fs-6 text-center">وسیله جا به جایی</th>
+                            @if (!isAriaBanader)
+                            {
+                                <th class="px-3 fs-6 text-center">تفکیک یا صفافی</th>
+                            }
+                            <th class="px-3 fs-6 text-center">صاحب کالا</th>
+                            @if (!isAriaBanader)
+                            {
+                                <th class="px-3 fs-6 text-center">گروه کارگری</th>
+                            }
+                            <th class="px-3 fs-6 text-center">تعداد تجهیز استفاده شده</th>
+                            <th class="px-3 fs-6 text-center">نوع ورود کالا</th>
+                            <th class="px-3 fs-6 text-center">نوع ترانزیت</th>
+                            <th class="px-3 fs-6 text-center">پلاک کامیون</th>
+                            <th class="px-3 fs-6 text-center">شماره شاسی</th>
+                            <th class="px-3 fs-6 text-center">وزن خالی</th>
+                            <th class="px-3 fs-6 text-center">وزن پر</th>
+                            <th class="px-3 fs-6 text-center">وزن کالا</th>
+                            <th class="px-3 fs-6 text-center">بارنامه</th>
+                            <th class="px-3 fs-6 text-center">کالا</th>
+                            <th class="px-3 fs-6 text-center">نوع انتقال کانتینر</th>
+                            <th class="px-3 fs-6 text-center">شماره کانتینر</th>
+                            <th class="px-3 fs-6 text-center">پلمپ کانتینر</th>
+                            <th class="px-3 fs-6 text-center">اندازه کانتینر</th>
+                            <th class="px-3 fs-6 text-center">نوع کانتینر</th>
+                            <th class="px-3 fs-6 text-center">انبار کشتی</th>
+                            <th class="px-3 fs-6 text-center">شمارش اسکله</th>
+                            <th class="px-3 fs-6 text-center">مشکل اسکله</th>
+                            <th class="px-3 fs-6 text-center">کاربر اسکله</th>
+                            <th class="px-3 fs-6 text-center">کاربر محوطه</th>
+                            <th class="px-3 fs-6 text-center">انبار</th>
+                            <th class="px-3 fs-6 text-center">بخش انبار</th>
+                            <th class="px-3 fs-6 text-center">شمارش محوطه</th>
+                            <th class="px-3 fs-6 text-center">مشکل محوطه</th>
+                            <th class="px-3 fs-6 text-center">عملیات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            int rowIndex = 1;
+                            foreach (var truck in taliGroups)
+                            {
+                                var totalTruckRows = truck.TaliProducts.Sum(p =>
+                                p.TaliDetailAreaProducts?.Count > 0 ? p.TaliDetailAreaProducts.Count : 1);
+                                var isFirstTruckRow = true;
+
+                                foreach (var taliProduct in truck.TaliProducts)
+                                {
+                                    var areaProducts = taliProduct.TaliDetailAreaProducts?.Any() == true
+                                    ? taliProduct.TaliDetailAreaProducts
+                                    : new List<TaliDetailGroupTruckDto.TaliDetailGroupTaliProduct.TaliDetailAreaProduct> { null };
+                                    var isFirstProductRow = true;
+                                    var productRowspan = areaProducts.Count;
+
+                                    foreach (var areaProduct in areaProducts)
+                                    {
+                                        <tr data-dock-tali-id="@truck.DockTaliId" data-dock-tali-product-id="@taliProduct.DockTaliProductId">
+                                            @if (isFirstTruckRow)
+                                            {
+                                            <td class="align-middle text-center" rowspan="@totalTruckRows">@rowIndex</td>
+                                                <td class="align-middle text-center" dir="ltr" rowspan="@totalTruckRows">@truck.DockTaliCreatedDate.ToShortPersianDateTimeString()</td>
+                                                <td class="align-middle text-center" dir="ltr" rowspan="@totalTruckRows">@truck.ShipName</td>
+                                                <td class="align-middle text-center" dir="ltr" rowspan="@totalTruckRows">@truck.DockTaliTaliType.ToDisplay()</td>
+                                                <td class="align-middle text-center" rowspan="@totalTruckRows">@truck.DockTaliUnLoadType.ToDisplay(DisplayProperty.Name)</td>
+
+                                                @if (!isAriaBanader)
+                                                {
+                                                    <td class="align-middle text-center" rowspan="@totalTruckRows">@truck.DockTaliUnloadingStageCount</td>
+                                                }
+
+                                                <td class="align-middle text-center" rowspan="@totalTruckRows">@truck.DockTaliIsSelfTransportTitle</td>
+
+                                                @if (!isAriaBanader)
+                                                {
+                                                    <td class="align-middle text-center" rowspan="@totalTruckRows">
+                                                        @if (truck.DockTaliIsSeparatedOrSorted == true)
+                                                        {
+                                                            <span>بلی</span>
+                                                        }
+                                                        else
+                                                        {
+                                                            <span>خیر</span>
+                                                        }
+                                                    </td>
+                                                }
+
+                                                <td class="align-middle text-center" rowspan="@totalTruckRows">@truck.ProductOwnerCompanyName</td>
+
+                                                @if (!isAriaBanader)
+                                                {
+                                                    <td class="align-middle text-center" rowspan="@totalTruckRows">@truck.DockTaliLaborWorkingGroupName</td>
+                                                }
+
+                                                <td class="align-middle text-center" rowspan="@totalTruckRows"><a onclick="ShowTaliGearModal('@truck.DockTaliId')"><i class="icon-eye rounded-circle bg-primary text-white mx-2 p-1 align-middle cursor-pointer btn"></i> @truck.DockTaliGearCount</a></td>
+                                                <td class="align-middle text-center" rowspan="@totalTruckRows">@truck.DockTaliEntryProductType?.ToDisplay(DisplayProperty.Name)</td>
+                                                <td class="align-middle text-center" rowspan="@totalTruckRows">@truck.DockTaliTrafficType?.ToDisplay(DisplayProperty.Name)</td>
+
+                                                <td class="align-middle text-center" rowspan="@totalTruckRows">@(truck.DockTaliIsSelfTransported ? truck.DockTaliIsSelfTransportTitle : truck.DockTaliTruckCarPlates)</td>
+                                                <td class="align-middle text-center" rowspan="@totalTruckRows">@truck.DockTaliSeoProductVehicleIdentificationNumber</td>
+
+                                                <td class="align-middle text-center" rowspan="@totalTruckRows">@truck.DockTaliWeightFree</td>
+                                                <td class="align-middle text-center" rowspan="@totalTruckRows">@truck.DockTaliWeightFull</td>
+                                                <td class="align-middle text-center" rowspan="@totalTruckRows">@truck.DockTaliWeightLoad</td>
+                                                isFirstTruckRow = false;
+                                            }
+
+                                            @if (isFirstProductRow)
+                                            {
+                                                <td class="align-middle text-center" rowspan="@productRowspan">@taliProduct.SeoBillOfLadingNumber</td>
+                                                <td class="align-middle text-center" rowspan="@productRowspan">@taliProduct.DockTaliSeoProductProductName</td>
+                                                <td class="align-middle text-center" rowspan="@productRowspan">@taliProduct.DockTaliSeoProductContainerMoveType</td>
+                                                <td class="align-middle text-center" rowspan="@productRowspan">@taliProduct.DockTaliSeoProductContainerNumber</td>
+                                                <td class="align-middle text-center" rowspan="@productRowspan">@taliProduct.DockTaliSeoProductContainerSealNumber</td>
+                                                <td class="align-middle text-center" rowspan="@productRowspan">@taliProduct.DockTaliSeoProductContainerSize</td>
+                                                <td class="align-middle text-center" rowspan="@productRowspan">@taliProduct.DockTaliSeoProductContainerType</td>
+                                                <td class="align-middle text-center" rowspan="@productRowspan">@taliProduct.DockTaliProductShipWarehouseNumber</td>
+                                                <td class="align-middle text-center" rowspan="@productRowspan">@taliProduct.DockTaliProductCount</td>
+                                                <td class="align-middle text-center" rowspan="@productRowspan">@taliProduct.DockTaliProductCountProblem</td>
+                                                <td class="align-middle text-center" rowspan="@productRowspan">
+                                                    @taliProduct.DockTaliPersonelFirstName @taliProduct.DockTaliPersonelLastName
+                                                </td>
+                                                <td class="align-middle text-center" rowspan="@productRowspan">
+                                                    @areaProduct?.AreaPersonelFirstName @areaProduct?.AreaPersonelLastName
+                                                </td>
+                                                isFirstProductRow = false;
+                                            }
+                                            <td class="align-middle text-center">@areaProduct?.AreaTaliWarehouseName</td>
+                                            <td class="align-middle text-center">@areaProduct?.AreaWarehouseSegmentName</td>
+                                            <td class="align-middle text-center">@areaProduct?.AreaTaliProductCount</td>
+                                            <td class="align-middle text-center">@areaProduct?.AreaTaliProductCountProblem</td>
+                                            <td class="align-middle text-center">
+                                                @if (truck.DockTaliId != null && taliProduct.HasDockTaliProductCheckList == true)
+                                                {
+                                                    <a class="btn btn-primary px-2 my-1" onclick="ShowTaliProductFactorModal('@truck.DockTaliId')">
+                                                        <i class="fas fa-list-ul"></i> اسکله
+                                                    </a>
+                                                }
+                                                @if (areaProduct?.AreaTaliId != null && areaProduct.HasAreaTaliProductCheckList == true)
+                                                {
+                                                    <a class="btn btn-info px-2 my-1" onclick="ShowTaliProductFactorModal('@areaProduct.AreaTaliId')">
+                                                        <i class="fas fa-list-ul"></i> محوطه
+                                                    </a>
+                                                }
+
+                                                @if (truck.DockTaliId != null && truck.DockTaliGearCount > 0)
+                                                {
+                                                    <a class="btn btn-secondary px-2 my-1" onclick="ShowTaliGearModal('@truck.DockTaliId')">
+                                                        <i class="fas fa-cogs"></i> مشاهده تجهیزات
+                                                    </a>
+                                                }
+
+                                                @if (truck.DockTaliId != null && truck.HasDockTaliFile == true)
+                                                {
+                                                    <a class="btn btn-primary px-2 my-1" onclick="ShowTaliFileModal('@truck.DockTaliId')">
+                                                        <i class="fas fa-list-ul"></i> فایل های اسکله
+                                                    </a>
+                                                }
+
+                                                @if (areaProduct?.AreaTaliId != null && areaProduct.HasAreaTaliFile == true)
+                                                {
+                                                    <a class="btn btn-primary px-2 my-1" onclick="ShowTaliFileModal('@areaProduct.AreaTaliId')">
+                                                        <i class="fas fa-list-ul"></i> فایل های محوطه
+                                                    </a>
+                                                }
+
+                                                @if (truck.DockTaliId != null && !isDateFilterMode)
+                                                {
+                                                    <div class="validation-status-wrapper">
+                                                        @{
+                                                            var isCurrentValid = truck.ValidationStatus == Common.enumeration.Hirman.ValidationStatus.Valid;
+                                                            var currentStatusClass = isCurrentValid ? "status-valid" : "status-invalid";
+                                                            var currentStatusIcon = isCurrentValid ? "fa-check-circle" : "fa-exclamation-circle";
+                                                            var currentStatusText = isCurrentValid ? "معتبر" : "غیرمعتبر";
+                                                            var currentStatusColor = isCurrentValid ? "success" : "danger";
+                                                        }
+
+                                                        <div class="dropdown w-100">
+                                                            <button class="dropbtn w-100 btn btn-@currentStatusColor rounded px-2" type="submit">
+                                                                <div class="d-flex align-items-center">
+                                                                    <span> @currentStatusText </span><i class="icofont icofont-arrow-down align-middle"></i>
+                                                                </div>
+                                                            </button>
+                                                            <div class="dropdown-content cu-dropdown-content">
+                                                                <ul>
+                                                                    @if (!isCurrentValid)
+                                                                    {
+                                                                        <li>
+                                                                            <a href="#" onclick="changeValidationStatus('@truck.DockTaliId', 0); return false;" class="dropdown-item"> <i class="fa-solid fa-receipt"></i> معتبر </a>
+                                                                        </li>
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <li>
+                                                                            <a href="#" onclick="changeValidationStatus('@truck.DockTaliId', 1); return false;" class="dropdown-item"> <i class="fa-solid fa-receipt"></i> غیرمعتبر </a>
+                                                                        </li>
+                                                                    }
+
+                                                                    <li>
+                                                                        <a href="#" onclick="showValidationHistory('@truck.DockTaliId'); return false;" class="dropdown-item"> <i class="fa-solid fa-receipt"></i>  تاریخچه </a>
+                                                                    </li>
+                                                                </ul>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                }
+                                            </td>
+                                        </tr>
+                                        rowIndex++;
+                                    }
+                                }
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="TaliProductFactorModalId">
+</div>
+
+<div id="TaliGearModalId">
+</div>
+
+<div id="TaliFileModalId">
+</div>
+
+@section script {
+    <script>
+        $(document).ready(function () {
+            @if (isDateFilterMode)
+            {
+                            <text>
+                        kamaDatepicker('DateFromFa', customOptions);
+                        kamaDatepicker('DateToFa', customOptions);
+                            </text>
+            }
+            // Handle pagination clicks
+            $(".page-link").click(e => {
+                e.preventDefault();
+                const page = new URL($(e.currentTarget).attr('href'), window.location.origin)
+                    .searchParams.get('p') || "1";
+
+                $("#pageNumber").val(page);
+            });
+
+            // Handle confirm button click for validation status change
+            $('#confirmStatusChange').on('click', function() {
+                var taliId = $(this).data('taliId');
+                var newStatus = $(this).data('newStatus');
+                var description = $('#validationStatusDescription').val();
+
+                console.log("=== CONFIRM STATUS CHANGE ===");
+                console.log("taliId:", taliId);
+                console.log("newStatus:", newStatus);
+                console.log("description:", description);
+
+                $('#validationStatusModal').modal('hide');
+
+                $.post("@Url.Action("ChangeTaliValidationStatus", "Voyage")", {
+                    taliId: taliId,
+                    validationStatus: newStatus,
+                    description: description
+                })
+                .done(function (res) {
+                    if (res.success) {
+                        location.reload();
+                    } else {
+                        alert('خطا در به‌روزرسانی وضعیت: ' + (res.message || 'خطای نامشخص'));
+                    }
+                })
+                .fail(function (xhr, status, error) {
+                    alert('خطا در ارتباط با سرور: ' + error);
+                });
+            });
+        });
+
+        function ShowTaliProductFactorModal(taliId) {
+            if (taliId == null) return;
+
+            $.post("@Url.Action("GetCheckListFactorTali", "Voyage")", { taliId })
+                .done(function (res) {
+                    $("#TaliProductFactorModalId").html(res);
+                    $("#TaliProductFactorModal").modal('show');
+                }).fail(function (xhr) {
+                var err = JSON.parse(xhr.responseText)
+                console.error("Error:", JSON.stringify(err));
+            });
+        }
+
+        function ShowTaliGearModal(taliId) {
+            if (taliId == null) return;
+
+            $.post("@Url.Action("GetTaliGears", "Voyage")", { taliId })
+                .done(function (res) {
+                    $("#TaliGearModalId").html(res);
+                    $("#TaliGearModal").modal('show');
+                }).fail(function (xhr) {
+                var err = JSON.parse(xhr.responseText)
+                console.error("Error:", JSON.stringify(err));
+            });
+        }
+
+        function ShowTaliFileModal(taliId) {
+            if (taliId == null) return;
+
+            $.post("@Url.Action("GetFilesTali", "Voyage")", { taliId })
+                .done(function (res) {
+                    $("#TaliFileModalId").html(res);
+                    $("#TaliFileModal").modal('show');
+                }).fail(function (xhr) {
+                var err = JSON.parse(xhr.responseText)
+                console.error("Error:", JSON.stringify(err));
+            });
+        }
+
+        function changeValidationStatus(taliId, newStatus) {
+            if (taliId == null) return;
+            $('#confirmStatusChange').data('taliId', taliId);
+            $('#confirmStatusChange').data('newStatus', newStatus);
+            $('#validationStatusDescription').val('');
+            $('#validationStatusModal').modal('show');
+        }
+
+        function showValidationHistory(taliId) {
+            var historyData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.ValidationStatusHistory ?? new object[0]));
+
+            console.log("History data:", historyData);
+            console.log("History data type:", typeof historyData);
+            console.log("History data length:", historyData ? historyData.length : 'null/undefined');
+
+            // Filter history for this specific Tali
+            var taliHistory = historyData.filter(function(h) {
+                console.log("Checking history item:", h);
+                 
+                return (h && h.taliId && h.taliId.toLowerCase() === taliId.toLowerCase()) ||
+                       (h && h.TaliId && h.TaliId.toLowerCase() === taliId.toLowerCase());
+            });
+
+            console.log("Found", taliHistory.length, "history records");
+
+            // Build the history table HTML
+            var html = '';
+            if (!taliHistory || taliHistory.length === 0) {
+                html = '<div class="alert alert-info text-center">تاریخچه‌ای برای این تالی یافت نشد.</div>';
+                html += '<div class="text-center text-muted small mt-2">برای مشاهده تاریخچه، ابتدا وضعیت تأیید را تغییر دهید.</div>';
+            } else {
+                html = '<div class="table-responsive"><table class="table table-striped table-hover">';
+                html += '<thead class="table-dark"><tr>';
+                html += '<th>تاریخ</th>';
+                html += '<th>کاربر</th>';
+                html += '<th>وضعیت قبلی</th>';
+                html += '<th>وضعیت جدید</th>';
+                html += '<th>توضیحات</th>';
+                html += '</tr></thead><tbody>';
+
+                taliHistory.forEach(function(h) {
+                    var oldStatus = h.oldStatus !== undefined ? h.oldStatus : h.OldStatus;
+                    var newStatus = h.newStatus !== undefined ? h.newStatus : h.NewStatus;
+                    var changedDate = h.changedDateFa !== undefined ? h.changedDateFa : h.ChangedDateFa;
+                    var description = h.description !== undefined ? h.description : h.Description;
+                    var changedByUser = h.changedByUserFullName !== undefined ? h.changedByUserFullName : h.ChangedByUserFullName;
+
+                    var oldStatusText = oldStatus === 0 ? "معتبر" : "غیرمعتبر";
+                    var newStatusText = newStatus === 0 ? "معتبر" : "غیرمعتبر";
+                    var oldStatusClass = oldStatus === 0 ? "text-success" : "text-danger";
+                    var newStatusClass = newStatus === 0 ? "text-success" : "text-danger";
+                    var date = changedDate;
+                    var userName = changedByUser;
+
+                    html += '<tr>';
+                    html += '<td>' + date + '</td>';
+                    html += '<td>' + userName + '</td>';
+                    html += '<td class="' + oldStatusClass + ' fw-bold">' + oldStatusText + '</td>';
+                    html += '<td class="' + newStatusClass + ' fw-bold">' + newStatusText + '</td>';
+                    html += '<td>' + (description || '-') + '</td>';
+                    html += '</tr>';
+                });
+
+                html += '</tbody></table></div>';
+            }
+
+            $('#validationHistoryContent').html(html);
+            $('#validationHistoryModal').modal('show');
+        }
+    </script>
+
+    <style>
+        .validation-status-wrapper {
+            display: inline-block;
+        }
+        /* Your original styles */
+    </style>
+}
+
+<!-- Modal for changing validation status -->
+<div class="modal fade" id="validationStatusModal" tabindex="-1" aria-labelledby="validationStatusModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="validationStatusModalLabel">توضیحات تغییر وضعیت</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="validationStatusDescription" class="form-label">لطفاً دلیل تغییر وضعیت را وارد کنید:</label>
+                    <textarea class="form-control" id="validationStatusDescription" rows="3" placeholder="توضیحات..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">انصراف</button>
+                <button type="button" class="btn btn-primary" id="confirmStatusChange">تأیید</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for validation status history -->
+<div class="modal fade" id="validationHistoryModal" tabindex="-1" aria-labelledby="validationHistoryModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="validationHistoryModalLabel">تاریخچه تغییر وضعیت تأیید</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="validationHistoryContent">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">بستن</button>
+            </div>
+        </div>
+    </div>
+</div>

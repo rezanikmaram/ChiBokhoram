@@ -1,0 +1,643 @@
+@model List<SystemSettingViewDto>
+@using Common.enumeration.Hirman
+@{
+    ViewData["Title"] = "تنظیمات سامانه";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+    var definitions = ViewBag.Definitions as List<SystemSettingDefinitionDto> ?? new List<SystemSettingDefinitionDto>();
+}
+
+@* setting modal  *@
+<div class="modal fade" id="setting-modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="setting-modal-title">  افزودن/ویرایش تنظیم</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="settingForm">
+                    <div class="mb-3">
+                        <label class="form-label">فیلتر بر اساس زیرسیستم</label>
+                        <select class="form-select select2" id="subsystemFilter">
+                            <option value="">همه زیرسیستم‌ها</option>
+                            @foreach (var subsystem in Enum.GetValues(typeof(Subsystem)).Cast<Subsystem>())
+                            {
+                                <option value="@((int)subsystem)">@subsystem.GetDisplayName()</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">کلید تنظیم <span class="text-danger">*</span></label>
+                        <select class="form-select select2" id="settingKey" required>
+                            <option value="">-- انتخاب کنید --</option>
+                            @foreach (var def in definitions)
+                            {
+                                <option value="@def.Key" 
+                                        data-type="@((int)def.ValueType)" 
+                                        data-description="@def.Description"
+                                        data-multiline="@def.IsMultiline.ToString().ToLower()"
+                                        data-predefined='@(def.PredefinedValueItems != null ? System.Text.Json.JsonSerializer.Serialize(def.PredefinedValueItems) : "[]")'
+                                        data-subsystem="@((int)def.Subsystem)">
+                                    (@def.SubsystemDisplayName) @def.DisplayName
+                                </option>
+                            }
+                        </select>
+                        <div class="form-text" id="settingDescription"></div>
+                    </div>
+
+                    <div class="mb-3" id="valueContainer">
+                        <label class="form-label">مقدار <span class="text-danger">*</span></label>
+                            
+                        <!-- Input برای مقادیر ساده -->
+                        <input type="text" class="form-control" id="settingValueInput" style="display:none;" />
+                            
+                        <!-- Textarea برای متن چند خطی -->
+                        <textarea class="form-control" id="settingValueTextarea" rows="4" style="display:none;"></textarea>
+                            
+                        <!-- Select برای مقادیر Enum و پیش‌فرض -->
+                        <select class="form-select select2" id="settingValueSelect" style="display:none;"></select>
+                            
+                        <!-- Checkbox برای Boolean -->
+                        <div class="form-check" id="settingValueCheckboxContainer" style="display:none;">
+                            <input class="form-check-input" type="checkbox" id="settingValueCheckbox">
+                            <label class="form-check-label" for="settingValueCheckbox">فعال</label>
+                        </div>
+                            
+                        <!-- Number input برای Integer و Double -->
+                        <input type="number" class="form-control" id="settingValueNumber" style="display:none;" step="any" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">نوع داده</label>
+                        <input type="text" class="form-control" id="valueTypeDisplay" readonly />
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <button type="button" class="btn btn-secondary w-50 me-2" id="btnReset">
+                            <i class="fas fa-undo"></i> بازنشانی
+                        </button>
+                        <button type="submit" class="btn btn-primary w-50 ms-2">
+                            <i class="fas fa-save"></i> ذخیره تنظیم
+                        </button>
+                    </div>
+                </form>
+            </div>
+            
+        </div>
+    </div>
+</div>
+
+@* info modal *@
+<div class="modal fade" id="info-modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="info-modal-title">  راهنما  </h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">
+                        <i class="fas fa-info-circle text-info"></i>
+                        تنظیمات از لیست کلیدهای از پیش تعریف شده انتخاب می‌شوند
+                    </li>
+                    <li class="list-group-item">
+                        <i class="fas fa-check-circle text-success"></i>
+                        هر کلید نوع داده خاص خود را دارد
+                    </li>
+                    <li class="list-group-item">
+                        <i class="fas fa-list text-primary"></i>
+                        برخی تنظیمات دارای مقادیر پیش‌فرض هستند
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid">
+    @* <div class="page-header"> *@
+    @*     <div class="row"> *@
+    @*         <div class="col-sm-6 d-flex"> *@
+    @*             <h3>تنظیمات سامانه</h3> *@
+    @*             <ol class="breadcrumb"> *@
+    @*                 <li class="breadcrumb-item"><a href="~/Dashboard/Index">داشبورد</a></li> *@
+    @*                 <li class="breadcrumb-item active">تنظیمات سامانه</li> *@
+    @*             </ol> *@
+    @*         </div> *@
+    @*     </div> *@
+    @* </div> *@
+
+    <div class="row">
+        <!-- لیست تنظیمات -->
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between">
+                    <div class="d-flex align-items-center">
+                        <h5>لیست تنظیمات</h5>
+                        <span class="f-light f-12 mx-2">تعداد کل: @Model.Count</span>
+                        <a class="mx-3 filter-collapse" data-bs-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false" aria-controls="collapseExample">
+                            فیلتر ها <i class="fa-solid fa-angle-down mx-2 align-middle"></i>
+                        </a>
+                    </div>
+                    <div>
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#info-modal">
+                            راهنما
+                        </button>
+                        <button type="button" class="btn btn-success btn-add-setting" data-bs-toggle="modal" data-bs-target="#setting-modal">
+                            افزودن
+                        </button>
+                    </div>
+                </div>
+                <div>
+                    <div class="collapse" id="collapseExample">
+                        <div class="card-body pt-0">
+                            <div class="col-md-12 mt-4">
+                                <div class="col-md-2 col-sm-12">
+                                    <div class="form-group">
+                                        <label>  جستجو:</label>
+                                        <div class="input-group">
+                                            <input type="text" class="form-control">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group align-content-center mb-3 text-end">
+                                    <button style="border-radius:5px;" class="alert-icon px-5 btn btn-success "
+                                            type="submit">
+                                        فیلتر
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body pt-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover table-striped" id="settingsTable">
+                            <thead class="bg-primary">
+                                <tr>
+                                    <th>#</th>
+                                    <th>زیرسیستم</th>
+                                    <th>نام نمایشی</th>
+                                    <th>کلید</th>
+                                    <th>مقدار</th>
+                                    <th>نوع داده</th>
+                                    <th>عملیات</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{
+                                    int i = 1;
+                                }
+                                @foreach (var item in Model)
+                                {
+                                    <tr data-key="@item.Key" data-value="@item.Value" data-type="@((int)item.ValueType)">
+                                        <td>@(i++)</td>
+                                        <td>
+                                            <span class="badge bg-secondary">@item.SubsystemDisplayName</span>
+                                        </td>
+                                        <td>
+                                            <strong>@item.DisplayName</strong>
+                                            @if (!string.IsNullOrEmpty(item.Description))
+                                            {
+                                                <br /><small class="text-muted">@item.Description</small>
+                                            }
+                                        </td>
+                                        <td><code>@item.Key</code></td>
+                                        <td>
+                                            @if (item.ValueType == SettingValueType.Boolean)
+                                            {
+                                                if (bool.TryParse(item.Value, out bool boolVal) && boolVal)
+                                                {
+                                                    <span class="badge bg-success"><i class="fas fa-check"></i> فعال</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-danger"><i class="fas fa-times"></i> غیرفعال</span>
+                                                }
+                                            }
+                                            else if (item.ValueType == SettingValueType.Enum && item.PredefinedValueItems != null)
+                                            {
+                                                var enumDisplay = item.Value;
+                                                foreach (var pv in item.PredefinedValueItems)
+                                                {
+                                                    if (pv.value == item.Value) { enumDisplay = pv.displayName; break; }
+                                                }
+                                                @enumDisplay
+                                            }
+                                            else if (!string.IsNullOrEmpty(item.Value))
+                                            {
+                                                @if (item.IsMultiline)
+                                                {
+                                                    <span class="text-truncate d-inline-block" style="max-width: 200px;" title="@item.Value">@item.Value</span>
+                                                }
+                                                else
+                                                {
+                                                    @item.Value
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted fst-italic">تنظیم نشده</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-info">@item.ValueTypeDisplay</span>
+                                        </td>
+                                        <td>
+                                            <button type="button" class="btn btn-sm btn-warning btn-edit px-2" data-key="@item.Key" title="ویرایش">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            @if (!string.IsNullOrEmpty(item.Value))
+                                            {
+                                                <button type="button" class="btn btn-sm btn-danger btn-delete px-2" data-key="@item.Key" title="حذف">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section style {
+    <style>
+        .form-text {
+            font-size: 0.875rem;
+            color: #6c757d;
+            margin-top: 0.25rem;
+        }
+        
+        .text-truncate {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        code {
+            font-size: 0.875em;
+            color: #d63384;
+            word-wrap: break-word;
+        }
+        
+        .table td {
+            vertical-align: middle;
+        }
+    </style>
+}
+
+@section script {
+    <script>
+        function initSettingKeySelect2() {
+            $('#settingKey').select2({
+                dropdownParent: $('#setting-modal')
+            });
+        }
+
+        function initSubsystemFilterSelect2() {
+            if ($('#subsystemFilter').hasClass('select2-hidden-accessible')) {
+                $('#subsystemFilter').select2('destroy');
+            }
+            $('#subsystemFilter').select2({
+                dropdownParent: $('#setting-modal')
+            });
+        }
+
+        function initSelect2() {
+            initSettingKeySelect2();
+            initSubsystemFilterSelect2();
+        }
+
+        function refreshSettingKeySelect2() {
+            if ($('#settingKey').hasClass('select2-hidden-accessible')) {
+                $('#settingKey').select2('destroy');
+            }
+            initSettingKeySelect2();
+        }
+
+        function refreshSettingValueSelect2() {
+            var $select = $('#settingValueSelect');
+            if ($select.is(':visible')) {
+                if ($select.hasClass('select2-hidden-accessible')) {
+                    $select.select2('destroy');
+                }
+                $select.select2({
+                    dropdownParent: $('#setting-modal')
+                });
+            }
+        }
+
+        // ذخیره تمام گزینه‌های کلید تنظیم برای بازسازی در فیلتر
+        var allSettingKeys = [];
+
+        $(document).ready(function() {
+            // ذخیره گزینه‌ها
+            $('#settingKey option:not(:first)').each(function() {
+                allSettingKeys.push({
+                    value: $(this).val(),
+                    type: $(this).data('type'),
+                    description: $(this).data('description'),
+                    multiline: $(this).data('multiline'),
+                    predefined: $(this).data('predefined'),
+                    subsystem: $(this).data('subsystem'),
+                    html: $(this).prop('outerHTML')
+                });
+            });
+
+            initSelect2();
+
+            // فیلتر بر اساس زیرسیستم
+            $('#subsystemFilter').on('change', function() {
+                var selectedSubsystem = $(this).val();
+                var $select = $('#settingKey');
+
+                if ($select.hasClass('select2-hidden-accessible')) {
+                    $select.select2('destroy');
+                }
+
+                // حذف همه گزینه‌ها به جز placeholder
+                $select.find('option:not(:first)').remove();
+
+                // اضافه کردن گزینه‌های منطبق
+                allSettingKeys.forEach(function(opt) {
+                    if (selectedSubsystem === '' || opt.subsystem === parseInt(selectedSubsystem)) {
+                        $select.append(opt.html);
+                    }
+                });
+
+                $select.val('');
+                hideAllInputs();
+                $('#settingDescription').text('');
+                $('#valueTypeDisplay').val('');
+                initSelect2();
+            });
+
+            // تغییر کلید تنظیم
+            $('#settingKey').on('change', function() {
+                var selected = $(this).find(':selected');
+                var type = parseInt(selected.data('type'));
+                var description = selected.data('description');
+                var isMultiline = selected.data('multiline') === true || selected.data('multiline') === 'true';
+                var predefinedValues = selected.data('predefined');
+                
+                // نمایش توضیحات
+                $('#settingDescription').text(description || '');
+                
+                // تنظیم نمایش نوع داده
+                var typeDisplay = getValueTypeDisplay(type);
+                $('#valueTypeDisplay').val(typeDisplay);
+                
+                // پنهان کردن همه input ها
+                hideAllInputs();
+                
+                // نمایش input مناسب بر اساس نوع
+                if (predefinedValues && predefinedValues.length > 0) {
+                    var select = $('#settingValueSelect');
+                    select.empty();
+                    select.append('<option value="">-- انتخاب کنید --</option>');
+
+                    var items = typeof predefinedValues === 'string' ?
+                        JSON.parse(predefinedValues) : predefinedValues;
+
+                    items.forEach(function(item) {
+                        var value = typeof item === 'string' ? item : item.value;
+                        var displayName = typeof item === 'string' ? item : (item.displayName || item.value);
+                        select.append('<option value="' + value + '">' + displayName + '</option>');
+                    });
+
+                    select.show();
+                    refreshSettingValueSelect2();
+                } else if (type === 4) { // Boolean
+                    $('#settingValueCheckboxContainer').show();
+                } else if (type === 2 || type === 3) { // Integer یا Double
+                    $('#settingValueNumber').show();
+                    if (type === 2) {
+                        $('#settingValueNumber').attr('step', '1');
+                    } else {
+                        $('#settingValueNumber').attr('step', 'any');
+                    }
+                } else if (isMultiline) {
+                    $('#settingValueTextarea').show();
+                } else {
+                    $('#settingValueInput').show();
+                }
+            });
+            
+            // ویرایش تنظیم
+            $('.btn-edit').on('click', function() {
+                var key = $(this).data('key');
+
+                loadSetting(key);
+                let modal = $("#setting-modal");
+                modal.modal("show");
+                 
+            });
+            
+            // حذف تنظیم
+            $('.btn-delete').on('click', function() {
+                var key = $(this).data('key');
+                var displayName = $(this).closest('tr').find('td:nth-child(2) strong').text();
+                
+                Swal.fire({
+                    title: 'آیا مطمئن هستید؟',
+                    text: 'تنظیم "' + displayName + '" حذف خواهد شد',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'بله، حذف کن',
+                    cancelButtonText: 'انصراف',
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        deleteSetting(key);
+                    }
+                });
+            });
+            
+            // بازنشانی فرم
+            $('#btnReset').on('click', function() {
+                resetForm();
+            });
+            
+            // افزودن تنظیم جدید - reset form قبل از نمایش مودال
+            $('.btn-add-setting').on('click', function() {
+                resetForm();
+            });
+            
+            // ارسال فرم
+            $('#settingForm').on('submit', function(e) {
+                e.preventDefault();
+                saveSetting();
+            });
+        });
+        
+        function hideAllInputs() {
+            $('#settingValueInput, #settingValueTextarea, #settingValueSelect, #settingValueNumber').hide();
+            $('#settingValueCheckboxContainer').hide();
+        }
+        
+        function getValueTypeDisplay(type) {
+            var types = {
+                1: 'متن (String)',
+                2: 'عدد صحیح (Integer)',
+                3: 'عدد اعشاری (Double)',
+                4: 'بله/خیر (Boolean)',
+                5: 'تاریخ (DateTime)',
+                6: 'لیست انتخابی (Enum)',
+                7: 'JSON'
+            };
+            return types[type] || 'نامشخص';
+        }
+        
+        function getInputValue() {
+            var type = parseInt($('#settingKey option:selected').data('type'));
+            var predefined = $('#settingKey option:selected').data('predefined');
+            
+            if (predefined && predefined.length > 0) {
+                return $('#settingValueSelect').val();
+            } else if (type === 4) { // Boolean
+                return $('#settingValueCheckbox').is(':checked').toString();
+            } else if (type === 2 || type === 3) { // Number
+                return $('#settingValueNumber').val();
+            } else if ($('#settingValueTextarea').is(':visible')) {
+                return $('#settingValueTextarea').val();
+            } else {
+                return $('#settingValueInput').val();
+            }
+        }
+        
+        function setInputValue(value, type) {
+            var predefined = $('#settingKey option:selected').data('predefined');
+            
+            if (predefined && predefined.length > 0) {
+                $('#settingValueSelect').val(value).trigger('change');
+            } else if (type === 4) { // Boolean
+                $('#settingValueCheckbox').prop('checked', value.toLowerCase() === 'true');
+            } else if (type === 2 || type === 3) { // Number
+                $('#settingValueNumber').val(value);
+            } else if ($('#settingValueTextarea').is(':visible')) {
+                $('#settingValueTextarea').val(value);
+            } else {
+                $('#settingValueInput').val(value);
+            }
+        }
+        
+        function loadSetting(key) {
+            $.ajax({
+                url: '@Url.Action("GetSetting", "SystemSetting")',
+                type: 'GET',
+                data: { key: key },
+                success: function(response) {
+                    if (response.success) {
+                        var data = response.data;
+                        
+                        // اگر کلید در گزینه‌های فعلی نیست، فیلتر را پاک کن
+                        if ($('#settingKey option[value="' + data.key + '"]').length === 0) {
+                            $('#subsystemFilter').val('').trigger('change');
+                        }
+                        
+                        $('#settingKey').val(data.key).trigger('change');
+                        setTimeout(function() {
+                            setInputValue(data.value, data.valueType);
+                        }, 100);
+                    } else {
+                        Swal.fire('خطا', response.message, 'error');
+                    }
+                },
+                error: function() {
+                    Swal.fire('خطا', 'خطا در دریافت اطلاعات', 'error');
+                }
+            });
+        }
+        
+        function saveSetting() {
+            var key = $('#settingKey').val();
+            var value = getInputValue();
+            
+            if (!key) {
+                Swal.fire('خطا', 'لطفاً کلید تنظیم را انتخاب کنید', 'error');
+                return;
+            }
+            
+            if (value === '' || value === null) {
+                Swal.fire('خطا', 'لطفاً مقدار تنظیم را وارد کنید', 'error');
+                return;
+            }
+            
+            var data = {
+                Key: key,
+                Value: value
+            };
+            
+            $.ajax({
+                url: '@Url.Action("SaveSetting", "SystemSetting")',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(data),
+                success: function(response) {
+                    if (response.success) {
+                        Swal.fire({
+                            title: 'موفق',
+                            text: response.message,
+                            icon: 'success',
+                            confirmButtonText: 'باشه'
+                        }).then(function() {
+                            location.reload();
+                        });
+                    } else {
+                        Swal.fire('خطا', response.message, 'error');
+                    }
+                },
+                error: function(xhr) {
+                    var message = 'خطا در ذخیره تنظیم';
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        message = xhr.responseJSON.message;
+                    }
+                    Swal.fire('خطا', message, 'error');
+                }
+            });
+        }
+        
+        function deleteSetting(key) {
+            $.ajax({
+                url: '@Url.Action("DeleteSetting", "SystemSetting")',
+                type: 'POST',
+                data: { key: key },
+                success: function(response) {
+                    if (response.success) {
+                        Swal.fire({
+                            title: 'موفق',
+                            text: response.message,
+                            icon: 'success',
+                            confirmButtonText: 'باشه'
+                        }).then(function() {
+                            location.reload();
+                        });
+                    } else {
+                        Swal.fire('خطا', response.message, 'error');
+                    }
+                },
+                error: function() {
+                    Swal.fire('خطا', 'خطا در حذف تنظیم', 'error');
+                }
+            });
+        }
+        
+        function resetForm() {
+            $('#settingForm')[0].reset();
+            hideAllInputs();
+            $('#settingDescription').text('');
+            $('#valueTypeDisplay').val('');
+            $('#settingKey').val('');
+            refreshSettingKeySelect2();
+            initSubsystemFilterSelect2();
+        }
+    </script>
+}

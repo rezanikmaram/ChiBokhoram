@@ -1,0 +1,177 @@
+﻿@model DeviceRadioPageDto
+@{
+    ViewData["Title"] = "لیست  رادیو ها";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+    int i = 1;
+
+    int deviceId = Model.CreateDeviceRadioDto.DeviceId;
+}
+
+
+
+
+
+@section style{
+
+    <link href="~/assets/plugins/select2/dist/css/select2.min.css" rel="stylesheet">
+}
+
+
+<div class="col-lg-12">
+    <div class="card">
+        <div class="card-header">
+            <div class="d-flex justify-content-between">
+                <h3 class="title">
+                    <a  asp-action="Index" asp-route-companyId="@ViewBag.DeviceId" ><i class="fa-solid fa-right-to-bracket me-2" ></i></a>
+                    <i class="icon-frane"></i> لیست رادیو های دستگاه (@ViewBag.DeviceName)
+                </h3>
+                
+                <div>
+                    <a style="border-radius:5px; margin:0px 10px" class="btn btn-primary" onclick="createRadio();">ثبت رادیو  </a>
+                    
+                <!-- /.portlet-title -->
+                <div class="buttons-box">
+                    
+                        <i class="icon-size-fullscreen"></i>
+                        <div class="paper-ripple">
+                            <div class="paper-ripple__background"></div>
+                            <div class="paper-ripple__waves"></div>
+                        </div>
+                </div>
+                </div>
+
+                <!-- /.buttons-box -->
+            </div>
+            <!-- /.portlet-heading -->
+
+
+        </div>
+        <div class="card-body pt-0">
+            <div class="table-responsive">
+                <table class="table table-sm table-bordered table-hover table-striped" id="data-table">
+                    <thead class="bg-primary">
+                        <tr>
+                            <th>ردیف</th>
+                            <th>نام</th>
+                            <th>توضیحات   </th>
+                            <th>کد FPN</th>
+                            <th>IP  </th>
+                            <th>شماره پورت  </th>
+                            <th>جهت  </th>
+                            <th>وضعبت</th>
+                            <th>عملیات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+
+                        @foreach (var item in Model.DataList)
+                        {
+                            <tr>
+                                <td class="align-middle" >@(i++)</td>
+                                <td class="align-middle" > @item.Name </td>
+                                <td class="align-middle" >@item.Description</td>
+                                <td class="align-middle" >@item.CodeNameForFpn  </td>
+                                <th class="align-middle" >@item.Ip  </th>
+                                <th class="align-middle" >@item.PortNumber</th>
+                                <td class="align-middle" >@item.Direction.ToDisplay(DisplayProperty.Name)  </td>
+                                <td class="align-middle" >
+                                    <a id="ActivationRadio@(i)" onclick="ShowQAlert(event,'ActivationRadio@(i)');"
+                                       asp-action="ActivationDeviceRadio"
+                                       asp-route-DeviceRadioId="@item.Id" asp-route-DeviceId="@deviceId">
+                                        <span class="label px-2 py-1 rounded     label-@(item.IsActive?"success":"danger")">
+                                            @(item.IsActive ? "فعال" : "غیر فعال")
+                                        </span>
+                                    </a>
+                                </td>
+
+                                <td class="align-middle" >
+                                    <a class="btn btn-warning px-2 btn-sm btn-icon curve" onclick="editRadio('@item.Id');"><i class="icon-pencil fs-6 align-middle"></i></a>
+                                    <a id="DeleteRadio@(i)" onclick="ShowQAlert(event,'DeleteRadio@(i)');" class="btn btn-danger px-2 btn-sm btn-icon curve btn-questions"
+                                       asp-action="RemoveDeviceRadio" asp-route-DeviceRadioId="@item.Id" asp-route-DeviceId="@deviceId">
+                                        <i class="icon-trash fs-6 align-middle fa-flip-horizontal"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+
+                    </tbody>
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+
+<div id="generalmodal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">ثبت رادیو</h4>
+                <button type="button" class="close btn-close rounded border" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="modalbody">
+
+                <partial name="_CreateRadio" model="Model.CreateDeviceRadioDto" />
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+@section script {
+
+
+    <script src="~/assets/plugins/select2/dist/js/select2.full.min.js"></script>
+    <script src="~/assets/plugins/select2/dist/js/i18n/fa.js"></script>
+    <script src="~/assets/js/pages/select2.js"></script>
+
+
+    @*   <script src="~/assets/js/validation/jquery.validate.min.js"></script>
+     <script src="~/assets/js/validation/jquery.validate.unobtrusive.min.js"></script>*@
+
+    <script>
+        $(document).ready(function () {
+            //$('.select2').select2();
+            // $("#CreateWarehouseDoorDto_WarehouseId").select2({
+            //     dropdownParent: $('#generalmodal')
+            // });
+
+        });
+
+
+        function createRadio() {
+            $("#Name").val('');
+            $("#Description").val('');
+            $("#Id").val('');
+            $("#Ip").val('');
+            $("#PortNumber").val('');
+            $("#Direction").val('0');
+            $("#Direction").trigger('change');
+            $("#CodeNameForFpn").val('');
+            $("#LatY").val('');
+            $("#LonX").val('');
+            $("#IsActive").prop('checked', true);
+            $("#generalmodal").modal('show');
+
+        }
+
+        function editRadio(id) {
+
+            $.post("@Url.Action("GetDeviceRadioById","Device")", { deviceRadioId: id })
+                .done(function (res) {
+                    $("#modalbody").html(res);
+                    $("#generalmodal").modal('show');
+                });
+        }
+
+
+
+    </script>
+}
+

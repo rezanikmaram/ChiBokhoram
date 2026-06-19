@@ -1,0 +1,172 @@
+﻿@model BaskolWeightByUserPageDto
+@{
+	ViewData["Title"] = "وزن های کاربر باسکول";
+	Layout = "~/Views/Shared/AdminLayout.cshtml";
+	int i = ((Model.List.PageNumber - 1) * Model.List.PageSize) + 1;
+
+
+}
+<div class="col-lg-12">
+	<div class="card">
+		<div class="card-header pb-2">
+			<div class="d-flex">
+				<div class="d-flex justify-content-between">
+					<h3 class="title">
+						<i class="icon-frane"></i> وزن های کاربر باسکول
+					</h3>
+				</div>
+				@* <a class="alert-icon btn btn-success round" asp-controller="Company" asp-action="CreateCompany">شرکت جدید</a>*@
+			</div>
+		</div>
+
+		<div class="card-body pt-0">
+
+			<form id="formFilter" asp-action="WeightByUserList" asp-route-p="" method="post">
+				<input name="p" id="pageNumber" hidden />
+				<div class="form-body ">
+
+					<div class="row gy-4">
+
+						<div class="col-md-3 col-sm-12">
+							<div class="form-group">
+								<label>  جستجو:</label>
+								<div class="input-group">
+									<input asp-for="Filter.Search" type="text" class="rounded form-control">
+									<span asp-validation-for="Filter.Search" class="text-danger"></span>
+								</div>
+							</div>
+						</div>
+
+						 
+						<div class="col-md-2 col-sm-12 align-content-end">
+							<div class="form-check form-switch">
+								<input type="checkbox" asp-for="Filter.OnlyIsFree" class="form-check-input" role="switch" />
+								<label class="form-check-label ms-2" for="Filter.OnlyIsFree">فقط وزن های خالی  </label>
+								<span asp-validation-for="Filter.OnlyIsFree" class="text-danger"></span>
+							</div>
+						</div>
+
+						<div class="form-group col-md-2 ">
+							<button style="border-radius:5px; margin-top:30px" class="alert-icon px-3 btn btn-success "
+									type="submit">
+								فیلتر
+							</button>
+						</div>
+
+					</div>
+					 
+				</div>
+			</form>
+			<div class="table-responsive mt-3">
+
+				<div id="data-table_filter" class="dataTables_filter">
+				</div>
+
+				<table class="table table-bordered table-hover table-striped" id="data-table">
+					<thead class="bg-primary">
+						<tr>
+							<td>#</td>
+							<td>  پلاک کامیون    </td>
+							<td>وزن پر / خالی</td>
+							<th>وزن  </th>
+
+							<td>تاریخ</td>
+							<td>کاربر</td>
+							<td>نام باسکول</td>
+						</tr>
+					</thead>
+					<tbody>
+
+
+						@foreach (var item in Model.List.Data)
+						{
+							<tr>
+								<td>@(i++)</td>
+								<td>@(item.CarPlates)</td>
+								<td>@(item.IsFree ? "خالی" : "پر")</td>
+								<td>@item.Weight.ToPrice()</td>
+
+
+								<td style="direction:ltr">@item.CreatedDateFa</td>
+								<td>@item.UserFirstName  @item.UserLastName</td>
+
+								<td>@item.BaskoolName</td>
+							</tr>
+
+						}
+
+
+
+					</tbody>
+				</table>
+				<div>
+					<cs-pager cs-paging-pagesize="@Model.List.PageSize"
+							  cs-paging-pagenumber="@Model.List.PageNumber"
+							  cs-paging-totalitems="@Model.List.TotalItems"
+							  cs-paging-maxpageritems="20"
+							  cs-pagenumber-param="p"
+							  cs-show-first-last="true"
+							  cs-suppress-empty-nextprev="true"
+							  cs-suppress-inactive-firstlast="true"
+							  cs-show-numbered="true"
+							  cs-first-page-text="ابتدا"
+							  cs-last-page-text="انتها"
+							  cs-next-page-title="بعدی"
+							  cs-previous-page-title="قبلی"
+							  cs-first-page-title="ابتدا"
+							  cs-last-page-title="انتها"
+							  cs-next-page-text="بعدی"
+							  cs-previous-page-text="قبلی"
+							  cs-pager-li-current-class="page-item active"
+							  cs-pager-li-other-class="page-item"
+							  cs-pager-li-non-active-class="page-item disabled"
+							  cs-pager-link-current-class="page-link"
+							  cs-pager-link-other-class="page-link"
+							  asp-controller="Baskool"
+							  asp-action="WeightByUserList">
+					</cs-pager>
+				</div>
+
+			</div>
+			<!-- /.table-responsive -->
+		</div>
+		<!-- /.portlet-body -->
+		<!-- /.portlet -->
+	</div>
+</div>
+
+
+
+@section script {
+
+
+	<script>
+		$(document).ready(function () {
+			$('.clockpicker').clockpicker({
+				placement: 'bottom',
+				align: 'left',
+				donetext: 'تایید'
+			});
+
+
+			kamaDatepicker('FilterDto_FromDate', customOptions);
+			kamaDatepicker('FilterDto_ToDate', customOptions);
+
+
+			
+
+		});
+
+		$(".page-link").click(e => {
+            e.preventDefault();
+            const page = new URL($(e.currentTarget).attr('href'), window.location.origin)
+                .searchParams.get('p') || "1";
+
+            $("#pageNumber").val(page);
+            $("#formFilter")
+                .attr("action", (i, val) => val.replace("__PAGE__", page))
+                .submit();
+        });
+
+	</script>
+}

@@ -1,0 +1,149 @@
+﻿@model SearchListPageDto
+@{
+    ViewData["Title"] = "صفحه اصلی";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+    int i = ((Model.List?.PageNumber - 1) * Model.List?.PageSize) + 1 ?? 1;
+}
+
+<div class="col-lg-12">
+    <div class="portlet box border shadow">
+
+        <div class="portlet-body">
+
+            <form id="formFilter" asp-action="Index" asp-route-p="" method="post">
+                <input name="p" id="pageNumber" hidden />
+                <div class="form-body ">
+
+                    <div class="row">
+                        <div class="col-md-4 col-sm-12">
+                            <div class="form-group ">
+                                <div class="input-group">
+                                    <input asp-for="Filter.SearchTerm" type="text" placeholder="متن مورد نظر را وارد کنید" class="form-control">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="row">
+                        <div class="form-group col-md-2 d-flex justify-content-center flex-wrap align-content-center">
+                            <button style="border-radius:5px; margin-top:30px" class="alert-icon btn btn-success "
+                                    type="submit">
+                                <p class="px-3">جستجو</p>
+                            </button>
+                        </div>
+                    </div>
+
+
+                </div>
+            </form>
+            @if (Model.List!=null&&(Model.List.Data!=null && Model.List.Data.Any()))
+            {
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover table-striped" id="data-table">
+                        <thead>
+                            <tr>
+                                <th>ردیف</th>
+                                <th>نام جدول</th>
+                                <th>اطلاعات تکمیلی</th>
+                                <td>عملیات</td>
+                            </tr>
+                        </thead>
+                        <tbody>
+
+                            @foreach (var item in Model.List.Data)
+                            {
+                                <tr>
+                                    <td>@(i++)</td>
+                                    <td>@item.SearchEntityTypeTitle </td>
+                                    <td>@item.CompletedSearchTerm</td>
+
+                                    <td>
+                                        <div class="btn-group">
+
+                                            <div class="btn-group">
+                                                <button type="button" class="btn btn-default dropdown-toggle  d-flex " data-bs-toggle="dropdown" aria-expanded="false">
+                                                    <i class="icon-options m-1"></i>
+                                                    <i class="icon-arrow-down m-1"></i>
+                                                    <div class="paper-ripple"><div class="paper-ripple__background" style="opacity: 0.00864;"></div><div class="paper-ripple__waves"></div></div>
+                                                </button>
+                                                <ul class="dropdown-menu">
+                                             
+                                                    <li>
+                                                        <a onclick="ShowDetail('@item.EntityId','@item.SearchEntityType')"><i class="icon-detail"></i> جزئیات </a>
+                                                    </li>
+
+                                                </ul>
+                                            </div><!-- /.btn-group -->
+                                        </div>
+
+
+                                    </td>
+                                </tr>
+                            }
+
+
+
+
+                        </tbody>
+                    </table>
+
+                    <div>
+                        <cs-pager cs-paging-pagesize="@Model.List.PageSize"
+                                  cs-paging-pagenumber="@Model.List.PageNumber"
+                                  cs-paging-totalitems="@Model.List.TotalItems"
+                                  cs-paging-maxpageritems="50"
+                                  cs-pagenumber-param="p"
+                                  cs-show-first-last="true"
+                                  cs-suppress-empty-nextprev="true"
+                                  cs-suppress-inactive-firstlast="true"
+                                  cs-show-numbered="true"
+                                  cs-first-page-text="ابتدا"
+                                  cs-last-page-text="انتها"
+                                  cs-next-page-title="بعدی"
+                                  cs-previous-page-title="قبلی"
+                                  cs-first-page-title="ابتدا"
+                                  cs-last-page-title="انتها"
+                                  cs-next-page-text="بعدی"
+                                  cs-previous-page-text="قبلی"
+                                  cs-pager-li-current-class="page-item active"
+                                  cs-pager-li-other-class="page-item"
+                                  cs-pager-li-non-active-class="page-item disabled"
+                                  cs-pager-link-current-class="page-link"
+                                  cs-pager-link-other-class="page-link"
+                                  asp-controller="AllocationOfEquipment"
+                                  asp-action="ListAllocationOfEqu">
+                        </cs-pager>
+                    </div>
+
+
+                </div>
+            }
+
+            <!-- /.table-responsive -->
+        </div>
+        <!-- /.portlet -->
+    </div>
+</div>
+
+@section script {
+
+    
+    <script>
+          
+        $(".page-link").click(function (event) {
+            event.preventDefault(); // غیرفعال کردن عملکرد پیشفرض href
+
+            var hrefValue = $(this).attr("href");
+            $("#pageNumber").val(hrefValue.split("p=")[1]);
+            $("#formFilter").submit();
+        });
+        function ShowDetail(id,type) {
+
+            $.post("@Url.Action("GetDetail", "Search")", { id: id ,type:type})
+                .done(function (res) {
+
+                });
+        }
+    </script>
+}

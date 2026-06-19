@@ -1,0 +1,578 @@
+@model ContractOptionsDto
+@using Entities.Common
+@using Microsoft.AspNetCore.Mvc.Rendering
+@using System.ComponentModel.DataAnnotations
+@{
+    ViewData["Title"] = "تنظیمات قرارداد";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+    var initialCount = Model?.AccountNumbers?.Count ?? 0;
+    var smsSettingsId = Model?.SmsSettings?.Id;
+    var smsProvider = Model?.SmsSettings?.SmsProvider ?? SmsProvider.TrezSms;
+    
+    // Get all SMS event types dynamically
+    var allEventTypes = Enum.GetValues(typeof(SmsEventType)).Cast<SmsEventType>().ToList();
+    
+    // Helper function to get display name
+    string GetDisplayName(Enum enumValue)
+    {
+        var field = enumValue.GetType().GetField(enumValue.ToString());
+        var attribute = (DisplayAttribute)Attribute.GetCustomAttribute(field, typeof(DisplayAttribute));
+        return attribute?.Name ?? enumValue.ToString();
+    }
+}
+
+<div class="col-lg-12">
+    <form asp-action="UpdateOptions" method="post" id="accountOptionsForm" class="needs-validation" novalidate>
+        <div class="card-header d-flex justify-content-between align-items-center bg-white rounded-3 shadow-sm mb-3 py-3">
+            <h3 class="title mb-0">
+                <a asp-action="Index">
+                    <i class="fa-solid fa-right-to-bracket align-middle me-2"></i>
+                </a><span>  تنظیمات قرارداد </span>
+            </h3>
+            <div class="w-75">
+                <div class="w-100 m-0">
+                    <div class="row g-3">
+                        <div class="col-md-4 text-center">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" class="w-100" name="ContractId" value="@Model.ContractId" />
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <strong>شماره قرارداد:</strong>
+                            <span>@Model.ContractNumber</span>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <strong>شرکت:</strong>
+                            <span>@Model.CompanyName</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card m-0">
+            <div class="card-body mt-3 pt-1 pb-0">
+                <div class="mb-4">
+                    <h5 class=" fs-6 fw-bold mb-4 ">مقادیر نهایی قرارداد</h5>
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label class="form-label">حجم نهایی</label>
+                            <input type="number" class="form-control" asp-for="FinallVolume" min="0" step="1"/>
+                            <span class="text-danger" asp-validation-for="FinallVolume"></span>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">وزن نهایی</label>
+                            <input type="number" class="form-control" asp-for="FinallWeight" min="0" step="1"/>
+                            <span class="text-danger" asp-validation-for="FinallWeight"></span>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">تعداد سفر نهایی</label>
+                            <input type="number" class="form-control" asp-for="FinallVoyage" min="0" step="1"/>
+                            <span class="text-danger" asp-validation-for="FinallVoyage"></span>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">تعداد کانتینر نهایی</label>
+                            <input type="number" class="form-control" asp-for="FinallContainer" min="0" step="1"/>
+                            <span class="text-danger" asp-validation-for="FinallContainer"></span>
+                        </div>
+                    </div>
+                    <div class="row g-3 mt-1">
+                        <div class="col-md-3">
+                            <label class="form-label">درصد سهم شرکت</label>
+                            <input type="number" class="form-control" asp-for="CompanySharePercentage" min="0" max="100" step="0.01"/>
+                            <span class="text-danger" asp-validation-for="CompanySharePercentage"></span>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">درصد سهم کارفرما</label>
+                            <input type="number" class="form-control" asp-for="EmployerSharePercentage" min="0" max="100" step="0.01"/>
+                            <span class="text-danger" asp-validation-for="EmployerSharePercentage"></span>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">شماره تماس ذینفع</label>
+                            <input type="text" class="form-control" asp-for="BeneficiaryPhoneNumber" maxlength="20"/>
+                            <span class="text-danger" asp-validation-for="BeneficiaryPhoneNumber"></span>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">نوع قرارداد منطقه</label>
+                            <select class="form-select" asp-for="RegionType" asp-items="Html.GetEnumSelectList<ContractRegionType>()">
+                            </select>
+                            <span class="text-danger" asp-validation-for="RegionType"></span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <div class="card mt-3 mb-0">
+            <div class="card-body">
+                <h5 class=" fs-6 fw-bold mb-4 ">تنظیمات قالب گزارشات</h5>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label" asp-for="WarehouseReceiptVersion"></label>
+                        <select class="form-select" asp-for="WarehouseReceiptVersion" asp-items="Html.GetEnumSelectList<Entities.enumeration.WarehouseReceiptVersion>()">
+                        </select>
+                        <span class="text-danger" asp-validation-for="WarehouseReceiptVersion"></span>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label" asp-for="DirectShippingPermitVersion"></label>
+                        <select class="form-select" asp-for="DirectShippingPermitVersion" asp-items="Html.GetEnumSelectList<Entities.enumeration.DirectShippingPermitVersion>()">
+                        </select>
+                        <span class="text-danger" asp-validation-for="DirectShippingPermitVersion"></span>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label" asp-for="DirectDeliveryPermitVersion"></label>
+                        <select class="form-select" asp-for="DirectDeliveryPermitVersion" asp-items="Html.GetEnumSelectList<Entities.enumeration.DirectDeliveryPermitVersion>()">
+                        </select>
+                        <span class="text-danger" asp-validation-for="DirectDeliveryPermitVersion"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-3 mb-0">
+            <div class="card-body">
+                <h5 class="fs-6 fw-bold mb-4">تنظیمات محاسبه تبدیل به تناژ</h5>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label" asp-for="WeightCalculationMethodAnbardary"></label>
+                        <select class="form-select" asp-for="WeightCalculationMethodAnbardary" asp-items="Html.GetEnumSelectList<WeightCalculationMethod>()">
+                        </select>
+                        <span class="text-danger" asp-validation-for="WeightCalculationMethodAnbardary"></span>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label" asp-for="WeightCalculationMethodLoading"></label>
+                        <select class="form-select" asp-for="WeightCalculationMethodLoading" asp-items="Html.GetEnumSelectList<WeightCalculationMethod>()">
+                        </select>
+                        <span class="text-danger" asp-validation-for="WeightCalculationMethodLoading"></span>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label" asp-for="WeightCalculationMethodDefault"></label>
+                        <select class="form-select" asp-for="WeightCalculationMethodDefault" asp-items="Html.GetEnumSelectList<WeightCalculationMethod>()">
+                        </select>
+                        <span class="text-danger" asp-validation-for="WeightCalculationMethodDefault"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="card mt-3 mb-0">
+            <div class="card-body">
+                <div class="d-flex">
+                    <h5 class="fs-6 fw-bold mb-0 me-3">تنظیمات بیمه</h5>
+                    <div class="form-check form-switch mb-0">
+                        <input class="form-check-input section-toggle" type="checkbox" asp-for="IsInsuranceActive" data-target="#insurance-settings" value="true"/>
+                        <label class="form-check-label mb-0" for="IsInsuranceActive">آیا بیمه فعال است؟</label>
+                    </div>
+                </div>
+                <div id="insurance-settings" class="row g-3 mt-3 @(Model?.IsInsuranceActive == true ? string.Empty : "d-none")">
+                    <div class="col-md-6">
+                        <label class="form-label">شرکت بیمه</label>
+                        <select class="form-select" asp-for="InsuranceCompanyId" asp-items="ViewBag.CompanySelectList">
+                            <option value="">انتخاب کنید</option>
+                        </select>
+                        <span class="text-danger" asp-validation-for="InsuranceCompanyId"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">نحوه اعمال بیمه</label>
+                        <div class="d-flex flex-wrap gap-3 mt-2">
+                            @foreach (InsuranceCreationType creationType in Enum.GetValues(typeof(InsuranceCreationType)))
+                            {
+                                var radioId = $"insurance-type-{(int)creationType}";
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" asp-for="InsuranceCreationType" id="@radioId" value="@creationType"/>
+                                    <label class="form-check-label" for="@radioId">@GetDisplayName(creationType)</label>
+                                </div>
+                            }
+                        </div>
+                        <span class="text-danger" asp-validation-for="InsuranceCreationType"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-3 mb-0">
+            <div class="card-body">
+                <div class="d-flex">
+                    <h5 class=" fs-6 fw-bold mb-0 me-3 ">تنظیمات شرکت حمل و نقل</h5>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input section-toggle" type="checkbox" asp-for="HasTransportationCompany" data-target="#transportation-settings" value="true"/>
+                        <label class="form-check-label mb-0" for="HasTransportationCompany">آیا شرکت حمل و نقل دارد؟</label>
+                    </div>
+                </div>
+                <div id="transportation-settings" class="row g-3 mt-3 @(Model?.HasTransportationCompany == true ? string.Empty : "d-none")">
+                    <div class="col-md-6">
+                        <label class="form-label">شرکت حمل و نقل</label>
+                        <select class="form-select" asp-for="TransportationCompanyId" asp-items="ViewBag.CompanySelectList">
+                            <option value="">انتخاب کنید</option>
+                        </select>
+                        <span class="text-danger" asp-validation-for="TransportationCompanyId"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-3 mb-0">
+            <div class="card-body">
+                <h5 class="mb-3">تنظیمات شماره‌گذاری فاکتور</h5>
+                <div class="mb-3">
+                    <label class="form-label d-block">نحوه تولید شماره</label>
+                    <div class="d-flex flex-wrap gap-3">
+                        @foreach (FactorNumberCreationType creationType in Enum.GetValues(typeof(FactorNumberCreationType)))
+                        {
+                            var radioId = $"factor-type-{(int)creationType}";
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" asp-for="FactorNumberCreationType" id="@radioId" value="@creationType"/>
+                                <label class="form-check-label" for="@radioId">@GetDisplayName(creationType)</label>
+                            </div>
+                        }
+                    </div>
+                    <span class="text-danger d-block mt-1" asp-validation-for="FactorNumberCreationType"></span>
+                </div>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">پیشوند سریال</label>
+                        <input type="text" class="form-control" asp-for="FactorPrefixSerial" maxlength="50"/>
+                        <span class="text-danger" asp-validation-for="FactorPrefixSerial"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">شروع از شماره</label>
+                        <input type="number" class="form-control" asp-for="FactorBeginFrom" min="0" step="1"/>
+                        <span class="text-danger" asp-validation-for="FactorBeginFrom"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card mt-3 mb-0">
+            <div class="card-body">
+                <h5 class="mb-3">تنظیمات شماره گذاری بیمه</h5>
+                <div class="mb-3">
+                    <label class="form-label d-block">نحوه تولید شماره</label>
+                    <div class="d-flex flex-wrap gap-3">
+                        @foreach (InsuranceNumberCreationType creationType in Enum.GetValues(typeof(InsuranceNumberCreationType)))
+                        {
+                            var radioId = $"insurance-number-type-{(int)creationType}";
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" asp-for="InsuranceNumberCreationType" id="@radioId" value="@creationType"/>
+                                <label class="form-check-label" for="@radioId">@GetDisplayName(creationType)</label>
+                            </div>
+                        }
+                    </div>
+                    <span class="text-danger d-block mt-1" asp-validation-for="InsuranceNumberCreationType"></span>
+                </div>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">پیشوند سریال</label>
+                        <input type="text" class="form-control" asp-for="InsurancePrefixSerial" maxlength="50"/>
+                        <span class="text-danger" asp-validation-for="InsurancePrefixSerial"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">شروع از شماره</label>
+                        <input type="number" class="form-control" asp-for="InsuranceBeginFrom" min="0" step="1"/>
+                        <span class="text-danger" asp-validation-for="InsuranceBeginFrom"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-3 mb-0">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">شماره حساب‌ها</h5>
+                    <button type="button" class="btn btn-primary" id="add-account-number">
+                        + افزودن شماره حساب
+                    </button>
+                </div>
+
+                <div id="account-number-list">
+                    @for (var i = 0; i < (Model.AccountNumbers?.Count ?? 0); i++)
+                    {
+                        var item = Model.AccountNumbers[i];
+                        <div class="account-item border rounded p-3 my-3 mt-3" data-index="@i">
+                            <input type="hidden" name="Items[@i].Id" value="@item.Id" class="account-id-input"/>
+                            <input type="hidden" name="Items[@i].IsRemoved" value="false" class="is-removed-input"/>
+                            <div class="row g-3 align-items-end ">
+                                <div class="col-md-4">
+                                    <label class="form-label">شماره حساب</label>
+                                    <input type="text" class="form-control" name="Items[@i].AccountNumber" value="@item.AccountNumber" maxlength="50"/>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">توضیحات</label>
+                                    <input type="text" class="form-control" name="Items[@i].Description" value="@item.Description" maxlength="500"/>
+                                </div>
+                                <div class="col-md-2 text-end">
+                                    <button type="button" class="btn btn-outline-danger w-100 remove-account"> <i class="icon-trash fa-flip-horizontal fs-6 align-middle"></i> </button>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+
+        </div>
+
+        <div class="card mt-3">
+            <div class="card-body">
+                <div class="mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="mb-3">تنظیمات پیامک</h5>
+                        <input type="hidden" name="SmsSettings.Id" value="@smsSettingsId"/>
+                        <div class="d-flex w-50 align-items-center">
+                            <span class="form-label w-50 mb-0">ارائه دهنده سرویس پیامک</span>
+                            <select class="form-control" name="SmsSettings.SmsProvider">
+                                @foreach (SmsProvider provider in Enum.GetValues(typeof(SmsProvider)))
+                                {
+                                    var providerField = provider.GetType().GetField(provider.ToString());
+                                    var providerAttribute = (DisplayAttribute)Attribute.GetCustomAttribute(providerField, typeof(DisplayAttribute));
+                                    var providerDisplayName = providerAttribute?.Name ?? provider.ToString();
+                                    var isSelected = smsProvider == provider;
+                                    <option value="@((int)provider)" selected="@isSelected">@providerDisplayName</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    
+                    @* Dynamically generate event sections based on enum values *@
+                    @for (var eventIndex = 0; eventIndex < allEventTypes.Count; eventIndex++)
+                    {
+                        var eventType = allEventTypes[eventIndex];
+                        var eventConfig = Model?.SmsSettings?.EventConfigs?.FirstOrDefault(x => x.EventType == eventType);
+                        var eventDisplayName = GetDisplayName(eventType);
+                        var eventId = $"event_{eventType}Enabled";
+
+                        <div class="border rounded p-3 mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h6 class="mb-0">@eventDisplayName</h6>
+                                <div class="form-check form-switch">
+                                    <input type="hidden" name="SmsSettings.EventConfigs[@eventIndex].Id" value="@eventConfig?.Id"/>
+                                    <input type="hidden" name="SmsSettings.EventConfigs[@eventIndex].EventType" value="@((int)eventType)"/>
+                                    <input type="hidden" name="SmsSettings.EventConfigs[@eventIndex].IsRemoved" value="false"/>
+                                    <input class="form-check-input" type="checkbox" name="SmsSettings.EventConfigs[@eventIndex].IsEnabled"
+                                           id="@eventId" @(eventConfig?.IsEnabled == true ? "checked" : "") value="true">
+                                    <label class="form-check-label" for="@eventId">فعال</label>
+                                </div>
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <label class="form-label mb-0">شماره تلفن‌های دریافت کننده</label>
+                                <button type="button" class="btn btn-sm btn-primary add-sms-phone" data-event-index="@eventIndex">
+                                    افزودن شماره
+                                </button>
+                            </div>
+
+                            <div class="sms-phone-list" data-event-index="@eventIndex">
+                                @if (eventConfig?.PhoneNumbers != null)
+                                {
+                                    for (var phoneIndex = 0; phoneIndex < eventConfig.PhoneNumbers.Count; phoneIndex++)
+                                    {
+                                        var phone = eventConfig.PhoneNumbers[phoneIndex];
+                                        <div class="sms-phone-item mb-2" data-phone-index="@phoneIndex">
+                                            <input type="hidden" name="SmsSettings.EventConfigs[@eventIndex].PhoneNumbers[@phoneIndex].Id" value="@phone.Id" class="sms-phone-id"/>
+                                            <input type="hidden" name="SmsSettings.EventConfigs[@eventIndex].PhoneNumbers[@phoneIndex].IsRemoved" value="false" class="sms-phone-removed"/>
+                                            <div class="input-group">
+                                                <input type="text" class="form-control" name="SmsSettings.EventConfigs[@eventIndex].PhoneNumbers[@phoneIndex].PhoneNumber"
+                                                       value="@phone.PhoneNumber" placeholder="شماره تلفن" maxlength="20"/>
+                                                <button type="button" class="btn btn-outline-danger remove-sms-phone">حذف</button>
+                                            </div>
+                                        </div>
+                                    }
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="card-footer">
+                <div class="d-flex justify-content-end mt-4">
+                    <button type="submit" class="btn btn-success px-4">ثبت تغییرات</button>
+                </div>
+            </div>
+        </div>
+
+    </form>
+        </div>
+<script type="text/template" id="account-number-template">
+    <div class="account-item border rounded p-3 mb-3" data-index="__index__">
+        <input type="hidden" name="Items[__index__].Id" value="" class="account-id-input" />
+        <input type="hidden" name="Items[__index__].IsRemoved" value="false" class="is-removed-input" />
+        <div class="row g-3 align-items-end">
+            <div class="col-md-4">
+                <label class="form-label">شماره حساب</label>
+                <input type="text" class="form-control" name="Items[__index__].AccountNumber" maxlength="50" />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">توضیحات</label>
+                <input type="text" class="form-control" name="Items[__index__].Description" maxlength="500" />
+            </div>
+            <div class="col-md-2 text-end">
+                <button type="button" class="btn btn-outline-danger w-100 remove-account">حذف</button>
+            </div>
+        </div>
+    </div>
+</script>
+
+@section script {
+    <script>
+        (function () {
+            let accountIndex = @initialCount;
+            const container = $("#account-number-list");
+            const template = $("#account-number-template").html();
+
+            $("#add-account-number").on("click", function () {
+                const content = template.replace(/__index__/g, accountIndex);
+                container.append(content);
+                accountIndex++;
+            });
+
+            container.on("click", ".remove-account", function () {
+                const wrapper = $(this).closest(".account-item");
+                const idInput = wrapper.find(".account-id-input");
+                const isRemovedInput = wrapper.find(".is-removed-input");
+
+                if (idInput.val()) {
+                    isRemovedInput.val("true");
+                    wrapper.addClass("d-none");
+                } else {
+                    wrapper.remove();
+                }
+            });
+
+            // SMS Phone Numbers Management - Dynamically initialize counters for all event types
+            const smsPhoneCounters = [@{
+                for (var i = 0; i < allEventTypes.Count; i++)
+                {
+                    var eventType = allEventTypes[i];
+                    var eventConfig = Model?.SmsSettings?.EventConfigs?.FirstOrDefault(x => x.EventType == eventType);
+                    var phoneCount = eventConfig?.PhoneNumbers?.Count ?? 0;
+                    if (i > 0) { Write(", "); }
+                    Write(phoneCount);
+                }
+            }];
+
+            $(".add-sms-phone").on("click", function () {
+                const eventIndex = $(this).data("event-index");
+                const phoneList = $(`.sms-phone-list[data-event-index="${eventIndex}"]`);
+                const phoneIndex = smsPhoneCounters[eventIndex];
+
+                const phoneHtml = `
+                    <div class="sms-phone-item mb-2" data-phone-index="${phoneIndex}">
+                        <input type="hidden" name="SmsSettings.EventConfigs[${eventIndex}].PhoneNumbers[${phoneIndex}].Id" value="" class="sms-phone-id" />
+                        <input type="hidden" name="SmsSettings.EventConfigs[${eventIndex}].PhoneNumbers[${phoneIndex}].IsRemoved" value="false" class="sms-phone-removed" />
+                        <div class="input-group">
+                            <input type="text" class="form-control" name="SmsSettings.EventConfigs[${eventIndex}].PhoneNumbers[${phoneIndex}].PhoneNumber" 
+                                   placeholder="شماره تلفن" maxlength="20" />
+                            <button type="button" class="btn btn-outline-danger remove-sms-phone">حذف</button>
+                        </div>
+                    </div>
+                `;
+
+                phoneList.append(phoneHtml);
+                smsPhoneCounters[eventIndex]++;
+            });
+
+            $(document).on("click", ".remove-sms-phone", function () {
+                const phoneItem = $(this).closest(".sms-phone-item");
+                const idInput = phoneItem.find(".sms-phone-id");
+                const removedInput = phoneItem.find(".sms-phone-removed");
+
+                if (idInput.val()) {
+                    removedInput.val("true");
+                    phoneItem.addClass("d-none");
+                } else {
+                    phoneItem.remove();
+                }
+            });
+
+            const toggleSection = (toggleSelector, targetSelector) => {
+                const toggle = $(toggleSelector);
+                const target = $(targetSelector);
+                if (!toggle.length || !target.length) return;
+                const inputs = target.find("select, input, textarea").not('[type="hidden"]');
+
+                const syncState = () => {
+                    const isActive = toggle.is(":checked");
+                    target.toggleClass("d-none", !isActive);
+                    inputs.prop("disabled", !isActive);
+                };
+
+                syncState();
+                toggle.on("change", syncState);
+            };
+
+            toggleSection("#IsInsuranceActive", "#insurance-settings");
+            toggleSection("#HasTransportationCompany", "#transportation-settings");
+
+            const setFieldError = (fieldName, message) => {
+                const span = $(`[data-valmsg-for="${fieldName}"]`);
+                if (span.length) {
+                    span.text(message || "");
+                }
+            };
+
+            $("#accountOptionsForm").on("submit", function (evt) {
+                let hasError = false;
+                const insuranceRequired = $("#IsInsuranceActive").is(":checked");
+                const insuranceCompany = $("#InsuranceCompanyId");
+                const insuranceMethodChecked = $("input[name='InsuranceCreationType']:checked");
+                const transportRequired = $("#HasTransportationCompany").is(":checked");
+                const transportCompany = $("#TransportationCompanyId");
+                const factorMethodInputs = $("input[name='FactorNumberCreationType']");
+                const factorMethodChecked = factorMethodInputs.filter(":checked");
+                const factorBeginInput = $("#FactorBeginFrom");
+
+                if (insuranceRequired && (!insuranceCompany.val() || insuranceCompany.val() === "")) {
+                    setFieldError("InsuranceCompanyId", "انتخاب شرکت بیمه الزامی است.");
+                    insuranceCompany.focus();
+                    hasError = true;
+                } else {
+                    setFieldError("InsuranceCompanyId", "");
+                }
+
+                if (insuranceRequired && insuranceMethodChecked.length === 0) {
+                    setFieldError("InsuranceCreationType", "انتخاب نحوه اعمال بیمه الزامی است.");
+                    if (!hasError) {
+                        $("input[name='InsuranceCreationType']").first().focus();
+                    }
+                    hasError = true;
+                } else {
+                    setFieldError("InsuranceCreationType", "");
+                }
+
+                if (transportRequired && (!transportCompany.val() || transportCompany.val() === "")) {
+                    if (!hasError) {
+                        transportCompany.focus();
+                    }
+                    setFieldError("TransportationCompanyId", "انتخاب شرکت حمل و نقل الزامی است.");
+                    hasError = true;
+                } else {
+                    setFieldError("TransportationCompanyId", "");
+                }
+
+                if (factorMethodInputs.length && factorMethodChecked.length === 0) {
+                    if (!hasError) {
+                        factorMethodInputs.first().focus();
+                    }
+                    setFieldError("FactorNumberCreationType", "انتخاب روش تولید شماره فاکتور الزامی است.");
+                    hasError = true;
+                } else {
+                    setFieldError("FactorNumberCreationType", "");
+                }
+
+                const beginVal = factorBeginInput.val();
+                if (!beginVal || isNaN(beginVal) || Number(beginVal) < 0) {
+                    if (!hasError) {
+                        factorBeginInput.focus();
+                    }
+                    setFieldError("FactorBeginFrom", "مقدار شروع باید عددی معتبر باشد.");
+                    hasError = true;
+                } else {
+                    setFieldError("FactorBeginFrom", "");
+                }
+
+                if (hasError) {
+                    evt.preventDefault();
+                }
+            });
+        })();
+    </script>
+}

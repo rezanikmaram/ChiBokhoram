@@ -1,0 +1,47 @@
+﻿<script>
+    $(document).on("click", ".btnAddCompany", function () {
+
+        const targetSelect = $(this).data("target-select");
+
+        $.post("/Company/GetAddCompanyPage", function (res) {
+
+            $("#addCompanyModalContainer").html(res);
+
+            let modal = $("#addCompanyModal");
+
+            // ⭐ ذخیره selector داخل مودال
+            modal.data("target-select", targetSelect);
+
+            modal.modal("show");
+
+            modal.find('.select2').select2({
+                dropdownParent: modal
+            });
+        });
+    });
+
+    function addCompanyToMainSelect(companyId) {
+
+        const modal = $("#addCompanyModal");
+        const targetSelect = modal.data("target-select");
+
+        if (!targetSelect) return;
+
+        $.get('/Company/GetCompanyNameById', { companyId: companyId }, function (company) {
+
+            const select = $(targetSelect);
+
+            const newOption = new Option(
+                company.text,
+                company.id,
+                true,
+                true
+            );
+
+            select
+                .append(newOption)
+                .val(company.id)
+                .trigger('change');
+        });
+    }
+</script>

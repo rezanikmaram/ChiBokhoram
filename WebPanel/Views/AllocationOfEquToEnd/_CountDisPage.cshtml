@@ -1,0 +1,133 @@
+﻿@model AllocationEquCountDisPageDto
+
+
+
+<div class="col-lg-12">
+    <div class="card">
+        <div class="card-header">
+            <div class="d-flex justify-content-between">
+               
+                    <h3 class="title">
+                        <i class="icon-frane"></i>    تعداد جابجایی تجهیزات
+
+                    </h3>
+                    <div>
+
+                        <a class="btn btn-primary rounded"
+                           onclick="countDisShowModal();">
+                            <i class="icon-plus align-middle"></i>
+                            مقدار جدید
+                        </a>
+                        <!-- /.portlet-title -->
+                        <div class="buttons-box">
+
+                            <i class="icon-size-fullscreen"></i>
+                            <div class="paper-ripple">
+                                <div class="paper-ripple__background"></div>
+                                <div class="paper-ripple__waves"></div>
+                            </div>
+                        </div>
+
+                    </div>
+                <!-- /.buttons-box -->
+            </div>
+            <!-- /.portlet-heading -->
+            <!-- /.portlet-body -->
+        </div>
+        <div class="card-body pt-0">
+            <div id="CountDisListId">
+                <partial name="_CountDisList" model="Model.List" />
+            </div>
+
+        </div>
+        <!-- /.portlet -->
+    </div>
+</div>
+
+
+
+<div id="CountDismodal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">  تعداد جابجایی</h4>
+                <button type="button" class="close btn-close rounded border" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="modalbody">
+
+                <div class="card-body pt-0">
+
+                    <div class="form-body">
+
+
+                        <input asp-for="CreateCountDisDto.Id" hidden />
+                        <input asp-for="CreateCountDisDto.AllocationEquipmentId" hidden />
+                        <div class="row">
+
+                            <div class="col-sm-12">
+                                <div class="form-group">
+                                    <label>نوع تجهیز</label>
+                                    <div class="input-group col-sm-12 ">
+                                        <select class="form-control select2 w-100" asp-for="CreateCountDisDto.SeoEquipmentId"
+                                                asp-items="Model.EquipmentsTitle">
+                                        </select>
+
+                                      @*   <span class="input-group-btn">
+                                            <a class="btn px-2 ms-2 btn-success"
+                                               onclick="showNewEquipmentModal('0', 'CountDismodal')">
+                                                <i class="icon-plus align-middle"></i>
+
+                                            </a>
+                                        </span> *@
+                                         
+                                    </div>
+                                    <span asp-validation-for="CreateCountDisDto.SeoEquipmentId"
+                                          class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-sm-6 my-4">
+                                <div class="form-group  ">
+                                    <label>تعداد جابجایی</label>
+                                    <div class="input-group">
+                                        <input type="number" asp-for="CreateCountDisDto.CountDisplacements" min="0" class="form-control">
+                                    </div>
+                                    <span asp-validation-for="CreateCountDisDto.CountDisplacements" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-sm-6 my-4">
+                                <div class="form-group  ">
+                                    <label>تاریخ</label>
+                                    <div class="input-group">
+                                        <input type="text" asp-for="CreateCountDisDto.DateFa"  required autocomplete="off" class="form-control">
+                                    </div>
+                                    <span asp-validation-for="CreateCountDisDto.DateFa" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                        </div>
+
+
+                    </div>
+                        <div class="modal-footer px-0 border-0">
+                            <a onclick="addOrUpdateCountDis()" class="btn btn-success btn-round">  ثبت</a>
+                            <button type="button" class="btn btn-danger btn-round" data-bs-dismiss="modal">بازگشت</button>
+                        </div>
+
+                    </div>
+
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+

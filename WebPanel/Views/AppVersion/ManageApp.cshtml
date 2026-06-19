@@ -1,0 +1,199 @@
+﻿@model List<AppVersionWebDto>
+@{
+	ViewData["Title"] = "مدیریت نسخه برنامه ها";
+	Layout = "~/Views/Shared/AdminLayout.cshtml";
+	int i = 1;
+}
+
+<div class="col-lg-12">
+	<div class="card">
+		<div class="card-header pb-3">
+			<div class="d-flex justify-content-between">
+				<h3 class="title">
+					<i class="icon-frane"></i> مدیریت نسخه برنامه ها
+				</h3>
+			</div>
+		</div>
+		<div class="card-body pt-0">
+
+			<div class="table-responsive">
+				<table class="table table-bordered table-hover table-striped" id="data-table">
+					<thead class="bg-primary">
+						<tr>
+							<th>ردیف</th>
+							<th>نام برنامه</th>
+							<th>سیستم عامل</th>
+							<th>نسخه جاری</th>
+							<th>حداقل نسخه</th>
+							<th>اخرین بروزرسانی</th>
+							<th> لینک  </th>
+
+							<td>عملیات</td>
+						</tr>
+					</thead>
+					<tbody>
+
+						@foreach (var item in Model)
+						{
+							<tr>
+								<td class="align-middle">@(i++)</td>
+								<td class="align-middle">@item.AppTypeTitle</td>
+								<td class="align-middle">@item.OsTypeTitle</td>
+
+								<td class="align-middle">@item.CurrentVersion.ToPrice()</td>
+
+								<td class="align-middle">@item.MinVersion.ToPrice()</td>
+
+								<td class="align-middle">@item.LastDateUpdate</td>
+								<td class="text-center align-middle">
+									<a href="@(item.Url)" target="_blank">
+										@((item.OsType == EnumOsType.Web) ? "نمایش" : "دانلود")
+									</a>
+								</td>
+
+								<td class="align-middle">
+									<a class="btn px-2 btn-success btn-sm btn-icon curve" onclick="showModalUploadFile('@item.Id', '@item.OsType')"><i class="fas fa-upload"></i></a>
+									<a class="btn px-2 btn-info btn-sm btn-icon curve" onclick="showModalchangeVer('@item.Id', '@item.CurrentVersion', '@item.MinVersion' );"><i class="icon-pencil align-middle"></i></a>
+								</td>
+							</tr>
+						}
+					</tbody>
+				</table>
+
+			</div>
+			<!-- /.table-responsive -->
+		</div>
+		<!-- /.portlet -->
+	</div>
+</div>
+
+
+<div id="generalmodal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" tabindex="-1">
+	<div class="modal-dialog modal-lg modal-dialog-centered">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h4 class="modal-title">فایل  جدید</h4>
+				<button type="button" class="close btn-close rounded border" data-bs-dismiss="modal"></button>
+			</div>
+			<div class="modal-body" id="modalbody">
+				<form asp-action="UpdateNewApp" method="post" enctype="multipart/form-data">
+					<input type="hidden" id="AppVersionId" name="AppVersionId" />
+					<div class="card mb-0">
+
+						<div class="card-body">
+							<div class="row">
+								<div class="col-md-12 col-sm-12">
+									<div class="form-group">
+										@* <label class="control-label">بارگزاری فایل جدید </label> *@
+										<div class="file-uploading">
+											<input id="kv-explorer" name="file" type="file" required />
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						@* <div class="modal-footer px-0 border-0 mt-3">
+							<button type="button" class="btn btn-danger btn-round" data-bs-dismiss="modal">بازگشت</button>
+							<button type="submit" class="btn btn-success btn-round">
+								ذخیره
+							</button>
+						</div> *@
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div id="changeVerModal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" tabindex="-1">
+	<div class="modal-dialog modal-dialog-centered">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h4 class="modal-title">شماره نسخه جدید</h4>
+				<button type="button" class="close btn-close rounded border" data-bs-dismiss="modal"></button>
+			</div>
+			<div class="modal-body" id="modalbody">
+				<form asp-action="SaveAppVersionInfo" method="post">
+					<input type="hidden" id="AppVersionId2" name="AppVersionId" />
+					<div class="card mb-0">
+
+						<div class="card-body pb-0">
+							<div class="row">
+								<div class="col-md-6">
+									<div class="form-group">
+										<label>نسخه جدید</label>
+										<div class="input-group">
+											<input type="number" class="form-control" id="NewVersionId" name="NewVersion">
+										</div>
+									</div>
+								</div>
+								<div class="col-md-6">
+									<div class="form-group">
+										<label>حداقل نسخه  </label>
+										<div class="input-group">
+											<input type="number" class="form-control" id="MinVersionId" name="MinVersion">
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="modal-footer px-0 border-0 mt-3">
+							<button type="button" class="btn btn-danger btn-round" data-bs-dismiss="modal">بازگشت</button>
+							<button type="submit" class="btn btn-success btn-round">
+								ذخیره
+							</button>
+						</div>
+
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+@section script {
+
+	<script>
+		function showModalUploadFile(id, osType) {
+
+			$("#AppVersionId").val(id);
+
+			$("#kv-explorer").fileinput("destroy"); // پاک کردن تنظیمات قبلی
+
+			$("#kv-explorer").fileinput({
+				theme: "fa4",
+				language: "fa",
+				overwriteInitial: false,
+				uploadUrl: "@Url.Action("UpdateNewApp", "AppVersion")",
+				uploadAsync: true,
+				showUpload: true,
+				browseLabel: "انتخاب فایل",
+				minFileCount: 1,
+				maxFileCount: 1,
+				allowedFileExtensions: osType === "Android" ? ["apk"] : ["zip"], // محدودیت بر اساس OsType
+				initialPreviewAsData: true,
+				uploadExtraData: function() {
+					return {
+						appVersionId: $("#AppVersionId").val()
+					};
+				}
+			}).on("filebatchuploadsuccess", function(event, data) {
+				location.reload();
+			});
+
+			$("#generalmodal").modal("show");
+		}
+
+	</script>
+
+	<script>
+		 function showModalchangeVer(id, currentVer, minVer) {
+			$("#AppVersionId2").val(id);
+			$("#NewVersionId").val(currentVer)
+			$("#MinVersionId").val(minVer)
+
+			$("#changeVerModal").modal('show');
+		}
+	</script>
+}

@@ -1,0 +1,223 @@
+﻿@model ExportMobileUsersManagerDto
+@{
+    ViewData["Title"] = "مدیریت کاربران ";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+    int i = 1;
+}
+
+<div class="col-md-12">
+    <div class="p-3 rounded-3 bg-white shadow-sm">
+        <div class="d-flex justify-content-between">
+            <div>
+                <span class="fs-6">
+                    <i class="icon-frane"></i>
+                    <a asp-controller="InlandExportManifest" asp-action="Details" asp-route-Id="@Model.Info.Id"><i class="fa-solid fa-right-to-bracket me-2"></i></a>
+                    مدیریت کاربران
+                </span>
+                <span class="label p-2 mx-2 rounded label-primary">@($"{Model.Info.ManifestNumber} {Model.Info.Seo?.OwnerName}")</span>
+                <span class="label p-2 mx-2 rounded label-info">@Model.Info.Seo?.ProductName (@Model.Info.Seo?.Count.ToPrice() @Model.Info.Seo?.ProductPackingName)</span>
+            </div>
+
+            <div class="d-flex align-items-center">
+                @DateTimeOffset.Now.ToLongPersianDateString()
+                <i class="icon-calendar"></i>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row mt-3">
+    <div class="col-md-6">
+        <div class="card rounded-3 min-height-600">
+            <div class="card-header">
+                <div class="d-flex justify-content-between">
+                    <h3 class="title m-0">
+                        <i class="icon-user"></i>
+                        انتخاب کاربر
+                    </h3>
+                    <form asp-action="SetUserForExport" method="post" id="postUser">
+
+                        <a class="btn mb-2 float-end btn-success text-white label rounded" onclick="setUserForExport();">اضافه کردن انتخاب شده ها</a>
+                        <input id="selectUserId" name="ids" type="hidden" />
+                        <input asp-for="FilterDto.ExportId" name="ExportId" type="hidden" />
+                    </form>
+                </div><!-- /.portlet-title -->
+            </div><!-- /.portlet-heading -->
+            <div class="card-body pt-0 mb-5">
+                <form id="formFilter" asp-action="ManageUser" asp-route-ExportId="@Model.FilterDto.ExportId" method="post">
+                    <input asp-for="FilterDto.ExportId" type="hidden" />
+                    <div class="form-body mb-5">
+
+                        <div class="row">
+                            <div class="form-group col-lg-5 ">
+                                <label>جستجو</label>
+                                <div class="input-group">
+                                    <input asp-for="FilterDto.Search" type="text" placeholder="نام/شماره تلفن" class="form-control">
+                                </div>
+                            </div>
+
+                            <div class="form-group col-lg-4 ">
+                                <label>نوع کاربر</label>
+                                <div class="input-group">
+                                    <select class="form-control select2"
+                                            asp-for="FilterDto.UserMobileType">
+                                        <option value="">همه کاربرها</option>
+                                        <option value="1">@(UserMobileType.BarshomarWaterfront.ToDisplay())</option>
+                                        <option value="2">@(UserMobileType.BarshomarMohavate.ToDisplay())</option>
+                                        <option value="6">@(UserMobileType.Barshomar.ToDisplay())</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-3">
+                                <div style="margin-top:32px;" class="d-flex justify-content-around">
+                                    <button class="alert-icon btn btn-success label rounded w-100" type="submit"><p>فیلتر</p></button>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </form>
+
+                <table id="TableUnSelected" class="table table-bordered ">
+                    <thead class="bg-primary">
+                        <tr>
+                            <th><input type="checkbox" id="selectAllTableUnSelected" /></th>
+                            <th>نام و نام خانوادگی</th>
+                            <td> نوع  </td>
+                            <td>موبایل (کدملی)</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.Users)
+                        {
+                            <tr>
+                                <td style="width:30px;"><input type="checkbox" value="@item.Id" name="UserId" class="row-selector" /></td>
+                                <td>@item.UserFullName</td>
+                                <td>@item.TypeTitle</td>
+                                <td>@item.Phone (@item.MeliCode)</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+
+                <!-- /.tab-content -->
+
+            </div><!-- /.portlet-body -->
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card rounded-3">
+            <div class="card-header">
+                <div class="d-flex justify-content-between d-flex">
+                    <h3 class="title m-0">
+                        <i class="icon-speech"></i>
+                        کاربران انتخاب شده
+                    </h3>
+                    <form asp-action="RemoveUserFromExport" method="post" id="deleteUser">
+
+                        <a class="btn btn-danger text-white label rounded" onclick="deleteUser();">حذف انتخاب شده ها</a>
+                        <input id="removeIds" name="ids" type="hidden" />
+                        <input asp-for="FilterDto.ExportId" name="ExportId" type="hidden" />
+
+                    </form>
+                </div><!-- /.portlet-title -->
+                <!-- /.buttons-box -->
+            </div><!-- /.portlet-heading -->
+            <div class="card-body pt-0">
+                <table id="TableSelected" class="table table-bordered ">
+                    <thead class="bg-primary">
+                        <tr>
+                            <th><input type="checkbox" id="selectAllTableSelected" /></th>
+                            <th>نام و نام خانوادگی</th>
+                            <td> نوع  </td>
+                            <td>موبایل (کدملی)</td>
+                             
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.SelectedUsers)
+                        {
+                            <tr>
+                                <td style="width:30px;"><input type="checkbox" value="@item.Id" name="selectedUserId" class="row-selector" /></td>
+                                <td>@item.UserFullName</td>
+                                <td>@item.TypeTitle</td>
+                                <td>@item.Phone (@item.MeliCode)</td>
+ 
+                            </tr>
+                            i++;
+                        }
+                    </tbody>
+                </table>
+
+                <!-- /.tab-content -->
+
+            </div><!-- /.portlet-body -->
+        </div>
+    </div>
+</div>
+
+
+ 
+
+@section script {
+    <script>
+        function setUserForExport() {
+            var ids = "";
+            $("#selectUserId").val('');
+            $("input:checkbox[name=UserId]:checked").each(function () {
+                if (ids) {
+                    ids += ',' + $(this).val();
+                }
+                else {
+                    ids = $(this).val();
+                }
+            });
+            $("#selectUserId").val(ids);
+            if (ids) {
+                $("#postUser").submit();
+            }
+            else {
+                showAlert2('کاربری انتخاب نشده است', 1);
+                return;
+            }
+        }
+
+        function deleteUser() {
+            var ids = "";
+            $("#removeIds").val('');
+            $("input:checkbox[name=selectedUserId]:checked").each(function () {
+                if (ids) {
+                    ids += ',' + $(this).val();
+                }
+                else {
+                    ids = $(this).val();
+                }
+            });
+            $("#removeIds").val(ids);
+            if (ids) {
+                $("#deleteUser").submit();
+            }
+            else {
+                showAlert2('کاربری انتخاب نشده است', 1);
+                return;
+            }
+        }
+         $(document).ready(function () {
+
+            $('#selectAllTableUnSelected').click(function (e) {
+                    var isChecked = this.checked;
+                // Only select/deselect visible checkboxes
+                $('#TableUnSelected tbody tr:visible').find('td input:checkbox.row-selector').prop('checked', isChecked);
+            });
+
+
+            $('#selectAllTableSelected').click(function (e) {
+                    var isChecked = this.checked;
+                // Only select/deselect visible checkboxes
+                $('#TableSelected tbody tr:visible').find('td input:checkbox.row-selector').prop('checked', isChecked);
+            });
+        });
+
+    </script>
+}

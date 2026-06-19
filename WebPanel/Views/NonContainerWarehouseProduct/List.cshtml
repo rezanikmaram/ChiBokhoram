@@ -1,0 +1,168 @@
+﻿@model NonContainerWarehouseProductPageDto
+
+@{
+    ViewData["Title"] = "تعرفه انبارداری کالای غیر کانتینری";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+    int groupIndex = 1;
+}
+
+<div class="col-lg-12">
+    <div class="card mb-0">
+        <div class="card-header pb-0">
+            <div class="d-flex justify-content-between">
+                <h3 class="title">
+                    <button type="button" class="btn bg-transparent p-0 fs-6 text-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+                        <i class="fa-solid fa-right-to-bracket me-2"></i>
+                    </button>
+                    تعرفه انبارداری کالای غیر کانتینری
+                </h3>
+                <div class="d-flex">
+                    <a class="btn btn-primary d-md-block mx-2" style="border-radius:5px" onclick="showDiscountPage()">
+                        مدیریت تخفیف ها
+                    </a>
+
+                </div>
+            </div>
+            <form id="formFilter" asp-action="List" method="post">
+                <input name="p" id="pageNumber" hidden />
+                <div class="row gy-4">
+                    <div class="form-group col-md-3">
+                        <label>جستجو</label>
+                        <input asp-for="Filter.Search" class="form-control" placeholder="عنوان محصول">
+                        <span asp-validation-for="Filter.Search" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-2">
+                        <button style="margin-top:30px; border-radius:5px" class="btn btn-success" type="submit">
+                            فیلتر
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="card-body pt-0">
+            <div class="table-responsive mt-3">
+                <table class="table table-bordered table-hover table-striped">
+                    <thead class="bg-primary">
+                        <tr>
+                            <th>ردیف</th>
+                            <th>سرفصل</th>
+                            <th>زیر گروه</th>
+                            <th>ویژگی ها</th>
+                            <th>تعرفه</th>
+                            <th>عملیات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var group in Model.Data)
+                        {
+                            var products = group.NonContainerWarehouseProducts;
+                            var rowspan = products.Count;
+                            var typeName = group.GeneralCargoProductType.ToDisplay();
+
+                            for (int i = 0; i < rowspan; i++)
+                            {
+                                var product = products[i];
+                                <tr>
+                                    @if (i == 0)
+                                    {
+                                        <td class="align-middle" rowspan="@rowspan">@groupIndex</td>
+                                        <td class="align-middle" rowspan="@rowspan">@typeName</td>
+                                        groupIndex++;
+                                    }
+                                    <td class="align-middle">@product.Title</td>
+                                    <td class="align-middle">
+
+                                        @if (product.ProductPackingTitle?.Any() == true)
+                                        {
+                                            foreach (var pk in product.ProductPackingTitle)
+                                            {
+                                                <span class="bg-success my-1 border p-1 rounded">@(pk)</span>
+                                            }
+                                        }
+
+                                        @if (product.MinWeightTon > 0)
+                                        {
+                                            <span class="bg-warning my-1 border p-1 rounded">@($"حداقل تناژ: {product.MinWeightTon.ToPrice()}")</span>
+                                        }
+                                        @if (product.MaxWeightTon > 0)
+                                        {
+                                            <span class="bg-warning d-inline-block my-1 border p-1 rounded">@($"حداکثر تناژ: {product.MaxWeightTon.ToPrice()}")</span>
+                                        }
+                                    </td>
+                                    <td class="align-middle">
+                                        @if (product.NonContainerWarehouseProductTariff != null)
+                                        {
+                                            <div class="d-flex gap-2 my-2">
+                                                <span class="p-1 bg-primary rounded px-2">۱-۵ روز: @product.NonContainerWarehouseProductTariff.From1To5DayPrice.ToPrice()</span><br />
+                                                <span class="p-1 bg-primary rounded px-2">۱-۱۰ روز: @product.NonContainerWarehouseProductTariff.From1To10DayPrice.ToPrice()</span><br />
+                                                <span class="p-1 bg-primary rounded px-2">۱-۲۰ روز: @product.NonContainerWarehouseProductTariff.From1To20DayPrice.ToPrice()</span><br />
+                                                <span class="p-1 bg-primary rounded px-2">۱-۳۰ روز: @product.NonContainerWarehouseProductTariff.From1To30DayPrice.ToPrice()</span><br />
+                                            </div>
+                                            <div class="d-flex gap-2 my-2">
+                                                <span class="p-1 bg-primary rounded px-2">۱-۴۰ روز: @product.NonContainerWarehouseProductTariff.From1To40DayPrice.ToPrice()</span><br />
+                                                <span class="p-1 bg-primary rounded px-2">۱-۵۰ روز: @product.NonContainerWarehouseProductTariff.From1To50DayPrice.ToPrice()</span><br />
+                                                <span class="p-1 bg-primary rounded px-2">بیش از ۵۰ روز: @product.NonContainerWarehouseProductTariff.LargerThan50DayPrice.ToPrice()</span><br />
+                                            </div>
+                                            <div class="d-flex gap-2 my-2">
+                                                <span class="p-1 bg-info rounded px-2">@product.NonContainerWarehouseProductTariff.StartDateFa - @product.NonContainerWarehouseProductTariff.EndDateFa</span>
+                                                <span class="p-1 bg-info rounded px-2">@product.NonContainerWarehouseProductTariff.CurrencyTypeTitle</span>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <span>تعرفه ندارد</span>
+                                        }
+                                    </td>
+                                    <td class="align-middle">
+
+                                        <a class="btn btn-primary px-3 btn-sm" href="/NonContainerWarehouseProductTariff/List?nonContainerWarehouseProductId=@product.Id">
+                                            <i class="fa fa-edit"></i> تعرفه‌ها
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<!-- Modal -->
+
+<div id="discountPageId"></div>
+
+@section script {
+    <script>
+        $(document).ready(function () {
+
+        });
+
+        function showCreateProductModal() {
+            $("#Id").val('');
+            $('#productModal').modal('show');
+        }
+
+
+        function showDiscountPage()
+        {
+            $.post("@Url.Action("GetDiscountPage", "NonContainerWarehouseProduct")",
+                    {
+
+                    })
+                    .done(function (res) {
+
+                        $("#discountPageId").html(res);
+                        $("#DiscountPageModal").modal('show');
+                    })
+                    .fail(function (xhr, status, error) {
+                        location.reload();
+                    });
+        }
+
+    </script>
+}

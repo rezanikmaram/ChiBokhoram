@@ -1,0 +1,230 @@
+﻿@model CreateSeoInsuranceDto
+
+<form asp-action="CreateSeoInsurance" method="post" enctype="multipart/form-data">
+	<input asp-for="Id" type="hidden" />
+	<input asp-for="SeoId" type="hidden" />
+
+	<div class="card-body pt-0">
+		<div class="col-md-12">
+			<div class="form-body">
+
+				<div class="row gy-3">
+
+					
+
+
+
+					<div class="col-md-3">
+						<div class="form-group">
+							<label>بیمه گزار</label>
+							<div class="input-group">
+								<input type="text" class="form-control"
+									   asp-for="Policyholder">
+								<span asp-validation-for="Policyholder"></span>
+							</div>
+						</div>
+					</div>
+					<div class="col-md-3">
+						<div class="form-group">
+							<label> بیمه گر</label>
+							<div class="input-group">
+								<input type="text" class="form-control"
+									   asp-for="Insurer">
+								<span asp-validation-for="Insurer"></span>
+							</div>
+						</div>
+					</div>
+
+					<div class="col-md-3">
+						<div class="form-group">
+							<label>شماره بیمه نامه</label>
+							<div class="input-group">
+								<input type="text" class="form-control"
+									   asp-for="PolicyNumber">
+								<span asp-validation-for="PolicyNumber"></span>
+							</div>
+						</div>
+					</div>
+					<div class="col-md-3">
+						<div class="form-group">
+							<label>  تاریخ صدور بیمه‌نامه  </label>
+							<div class="input-group d-flex flex-column">
+								<input type="text" class="form-control"
+									   asp-for="IssueDateFa" autocomplete="off">
+								<span asp-validation-for="IssueDateFa"></span>
+							</div>
+						</div>
+					</div>
+
+
+					<div class="col-md-3">
+						<div class="form-group">
+							<label>ارزش بیمه نامه (ريال) </label>
+							<div class="input-group d-flex flex-column">
+								<price-input asp-for="InsuredValue" placeholder="به ریال"></price-input>
+								<span asp-validation-for="InsuredValue"></span>
+							</div>
+						</div>
+					</div>
+					<div class="col-md-3">
+						<div class="form-group">
+							<label>نام شرط</label>
+							<div class="input-group">
+								<input type="text" class="form-control"
+									   asp-for="PolicyTermName" autocomplete="off">
+								<span asp-validation-for="PolicyTermName"></span>
+							</div>
+						</div>
+					</div>
+
+
+					@* جزئیات مورد بیمه *@
+					<div class="col-md-3">
+						<div class="form-group">
+							<label> نوع کالا  </label>
+							<div class="input-group">
+								<input type="text" class="form-control"
+									   asp-for="GoodsType">
+								<span asp-validation-for="GoodsType"></span>
+							</div>
+						</div>
+					</div>
+					<div class="col-md-3">
+						<div class="form-group">
+							<label>  نوع بسته بندی  </label>
+							<div class="input-group">
+								<input type="text" class="form-control"
+									   asp-for="PackagingType">
+								<span asp-validation-for="PackagingType"></span>
+							</div>
+						</div>
+					</div>
+
+					<div class="col-md-3">
+						<div class="form-group">
+							<label>شماره ثبت سفارش</label>
+							<div class="input-group">
+								<input type="text" class="form-control"
+									   asp-for="OrderRegistrationNumber">
+								<span asp-validation-for="OrderRegistrationNumber"></span>
+							</div>
+						</div>
+					</div>
+					<div class="col-md-3">
+						<div class="form-group">
+							<label>  شماره پرفورما  </label>
+							<div class="input-group">
+								<input type="text" class="form-control"
+									   asp-for="ProformaNumber">
+								<span asp-validation-for="ProformaNumber"></span>
+							</div>
+						</div>
+					</div>
+
+					<div class="col-md-3">
+						<div class="form-group">
+							<label> مبدا </label>
+							<div class="input-group">
+								<input type="text" class="form-control"
+									   asp-for="Origin">
+								<span asp-validation-for="Origin"></span>
+							</div>
+						</div>
+					</div>
+					<div class="col-md-3">
+						<div class="form-group">
+							<label>  مقصد  </label>
+							<div class="input-group">
+								<input type="text" class="form-control"
+									   asp-for="Destination">
+								<span asp-validation-for="Destination"></span>
+							</div>
+						</div>
+					</div>
+
+					<div class="col-md-3">
+						<div class="form-group">
+							<label> از طریق </label>
+							<div class="input-group">
+								<input type="text" class="form-control"
+									   asp-for="TransportMethod">
+								<span asp-validation-for="TransportMethod"></span>
+							</div>
+						</div>
+					</div>
+					<div class="col-md-3">
+						<div class="form-group">
+							<label>  نوع وسیله حمل  </label>
+							<div class="input-group">
+								<input type="text" class="form-control"
+								       asp-for="TransportVehicleType">
+								<span asp-validation-for="TransportVehicleType"></span>
+							</div>
+						</div>
+					</div>
+
+					<div class="col-md-6">
+						<div class="form-group">
+							<label>آپلود فایل </label>
+							<div style="flex-wrap:nowrap" class="input-group round">
+								<input type="file" asp-for="FormFile" class="form-control rounded w-25">
+								<span asp-validation-for="FormFile"></span>
+							</div>
+						</div>
+					</div>
+
+					<div class="col-md-3 d-flex mt-4 align-items-end">
+						<div>
+							<div class="input-group activeor">
+								<label>
+									<input type="checkbox" asp-for="IsMultipleShipmentsAllowed" class="form-check-input me-2">
+									حمل به دفعات مجاز است
+								</label>
+							</div>
+						</div>
+					</div>
+
+					<div class="col-md-3 d-flex mt-4 align-items-end">
+						<div>
+							<div class="input-group activeor">
+								<label>
+									<input type="checkbox" asp-for="IsTransshipmentAllowed" class="form-check-input me-2">
+									ترانس شیپمنت
+								</label>
+							</div>
+						</div>
+					</div>
+
+				</div>
+
+				
+
+
+				<div class="modal-footer px-2 border-0 px-0">
+					<button type="submit" class="btn btn-success btn-round">ذخیره</button>
+					<button type="button" class="btn btn-danger btn-round" data-bs-dismiss="modal">بازگشت</button>
+				</div>
+			</div>
+
+
+
+		</div>
+	</div>
+
+</form>
+
+
+<script src="~/assets/js/validation/jquery.validate.min.js"></script>
+<script src="~/assets/js/validation/jquery.validate.unobtrusive.min.js"></script>
+
+<script>
+	$(document).ready(function () {
+		//$('.select2').select2();
+
+	});
+
+	kamaDatepicker('IssueDateFa', customOptions);
+
+</script>
+
+

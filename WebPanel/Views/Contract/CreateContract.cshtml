@@ -1,0 +1,194 @@
+@model CreateContractDto
+@{
+    ViewData["Title"] = "ثبت/ویرایش قرارداد";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+<div class="row">
+    <div class="col-md-12 grid-margin stretch-card">
+        <div class="card">
+            <div class="card-header pb-0">
+                <div class="d-flex">
+                    <h3 class="card-title mb-0">ثبت و مدیریت قرارداد</h3>
+                </div>
+            </div>
+
+            <form asp-action="CreateContract" asp-controller="Contract" method="post">
+                <div class="card-body">
+                    @if (Model != null && Model.Id.GuidHasValue())
+                    {
+                        <input type="hidden" asp-for="Id" />
+                    }
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="row gy-4">
+                                <!-- شماره قرارداد -->
+                                <div class="col-md-3 col-sm-12">
+                                    <div class="form-group">
+                                        <label class="control-label">شماره قرارداد</label>
+                                        <input type="text" class="form-control" asp-for="ContractNumber" placeholder="شماره قرارداد">
+                                        <span asp-validation-for="ContractNumber" class="text-danger"></span>
+                                    </div>
+                                </div>
+
+                                <!-- عنوان -->
+                                <div class="col-md-3 col-sm-12">
+                                    <div class="form-group">
+                                        <label class="control-label">عنوان</label>
+                                        <input type="text" class="form-control" asp-for="Title" placeholder="عنوان قرارداد">
+                                        <span asp-validation-for="Title" class="text-danger"></span>
+                                    </div>
+                                </div>
+
+                                <!-- شرکت -->
+                                <div class="col-md-3 col-sm-12">
+                                    <div class="input-group">
+                                        <label class="control-label">شرکت</label>
+                                        <select class="form-control select2" asp-for="CompanyId" asp-items="ViewBag.Company">
+                                        </select>
+                                        <span asp-validation-for="CompanyId" class="text-danger"></span>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-3 col-sm-12">
+                                    <div class="input-group">
+                                        <label class="control-label">شرکت طرف حساب</label>
+                                        <select class="form-control select2" asp-for="AccountCompanyId" asp-items="ViewBag.AccountCompany">
+                                            <option value="">نامشخص</option>
+                                        </select>
+                                        <span asp-validation-for="AccountCompanyId" class="text-danger"></span>
+                                    </div>
+                                </div>
+
+                                <!-- شرکت اپراتور بندر -->
+                                <div class="col-md-4 col-sm-12">
+                                    <div class="input-group">
+                                        <label class="control-label">شرکت اپراتور بندر (پیش‌فرض)</label>
+                                        <select class="form-control select2" asp-for="DefaultPortOperatorCompanyId" asp-items="ViewBag.PortOperatorCompanies">
+                                            <option value="">نامشخص</option>
+                                        </select>
+                                        <span asp-validation-for="DefaultPortOperatorCompanyId" class="text-danger"></span>
+                                    </div>
+                                </div>
+
+                                <!-- تاریخ شروع قرارداد -->
+                                <div class="col-md-2 col-sm-12">
+                                    <div class="form-group">
+                                        <label class="control-label">تاریخ شروع قرارداد</label>
+                                        <input type="text" asp-for="StartDateFa"
+                                               class="form-control"
+                                               placeholder="تاریخ"
+                                               autocomplete="off">
+                                        <span asp-validation-for="StartDateFa" class="text-danger"></span>
+                                    </div>
+                                </div>
+
+                                <!-- تاریخ پایان -->
+                                <div class="col-md-2 col-sm-12">
+                                    <div class="form-group">
+                                        <label class="control-label">تاریخ پایان</label>
+                                        <input type="text" asp-for="EndDateFa"
+                                               class="form-control"
+                                               placeholder="تاریخ"
+                                               autocomplete="off">
+                                        <span asp-validation-for="EndDateFa" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                
+                                 <!-- درصد پیشرفت واقعی -->
+                                <div class="col-md-2 col-sm-12">
+                                    <div class="form-group">
+                                        <label class="control-label">درصد پیشرفت واقعی</label>
+                                        <input type="number" class="form-control" asp-for="PercentageActual" placeholder="درصد"
+                                               step="1" min="0" max="100">
+                                        <span asp-validation-for="PercentageActual" class="text-danger"></span>
+                                    </div>
+                                </div>
+
+                                <!-- درصد پیشرفت برنامه -->
+                                <div class="col-md-2 col-sm-12">
+                                    <div class="form-group">
+                                        <label class="control-label">درصد پیشرفت برنامه</label>
+                                        <input type="number" class="form-control" asp-for="Percentage" placeholder="درصد"
+                                               step="1" min="0" max="100">
+                                        <span asp-validation-for="Percentage" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                
+                                <!-- وضعیت -->
+                                <div class="col-md-6 col-sm-12 my-3">
+                                    <div class="form-group">
+                                        <label class="control-label">وضعیت</label>
+                                        <textarea class="form-control" asp-for="Status" rows="3" placeholder="وضعیت" style="max-width: 100%;line-height: 31px;"></textarea>
+                                        <span asp-validation-for="Status" class="text-danger"></span>
+                                    </div>
+                                </div>
+
+                                <!-- مشکلات -->
+                                <div class="col-md-6 col-sm-12 my-3">
+                                    <div class="form-group">
+                                        <label class="control-label">مشکلات</label>
+                                        <textarea class="form-control" asp-for="Problems" rows="3" placeholder="مشکلات" style="max-width: 100%;line-height: 31px;"></textarea>
+                                        <span asp-validation-for="Problems" class="text-danger"></span>
+                                    </div>
+                                </div>
+
+                                <!-- توضیحات -->
+                                <div class="col-md-12 col-sm-12 mt-1">
+                                    <div class="form-group">
+                                        <label class="control-label">توضیحات</label>
+                                        <textarea class="form-control" asp-for="Description" rows="3" placeholder="توضیحات" style="max-width: 100%;line-height: 31px;"></textarea>
+                                        <span asp-validation-for="Description" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <!-- وضعیت اتمام -->
+                                <div class="col-md-2 col-sm-12">
+                                    <div class="input-group">
+                                        <label class="control-label">وضعیت اتمام</label>
+                                        <select class="form-control select2" asp-for="IsFinish">
+                                            <option value="false" title="در حال اجرا">در حال اجرا</option>
+                                            <option value="true" title="پایان یافته">پایان یافته</option>
+                                        </select>
+                                        <span asp-validation-for="IsFinish" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <!-- فعال بودن -->
+                                <div class="col-md-4 align-content-end">
+                                    <div class="media">
+                                        <div class="media-body text-first icon-state">
+                                            <label class="control-label d-block mb-3">فعال</label>
+                                            <label class="switch">
+                                                <input asp-for="IsActive" class="form-check-input" type="checkbox"><span class="switch-state"></span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-footer mt-4 px-0">
+                        <div class="d-flex justify-content-end align-items-center">
+                            <a asp-action="Index" class="btn btn-light mx-3">انصراف</a>
+                            <button type="submit" class="btn btn-primary ">ذخیره</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section script {
+    <script>
+        $(document).ready(function () {
+            $(".select2").select2();
+            // Initialize Persian date pickers
+            if (typeof kamaDatepicker !== 'undefined') {
+                kamaDatepicker('StartDateFa', customOptions);
+                kamaDatepicker('EndDateFa', customOptions);
+            }
+        });
+    </script>
+}

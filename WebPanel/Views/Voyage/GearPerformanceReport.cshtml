@@ -1,0 +1,545 @@
+@model Entities.DTOs.Web.Hirman.Tali.ListEquipmentPerformance.GearPerformanceReportPageDto
+@{
+    ViewData["Title"] = "گزارش عملکرد تجهیزات";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+<div class="row g-4 mb-4">
+    <div class="col-12">
+        <div class="glass-card p-4">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="icon-box icon-box--primary">
+                        <i class="fa-solid fa-truck-monster"></i>
+                    </div>
+                    <div>
+                        <h4 class="mb-0 fw-bold">گزارش عملکرد تجهیزات</h4>
+                        <p class="text-muted mb-0 small">
+                            @(string.IsNullOrWhiteSpace(Model.Filter?.DateFromFa) && string.IsNullOrWhiteSpace(Model.Filter?.DateToFa) 
+                                ? "عملکرد تجهیزات در تمام سفرها" 
+                                : $"بازه زمانی: {Model.Filter?.DateFromFa} تا {Model.Filter?.DateToFa}")
+                        </p>
+                    </div>
+                </div>
+                <div class="d-flex gap-2">
+                    @if (Model.Data?.Any() == true)
+                    {
+                        <a asp-action="ExportGearPerformanceReportExcel" 
+                           asp-route-dateFromFa="@Model.Filter?.DateFromFa"
+                           asp-route-dateToFa="@Model.Filter?.DateToFa"
+                           asp-route-search="@Model.Filter?.Search"
+                           class="btn btn-success btn-sm">
+                            <i class="fa-solid fa-download me-1"></i> خروجی اکسل
+                        </a>
+                    }
+                    <span class="badge bg-primary fs-6">
+                        <i class="fa-solid fa-layer-group me-1"></i>
+                        @((Model.Data?.Count ?? 0).ToString("N0")) تجهیز
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <form id="formFilter" asp-action="GearPerformanceReport" method="get">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-3 col-sm-6">
+                    <label class="form-label fw-bold small text-muted">
+                        <i class="fa-solid fa-calendar-day me-1"></i> از تاریخ تالی
+                    </label>
+                    <div class="input-group input-group--flat">
+                        <span class="input-group-text bg-transparent border-end-0">
+                            <i class="fa-solid fa-calendar text-muted"></i>
+                        </span>
+                        <input type="text" class="form-control border-start-0" 
+                               name="Filter.DateFromFa" id="DateFromFa" 
+                               autocomplete="off" placeholder="از تاریخ" 
+                               value="@Model.Filter?.DateFromFa">
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6">
+                    <label class="form-label fw-bold small text-muted">
+                        <i class="fa-solid fa-calendar-week me-1"></i> تا تاریخ تالی
+                    </label>
+                    <div class="input-group input-group--flat">
+                        <span class="input-group-text bg-transparent border-end-0">
+                            <i class="fa-solid fa-calendar text-muted"></i>
+                        </span>
+                        <input type="text" class="form-control border-start-0" 
+                               name="Filter.DateToFa" id="DateToFa" 
+                               autocomplete="off" placeholder="تا تاریخ" 
+                               value="@Model.Filter?.DateToFa">
+                    </div>
+                </div>
+                <div class="col-md-4 col-sm-8">
+                    <label class="form-label fw-bold small text-muted">
+                        <i class="fa-solid fa-magnifying-glass me-1"></i> جستجو تجهیز
+                    </label>
+                    <div class="input-group input-group--flat">
+                        <span class="input-group-text bg-transparent border-end-0">
+                            <i class="fa-solid fa-gear text-muted"></i>
+                        </span>
+                        <input type="text" class="form-control border-start-0" 
+                               name="Filter.Search" id="Search" 
+                               autocomplete="off" placeholder="نام تجهیز..." 
+                               value="@Model.Filter?.Search">
+                    </div>
+                </div>
+                <div class="col-md-2 col-sm-4">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fa-solid fa-filter me-1"></i> فیلتر
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+@if (Model.Data?.Any() == true)
+{
+    <div class="row g-3">
+        @foreach (var gear in Model.Data)
+        {
+            <div class="col-xl-3 col-lg-4 col-md-6">
+                <div class="gear-card" data-gear-id="@gear.GearId">
+                    <div class="gear-card-header">
+                        <div class="gear-mini-icon">
+                            <i class="fa-solid fa-truck-monster"></i>
+                        </div>
+                        <div class="gear-info">
+                            <h6 class="gear-name" title="@gear.GearName">@gear.GearName</h6>
+                            <div class="gear-badges">
+                                <span class="gear-type-badge">@gear.GearType</span>
+                                @if (!string.IsNullOrEmpty(gear.Plaque))
+                                {
+                                    <span class="gear-plaque-badge">@gear.Plaque</span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="gear-stats">
+                        <div class="stat-row">
+                            <div class="stat-group">
+                                <span class="stat-label stat-label--dock">
+                                    <i class="fa-solid fa-water me-1"></i>اسکله
+                                </span>
+                                <div class="stat-values">
+                                    <span class="stat-count">@gear.DockTaliCount.ToString("N0")</span>
+                                    <span class="stat-weight">@gear.DockTotalWeight.ToString("N0") kg</span>
+                                </div>
+                            </div>
+                            <div class="stat-group">
+                                <span class="stat-label stat-label--area">
+                                    <i class="fa-solid fa-warehouse me-1"></i>محوطه
+                                </span>
+                                <div class="stat-values">
+                                    <span class="stat-count">@gear.AreaTaliCount.ToString("N0")</span>
+                                    <span class="stat-weight">@gear.AreaTotalWeight.ToString("N0") kg</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="stat-total">
+                            <span>جمع کل:</span>
+                            <span class="fw-bold">@gear.TotalTaliCount.ToString("N0") تالی - @gear.TotalWeight.ToString("N0") kg</span>
+                        </div>
+                    </div>
+
+                    <div class="gear-accordion">
+                        @if (gear.VoyageDetails?.Any() == true)
+                        {
+                            <button class="accordion-toggle" onclick="toggleGearPanel('@gear.GearId')">
+                                <span>
+                                    <i class="fa-solid fa-ship me-2"></i>
+                                    سفرها (@gear.VoyageDetails.Count)
+                                </span>
+                                <i class="fa-solid fa-chevron-down" id="icon-gear-@gear.GearId"></i>
+                            </button>
+                            <div class="accordion-panel" id="panel-gear-@gear.GearId">
+                                <div class="voyage-scroll">
+                                    @foreach (var voyage in gear.VoyageDetails)
+                                    {
+                                        <div class="voyage-item">
+                                            <div class="voyage-header">
+                                                <span class="voyage-number">@voyage.VoyageNumber</span>
+                                                <span class="voyage-ship">@voyage.VoyageName</span>
+                                            </div>
+                                            <div class="voyage-stats-mini">
+                                                <span class="voyage-stat-mini">
+                                                    <i class="fa-solid fa-water text-primary"></i> @voyage.DockTaliCount تالی
+                                                </span>
+                                                <span class="voyage-stat-mini">
+                                                    <i class="fa-solid fa-warehouse text-success"></i> @voyage.AreaTaliCount تالی
+                                                </span>
+                                                <span class="voyage-stat-mini fw-bold">
+                                                    <i class="fa-solid fa-scale-balanced"></i> @voyage.TotalWeight.ToString("N0") kg
+                                                </span>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+
+                        @if (gear.DailyPerformances?.Any() == true)
+                        {
+                            <button class="accordion-toggle" onclick="toggleDailyPanel('@gear.GearId')">
+                                <span>
+                                    <i class="fa-solid fa-chart-line me-2"></i>
+                                    عملکرد روزانه (@gear.DailyPerformances.Count)
+                                </span>
+                                <i class="fa-solid fa-chevron-down" id="icon-daily-gear-@gear.GearId"></i>
+                            </button>
+                            <div class="accordion-panel" id="panel-daily-gear-@gear.GearId">
+                                <div class="voyage-scroll">
+                                    @foreach (var daily in gear.DailyPerformances)
+                                    {
+                                        <div class="voyage-item">
+                                            <div class="voyage-header">
+                                                <span class="voyage-number">@daily.PersianDate</span>
+                                                <span class="voyage-ship @(daily.IsDock ? "text-primary" : "text-success")">
+                                                    @(daily.IsDock ? "اسکله" : "محوظه")
+                                                </span>
+                                            </div>
+                                            <div class="voyage-stats-mini">
+                                                <span class="voyage-stat-mini">
+                                                    <i class="fa-solid fa-list"></i> @daily.TaliCount تالی
+                                                </span>
+                                                <span class="voyage-stat-mini">
+                                                    <i class="fa-solid fa-weight-hanging"></i> @daily.TotalWeight.ToString("N0") kg
+                                                </span>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <div class="empty-state-card">
+        <div class="empty-state-card__icon">
+            <i class="fa-solid fa-truck-monster"></i>
+        </div>
+        <h5 class="empty-state-card__title">
+            @if (!string.IsNullOrWhiteSpace(Model.Filter?.DateFromFa) || !string.IsNullOrWhiteSpace(Model.Filter?.DateToFa))
+            {
+                <span>تجهیزی یافت نشد</span>
+            }
+            else
+            {
+                <span>لطفا بازه زمانی را انتخاب کنید</span>
+            }
+        </h5>
+    </div>
+}
+
+<style>
+    .glass-card {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(147, 197, 253, 0.05) 100%);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        border-radius: 16px;
+    }
+    
+    .icon-box {
+        width: 56px;
+        height: 56px;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+    }
+    
+    .icon-box--primary {
+        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        color: white;
+    }
+    
+    .input-group--flat .form-control:focus {
+        box-shadow: none;
+        border-color: #3b82f6;
+    }
+    
+    .gear-card {
+        background: white;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        overflow: hidden;
+        height: 100%;
+    }
+    
+    .gear-card-header {
+        display: flex;
+        gap: 0.75rem;
+        padding: 1rem;
+        background: #f9fafb;
+        border-bottom: 1px solid #e5e7eb;
+    }
+    
+    .gear-mini-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+    
+    .gear-info {
+        flex: 1;
+        min-width: 0;
+    }
+    
+    .gear-name {
+        font-weight: 700;
+        color: #1f2937;
+        margin-bottom: 0.25rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    .gear-badges {
+        display: flex;
+        gap: 0.25rem;
+        flex-wrap: wrap;
+    }
+    
+    .gear-type-badge, .gear-plaque-badge {
+        font-size: 0.65rem;
+        padding: 0.15rem 0.4rem;
+        background: #f3f4f6;
+        border-radius: 4px;
+        color: #6b7280;
+    }
+    
+    .gear-plaque-badge {
+        background: #dbeafe;
+        color: #1d4ed8;
+    }
+    
+    .gear-stats {
+        padding: 0.75rem 1rem;
+    }
+    
+    .stat-row {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-group {
+        flex: 1;
+        padding: 0.5rem;
+        background: #f9fafb;
+        border-radius: 6px;
+    }
+    
+    .stat-label {
+        font-size: 0.7rem;
+        font-weight: 600;
+        display: block;
+        margin-bottom: 0.25rem;
+    }
+    
+    .stat-label--dock {
+        color: #2563eb;
+    }
+    
+    .stat-label--area {
+        color: #059669;
+    }
+    
+    .stat-values {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .stat-count {
+        font-weight: 700;
+        font-size: 0.85rem;
+        color: #1f2937;
+    }
+    
+    .stat-weight {
+        font-size: 0.7rem;
+        color: #6b7280;
+    }
+    
+    .stat-total {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5rem;
+        background: #1f2937;
+        border-radius: 6px;
+        color: white;
+        font-size: 0.75rem;
+    }
+    
+    .gear-accordion {
+        border-top: 1px solid #e5e7eb;
+    }
+    
+    .accordion-toggle {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 1rem;
+        background: white;
+        border: none;
+        border-bottom: 1px solid #f3f4f6;
+        cursor: pointer;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #374151;
+        transition: background 0.2s;
+    }
+    
+    .accordion-toggle:hover {
+        background: #f9fafb;
+    }
+    
+    .accordion-toggle:last-child {
+        border-bottom: none;
+    }
+    
+    .accordion-toggle i:last-child {
+        transition: transform 0.3s;
+    }
+    
+    .accordion-toggle.active i:last-child {
+        transform: rotate(180deg);
+    }
+    
+    .accordion-panel {
+        display: none;
+        background: #fafafa;
+        max-height: 200px;
+        overflow-y: auto;
+    }
+    
+    .accordion-panel.show {
+        display: block;
+    }
+    
+    .voyage-scroll {
+        padding: 0.5rem;
+    }
+    
+    .voyage-item {
+        background: white;
+        border: 1px solid #e5e7eb;
+        border-radius: 6px;
+        padding: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .voyage-item:last-child {
+        margin-bottom: 0;
+    }
+    
+    .voyage-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.25rem;
+    }
+    
+    .voyage-number {
+        font-weight: 700;
+        color: #2563eb;
+        font-size: 0.75rem;
+    }
+    
+    .voyage-ship {
+        font-size: 0.7rem;
+        color: #6b7280;
+    }
+    
+    .voyage-stats-mini {
+        display: flex;
+        gap: 0.75rem;
+    }
+    
+    .voyage-stat-mini {
+        font-size: 0.65rem;
+        color: #6b7280;
+    }
+    
+    .empty-state-card {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: white;
+        border: 2px dashed #e5e7eb;
+        border-radius: 16px;
+    }
+    
+    .empty-state-card__icon {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: #f3f4f6;
+        color: #9ca3af;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        margin: 0 auto 1.5rem;
+    }
+    
+    .empty-state-card__title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #1f2937;
+    }
+</style>
+
+@section script {
+    <script>
+        $(document).ready(function () {
+            kamaDatepicker('DateFromFa', customOptions);
+            kamaDatepicker('DateToFa', customOptions);
+        });
+        
+        function toggleGearPanel(gearId) {
+            var panel = document.getElementById('panel-gear-' + gearId);
+            var icon = document.getElementById('icon-gear-' + gearId);
+            var btn = panel.previousElementSibling;
+            
+            if (panel.classList.contains('show')) {
+                panel.classList.remove('show');
+                btn.classList.remove('active');
+            } else {
+                panel.classList.add('show');
+                btn.classList.add('active');
+            }
+        }
+        
+        function toggleDailyPanel(gearId) {
+            var panel = document.getElementById('panel-daily-gear-' + gearId);
+            var icon = document.getElementById('icon-daily-gear-' + gearId);
+            var btn = panel.previousElementSibling;
+            
+            if (panel.classList.contains('show')) {
+                panel.classList.remove('show');
+                btn.classList.remove('active');
+            } else {
+                panel.classList.add('show');
+                btn.classList.add('active');
+            }
+        }
+    </script>
+}

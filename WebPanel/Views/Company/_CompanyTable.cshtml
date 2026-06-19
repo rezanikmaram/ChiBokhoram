@@ -1,0 +1,214 @@
+@model Entities.DTOs.Web.CompanyPageDto
+@using System.ComponentModel.DataAnnotations
+@{
+    int i = ((Model.Companies.PageNumber - 1) * Model.Companies.PageSize) + 1;
+    var currentSortColumn = Model.Filter?.SortColumn ?? "companyname";
+    var currentSortDirection = Model.Filter?.SortDirection ?? "asc";
+
+    string GetDisplayName(Enum enumValue)
+    {
+        var field = enumValue.GetType().GetField(enumValue.ToString());
+        var attribute = (DisplayAttribute)Attribute.GetCustomAttribute(field, typeof(DisplayAttribute));
+        return attribute?.Name ?? enumValue.ToString();
+    }
+}
+
+<div class="table-responsive mt-4">
+    <table class="table table-bordered table-hover table-striped" id="data-table">
+        <thead class="bg-primary">
+            <tr>
+                <th class="sortable-header" data-column="row">ردیف</th>
+                <th class="sortable-header" data-column="companyname" style="cursor: pointer;">
+                    شرکت فارسی
+                    @if (currentSortColumn == "companyname")
+                    {
+                        <i class="icon-arrow-@(currentSortDirection == "asc" ? "up" : "down") text-white"></i>
+                    }
+                    else
+                    {
+                        <i class="icon-sort text-white-50"></i>
+                    }
+                </th>
+                <th class="sortable-header" data-column="companynameEn" style="cursor: pointer;">
+                    شرکت انگلیسی
+                    @if (currentSortColumn == "companynameen")
+                    {
+                        <i class="icon-arrow-@(currentSortDirection == "asc" ? "up" : "down") text-white"></i>
+                    }
+                    else
+                    {
+                        <i class="icon-sort text-white-50"></i>
+                    }
+                </th>
+                <th class="sortable-header" data-column="melicode" style="cursor: pointer;">
+                    شناسه ملی
+                    @if (currentSortColumn == "melicode")
+                    {
+                        <i class="icon-arrow-@(currentSortDirection == "asc" ? "up" : "down") text-white"></i>
+                    }
+                    else
+                    {
+                        <i class="icon-sort text-white-50"></i>
+                    }
+                </th>
+                <th>نوع مشتری</th>
+                <th class="sortable-header" data-column="ceoname" style="cursor: pointer;">
+                    مدیر عامل
+                    @if (currentSortColumn == "ceoname")
+                    {
+                        <i class="icon-arrow-@(currentSortDirection == "asc" ? "up" : "down") text-white"></i>
+                    }
+                    else
+                    {
+                        <i class="icon-sort text-white-50"></i>
+                    }
+                </th>
+                <th class="sortable-header" data-column="ceonumber" style="cursor: pointer;">
+                    شماره تماس
+                    @if (currentSortColumn == "ceonumber")
+                    {
+                        <i class="icon-arrow-@(currentSortDirection == "asc" ? "up" : "down") text-white"></i>
+                    }
+                    else
+                    {
+                        <i class="icon-sort text-white-50"></i>
+                    }
+                </th>
+                <th class="sortable-header" data-column="address" style="cursor: pointer;">
+                    آدرس
+                    @if (currentSortColumn == "address")
+                    {
+                        <i class="icon-arrow-@(currentSortDirection == "asc" ? "up" : "down") text-white"></i>
+                    }
+                    else
+                    {
+                        <i class="icon-sort text-white-50"></i>
+                    }
+                </th>
+                <th class="sortable-header" data-column="representativenumber" style="cursor: pointer;">
+                    شماره نماینده
+                    @if (currentSortColumn == "representativenumber")
+                    {
+                        <i class="icon-arrow-@(currentSortDirection == "asc" ? "up" : "down") text-white"></i>
+                    }
+                    else
+                    {
+                        <i class="icon-sort text-white-50"></i>
+                    }
+                </th>
+                <th class="sortable-header" data-column="isactive" style="cursor: pointer;">
+                    وضعیت
+                    @if (currentSortColumn == "isactive")
+                    {
+                        <i class="icon-arrow-@(currentSortDirection == "asc" ? "up" : "down") text-white"></i>
+                    }
+                    else
+                    {
+                        <i class="icon-sort text-white-50"></i>
+                    }
+                </th>
+                <th>جزییات</th>
+                <th>عملیات</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Companies.Data)
+            {
+                <tr>
+                    <td class="align-middle">@(i++)</td>
+                    <td class="align-middle">@item.CompanyName</td>
+                    <td class="align-middle">@item.CompanyNameEn</td>
+                    <td class="align-middle">@item.MeliCode</td>
+                    <td class="align-middle">@GetDisplayName(item.CustomerType)</td>
+                    <td class="align-middle">@item.CeoName</td>
+                    <td class="align-middle">@item.CeoNumber</td>
+                    <td class="align-middle">@item.Address</td>
+                    <td class="align-middle">@item.RepresentativeNumber</td>
+                    <td class="align-middle">
+                        <span class="label px-2 py-1 rounded label-@(item.IsActive?"success":"danger")">@(item.IsActive ? "فعال" : "غیر فعال")</span>
+                    </td>
+                    <td class="align-middle">
+                        <button class="btn btn-info w-100 btn-details" data-id="@item.Id">
+                            <span class="text-white">جزئیات</span>
+                        </button>
+                    </td>
+                    <td class="d-flex justify-content-first">
+                        <div class="d-flex">
+                            <a class="btn btn-danger btn-sm btn-icon curve btn-questions  mx-1 px-2" id="DeleteCompany@i" onclick="ShowQAlert(event,'DeleteCompany@i');" asp-action="DeleteCompany" asp-route-companyId="@item.Id"> <i class="icon-trash fa-flip-horizontal fs-6 align-middle"></i> </a>
+                            <button type="button" class="btn btn-warning btn-sm btn-icon curve mx-1  px-2 btn-edit-company" data-id="@item.Id"><i class="icon-pencil align-middle fs-6"></i></button>
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <div class="mt-3">
+        <cs-pager cs-paging-pagesize="@Model.Companies.PageSize"
+                  cs-paging-pagenumber="@Model.Companies.PageNumber"
+                  cs-paging-totalitems="@Model.Companies.TotalItems"
+                  cs-paging-maxpageritems="10"
+                  cs-pagenumber-param="p"
+                  cs-show-first-last="true"
+                  cs-suppress-empty-nextprev="true"
+                  cs-suppress-inactive-firstlast="true"
+                  cs-show-numbered="true"
+                  cs-first-page-text="ابتدا"
+                  cs-last-page-text="انتها"
+                  cs-next-page-title="بعدی"
+                  cs-previous-page-title="قبلی"
+                  cs-first-page-title="ابتدا"
+                  cs-last-page-title="انتها"
+                  cs-next-page-text="بعدی"
+                  cs-previous-page-text="قبلی"
+                  cs-pager-li-current-class="page-item active"
+                  cs-pager-li-other-class="page-item"
+                  cs-pager-li-non-active-class="page-item disabled"
+                  cs-pager-link-current-class="page-link"
+                  cs-pager-link-other-class="page-link"
+                  asp-controller="Company"
+                  asp-action="Table">
+        </cs-pager>
+    </div>
+</div>
+
+<script>
+    // Store filter state and navigate to details
+    $(document).off('click', '.btn-details').on('click', '.btn-details', function(e) {
+        e.preventDefault();
+        var companyId = $(this).data('id');
+        
+        // Store current filter state in sessionStorage
+        var filterState = {
+            search: $('#Filter_Search').val(),
+            page: $('.page-item.active .page-link').text() || '1',
+            sortColumn: '@currentSortColumn',
+            sortDirection: '@currentSortDirection',
+            timestamp: new Date().getTime()
+        };
+        sessionStorage.setItem('companyFilterState', JSON.stringify(filterState));
+        
+        // Navigate to details page
+        window.location.href = '@Url.Action("Details", "Company")' + '?companyId=' + companyId;
+    });
+
+    // Handle column sorting
+    $(document).off('click', '.sortable-header').on('click', '.sortable-header', function(e) {
+        var column = $(this).data('column');
+        if (!column || column === 'row') return;
+        
+        var currentSortColumn = '@currentSortColumn';
+        var currentSortDirection = '@currentSortDirection';
+        
+        // Toggle direction if clicking the same column
+        var newDirection = 'asc';
+        if (column === currentSortColumn) {
+            newDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
+        }
+        
+        // Call parent page's loadTableWithSort function
+        if (typeof loadTableWithSort === 'function') {
+            loadTableWithSort(column, newDirection);
+        }
+    });
+</script>
+

@@ -1,0 +1,527 @@
+﻿@model OtherIncomeInvoiceDocFilePageDto
+@{
+	ViewData["Title"] = "مستندات سایر درامد";
+	Layout = "~/Views/Shared/AdminLayout.cshtml";
+
+	int j = 1;
+}
+
+@section style {
+
+}
+
+
+<div class="card">
+
+	<div class="card-header">
+		<div class="d-flex justify-content-between">
+
+			<h3 class="title">
+				@if ((int)ViewBag.reternPage == 0)
+				{
+					<a asp-action="Details" asp-controller="OtherIncomeInvoice"
+					   asp-route-invoiceId="@Model.InvoiceId">
+						<i class="fa-solid fa-right-to-bracket align-middle me-2"></i>
+					</a>
+				}
+
+
+				اطلاعات پایه
+			</h3>
+
+
+			<!-- /.portlet-title -->
+			<div>
+				<div class="buttons-box">
+
+					<i class="icon-size-fullscreen"></i>
+					<div class="paper-ripple">
+						<div class="paper-ripple__background"></div>
+						<div class="paper-ripple__waves"></div>
+					</div>
+				</div>
+			</div>
+			<!-- /.buttons-box -->
+		</div>
+		<!-- /.portlet-heading -->
+	</div>
+
+
+
+	<div class="card-body pt-0">
+		<div class="form-body">
+
+			<div class="row gy-3">
+				<div class="col-sm-6">
+					<div class="form-group">
+						<label>نوع درآمد</label>
+						<div class="input-group">
+							<input type="text" class="form-control" asp-for="BaseInfo.TypeTitle" disabled>
+						</div>
+					</div>
+				</div>
+				<div class="col-sm-6">
+					<div class="form-group">
+						<label>طرف حساب</label>
+						<div class="input-group">
+							<input type="text" class="form-control" asp-for="BaseInfo.CompanyCompanyName" disabled>
+						</div>
+					</div>
+				</div>
+
+				<div class="col-sm-3">
+					<div class="form-group">
+						<label>تناژ</label>
+						<div class="input-group">
+							<input type="text" class="form-control" asp-for="BaseInfo.TonnageTitle" disabled>
+						</div>
+					</div>
+				</div>
+
+				<div class="col-sm-3">
+					<div class="form-group">
+						<label>  تاریخ</label>
+						<div class="input-group">
+							<input type="text" class="form-control" asp-for="BaseInfo.DateFa" disabled>
+						</div>
+					</div>
+				</div>
+
+				<div class="col-sm-6">
+					<div class="form-group">
+						<label>کالا</label>
+						<div class="input-group">
+							<input type="text" class="form-control"
+								   asp-for="BaseInfo.CargoName" disabled>
+						</div>
+					</div>
+				</div>
+
+				<div class="col-sm-6">
+					<div class="form-group">
+						<label>شناور</label>
+						<div class="input-group">
+							<input type="text" class="form-control"
+								   asp-for="BaseInfo.ShipShipName" disabled>
+						</div>
+					</div>
+				</div>
+
+			</div>
+
+		</div>
+
+	</div>
+</div>
+
+
+
+
+<div id="listDocFiles">
+	<div class="card">
+
+		<div class="card-header">
+			<div class="d-flex justify-content-between">
+
+				<h3 class="title">
+					<i class="icon-frane"></i> مستندات اپلود شده
+				</h3>
+
+				<div>
+					<a class="btn mx-2 btn-success rounded"
+					   onclick="DocFileShowModal();">
+						<i class="icon-plus align-middle"></i>
+						فایل جدید
+					</a>
+
+					 
+						<a class="btn btn-success rounded"
+						   onclick="ReceiptFileShowModal();">
+							<i class="icon-plus align-middle"></i>
+							رسید جدید
+						</a>
+					 
+
+
+
+					<!-- /.portlet-title -->
+					<div class="buttons-box">
+
+						<i class="icon-size-fullscreen"></i>
+						<div class="paper-ripple">
+							<div class="paper-ripple__background"></div>
+							<div class="paper-ripple__waves"></div>
+						</div>
+					</div>
+				</div>
+
+
+				<!-- /.buttons-box -->
+			</div>
+			<!-- /.portlet-heading -->
+		</div>
+
+
+
+		<div class="card-body pt-0">
+			<div class="table-responsive">
+				<table class="table table-sm table-bordered table-hover table-striped" id="data-table">
+					<thead class="bg-primary">
+						<tr>
+							<th style="width: 5%">ردیف</th>
+							<th>نوع سند</th>
+							<th>شرح</th>
+							<th>اسم فایل</th>
+							<td>تاریخ</td>
+							<td>مبلغ (ريال)</td>
+							<td>عملیات</td>
+						</tr>
+					</thead>
+					<tbody>
+						@if (Model?.Files?.Any() == true)
+						{
+							foreach (var item in Model?.Files)
+							{
+								<tr>
+									<td class="align-middle">@(j++)</td>
+									<td class="align-middle">@item.TypeTitle</td>
+									<td class="align-middle">@item.Description </td>
+									<td class="align-middle" style="direction: ltr;">@item.FileInfoDto.FileTitle@item.FileInfoDto.FileExtention</td>
+									<td class="align-middle">@item.DateFa </td>
+									<td class="align-middle">@item.PriceTitle </td>
+									<td class="align-middle px-2 text-center">
+										<a target="_blank" class="btn btn-primary px-2 my-2 rounded"
+										   asp-action="GetFileById"  
+										   asp-route-docFileId="@item.Id"><i class="fa-solid fa-download"></i> دانلود  </a>
+
+										@if (!(item.Type >=  OtherIncomeInvoiceFileType.PreFactor
+																		&& item.Type < OtherIncomeInvoiceFileType.PaymentNumberReceipt)
+																		@*  && Model.State != AllocationEquipmentState.Finish *@
+																		)
+										{
+											<a id="DeleteDoc@(j)" onclick="ShowQAlert(event,'DeleteDoc@(j)');" class="rounded mx-2 px-2 py-1 bg-danger btn"   asp-action="DeleteFileById" asp-route-docFileId="@item.Id"><i class="icon-trash fs-6 align-middle fa-flip-horizontal"> </i></a>
+										}
+
+									</td>
+								</tr>
+							}
+						}
+
+					</tbody>
+				</table>
+
+			</div>
+		</div>
+	</div>
+
+</div>
+
+
+
+ 
+	<div id="listPrice">
+		<div class="card">
+
+			<div class="card-header">
+				<div class="d-flex justify-content-between">
+
+					<div class="title d-flex">
+						<div>
+							<i class="icon-frane"></i> <h3>وضعیت واریزی ها</h3>
+						</div>
+					</div>
+
+					<div>
+
+
+						<!-- /.portlet-title -->
+						<div class="buttons-box">
+
+							<i class="icon-size-fullscreen"></i>
+							<div class="paper-ripple">
+								<div class="paper-ripple__background"></div>
+								<div class="paper-ripple__waves"></div>
+							</div>
+						</div>
+					</div>
+
+
+					<!-- /.buttons-box -->
+				</div>
+				<!-- /.portlet-heading -->
+			</div>
+
+
+
+			<div class="card-body pt-0">
+				<div class="table-responsive">
+					<table class="table table-sm table-bordered table-hover table-striped" id="data-table">
+						<thead class="bg-primary">
+							<tr>
+
+								<th>بخش</th>
+								<th>جمع کل</th>
+								<th>جمع واریزی ها</th>
+								<td>باقی مانده</td>
+
+							</tr>
+						</thead>
+						<tbody>
+
+							@foreach (var item in Model?.FactoPriceRemainders)
+							{
+								<tr>
+									<td class="align-middle">@item.Name</td>
+									<td class="align-middle">@item.PriceTitle</td>
+									<td class="align-middle">@item.SumPayedTitle </td>
+									<td class="align-middle">@item.RemainderPriceTitle </td>
+
+								</tr>
+							}
+
+
+						</tbody>
+					</table>
+
+				</div>
+				 
+
+			</div>
+		</div>
+
+	</div>
+ 
+
+
+
+
+<div id="generalmodal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" tabindex="-1">
+	<div class="modal-dialog modal-dialog-centered">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h4 class="modal-title">فایل جدید</h4>
+				<button type="button" class="close btn-close rounded border" data-bs-dismiss="modal"></button>
+			</div>
+			<div class="modal-body" id="modalbody">
+
+				<div class="card-body pt-0">
+					<form asp-action="UploadFile" method="post" enctype="multipart/form-data">
+						<div class="form-body">
+							<input name="fileDto.OtherIncomeInvoiceId" value="@Model.InvoiceId" hidden />
+							<input type="text" name="fileDto.OverwritingFile" value="false" hidden />
+							<input type="number" name="goToPageCreate" value="100" hidden />
+
+							<div class="row gy-3">
+
+								<div class="col-sm-12">
+									<div class="  form-group ">
+										<label>نوع فایل</label>
+										<div class="input-group  ">
+											<select class="form-control select2" asp-for="CreateFile.FileType" name="fileDto.type"
+													asp-items="Model.FileType" style="width:100%!important;">
+											</select>
+
+										</div>
+										<span asp-validation-for="CreateFile.FileType"
+											  class="text-danger"></span>
+									</div>
+								</div>
+
+								<div class="col-md-12">
+									<div class="form-group">
+										<label>آپلود فایل </label>
+										<div style="flex-wrap:nowrap" class="input-group round">
+											<input type="file" name="fileDto.file" class="form-control rounded w-25" required>
+										</div>
+									</div>
+								</div>
+
+
+
+								<div class="col-sm-12">
+									<div class="form-group">
+										<label>توضیحات</label>
+										<div class="input-group">
+											<input type="text" class="form-control"
+												   asp-for="CreateFile.Description" name="fileDto.Description">
+											<span asp-validation-for="CreateFile.Description"></span>
+										</div>
+									</div>
+								</div>
+
+
+							</div>
+
+
+							<div class="modal-footer px-0 border-0 mt-3">
+								<button type="submit" class="btn btn-success btn-round">
+									ذخیره
+								</button>
+								<button type="button" class="btn btn-danger btn-round" data-bs-dismiss="modal">بازگشت</button>
+							</div>
+
+						</div>
+					</form>
+				</div>
+
+			</div>
+		</div>
+	</div>
+</div>
+
+
+
+	<div id="ReceiptModal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" tabindex="-1">
+		<div class="modal-dialog modal-dialog-centered">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h4 class="modal-title">رسید جدید</h4>
+					<button type="button" class="close btn-close rounded border" data-bs-dismiss="modal"></button>
+				</div>
+				<div class="modal-body" id="modalbody">
+
+					<div class="portlet-body">
+						<form asp-action="UploadFile" method="post" enctype="multipart/form-data">
+							<div class="form-body">
+							<input name="fileDto.OtherIncomeInvoiceId" value="@Model.InvoiceId" hidden />
+								<input type="text" name="fileDto.overwritingFile" value="false" hidden />
+								<input type="number" name="goToPageCreate" value="100" hidden />
+
+								<div class="row gy-3">
+
+									<div class="col-sm-12">
+										<div class="  form-group ">
+											<label>نوع فایل</label>
+											<div class="input-group  ">
+											<select class="form-control select2" asp-for="CreateFileReceipt.FileType" name="fileDto.type"
+														asp-items="Model.FileTypeReceipt" style="width:100%!important;">
+												</select>
+
+											</div>
+											<span asp-validation-for="CreateFileReceipt.FileType"
+												  class="text-danger"></span>
+										</div>
+									</div>
+
+									<div class="col-md-12">
+										<div class="form-group">
+											<label>آپلود فایل </label>
+											<div style="flex-wrap:nowrap" class="input-group round">
+												<input type="file" name="fileDto.file" class="form-control w-25" required>
+											</div>
+										</div>
+									</div>
+
+									<div class="col-sm-6">
+										<div class="form-group">
+											<label>تاریخ رسید</label>
+											<div class="input-group">
+												<input type="text" class="form-control"
+												   asp-for="CreateFileReceipt.DateFa" name="fileDto.DateFa" autocomplete="off">
+												<span asp-validation-for="CreateFile.Description"></span>
+											</div>
+										</div>
+									</div>
+									<div class="col-sm-6">
+										<div class="form-group">
+											<label>مبلغ (ريال)</label>
+											<div class="input-group">
+												<input type="number" class="form-control"
+												   asp-for="CreateFileReceipt.Price" min="0" name="fileDto.Price">
+												<span asp-validation-for="CreateFileReceipt.Price"></span>
+											</div>
+										</div>
+									</div>
+
+									<div class="col-sm-12">
+										<div class="form-group">
+											<label>توضیحات</label>
+											<div class="input-group">
+												<input type="text" class="form-control rounded"
+												   asp-for="CreateFileReceipt.Description" name="fileDto.Description">
+												<span asp-validation-for="CreateFileReceipt.Description"></span>
+											</div>
+										</div>
+									</div>
+
+
+								</div>
+
+
+								<div class="modal-footer px-0 border-0 mt-2">
+									<button type="submit" class="btn btn-success btn-round">
+										ذخیره
+									</button>
+									<button type="button" class="btn btn-danger btn-round" data-bs-dismiss="modal">بازگشت</button>
+								</div>
+
+							</div>
+						</form>
+					</div>
+
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+
+
+
+@section script {
+
+
+	<script>
+
+		$(document).ready(function () {
+			$("#CreateFile_FileType").select2({
+				dropdownParent: $('#generalmodal')
+			});
+
+			$("#CreateFileReceipt_FileType").select2({
+				dropdownParent: $('#ReceiptModal')
+			});
+		});
+
+
+
+		kamaDatepicker('CreateFileReceipt_DateFa', customOptions);
+	</script>
+
+
+
+	<script>
+		function DocFileShowModal() {
+			$("#CreateFile_Description").val('');
+
+			$("#generalmodal").modal('show');
+		}
+
+		function ReceiptFileShowModal() {
+			$("#CreateFileReceipt_Description").val('');
+			$("#CreateFileReceipt_Price").val('0');
+			$("#CreateFileReceipt_Datefa").val('');
+
+			$("#ReceiptModal").modal('show');
+		}
+
+
+		async function DeleteDocFile(event, id) {
+
+			event.preventDefault();
+			let result = await ShowQAlert2(event);
+
+			if (result === true) {
+				$.post("@Url.Action("DeleteFileById", "OtherIncomeInvoice")", {
+					docFileId: id
+				})
+					.done(function (res) {
+						location.reload();
+					}).fail(function (xhr, status, error) {
+						location.reload();
+					});
+			}
+		}
+
+	</script>
+}

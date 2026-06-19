@@ -1,0 +1,293 @@
+﻿@model EditSeoDto
+@{
+    ViewData["Title"] = "ویرایش CHO";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+    var drops = ViewBag.drops as CompanyListByTypeDto;
+}
+@section style {
+     
+}
+<div class="col-12">
+    <div class="card">
+        <div class="card-header pb-0">
+            <div class="d-flex justify-content-between  align-items-baseline">
+                <h3 class="title">
+                    <i class="icon-anchor"></i> ویرایش CHO
+                </h3>
+            </div>
+            <hr />
+        </div>
+
+        <div class="card-body pt-0">
+            <form asp-action="EditSeo" method="post">
+                <input type="hidden" asp-for="Id" />
+                <div class="row">
+                    <div class="form-body">
+
+                        <div class="row gy-4">
+
+                            <div class="col-md-4 col-sm-12">
+                                <div class="  form-group ">
+                                    <label>اسکله</label>
+                                    <div class="input-group col-sm-6">
+                                        <select class="form-control select2" asp-for="WaterfrontId"
+                                                asp-items="@(new SelectList(ViewBag.waterfront,"Id","Title"))">
+                                                @if(Model.WaterfrontId == null)
+                                            {
+                                                     <option value="">نامشخص</option>
+                                            }
+                                        </select>
+                                    </div>
+                                    <span asp-validation-for="WaterfrontId"
+                                          class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-4 col-sm-12">
+                                <div class="form-group">
+                                    <label>شماره دریایی</label>
+                                    <div class="input-group">
+                                        <input type="text" asp-for="PmoNumber" class="form-control">
+                                    </div>
+                                    <span asp-validation-for="PmoNumber" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4 col-sm-12">
+
+                                <div class=" form-group relative">
+                                    <label>شرکت خن کار</label>
+                                    <div class="input-group " style="flex-wrap:nowrap; ">
+
+                                        <select class="form-control select2 rounded" asp-for="CompanyKhankariId"
+                                                asp-items="@(new SelectList(drops.Khankar,"Id","Title"))">
+                                            <option value="">نا مشخص</option>
+                                        </select>
+
+                                        <span class="input-group-btn">
+                                            <a class="btn btn-success px-2 ms-2 rounded" target="_blank"
+                                               asp-action="CreateCompany" asp-controller="Company">
+                                                <i class="icon-plus align-middle"></i>
+
+                                                <div class="paper-ripple"><div class="paper-ripple__background"></div><div class="paper-ripple__waves"></div></div>
+                                            </a>
+                                        </span>
+                                    </div>
+
+                                    <span asp-validation-for="CompanyKhankariId"
+                                          class="text-danger"></span>
+                                </div>
+
+
+                            </div>
+                            <div class="col-md-4 col-sm-12">
+                                <div class=" form-group relative">
+                                    <label>شرکت تجهیزاتی</label>
+                                    <div class="input-group " style="flex-wrap:nowrap; ">
+
+                                        <select class="form-control select2 rounded" asp-for="EquipmentCompanyId"
+                                                asp-items="@(new SelectList(drops.Equipment,"Id","Title"))">
+                                            <option value="">نا مشخص</option>
+                                        </select>
+
+                                        <span class="input-group-btn">
+                                            <a class="btn btn-success px-2 ms-2 rounded" target="_blank"
+                                               asp-action="CreateCompany" asp-controller="Company">
+                                                <i class="icon-plus align-middle"></i>
+
+                                                <div class="paper-ripple"><div class="paper-ripple__background"></div><div class="paper-ripple__waves"></div></div>
+                                            </a>
+                                        </span>
+                                    </div>
+
+                                    <span asp-validation-for="EquipmentCompanyId"
+                                          class="text-danger"></span>
+                                </div>       
+                            </div>
+
+
+                            @* <div class="col-md-4 col-sm-12">
+                            <div class="form-group m-l-60">
+                            <label>بندر مبدا</label>
+                            <div class="input-group">
+                            <select class="form-control select2" asp-for="SourcePortId" asp-items="@ViewBag.Ports">
+                            </select>
+                            </div>
+                            </div>
+                            </div>
+
+                            <div class="col-md-4 col-sm-12">
+                            <div class="form-group ">
+                            <label>بندر مقصد</label>
+                            <div class="input-group">
+                            <select class="form-control select2" asp-for="DestinationPortId" asp-items="@ViewBag.Ports">
+                            </select>
+                            </div>
+                            </div>
+                            </div> *@
+                            @*
+                            <div class="col-md-4 col-sm-12">
+                            <div class="form-group m-l-60">
+                            <label>شرکت حمل و نقل</label>
+                            <div class="input-group">
+                            <select class="form-control select2 rounded" asp-for="TransportationCompanyId"
+                            asp-items="@(new SelectList(drops.Transportation,"Id","Title"))">
+                            </select>
+                            </div>
+                            </div>
+                            </div>
+
+                         
+
+                            <div class="col-md-4 col-sm-12">
+                            <div class="form-group m-l-60">
+                            <label>شرکت بار شمار</label>
+                            <div class="input-group">
+                            <select class="form-control select2" asp-for="CounterCompanyId"
+                            asp-items="@(new SelectList(drops.CounterCompany,"Id","Title"))">
+                            </select>
+                            </div>
+                            </div>
+                            </div> *@
+
+                            @*                      <div class="col-md-4 col-sm-12">
+                            <div class="form-group ">
+                            <label>سایت</label>
+                            <div class="input-group">
+                            <select class="form-control select2" asp-for="SiteId"
+                            asp-items="@(new SelectList(ViewBag.site,"Id","Title"))">
+                            </select>
+                            </div>
+                            </div>
+                            </div> *@
+
+                            @*                <div class="col-md-4 col-sm-12">
+                            <div class="form-group m-l-60">
+                            <label>شرکت انباردار</label>
+                            <div class="input-group">
+                            <select class="form-control select2" name="WareHousCompanyId"
+                            asp-items="@(new SelectList(drops.WareHouse,"Id","Title"))">
+                            </select>
+                            </div>
+                            </div>
+                            </div> *@
+
+                            @*                             <div class="col-md-4 col-sm-12">
+                            <div class="form-group">
+                            <label>انبار پیشفرض</label>
+                            <div class="input-group">
+                            <select class="form-control select2" asp-for="DefaultWarehouseId"
+                            asp-items="@(new SelectList(drops.WareHouse,"Id","Title"))">
+                            </select>
+                            </div>
+                            </div>
+                            </div> *@
+
+                            @*  <div class="col-md-4 col-sm-12">
+
+                            <div class="form-group  ">
+                            <label>توضیحات</label>
+                            <div class="input-group">
+                            <input asp-for="Description" type="text" class="rounded form-control" autocomplete="off">
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                            </div>
+                            </div>
+                            </div> *@
+
+
+
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="media report-perfom" style="float: left;">
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-info btn-round">
+                                    <i class="icon-check align-middle px-1"></i>
+                                    ذخیره
+                                    <div class="paper-ripple"><div class="paper-ripple__background"></div><div class="paper-ripple__waves"></div></div>
+                                </button>
+                                <a class="btn btn-warning btn-round" asp-action="SeoAllocationPage" asp-route-seoId="@Model.Id">
+                                    <i class="icon-close align-middle px-1"></i>
+                                    بازگشت
+                                    <div class="paper-ripple"><div class="paper-ripple__background"></div><div class="paper-ripple__waves"></div></div>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </form>
+            <section class="fix"></section>
+        </div>
+    </div>
+</div>
+
+
+@section script {
+
+
+    <script>
+
+        $(document).ready(function () {
+
+            $('.clockpicker').clockpicker({
+                placement: 'bottom',
+                align: 'left',
+                donetext: 'تایید'
+            });
+
+
+
+            $("#ShipId").select2().trigger('change');
+            $("#ProductOwnerCompanyId").select2().trigger('change');
+            $("#TransportType").select2().trigger('change');
+
+            $("#ProductCategoryId").select2().trigger('change');
+            $("#ProuductId").select2().trigger('change');
+
+
+            //===
+            $("#ProductCategoryId").change(function () {
+
+                var url = "@Url.Action("GetProductTypeAsJson", "Seo")";
+                $.getJSON(url, { categoryId: $("#ProductCategoryId").val() }, function (data) {
+
+                    var item = '';
+                    $("#ProuductId").empty();
+                    $.each(data, function (i, val) {
+                        if (val == null) {
+                            $("#ProuductId").empty();
+                        }
+                        else {
+                            item += "<option value='" + val.id + "'>" + val.title + "</option>";
+                        }
+
+                    });
+                    $("#ProuductId").html(item);
+                });
+            });
+
+            //get data for kala
+
+            var url = "@Url.Action("GetProductTypeAsJson", "Seo")";
+            $.getJSON(url, { categoryId: $("#ProductCategoryId").val() }, function (data) {
+
+                var item = '';
+                $("#ProuductId").empty();
+                $.each(data, function (i, val) {
+                    if (val == null) {
+                        $("#ProuductId").empty();
+                    }
+                    else {
+                        item += "<option value='" + val.id + "'>" + val.title + "</option>";
+                    }
+                });
+                $("#ProuductId").html(item);
+            });
+        });
+
+
+        kamaDatepicker('ContractDateFa', customOptions);
+    </script>
+}
+
+

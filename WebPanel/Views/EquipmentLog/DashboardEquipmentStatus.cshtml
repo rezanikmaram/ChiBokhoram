@@ -1,0 +1,146 @@
+﻿@model DashboardEquipmentStatusLogDto
+@{
+    ViewData["Title"] = "داشبورد تعیین وضعیت روزانه تجهیزات";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+@section style {
+    <link rel="stylesheet" href="/Bootstrap/css/bootstrap.min.css">
+    <style>
+        .calendar-day {
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+            .calendar-day button {
+                width: 100%;
+                height: 100%;
+            }
+
+        .p-6 {
+            padding: 6px;
+        }
+    </style>
+}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header d-flex justify-content-between">
+            <strong class="bs-info-bg-subtle">@Model.CurrentDay @Model.CurrentMonthTitle ماه @Model.CurrentYear</strong>
+            <span> <label class="btn btn-success">کامل شده</label>  <label class="btn btn-warning">ناقص</label>  <label class="btn btn-primary">تعیین نشده</label> </span>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                @foreach (var dayOfWeek in Model.DaysOfWeeks)
+                {
+                    <div class="col text-center">
+                        <strong>@dayOfWeek.Title</strong>
+                    </div>
+                }
+            </div>
+            @{
+                var daysOfWeek = Model.DaysOfWeeks;
+                var calendarItems = Model.CalendarItems;
+
+                // Initialize a list to hold the calendar weeks
+                var calendarMatrix = new List<List<CalendarItemsDto?>>();
+
+                // Determine the number of weeks required (maximum 6 weeks)
+                int maxWeeks = 6;
+
+                @if(calendarItems!=null && calendarItems.Count>0)
+                {
+                    // Create matrix for each week
+                    for (int i = 0; i < maxWeeks; i++)
+                    {
+                        calendarMatrix.Add(new List<CalendarItemsDto?>(new CalendarItemsDto?[7]));
+                    }
+
+                    // Determine the first day of the month
+                    int firstDayOfWeek = (int)calendarItems.First().DayOfWeek - 1;
+
+                    // Fill the calendar matrix
+                    foreach (var item in calendarItems)
+                    {
+                        int dayOfWeekIndex = (int)item.DayOfWeek - 1;
+                        int currentWeekIndex = (item.Day + firstDayOfWeek - 1) / 7;
+
+                        // Place item in the correct week and day
+                        calendarMatrix[currentWeekIndex][dayOfWeekIndex] = item;
+                    }
+
+                    // Fill the remaining days of the last week with nulls
+                    int lastWeekIndex = calendarMatrix.Count - 1;
+                    for (int i = (int)calendarItems.Last().DayOfWeek; i < 7; i++)
+                    {
+                        calendarMatrix[lastWeekIndex][i] = null;
+                    }
+                }
+
+            }
+            <div class="calendar">
+                @foreach (var week in calendarMatrix)
+                {
+                    <div class="row p-6">
+                        @foreach (var day in week)
+                        {
+                            if (day != null)
+                            {
+                                string buttonClass = "btn btn-primary";
+                                if (day.IsCompleted.Value)
+                                {
+                                    buttonClass = "btn btn-success";
+                                }
+                                else if (day.IsIncomplete.Value)
+                                {
+                                    buttonClass = "btn btn-warning";
+                                }
+
+                                <div class="col text-center calendar-day">
+                                    <button type="button" disabled="@(day.Date > DateTimeOffset.Now.Date)" onclick="navigateToDashboardVessel('@day.Date','@Model.EntityId');" class="@buttonClass" data-bs-toggle="tooltip" data-bs-placement="top" title="@($"تعیین شده : {day.CompletedCount}\nتعیین نشده : {day.IncompleteCount}")">
+                                        @day.Day
+                                    </button>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="col calendar-day"></div>
+                            }
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section script {
+    <script src="~/assets/js/bootstrap/popper.min.js"></script>
+    <script src="~/assets/js/bootstrap/bootstrap.min.js"></script>
+    <script>
+        function navigateToDashboardVessel(date,entityId) {
+            var url = "@Url.Action("DashboardVessel", "Vessel")";
+
+            $.get(url, { date: date, vesselId :entityId })
+                .done(function (res) {
+
+                    var redirectUrl = url + "?date=" + encodeURIComponent(date);
+
+                    if (entityId !== null) {
+                        redirectUrl += "&vesselId=" + encodeURIComponent(entityId);
+                    }
+
+                    window.location.href = redirectUrl;
+                })
+                .fail(function () {
+                    // Handle the error case if needed
+                    alert('Error occurred while processing your request.');
+                });
+        }
+
+        document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(tooltipNode => {
+            new bootstrap.Tooltip(tooltipNode);
+        });
+    </script>
+}

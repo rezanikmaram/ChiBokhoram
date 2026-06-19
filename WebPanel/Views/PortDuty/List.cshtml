@@ -1,0 +1,250 @@
+@model PortDutyPageDto
+
+@{
+    ViewData["Title"] = "تعرفه عوارض های بندری";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+    int groupIndex = 1;
+}
+
+<div class="col-lg-12">
+    <div class="card">
+        <div class="card-header pb-0">
+            <div class="d-flex justify-content-between mb-2">
+                <h3 class="title">
+                    <button type="button" class="btn bg-transparent p-0 fs-6 text-primary" data-bs-toggle="modal"
+                            data-bs-target="#staticBackdrop">
+                        <i class="fa-solid fa-right-to-bracket me-2"></i>
+                    </button>
+                    تعرفه عوارض های بندری
+                </h3>
+
+                <a class="btn btn-success d-md-block d-none" style="border-radius:5px"
+                   onclick="showCreatePortDutyModal()">
+                    <i class="icon-plus"></i> ثبت عوارض جدید
+                </a>
+            </div>
+            <form id="formFilter" asp-action="List" method="post">
+                <input name="p" id="pageNumber" hidden/>
+                <div class="row gy-4">
+                    <div class="form-group col-md-3">
+                        <label>نوع عوارض</label>
+                        <select class="form-control select2" asp-for="Filter.PortDutyDescriptionType"
+                                asp-items="Html.GetEnumSelectList<PortDutyDescriptionType>()">
+                            <option value="">همه انواع عوارض</option>
+                        </select>
+                        <span asp-validation-for="Filter.PortDutyDescriptionType" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-2">
+                        <button style="margin-top:30px; border-radius:5px" class="btn btn-success" type="submit">
+                            فیلتر
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="card-body pt-0">
+            <div class="table-responsive mt-4">
+                <table class="table table-bordered table-hover table-striped">
+                    <thead class="bg-primary">
+                    <tr>
+                        <th>ردیف</th>
+                        <th>نوع عوارض</th>
+                        <th>هدف عوارض</th>
+                        <th>تعرفه جاری</th>
+                        <th>عملیات</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @if (Model?.Data != null)
+                    {
+                        foreach (var group in Model.Data)
+                        {
+                            var duties = group.PortDuties;
+                            if (duties == null || duties.Count == 0)
+                            {
+                                continue;
+                            }
+
+                            var rowspan = duties.Count;
+                            var descName = group.PortDutyDescriptionType.ToDisplay();
+
+                            for (int i = 0; i < rowspan; i++)
+                            {
+                                var duty = duties[i];
+                                <tr>
+                                    @if (i == 0)
+                                    {
+                                        <td class="align-middle" rowspan="@rowspan">@groupIndex</td>
+                                        <td class="align-middle" rowspan="@rowspan">@descName</td>
+                                        groupIndex++;
+                                    }
+                                    <td class="align-middle">@duty.PortDutyTargetType.ToDisplay()</td>
+                                    <td class="align-middle">
+                                        @if (duty.PortDutyTariff != null)
+                                        {
+                                            <div>
+                                                <span>قیمت: @duty.PortDutyTariff.Price.ToPrice() @duty.PortDutyTariff.CurrencyTypeTitle</span><br/>
+                                                <span>@duty.PortDutyTariff.StartDateFa - @duty.PortDutyTariff.EndDateFa</span>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <span>تعرفه ندارد</span>
+                                        }
+                                    </td>
+                                    <td class="align-middle">
+                                        <a class="btn btn-danger px-2 btn-sm" id="Delete@(duty.Id)"
+                                           onclick="ShowQAlert(event,'Delete@(duty.Id)');"
+                                           asp-action="Delete" asp-route-portDutyId="@duty.Id">
+                                            <i class="icon-trash fs-6"></i>
+                                        </a>
+                                        <a class="btn btn-primary px-3 btn-sm"
+                                           href="/PortDuty/ListTariff?PortDutyId=@duty.Id">
+                                            <i class="fa fa-edit"></i> تعرفه‌ها
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div id="portDutyModal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+     role="dialog">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">ثبت عوارض جدید</h4>
+                <button type="button" class="close btn-close rounded border" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <partial name="_CreatePortDuty" model="@Model.Create"/>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section script {
+    <script>
+        $(document).ready(function () {
+            const $modal = $('#portDutyModal');
+            const $typeStep = $('#portDutyTypeStep');
+            const $detailsStep = $('#portDutyDetailsStep');
+            const $typeSelect = $('#PortDutyType');
+            const $descriptionSelect = $('#PortDutyDescriptionType');
+            const $targetSelect = $('#PortDutyTargetType');
+            const $nextButton = $('#portDutyNextBtn');
+            const $prevButton = $('#portDutyPrevBtn');
+            const $typeValidation = $('[data-valmsg-for="PortDutyType"]');
+            const descriptionOptionsCache = buildOptionsCache($descriptionSelect);
+            const targetOptionsCache = buildOptionsCache($targetSelect);
+
+            $('select[class*="generalmodal"].select2').select2({
+                dropdownParent: $modal
+            });
+
+            const filterRules = {
+                '1': {
+                    description: ['', '1', '2'],
+                    target: ['', '1', '2', '3']
+                },
+                '2': {
+                    description: ['', '3'],
+                    target: ['', '2', '4']
+                },
+                '3': {
+                    description: ['', '4'],
+                    target: ['', '1', '3']
+                }
+            };
+
+            $nextButton.on('click', function () {
+                if (!$typeSelect.val()) {
+                    setTypeValidationMessage('انتخاب نوع ثبت الزامی است');
+                    return;
+                }
+
+                setTypeValidationMessage('');
+                filterSelectsByType($typeSelect.val());
+                $typeStep.addClass('d-none');
+                $detailsStep.removeClass('d-none');
+            });
+
+            $prevButton.on('click', function () {
+                $detailsStep.addClass('d-none');
+                $typeStep.removeClass('d-none');
+            });
+
+            $modal.on('hidden.bs.modal', function () {
+                resetCreatePortDutyForm();
+            });
+
+            function resetCreatePortDutyForm() {
+                rebuildSelect($descriptionSelect, descriptionOptionsCache);
+                rebuildSelect($targetSelect, targetOptionsCache);
+                $descriptionSelect.val('').trigger('change.select2');
+                $targetSelect.val('').trigger('change.select2');
+                $typeSelect.val('').trigger('change.select2');
+                setTypeValidationMessage('');
+                $detailsStep.addClass('d-none');
+                $typeStep.removeClass('d-none');
+            }
+
+            function filterSelectsByType(typeValue) {
+                const rule = filterRules[typeValue] || filterRules['1'];
+                rebuildSelect($descriptionSelect, descriptionOptionsCache, rule.description);
+                rebuildSelect($targetSelect, targetOptionsCache, rule.target);
+            }
+
+            function rebuildSelect($select, cache, allowedValues) {
+                const currentValue = $select.val();
+                $select.empty();
+
+                cache.forEach(function (opt) {
+                    if (!allowedValues || allowedValues.indexOf(opt.value) !== -1) {
+                        const option = new Option(opt.text, opt.value);
+                        $select.append(option);
+                    }
+                });
+
+                if (currentValue && (!allowedValues || allowedValues.indexOf(currentValue) !== -1)) {
+                    $select.val(currentValue);
+                } else {
+                    $select.val('');
+                }
+
+                $select.trigger('change.select2');
+            }
+
+            function buildOptionsCache($select) {
+                return $select.find('option').map(function () {
+                    const value = $(this).attr('value');
+                    return {
+                        value: value === undefined ? '' : value,
+                        text: $(this).text()
+                    };
+                }).get();
+            }
+
+            function setTypeValidationMessage(message) {
+                $typeValidation.text(message);
+                if (message) {
+                    $typeSelect.addClass('is-invalid');
+                } else {
+                    $typeSelect.removeClass('is-invalid');
+                }
+            }
+        });
+
+        function showCreatePortDutyModal() {
+            $('#portDutyModal').modal('show');
+        }
+    </script>
+}

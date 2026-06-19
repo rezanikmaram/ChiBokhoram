@@ -1,0 +1,67 @@
+﻿@model CreateDeviceDto
+
+
+<form asp-action="CreateDevice" method="post">
+    <input asp-for="Id" type="hidden" />
+    <div class="card-body pt-0">
+
+        <div class="col-md-12">
+            <div class="form-body">
+                <div class=" row ">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>نام دستگاه</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control rounded" asp-for="Name">
+                                <span asp-validation-for="Name" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>سریال دستگاه </label>
+                            <div class="input-group">
+                                <input type="text" class="form-control rounded" asp-for="Sn" placeholder="S00001">
+                               
+                            </div>
+                        </div>
+                        <span asp-validation-for="Sn" class="text-danger"></span>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label> نوع</label>
+                        <div class="input-group">
+                            <select style="width:500px !important" class="form-control  select2" asp-for="DeviceType"
+                                    asp-items="Html.GetEnumSelectList<DeviceType>()">
+                                <option value="">نامشخص</option>
+                            </select>
+                            <span asp-validation-for="DeviceType" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 align-items-end d-flex">
+                        <div>
+                            <div class="input-group activeor mt-3">
+                                <label>
+                                    <input type="checkbox" asp-for="IsActive" class="normal">
+                                    فعال/غیرفعال
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer border-0 px-0">
+                    <button type="submit" class="btn btn-success btn-round">ذخیره</button>
+                    <button type="button" class="btn btn-danger btn-round" data-bs-dismiss="modal">بازگشت</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</form>
+
+
+  <script src="~/assets/js/validation/jquery.validate.min.js"></script>
+ <script src="~/assets/js/validation/jquery.validate.unobtrusive.min.js"></script>

@@ -1,0 +1,259 @@
+@model CreateVoyagePageDto
+
+<form asp-action="CreateVoyage" method="post" id="CreateVoyageForm">
+    <input type="hidden" asp-for="CreateDto.Id" />
+    <input type="hidden" name="reternPage" value="@ViewBag.reternPage" />
+
+    <div class="row">
+        <div class="form-body">
+            <div class="row gy-4">
+                <div class="col-md-4 col-sm-12">
+                    <div class="form-group relative">
+                        <label>کشتی</label>
+                        <div class="input-group d-flex flex-nowrap">
+                            <select class="form-control select2 CreateVoyageModal" asp-for="CreateDto.ShipId" asp-items="Model.Ships"></select>
+                            <a class="btn btn-success px-2 ms-2 rounded" target="_blank" asp-action="Index" asp-controller="Ship">
+                                <i class="icon-plus align-bottom"></i>
+                            </a>
+                        </div>
+                        <span asp-validation-for="CreateDto.ShipId" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="col-md-4 col-sm-12">
+                    <div class="form-group">
+                        <label> بندر بارگیری </label>
+                        <div class="input-group col-sm-6">
+                            <input type="text" asp-for="CreateDto.LoadingPort" placeholder="نام بندر را بنویسید" style="border: 0.5px solid #d9d9d9" class="p-2 rounded w-100">
+                        </div>
+                        <span asp-validation-for="CreateDto.LoadingPort" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="col-md-4 col-sm-12">
+                    <div class="form-group">
+                        <label> بندر تخلیه </label>
+                        <div class="input-group col-sm-6">
+                            <select class="form-control select2 rounded CreateVoyageModal" asp-for="CreateDto.DischargePortId" asp-items="Model.Ports">
+                                <option value="">نامشخص</option>
+                            </select>
+                            <span asp-validation-for="CreateDto.DischargePortId" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4 col-sm-12">
+                    <div class="form-group">
+                        <label> بندر ورودی </label>
+                        <div class="input-group col-sm-6">
+                            <select class="form-control select2 rounded CreateVoyageModal" asp-for="CreateDto.EntryPortId" asp-items="Model.Ports">
+                                <option value="">نامشخص</option>
+                            </select>
+                            <span asp-validation-for="CreateDto.EntryPortId" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-2 col-sm-12">
+                    <div class="form-group">
+                        <label> پرچم </label>
+                        <div class="input-group col-sm-6">
+                            <input type="text" asp-for="CreateDto.Flag" placeholder="پرچم کشور" style="border: 0.5px solid #d9d9d9" class="p-2 rounded w-100">
+                        </div>
+                    </div>
+                </div>
+
+                 <div class="col-md-2 col-sm-12">
+                     <div class="form-group">
+                         <label> خدمه </label>
+                         <div class="input-group col-sm-6">
+                             <price-input asp-for="CreateDto.CrewCount" min="0" placeholder="0"></price-input>
+                         </div>
+                         <span asp-validation-for="CreateDto.CrewCount" class="text-danger"></span>
+                     </div>
+                 </div>
+
+                 <div class="col-md-4 col-sm-12">
+                     <div class="form-group">
+                         <label>قرارداد</label>
+                         <div class="input-group">
+                             <select class="form-control select2 rounded CreateVoyageModal" asp-for="CreateDto.ContractId" asp-items="Model.Contracts">
+                                 <option value="">نامشخص</option>
+                             </select>
+                             <span asp-validation-for="CreateDto.ContractId" class="text-danger"></span>
+                         </div>
+                     </div>
+                 </div>
+
+                 <div class="col-md-2 col-sm-12">
+                     <div class="  form-group ">
+                         <label>تاریخ ورود</label>
+                        <div class="input-group">
+                            <input asp-for="CreateDto.EntryDateFa" type="text" class=" form-control rounded" autocomplete="off">
+                            <span asp-validation-for="CreateDto.EntryDateFa" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-2 col-sm-12">
+                    <div class="  form-group ">
+                        <label>تاریخ پهلوگیری</label>
+                        <div class="input-group">
+                            <input asp-for="CreateDto.BerthingDateFa" type="text" class=" form-control rounded" autocomplete="off">
+                            <span asp-validation-for="CreateDto.BerthingDateFa" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-2 col-sm-12">
+                    <div class="form-group">
+                        <label>ساعت پهلوگیری</label>
+                        <div class="input-group clockpicker">
+                            <input asp-for="CreateDto.BerthingTime" type="text" class="form-control rounded" autocomplete="off">
+                            <span class="input-group-addon">
+                                <span class="glyphicon glyphicon-time"></span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4 col-sm-12">
+                    <div class="form-group">
+                        <label>موقعیت کشتی</label>
+                        <div class="input-group col-sm-6">
+                            <select class="form-control select2 rounded CreateVoyageModal" asp-for="CreateDto.SeoShipState" asp-items="Html.GetEnumSelectList<SeoShipState>()"></select>
+                            <span asp-validation-for="CreateDto.SeoShipState" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4 col-sm-12">
+                    <div class="form-group relative">
+                        <label>اسکله</label>
+                        <div class="input-group d-flex flex-nowrap">
+                            <select class="form-control select2 CreateVoyageModal" asp-for="CreateDto.WaterfrontId" asp-items="Model.Waterfronts">
+                                <option value="">نامشخص</option>
+                            </select>
+                            <span asp-validation-for="CreateDto.WaterfrontId" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-2 col-sm-12">
+                    <div class="form-group">
+                        <label>نوع محموله</label>
+                        <div class="input-group col-sm-6">
+                            <select class="form-control select2 rounded CreateVoyageModal" asp-for="CreateDto.TrafficType" asp-items="Html.GetEnumSelectList<TrafficType>()">
+                                <option value="">نامشخص</option>
+                            </select>
+                            <span asp-validation-for="CreateDto.TrafficType" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-2 col-sm-12">
+                    <div class="form-group">
+                        <label>نوع عملیات</label>
+                        <div class="input-group col-sm-6">
+                            <select class="form-control select2 rounded CreateVoyageModal" asp-for="CreateDto.TransportType" asp-items="Html.GetEnumSelectList<TransportType>()"></select>
+                            <span asp-validation-for="CreateDto.TransportType" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-2 col-sm-12">
+                    <div class="form-group">
+                        <label>تعداد بارنامه</label>
+                        <div class="input-group">
+                            <price-input asp-for="CreateDto.CountOfSeo" min="1"></price-input>
+                        </div>
+                        <span asp-validation-for="CreateDto.CountOfSeo" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="col-md-2 col-sm-12">
+                    <div class="form-group">
+                        <label>وزن کیلوگرم</label>
+                        <div class="input-group">
+                            <price-input asp-for="CreateDto.Tonnage" min="0"></price-input>
+                        </div>
+                        <span asp-validation-for="CreateDto.Tonnage" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="col-md-2 col-sm-12">
+                    <div class="form-group">
+                        <label>تعداد انبار کشتی</label>
+                        <div class="input-group">
+                            <price-input asp-for="CreateDto.CountOfShipWarehouse"></price-input>
+                        </div>
+                        <span asp-validation-for="CreateDto.CountOfShipWarehouse" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="col-md-4 col-sm-12">
+                    <div class="form-group">
+                        <label>شرکت کشتیرانی</label>
+                        <div class="input-group d-flex flex-nowrap">
+                            <select class="form-control select2 rounded CreateVoyageModal" asp-for="CreateDto.CompanyShippingId" asp-items="Model.Companies">
+                                <option value="">نامشخص</option>
+                            </select>
+                            <a class="btn btn-success px-2 ms-2 rounded" target="_blank" asp-action="CreateCompany" asp-controller="Company">
+                                <i class="icon-plus align-bottom"></i>
+                            </a>
+                        </div>
+                        <span asp-validation-for="CreateDto.CompanyShippingId" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="col-md-4 col-sm-12">
+                    <div class="form-group">
+                        <label>شماره دریایی</label>
+                        <div class="input-group">
+                            <input type="text" asp-for="CreateDto.PmoNumber" class="form-control">
+                        </div>
+                        <span asp-validation-for="CreateDto.PmoNumber" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="col-md-4 col-sm-12">
+                    <div class="form-group">
+                        <label>شماره سفر</label>
+                        <div class="input-group">
+                            <input type="text" asp-for="CreateDto.VoyageNumber" class="form-control">
+                        </div>
+                        <span asp-validation-for="CreateDto.VoyageNumber" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="col-md-4 col-sm-12 align-content-end">
+                    <div class="input-group activeor">
+                        <label>
+                            <input type="checkbox" asp-for="CreateDto.IsBerthedAtAnotherPort" class="normal">
+                            پهلوگیری در بندر دیگر بوده؟
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 mt-4">
+            <div class="form-actions d-flex justify-content-end gap-2">
+                <button type="submit" class="btn btn-info btn-round">
+                    <i class="icon-check align-middle px-1"></i>
+                    ذخیره
+                    <div class="paper-ripple"><div class="paper-ripple__background"></div><div class="paper-ripple__waves"></div></div>
+                </button>
+                <button type="button" class="btn btn-warning btn-round" data-bs-dismiss="modal">
+                    <i class="icon-close align-middle px-1"></i>
+                    بازگشت
+                    <div class="paper-ripple"><div class="paper-ripple__background"></div><div class="paper-ripple__waves"></div></div>
+                </button>
+            </div>
+        </div>
+    </div>
+</form>
+
+<script>
+    // Number inputs are now handled by price-input tag helper
+</script>

@@ -1,0 +1,206 @@
+﻿@model SeoStopServiceLogPageDto
+@{
+    ViewData["Title"] = "لیست توقف های CHO";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+    int i = ((Model.SeoStopLogs.PageNumber - 1) * Model.SeoStopLogs.PageSize) + 1;
+}
+
+<div class="col-lg-12">
+    <div class="card">
+        <div class="card-header pb-2">
+            <div class="d-flex">
+                <div class="d-flex justify-content-between">
+                    <h3 class="title">
+                        <i class="icon-frane"></i>
+                        @if (ViewBag.seoId != null)
+                        {
+                            <a asp-controller="Seo" asp-action="SeoPortOperatorPage" asp-route-seoId="@((Guid)ViewBag.seoId)"><i class="fa-solid fa-right-to-bracket me-2"></i></a>
+                        }
+                        توقف های عملیات
+                    </h3>
+                </div>
+                <div class="buttons-box">
+
+                    <i class="icon-size-fullscreen"></i>
+                    <div class="paper-ripple">
+                        <div class="paper-ripple__background"></div>
+                        <div class="paper-ripple__waves"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-body pt-0">
+   
+                <div class="no-footer">
+                    <div class="row">
+                        <div id="data-table_filter" class="dataTables_filter">
+                            <form id="formFilter" asp-action="SeoStopServiceLog" method="post">
+                                <input name="p" id="pageNumber" hidden />
+                                <div class="form-body">
+                                    <div class="row gy-4">
+                                        <div class="form-group col-md-4 ">
+                                            <label>جستجو</label>
+                                            <div class="input-group">
+                                                <input asp-for="FilterDto.Search" type="text" placeholder="کاربر/توضیحات" class="form-control">
+                                            </div>
+                                        </div>
+                                        <div class="form-group col-md-4">
+                                            <label>CHO</label>
+                                            <div class="input-group">
+                                                <select class="form-control select2"
+                                                        asp-for="FilterDto.SeoId"
+                                                        asp-items="Model.Seos">
+                                                    <option value="">همه CHO</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group col-md-4">
+                                            <label>نوع توقف</label>
+                                            <div class="input-group">
+                                                <select class="form-control select2"
+                                                        asp-for="FilterDto.SeoStopServiceTypeId"
+                                                        asp-items="Model.SeoStopServiceType">
+                                                    <option value="">همه نوع</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        
+                                        <div class="col-md-2">
+                                            <div class="form-group ">
+                                                <label> از تاریخ:</label>
+                                                <div class="input-group">
+                                                    <input asp-for="FilterDto.DateFrom" type="text" class=" form-control" autocomplete="off">
+                                                    <span asp-validation-for="FilterDto.DateFrom" class="text-danger"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                      <div class="col-md-2" >
+                                        <div class="form-group ">
+                                                <label>تا تاریخ:</label>
+                                                <div class="input-group">
+                                                    <input asp-for="FilterDto.DateTo" type="text" class=" form-control" autocomplete="off">
+                                                    <span asp-validation-for="FilterDto.DateTo" class="text-danger"></span>
+                                                </div>
+                                        </div>
+                                      </div>
+
+
+                                        <div class="form-group col-md-2 align-self-end">
+                                            <div class="mt-4">
+                                                <input type="checkbox" asp-for="FilterDto.StopForFailureEqupment" class="normal">
+                                                <label>
+                                                    توقف های بر اثر خرابی تجهیز
+                                                </label>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-1">
+                                            <div class="d-flex justify-content-around " style="margin-top:28px">
+                                                <button style="border-radius:5px" class="alert-icon btn btn-success " type="submit"><p class="px-3">فیلتر</p></button>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2"></div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <table class="table my-4 table-bordered table-hover table-striped" id="data-table">
+                        <thead class="bg-primary">
+                            <tr>
+                                <th>#</th>
+                                <th>شروع توقف  </th>
+                                <th>پایان توقف</th>
+                                <th>نوع</th>
+                                <th>تجهیز خراب شده</th>
+                                <th>کاربر ثبت کننده</th>
+                                <th>CHO</th>
+                                <th>توضیحات</th>
+
+                            </tr>
+                        </thead>
+                        <tbody>
+
+
+                            @foreach (var item in Model.SeoStopLogs.Data)
+                            {
+                                <tr class="second-row">
+                                    <td>@(i++)</td>
+                                    <td dir="ltr">@item.DateFailureStartFa</td>
+                                    <td dir="ltr">@item.DateFailureEndFa</td>
+                                    <td>@item.SeoStopServiceTypeName</td>
+                                    <td>@item.EquipmentName</td>
+                                    <td>@item.UserReportName</td>
+                                    <td>@item.SeoSeoCode</td>
+                                    <td class="col-sm-4">@item.Description</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                    <div>
+                        <cs-pager cs-paging-pagesize="@Model.SeoStopLogs.PageSize"
+                                  cs-paging-pagenumber="@Model.SeoStopLogs.PageNumber"
+                                  cs-paging-totalitems="@Model.SeoStopLogs.TotalItems"
+                                  cs-paging-maxpageritems="10"
+                                  cs-pagenumber-param="p"
+                                  asp-route-seoId="@ViewBag.seoId"
+                                  cs-show-first-last="true"
+                                  cs-suppress-empty-nextprev="true"
+                                  cs-suppress-inactive-firstlast="true"
+                                  cs-show-numbered="true"
+                                  cs-first-page-text="ابتدا"
+                                  cs-last-page-text="انتها"
+                                  cs-next-page-title="بعدی"
+                                  cs-previous-page-title="قبلی"
+                                  cs-first-page-title="ابتدا"
+                                  cs-last-page-title="انتها"
+                                  cs-next-page-text="بعدی"
+                                  cs-previous-page-text="قبلی"
+                                  cs-pager-li-current-class="page-item active"
+                                  cs-pager-li-other-class="page-item"
+                                  cs-pager-li-non-active-class="page-item disabled"
+                                  cs-pager-link-current-class="page-link"
+                                  cs-pager-link-other-class="page-link"
+                                  asp-controller="Seo"
+                                  asp-action="SeoStopServiceLog">
+                        </cs-pager>
+                    </div>
+                </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+@section script {
+
+
+    <script>
+
+      
+    </script>
+
+
+    <script>
+        $(".page-link").click(function (event) {
+            event.preventDefault(); // غیرفعال کردن عملکرد پیشفرض href
+
+            var hrefValue = $(this).attr("href");
+            $("#pageNumber").val(hrefValue.split("p=")[1]);
+            $("#formFilter").submit();
+        });
+        
+        kamaDatepicker('FilterDto_DateFrom', customOptions);
+        kamaDatepicker('FilterDto_DateTo', customOptions);
+        kamaDatepicker('daterrrrr', customOptions);
+        
+    </script>
+
+    
+}

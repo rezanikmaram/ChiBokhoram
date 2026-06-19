@@ -1,0 +1,250 @@
+@model WarehousePageDto
+@{
+	ViewData["Title"] = "لیست انبار ها";
+	Layout = "~/Views/Shared/AdminLayout.cshtml";
+	int i = ((Model.List.PageNumber - 1) * Model.List.PageSize) + 1;
+}
+
+@* modal start  *@
+<div class="modal fade" id="newWarehouse" tabindex="-1" aria-labelledby="newWarehouseLabel" aria-hidden="true">
+	<div class="modal-dialog modal-xl">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h1 class="modal-title fs-5" id="newWarehouseLabel"> افزودن انبار </h1>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body" id="LoadCreate">
+				
+			</div>
+		</div>
+	</div>
+</div>
+
+@* modal end  *@
+
+<div class="col-lg-12">
+	<div class="card">
+		<div class="card-header pb-2">
+			<div class="d-flex justify-content-between">
+				<h3 class="title">
+	                 <i class="icon-frane"></i> لیست انبارها
+				</h3>
+				<div>
+					<a class="alert-icon mx-2 btn btn-primary round" id="newWarehouseBtn" href="javascript:void(0);">
+						<i class="fa-solid fa-plus me-2"></i>انبار جدید
+					</a>
+				</div>
+			</div>
+		</div>
+		
+		<div class="card-body pt-0">
+			<div class="no-footer">
+				<div class="row">
+					<div id="data-table_filter" class="dataTables_filter">
+						<form id="formFilter" asp-action="Warehouses" method="post">
+							<input name="p" id="pageNumber" hidden />
+							<div class="form-body">
+								<div class="row gy-4">
+									<div class="form-group col-md-3 ">
+										<label>جستجو</label>
+										<div class="input-group">
+											<input asp-for="Filter.Search" type="text" class="form-control">
+										</div>
+									</div>
+
+									<div class="form-group col-md-3">
+										<label>شرکت</label>
+										<div class="input-group">
+											<select class="form-control select2"
+													asp-for="Filter.CompanyId"
+													asp-items="Model.Companies">
+												<option value="">همه شرکت ها</option>
+											</select>
+										</div>
+									</div>
+
+									<div class="col-md-3">
+										<div class="form-group">
+											<label> نوع انبار</label>
+											<div class="input-group">
+												<select class="form-control select2" asp-for="Filter.WarehouseStorageType"
+														asp-items="@Html.GetEnumSelectList<WarehouseStorageType>()"
+														style="width:100%!important;">
+													<option value="">همه موارد</option>
+												</select>
+												<span asp-validation-for="Filter.WarehouseStorageType"></span>
+											</div>
+										</div>
+									</div>
+
+									<div class="col-md-1">
+										<div class="d-flex justify-content-around " style="margin-top:28px">
+											<button style="border-radius:5px" class="alert-icon btn btn-success " type="submit"><p class="px-3">فیلتر</p></button>
+										</div>
+									</div>
+									<div class="col-md-2"></div>
+								</div>
+							</div>
+						</form>
+					</div>
+				</div>
+
+				<div class="table-responsive mt-4 pt-4 vh-100">
+					<table class="table table-bordered table-hover table-striped" id="data-table">
+						<thead class="bg-primary">
+							<tr>
+								<th>ردیف</th>
+								<th>انبار</th>
+								<th>نوع انبار</th>
+								<th>شرکت</th>
+
+
+								<td>حداکثر ظرفیت</td>
+								<td>ظرفیت خالی</td>
+								<td>ظرفیت فعلی</td>
+
+								<td>عملیات</td>
+							</tr>
+						</thead>
+						<tbody>
+
+
+							@foreach (var item in Model.List.Data)
+							{
+								<tr>
+									<td class="align-middle">@(i++)</td>
+									<td class="align-middle">@item.Name</td>
+									<td class="align-middle">@item.WarehouseStorageTypeTitle</td>
+									<td class="align-middle">@item.CompanyCompanyName</td>
+
+
+									<td class="align-middle">@item.MaxCapacity</td>
+									<td class="align-middle">@item.EmptyCapacity</td>
+									<td class="align-middle">@item.CurrentCapacity</td>
+
+									<td class="d-flex justify-content-first">
+										<div class="dropdown-basic">
+											<div class="dropdown">
+												<div class="btn-group mb-0">
+													<button class="dropbtn btn-light rounded" type="button"><i data-feather="chevron-down" class="text-info"></i></button>
+													<div class="dropdown-content">
+
+														<a href="javascript:void(0);" class="edit-warehouse" data-warehouse-id="@item.Id" data-company-id="@item.CompanyId">
+															<i class="icon-pencil"></i> ویرایش
+														</a>
+														<a asp-action="WarehouseDoor" asp-route-companyId="@item.CompanyId" asp-route-warehouseId="@item.Id"><i class="icon-login"></i> مدیریت ورودی ها</a>
+														<a asp-action="Segments" asp-route-warehouseId="@item.Id"><i class="icon-login"></i> مدیریت قطعه بندی ها</a>
+														<a asp-action="DeleteWarehouse" asp-route-id="@item.Id" asp-route-companyId="@item.CompanyId" 
+														   onclick="return confirm('آیا از حذف این انبار اطمینان دارید؟ این عملیات قابل بازگشت نیست.')" 
+														   class="text-danger"><i class="icon-trash"></i> حذف</a>
+
+													</div>
+												</div>
+											</div>
+											<!-- /.btn-group -->
+										</div>
+									</td>
+								</tr>
+
+							}
+
+
+
+						</tbody>
+					</table>
+
+					<div>
+						<cs-pager cs-paging-pagesize="@Model.List.PageSize"
+								  cs-paging-pagenumber="@Model.List.PageNumber"
+								  cs-paging-totalitems="@Model.List.TotalItems"
+								  cs-paging-maxpageritems="10"
+								  cs-pagenumber-param="p"
+								  cs-show-first-last="true"
+								  cs-suppress-empty-nextprev="true"
+								  cs-suppress-inactive-firstlast="true"
+								  cs-show-numbered="true"
+								  cs-first-page-text="ابتدا"
+								  cs-last-page-text="انتها"
+								  cs-next-page-title="بعدی"
+								  cs-previous-page-title="قبلی"
+								  cs-first-page-title="ابتدا"
+								  cs-last-page-title="انتها"
+								  cs-next-page-text="بعدی"
+								  cs-previous-page-text="قبلی"
+								  cs-pager-li-current-class="page-item active"
+								  cs-pager-li-other-class="page-item"
+								  cs-pager-li-non-active-class="page-item disabled"
+								  cs-pager-link-current-class="page-link"
+								  cs-pager-link-other-class="page-link"
+								  asp-controller="Warehouse"
+								  asp-action="Warehouses">
+						</cs-pager>
+					</div>
+
+				</div>
+
+			</div>
+
+
+
+			<!-- /.table-responsive -->
+		</div>
+		<!-- /.portlet-body -->
+		<!-- /.portlet -->
+	</div>
+</div>
+
+@section script {
+
+	<script>
+		 
+		 
+		$(document).ready(function () {
+
+			$('.select2').select2();
+
+			// Handle "New Warehouse" button click
+			$('#newWarehouseBtn').on('click', function () {
+				$('#newWarehouseLabel').text('انبار جدید');
+				$('#LoadCreate').load('@Url.Action("CreateWarehousePartial", "Warehouse")', function () {
+					$('#LoadCreate .select2').select2({
+						dropdownParent: $('#newWarehouse')
+					});
+					$('#newWarehouse').modal('show');
+				});
+			});
+
+			// Handle edit link clicks
+			$(document).on('click', '.edit-warehouse', function (e) {
+				e.preventDefault();
+				var warehouseId = $(this).data('warehouse-id');
+				var companyId = $(this).data('company-id');
+
+				$('#newWarehouseLabel').text('ویرایش انبار');
+
+				$.get('@Url.Action("EditWarehousePartial", "Warehouse")', { warehouseId: warehouseId, companyId: companyId })
+					.done(function (data) {
+						$('#LoadCreate').html(data);
+						$('#LoadCreate .select2').select2({
+							dropdownParent: $('#newWarehouse')
+						});
+						$('#newWarehouse').modal('show');
+					})
+					.fail(function () {
+						alert('خطا در بارگذاری اطلاعات');
+					});
+			});
+
+			// Handle save button click inside modal
+			$('#newWarehouse .btn-primary').on('click', function () {
+				$('#LoadCreate form').submit();
+			});
+
+			// When modal is closed, reset content (optional)
+			$('#newWarehouse').on('hidden.bs.modal', function () {
+				$('#LoadCreate').empty(); // Clears the form; next open will load fresh
+			});
+		});
+
+	</script>
+}

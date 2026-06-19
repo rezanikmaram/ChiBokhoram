@@ -1,0 +1,131 @@
+@model Entities.DTOs.Web.Hirman.Tariff.ContractPeriod.CopyContractPeriodDto
+@using Entities.enumeration
+@using Common.Utilities
+
+<form asp-action="Copy" method="post">
+    <input type="hidden" asp-for="OriginalContractPeriodId" />
+
+    <div class="row gy-4">
+        <div class="col-md-12">
+            <label>ایجاد بر مبنای</label>
+            <input asp-for="OriginalContractPeriodTitle" class="form-control" disabled />
+        </div>
+        <div class="col-md-6">
+            <label>عنوان جدید</label>
+            <input asp-for="Title" class="form-control" />
+            <span asp-validation-for="Title" class="text-danger"></span>
+        </div>
+        <div class="col-md-6">
+            <label>تاریخ شروع جدید</label>
+            <input asp-for="StartDate" class="form-control persian-date" />
+            <span asp-validation-for="StartDate" class="text-danger"></span>
+        </div>
+        <div class="col-md-6">
+            <label>تاریخ پایان جدید</label>
+            <input asp-for="EndDate" class="form-control persian-date" />
+            <span asp-validation-for="EndDate" class="text-danger"></span>
+        </div>
+        <div class="col-md-12">
+            <label>نوع تغییر قیمت</label>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" asp-for="PriceChangeType" value="@PriceChangeType.Increase" checked>
+                <label class="form-check-label">افزایش</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" asp-for="PriceChangeType" value="@PriceChangeType.Decrease">
+                <label class="form-check-label">کاهش</label>
+            </div>
+        </div>
+        <div class="col-md-12">
+            <label>جداول برای کپی</label>
+            <div class="row mt-2">
+                <div class="col-md-12 text-muted">
+                    درصد برای هر جدول (در صورت انتخاب)
+                </div>
+            </div>
+
+            @for (var i = 0; i < (Model.TableSettings?.Count ?? 0); i++)
+            {
+                <div class="row align-items-center mt-2">
+                    <div class="col-md-7">
+                        <div class="form-check">
+                            <input type="hidden" asp-for="TableSettings[i].Table" />
+                            <input class="form-check-input copy-table-check" asp-for="TableSettings[i].Selected" data-index="@i" />
+                            <label class="form-check-label">@Model.TableSettings[i].Table.GetEnumDescription()</label>
+                        </div>
+                    </div>
+                    <div class="col-md-5">
+                        <input asp-for="TableSettings[i].Percentage" class="form-control copy-table-percent" type="number" min="0" max="100" step="0.01" data-index="@i" />
+                        <span asp-validation-for="TableSettings[i].Percentage" class="text-danger"></span>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <button type="submit" class="btn btn-primary w-100">کپی</button>
+        </div>
+    </div>
+</form>
+
+<script>
+    $(document).ready(function () {
+        kamaDatepicker('StartDate', { buttonsColor: "blue", forceFarsiDigits: true });
+        kamaDatepicker('EndDate', { buttonsColor: "blue", forceFarsiDigits: true });
+
+        $.validator.unobtrusive.parse($('form'));
+
+        function syncPercentDisabled() {
+            $('.copy-table-check').each(function () {
+                var idx = $(this).data('index');
+                var isChecked = $(this).is(':checked');
+                $('.copy-table-percent[data-index=\"' + idx + '\"]').prop('disabled', !isChecked);
+            });
+        }
+
+        $(document).on('change', '.copy-table-check', function () {
+            syncPercentDisabled();
+        });
+
+        syncPercentDisabled();
+
+        // Handle form submission
+        $('form').on('submit', function (e) {
+            e.preventDefault();
+            var form = $(this);
+
+            if (!form.valid()) {
+                return;
+            }
+
+            $.ajax({
+                url: form.attr('action'),
+                type: 'POST',
+                data: form.serialize(),
+                success: function (result) {
+                    if (result.success) {
+                        $('#copyContractPeriodModal').modal('hide');
+                        location.reload();
+                    } else {
+                        Toast.fire({
+                            icon: "error",
+                            title: result.message
+                        });
+                    }
+                },
+                error: function (xhr, status, error) {
+                    if (xhr.status === 400) {
+                        $('#copyModalBody').html(xhr.responseText);
+                        kamaDatepicker('StartDate', { buttonsColor: "blue", forceFarsiDigits: true });
+                        kamaDatepicker('EndDate', { buttonsColor: "blue", forceFarsiDigits: true });
+                        syncPercentDisabled();
+                        $.validator.unobtrusive.parse($('form'));
+                    } else {
+                        alert('خطایی در انجام عملیات رخ داد. لطفا مجددا تلاش کنید.');
+                    }
+                }
+            });
+        });
+    });
+</script>

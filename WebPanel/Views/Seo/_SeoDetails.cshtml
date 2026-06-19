@@ -1,0 +1,52 @@
+﻿@model SeoInfoDto
+ 
+<div class="card-body pt-0 min-height-700">
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped table-hover">
+
+            <tbody>
+                <tr><td>کد CHO</td><td>@Model.SeoCode</td></tr>
+                <tr><td>کشتی </td><td>@Model.ShipShipName</td></tr>
+                <tr><td>اسکله </td><td>@Model.WaterfrontWaterfrontName</td></tr>
+                <tr><td>کشتیرانی </td><td>@Model.CompanyShippingCompanyName</td></tr>
+                <tr><td>صاحب کالا </td><td>@Model.ProductOwnerCompanyCompanyName</td></tr>
+                <tr><td>شرکت حمل و نقل </td><td>@Model.TransportationCompanyCompanyName</td></tr>
+                <tr><td>شرکت انبارداری </td><td>@Model.WareHousCompanyCompanyName</td></tr>
+                <tr><td>شرکت تجهیزات </td><td>@Model.EquipmentCompanyCompanyName</td></tr>
+                <tr><td>شرکت بار شمار </td><td>@Model.CounterCompanyCompanyName</td></tr>
+                <tr><td>کالا </td><td>@Model.ProductProductName</td></tr>
+                <tr><td>تناژ </td><td>@Model.ShipTonnage</td></tr>
+                <tr><td>نوع </td><td>@Model.TransportType.ToDisplay(DisplayProperty.Name)</td></tr>
+                <tr>
+                    <td>وضعیت </td>
+                    <td>
+                        <label class="label px-2 p-1 label-@(Model.State==SeoState.Active?"success":Model.State==SeoState.Stoped?"danger":"primary")">@(Model.State == SeoState.Active ? "فعال" : Model.State == SeoState.Stoped ? "متوقف" : "پایان یافته")</label>
+                    </td>
+                </tr>
+
+                @if(Model.TransportType == TransportType.Unloading )
+                {
+                    <tr><td>بندر مبدا </td><td>@Model.SourcePortPortName</td></tr>
+                }
+                else
+                {
+                    <tr><td>بندر مقصد </td><td>@Model.DestinationPortPortName</td></tr>
+                }
+
+                @*<tr><td>تناژ </td><td>@Model.SeoInfo.Tonnage</td></tr>*@
+                <tr><td>تاریخ ورود کشتی </td><td>@Model.ShipEntranceDateFa</td></tr>
+                <tr><td>تاریخ شروع عملیات </td><td>@Model.Start?.ToShortPersianDateTimeString()</td></tr>
+                @if(Model.State == SeoState.Finish)
+                {
+                    <tr><td>تاریخ اتمام عملیات  </td><td>@(Model?.End?.ToShortPersianDateTimeString() ?? "---")</td></tr>
+                    <tr><td>مدت زمان عملیات  </td><td>@Model?.GetDifferenceTime</td></tr>
+                }
+               
+                <tr><td> دریافت فایل</td><td><a class="btn btn-primary label" asp-controller="Report" asp-action="GetSeoViewExcelFile" asp-route-seoId="@Model.Id">دریافت فایل Excel</a></td></tr>
+
+
+            </tbody>
+        </table>
+    </div><!-- /.table-responsive -->
+
+</div> 

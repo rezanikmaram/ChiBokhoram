@@ -1,0 +1,98 @@
+﻿@model CreateEquipmentDto
+@{
+    ViewData["Title"] = "ثبت تجهیز";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+<div class="col-lg-12">
+    <div class="card">
+        <div class="card-header pb-0">
+            <div class="d-flex justify-content-between">
+                <h3 class="title">
+                   افزودن تجهیز
+                </h3>
+            </div>
+        </div>
+        <form asp-action="CreateEquipment" method="post">
+            <input asp-for="CompanyId" type="hidden" />
+            <input type="hidden" asp-for="Id" />
+            <div class="card-body">
+
+                <div class="form-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>نام تجهیز</label>
+                                <div class="input-group">
+                                    <input type="text" asp-for="EquipmentName" class="form-control rounded" required>
+                                </div>
+                                <span asp-validation-for="EquipmentName" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>شناسه تجهیز</label>
+                                <div class="input-group">
+                                    <input asp-for="EquipmentCode" class="form-control rounded" required>
+                                </div>
+                                <span asp-validation-for="EquipmentCode" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row my-4">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>نوع تجهیز</label>
+                                <div class="input-group">
+                                    <select class="form-control rounded" asp-for="EquipmentType" asp-items="Html.GetEnumSelectList<EquipmentType>()">
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>دسته تجهیز</label>
+                                <div class="input-group">
+                                    <select class="form-control rounded" asp-for="EquipmentCategoryId" asp-items="ViewBag.Categories">
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>مدل تجهیز</label>
+                                <div class="input-group">
+                                    <input type="text" asp-for="Model" class="form-control rounded" required>
+                                </div>
+                                <span asp-validation-for="Model" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4 align-self-end">
+                        <div class="input-group activeor">
+                            <label>
+                                <input type="checkbox" asp-for="Status" class="form-check-input">
+                                تجهیز آماده به کار است؟
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="form-actions text-end m-4">
+                <button type="submit" class="btn btn-info btn-round">
+                    <i class="icon-check"></i>
+                    ذخیره
+                    <div class="paper-ripple"><div class="paper-ripple__background"></div><div class="paper-ripple__waves"></div></div>
+                </button>
+                @*<a   class="btn btn-warning btn-round" asp-action="EquipmentCompany" asp-route-companyId="@Model.CompanyId">
+                بازگشت
+                <i class="icon-close"></i>
+                <div class="paper-ripple"><div class="paper-ripple__background"></div><div class="paper-ripple__waves"></div></div>
+                </a>*@
+            </div>
+        </form>
+        <section class="fix"></section>
+
+    </div>
+</div>

@@ -1,0 +1,245 @@
+@model GearPageResultDto
+@{
+    ViewData["Title"] = "لیست تجهیزات";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+    int i = ((Model.Result.PageNumber - 1) * Model.Result.PageSize) + 1;
+}
+
+<div class="col-lg-12">
+    <div class="card">
+        <div class="card-header pb-0">
+            <div class="d-flex justify-content-between">
+                <h3 class="title">
+                    <i class="icon-frane"></i> لیست تجهیزات
+                </h3>
+                <div>
+                    <a class="btn rounded btn-primary" onclick="createGear();">  +  تجهیز جدید   </a>
+                </div>
+            </div>
+            <div>
+                <form id="formFilter" asp-action="Index" asp-route-p="__PAGE__" method="post" onsubmit="event.preventDefault(); refreshGearTable();">
+                    <input name="p" id="pageNumber" value="@(Model.Result.PageNumber)" hidden />
+                    <div class="form-body">
+                        <div class="row">
+                            <div class="row col-md-12 mt-0 gy-4">
+                                <div class="form-group col-md-3 ">
+                                    <label>شرکت</label>
+                                    <div class="input-group">
+                                        <select class="form-control select2"
+                                                name="CompanyFilter"
+                                                asp-for="Filter.CompanyFilter"
+                                                asp-items="ViewBag.Companies">
+                                            <option value="">همه شرکت ها</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group col-md-2">
+                                    <label>انواع تجهیزات</label>
+                                    <div class="input-group">
+                                        <select class="form-control select2"
+                                                name="GearTypeFilter"
+                                                asp-for="Filter.GearTypeFilter"
+                                                asp-items="ViewBag.GearTypes">
+                                            <option value="">همه انواع تجهیزات</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                
+                                <div class="form-group col-md-3">
+                                    <label>نام تجهیزات</label>
+                                    <div class="input-group">
+                                        <input class="form-control" type="text" name="GearName" asp-for="Filter.GearName" placeholder="نام تجهیزات" />
+                                    </div>
+                                </div>
+
+                                <div class="col-sm-1 d-flex justify-content-center align-content-center flex-wrap">
+                                    <div class="">
+                                        <button style="margin-top:30px; border-radius:5px" class="alert-icon btn btn-success " type="submit"><p class="px-3 m-0">فیلتر</p></button>
+                                    </div>
+                                </div>
+
+
+                            </div>
+
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card-body pt-0">
+            <div class="table-responsive py-4" id="gearTableContainer">
+                <partial name="_GearTable" model="Model" />
+            </div>
+        </div>
+        <!-- /.table-responsive -->
+    </div>
+    <!-- /.portlet -->
+</div>
+
+
+
+
+<div id="generalmodal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">ثبت تجهیز</h4>
+                <button type="button" class="close btn-close rounded border" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="modalbody">
+
+                <partial name="_CreateGear" model="new CreateGearDto { }" />
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="checklistModal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="checklistModalTitle">مدیریت چک لیست‌های بازدید روزانه</h4>
+                <button type="button" class="close btn-close rounded border" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="checklistModalBody">
+                <!-- Content loaded via AJAX -->
+            </div>
+        </div>
+    </div>
+</div>
+
+@section script {
+
+    <script>
+        $(document).ready(function () {
+
+            $('.select2').select2();
+
+            $('select[class*="generalmodal"].select2').select2({
+                dropdownParent: $('#generalmodal')
+            });
+
+            // Handle pagination clicks via AJAX
+            $(document).on('click', '.page-link', function(e) {
+                e.preventDefault();
+                const href = $(this).attr('href');
+                const page = new URL(href, window.location.origin).searchParams.get('p') || "1";
+
+                $("#pageNumber").val(page);
+                refreshGearTable();
+            });
+        });
+
+        function createGear() {
+            $.get("@Url.Action("GetGearById", "Gear")", { gearId: 0 })
+                .done(function (res) {
+                    $("#modalbody").html(res);
+                    $("#generalmodal").modal('show');
+                });
+        }
+
+        function editGear(id) {
+            $.post("@Url.Action("GetGearById", "Gear")", { gearId: id })
+                .done(function (res) {
+                    $("#modalbody").html(res);
+                    $("#generalmodal").modal('show');
+                });
+        }
+
+        function refreshGearTable() {
+            var formData = $("#formFilter").serialize();
+
+            $.ajax({
+                url: "@Url.Action("GetGearTable", "Gear")",
+                type: "POST",
+                data: formData,
+                success: function(response) {
+                    $("#gearTableContainer").html(response);
+                },
+                error: function() {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'خطا',
+                        text: 'خطا در بارگذاری داده‌ها',
+                        confirmButtonText: 'باشه'
+                    });
+                }
+            });
+        }
+
+        function deleteGear(gearId, btn) {
+            Swal.fire({
+                title: 'تایید حذف',
+                text: 'آیا از حذف این تجهیز اطمینان دارید؟',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'بله، حذف شود',
+                cancelButtonText: 'لغو',
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: "@Url.Action("DeleteGearAjax", "Gear")",
+                        type: "POST",
+                        data: { gearId: gearId },
+                        success: function(response) {
+                            if (response.success) {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'موفقیت',
+                                    text: response.message,
+                                    timer: 2000,
+                                    timerProgressBar: true,
+                                    showConfirmButton: false
+                                });
+                                refreshGearTable();
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'خطا',
+                                    text: response.message,
+                                    confirmButtonText: 'باشه'
+                                });
+                            }
+                        },
+                        error: function() {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'خطا',
+                                text: 'خطایی رخ داد. لطفاً دوباره تلاش کنید',
+                                confirmButtonText: 'باشه'
+                            });
+                        }
+                    });
+                }
+            });
+        }
+
+        function openChecklistModal(gearId, gearName) {
+            $('#checklistModalTitle').text('مدیریت چک لیست‌های بازدید روزانه - تجهیز: ' + gearName);
+
+            $.ajax({
+                url: "@Url.Action("ManageChecklistsPartial", "GearDailyInspectionAssignment")",
+                type: "GET",
+                data: { gearId: gearId },
+                success: function(response) {
+                    $('#checklistModalBody').html(response);
+                    $('#checklistModal').modal('show');
+                },
+                error: function() {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'خطا',
+                        text: 'خطا در بارگذاری چک لیست‌ها',
+                        confirmButtonText: 'باشه'
+                    });
+                }
+            });
+        }
+    </script>
+}
+

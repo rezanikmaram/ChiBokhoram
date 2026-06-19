@@ -1,0 +1,50 @@
+@model CreateWarehouseReceiptOutboundDocumentDto
+@using Common.enumeration.Hirman
+
+<form onsubmit="return submitDocumentForm(this);" enctype="multipart/form-data">
+    <input type="hidden" asp-for="SeoWarehouseReceiptOutboundId" />
+
+    <div class="row gy-3">
+        <div class="form-group col-md-12">
+            <label>نوع سند</label>
+            <select class="form-control select2" asp-for="Type"
+                    asp-items="@Html.GetEnumSelectList<GoodsClearanceType>()" required>
+            </select>
+            <span asp-validation-for="Type" class="text-danger"></span>
+        </div>
+
+        <div class="form-group col-md-12">
+            <label>انتخاب فایل</label>
+            <input type="file" asp-for="FormFile" class="form-control rounded" required>
+            <span asp-validation-for="FormFile" class="text-danger"></span>
+        </div>
+
+        <div class="form-group col-md-12">
+            <label>توضیحات</label>
+            <input type="text" class="form-control" asp-for="Description"
+                   maxlength="300" />
+            <span asp-validation-for="Description" class="text-danger"></span>
+        </div>
+
+        <div class="form-group col-md-6">
+            <label>شماره</label>
+            <input type="text" class="form-control" asp-for="Number" />
+            <span asp-validation-for="Number" class="text-danger"></span>
+        </div>
+
+        <div class="form-group col-md-6">
+            <label>تاریخ سند</label>
+            <input type="text" class="form-control" asp-for="DateFa"
+                   id="documentDate" data-datepicker="true" autocomplete="off" required />
+            <span asp-validation-for="DateFa" class="text-danger"></span>
+        </div>
+    </div>
+</form>
+
+<script>
+    $(document).ready(function () {
+        if (typeof kamaDatepicker !== 'undefined') {
+            kamaDatepicker('documentDate', customOptions);
+        }
+    });
+</script>

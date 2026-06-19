@@ -1,0 +1,93 @@
+@model CreateSeoWarehouseReceiptOutboundProductDto
+ 
+
+<div class="col-lg-12">
+    <div class="card">
+        <div class="card-header pb-0 pt-2">
+            <div class="d-flex justify-content-between">
+                <h3 class="title">
+                    <i class="fas fa-archive"></i>  افزودن کالا
+                </h3>
+            </div>
+        </div>
+        <form onsubmit="return submitProductForm(this);">
+            <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="SeoWarehouseReceiptOutboundId" />
+            <div class="card-body">
+                <div class="form-body">
+                    <div class="row gy-3">
+                        <!-- First Row -->
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>محصول</label>
+                                <div class="input-group d-flex flex-nowrap">
+                                    <select class="form-control rounded select2 generalmodal" asp-for="SeoWarehouseReceiptProductId" asp-items="Model.SeoWarehouseReceiptProducts">
+                                        <option value="">انتخاب کنید</option>
+                                    </select>
+                                </div>
+                                <span asp-validation-for="SeoWarehouseReceiptProductId" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>تعداد</label>
+                                <div class="input-group">
+                                    <input type="number" asp-for="Count" class="form-control rounded" required>
+                                </div>
+                                <span asp-validation-for="Count" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>وزن خالص (کیلوگرم)</label>
+                                <div class="input-group">
+                                    <input type="number" step="0.001" asp-for="Weight" class="form-control rounded">
+                                </div>
+                                <span asp-validation-for="Weight" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>حجم (متر مکعب)</label>
+                                <div class="input-group">
+                                    <input type="number" step="0.001" asp-for="Volume" class="form-control rounded">
+                                </div>
+                                <span asp-validation-for="Volume" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+             
+                       
+                      
+                  
+                </div>
+            </div>
+            <div class="form-actions text-end m-4 mb-0">
+                <button type="button" class="btn btn-danger btn-round" data-bs-dismiss="modal">بازگشت</button>
+                <button type="submit" class="btn btn-info btn-round">
+                    <i class="icon-check"></i>
+                    ذخیره
+                    <div class="paper-ripple">
+                        <div class="paper-ripple__background"></div>
+                        <div class="paper-ripple__waves"></div></div>
+
+                </button>
+
+            </div>
+        </form>
+        <section class="fix"></section>
+    </div>
+</div>
+
+<script src="~/assets/js/validation/jquery.validate.min.js"></script>
+<script src="~/assets/js/validation/jquery.validate.unobtrusive.min.js"></script>
+
+<script>
+    $(document).ready(function () {
+        $('select[class*="generalmodal"].select2').select2({
+            dropdownParent: $('#generalmodal')
+        });
+    });
+</script>

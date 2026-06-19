@@ -1,0 +1,1086 @@
+@model WarehouseReceiptOutboundInfoDto
+@using Common.enumeration.Hirman
+@{
+	ViewData["Title"] = "پرونده گمرک";
+	Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+<div class="row">
+	<div class="card">
+		<div class="card-header pb-0 px-3">
+			<div class="d-flex justify-content-between align-items-center">
+				<h3 class="title">
+					<i class="icon-frane"></i>
+					<a asp-action="list"  ><i class="fa-solid fa-right-to-bracket me-2"></i></a>
+					پرونده گمرک
+				</h3>
+				<div class="d-flex align-items-center">
+					@* <a id="DeleteWRO" onclick="ShowQAlert(event,'DeleteWRO', 'حذف پروانه خروج کالا' , 'آیا از حذف مطمئن هستید');"
+					     asp-action="DeleteWRO"
+					   asp-route-wroId="@Model.Id" 
+					   class=" btn btn-danger">
+						<i class="icon-trash fa-flip-horizontal"></i> حذف
+					</a> *@
+
+				</div>
+			</div>
+			 
+		</div>
+		<div class="card-body pt-0 px-2">
+			<div class="bg-primary rounded-3 mt-4 p-3">
+				<div class="row gy-3 align-items-center">
+					<div class="col-1">
+						<img src="~/assets/images/GoodsClearance.png" alt="" class="img-fluid">
+					</div>
+					<div class="col-3">
+						<p class="fs-6 fw-bold">شماره پروانه : @(Model.CaseNumber ) </p>
+						<p class="fs-6 fw-bold">تاریخ : @Model.IssueDateFa</p>
+					</div>
+					<div class="col-3">
+						<p class="fs-6 fw-bold">شرکت: @Model.CompanyAndSwrNumber</p>
+						<p class="fs-6 fw-bold">نماینده قانونی: @Model.Agent</p>
+					</div>
+				<div class="col-3">
+					<p class="fs-6 fw-bold">مبدا: @Model.Origin</p>
+					<p class="fs-6 fw-bold"> مقصد: @Model.Destination</p>
+					<p class="fs-6 fw-bold">روش خروج: @Model.OutboundMethodTypeTitle</p>
+				</div>
+
+
+				@* white devider start *@
+					<div class="col-12 border-top border-white"></div>
+					@* white divider end *@
+
+
+					@* @if (User.IsInRole("admin") || User.IsInRole("adminOnePort")) *@
+
+					<div class="col-3">
+						<a class="btn btn-light w-100 py-3 fs-5" href="javascript:void(0)" onclick="loadSection('documents')">
+							<p><i class="fa-solid fa-file-lines fs-3  mb-2"></i></p>
+							مدیریت اسناد مرتبط
+							<span id="documents-badge" class="badge bg-danger ms-1" style="display:none">0</span>
+						</a>
+					</div>
+
+					<div class="col-3">
+						<a class="btn btn-light w-100 py-3 fs-5" href="javascript:void(0)" onclick="loadSection('loadingLicenses')">
+							<p><i class="fa-solid fa-certificate fs-3  mb-2"></i></p>
+							مجوزهای بارگیری
+							<span id="loadingLicenses-badge" class="badge bg-danger ms-1" style="display:none">0</span>
+						</a>
+					</div>
+
+					<div class="col-3">
+						<a class="btn btn-light w-100 py-3 fs-5" href="javascript:void(0)" onclick="loadSection('products')">
+							<p><i class="fa-solid fa-boxes-stacked fs-3  mb-2"></i></p>
+							مدیریت کالا
+							<span id="products-badge" class="badge bg-danger ms-1" style="display:none">0</span>
+						</a>
+					</div>
+
+					<div class="col-3">
+						<a class="btn btn-light w-100 py-3 fs-5" href="javascript:void(0)" onclick="loadSection('users')">
+							<p><i class="fa-solid fa-users fs-3  mb-2"></i></p>
+							مدیریت کاربران
+							<span id="users-badge" class="badge bg-danger ms-1" style="display:none">0</span>
+						</a>
+					</div>
+
+					<div class="col-3">
+						<a class="btn btn-light w-100 py-3 fs-5" href="javascript:void(0)" onclick="loadSection('trucks')">
+							<p><i class="fa-solid fa-truck fs-3  mb-2"></i></p>
+							کامیون ها
+							<span id="trucks-badge" class="badge bg-danger ms-1" style="display:none">0</span>
+						</a>
+					</div>
+
+					<div class="col-3">
+						<a class="btn btn-light w-100 py-3 fs-5" href="javascript:void(0)" onclick="loadSection('equipment')">
+							<p><i class="fa-solid fa-gear fs-3  mb-2"></i></p>
+							مدیریت تجهیزات
+							<span id="equipment-badge" class="badge bg-danger ms-1" style="display:none">0</span>
+						</a>
+					</div>
+
+				@if (Model.OutboundMethodType == OutboundMethodType.LoadToVessel)
+				{
+					<div class="col-3">
+						<a class="btn btn-light w-100 py-3 fs-5" href="javascript:void(0)" onclick="loadSection('voyages')">
+							<p><i class="fa-solid fa-anchor fs-3  mb-2"></i></p>
+							مدیریت شناور
+							<span id="voyages-badge" class="badge bg-danger ms-1" style="display:none">0</span>
+						</a>
+					</div>
+
+					<div class="col-3">
+						<a class="btn btn-light w-100 py-3 fs-5" href="javascript:void(0)" onclick="loadSection('compactExport')">
+							<p><i class="fa-solid fa-ship fs-3  mb-2"></i></p>
+							بارگیری به شناور
+						</a>
+					</div>
+					
+					<div class="col-3">
+						<a class="btn btn-light w-100 py-3 fs-5" href="javascript:void(0)" onclick="loadSection('counterDetail')">
+							<p><i class="fa-solid fa-clipboard-list fs-3  mb-2"></i></p>
+							جزئیات تالی به دریا
+						</a>
+					</div>
+				}
+				@if (Model.OutboundMethodType == OutboundMethodType.GateExit)
+				{
+					<div class="col-3">
+						<a class="btn btn-light w-100 py-3 fs-5" href="javascript:void(0)" onclick="loadSection('outboundTalies')">
+							<p><i class="fa-solid fa-dolly fs-3  mb-2"></i></p>
+							بارگیری های ثبت شده
+							<span id="outboundTalies-badge" class="badge bg-danger ms-1" style="display:none">0</span>
+						</a>
+					</div>
+				}
+
+			</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+@* Dynamic Content Section *@
+<div id="dynamic-content-section" class="mt-4" style="display:none;">
+	<div class="card">
+		<div class="card-header d-flex justify-content-between align-items-center">
+			<h4 id="section-title" class="mb-0"></h4>
+			<button type="button" class="btn btn-secondary btn-sm" onclick="closeSection()">
+				<i class="fa-solid fa-times"></i> بستن
+			</button>
+		</div>
+		<div class="card-body pt-0" id="section-content">
+			@* Content will be loaded here via AJAX *@
+		</div>
+	</div>
+</div>
+
+@* General Modal for Forms *@
+<div id="generalModalContent"></div>
+
+@* Modal Container *@
+<div id="generalModal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="modalTitle">Modal Title</h4>
+                <button type="button" class="close btn-close rounded border" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                @* Content will be loaded here *@
+            </div>
+            <div class="modal-footer border-0" id="modalFooter">
+                @* Footer buttons will be loaded here or use defaults *@
+            </div>
+        </div>
+    </div>
+</div>
+
+
+ 
+@* Counter Gear Modal Container *@
+<div id="CounterGearModalId"></div>
+
+@* Counter File Modal Container *@
+<div id="CounterFileModalId"></div>
+
+@* Validation Status Modal *@
+<div class="modal fade" id="counterValidationStatusModal" tabindex="-1" aria-labelledby="counterValidationStatusModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="counterValidationStatusModalLabel">توضیحات تغییر وضعیت</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="counterValidationStatusDescription" class="form-label">لطفاً دلیل تغییر وضعیت را وارد کنید:</label>
+                    <textarea class="form-control" id="counterValidationStatusDescription" rows="3" placeholder="توضیحات..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">انصراف</button>
+                <button type="button" class="btn btn-primary" id="counterConfirmStatusChange">تأیید</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* Validation History Modal *@
+<div class="modal fade" id="counterValidationHistoryModal" tabindex="-1" aria-labelledby="counterValidationHistoryModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="counterValidationHistoryModalLabel">تاریخچه تغییر وضعیت تأیید</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="counterValidationHistoryContent">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">بستن</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* Loading Spinner *@
+<div id="loading-spinner" class="text-center py-5" style="display:none;">
+	<div class="spinner-border text-primary" role="status">
+		<span class="visually-hidden">در حال بارگذاری...</span>
+	</div>
+	<p class="mt-2">در حال بارگذاری...</p>
+</div>
+
+@section script {
+	<script>
+		const wroId = '@Model.Id';
+		let currentSection = null;
+
+		$(document).ready(function () {
+			// Load initial counts for badges
+			loadBadgeCounts();
+		});
+
+		// Load badge counts for all sections
+		function loadBadgeCounts() {
+			$.get('@Url.Action("GetSectionCounts", "WarehouseReceiptOutbound")', { wroId: wroId })
+				.done(function (data) {
+					if (data.success) {
+						updateBadge('documents', data.counts.documents);
+						updateBadge('loadingLicenses', data.counts.loadingLicenses);
+						updateBadge('products', data.counts.products);
+						updateBadge('users', data.counts.users);
+						updateBadge('trucks', data.counts.trucks);
+						updateBadge('outboundTalies', data.counts.outboundTalies);
+						updateBadge('voyages', data.counts.voyages);
+						updateBadge('equipment', data.counts.equipment);
+					}
+				});
+		}
+
+		function updateBadge(section, count) {
+			const badge = $(`#${section}-badge`);
+			if (count > 0) {
+				badge.text(count).show();
+			} else {
+				badge.hide();
+			}
+		}
+
+		// Load section content via AJAX
+		function loadSection(sectionName) {
+			currentSection = sectionName;
+			
+			// Show loading
+			$('#section-content').html($('#loading-spinner').html());
+			$('#dynamic-content-section').show();
+			
+			// Scroll to section
+			$('html, body').animate({
+				scrollTop: $('#dynamic-content-section').offset().top - 100
+			}, 300);
+
+			// Load content based on section
+			let url = '';
+			let title = '';
+			
+			switch(sectionName) {
+				case 'documents':
+					url = '@Url.Action("GetDocumentsPartial", "WarehouseReceiptOutbound")';
+					title = 'مدیریت اسناد مرتبط';
+					break;
+				case 'loadingLicenses':
+					url = '@Url.Action("GetLoadingLicensesPartial", "WarehouseReceiptOutbound")';
+					title = 'مجوزهای بارگیری';
+					break;
+				case 'products':
+					url = '@Url.Action("GetProductsPartial", "WarehouseReceiptOutbound")';
+					title = 'مدیریت کالا';
+					break;
+				case 'users':
+					url = '@Url.Action("GetUsersPartial", "WarehouseReceiptOutbound")';
+					title = 'مدیریت کاربران';
+					break;
+				case 'trucks':
+					url = '@Url.Action("GetTrucksPartial", "WarehouseReceiptOutbound")';
+					title = 'کامیون ها';
+					break;
+				case 'outboundTalies':
+					url = '@Url.Action("GetOutboundTaliesPartial", "WarehouseReceiptOutbound")';
+					title = 'بارگیری های ثبت شده';
+					break;
+				case 'compactExport':
+					url = '@Url.Action("GetCompactExportPartial", "WarehouseReceiptOutbound")';
+					title = 'بارگیری به شناور';
+					break;
+				case 'voyages':
+					url = '@Url.Action("GetVoyagesPartial", "WarehouseReceiptOutbound")';
+					title = 'مدیریت شناور';
+					break;
+				case 'equipment':
+					url = '@Url.Action("GetEquipmentPartial", "WarehouseReceiptOutbound")';
+					title = 'مدیریت تجهیزات';
+					break;
+				case 'counterDetail':
+					url = '@Url.Action("GetCounterDetailPartial", "WarehouseReceiptOutbound")';
+					title = 'جزئیات تالی';
+					break;
+			}
+
+			$('#section-title').text(title);
+
+			$.get(url, { wroId: wroId })
+				.done(function (html) {
+					$('#section-content').html(html);
+					// Initialize any plugins in the loaded content
+					initializePlugins();
+				})
+				.fail(function () {
+					$('#section-content').html('<div class="alert alert-danger">خطا در بارگذاری اطلاعات</div>');
+				});
+		}
+
+		function closeSection() {
+			$('#dynamic-content-section').hide();
+			currentSection = null;
+		}
+
+		function initializePlugins() {
+			// Initialize select2
+			$('.select2').select2();
+			
+			// Initialize datepickers
+			if (typeof kamaDatepicker !== 'undefined') {
+				$('[data-datepicker]').each(function () {
+					kamaDatepicker($(this).attr('id'), customOptions);
+				});
+			}
+			
+			// Initialize tooltips
+			$('[data-bs-toggle="tooltip"]').tooltip();
+		}
+
+		// ==================== MODAL FUNCTIONS ====================
+
+		function showModal(title, content) {
+			$('#modalTitle').text(title);
+			$('#modalBody').html(content);
+			
+			// Check if content has its own footer, if not add default buttons
+			const hasFooter = content.includes('modal-footer');
+			if (!hasFooter) {
+				$('#modalFooter').html(`
+					<button type="button" class="btn btn-danger" data-bs-dismiss="modal">انصراف</button>
+					<button type="button" class="btn btn-success" onclick="submitModalForm()">ذخیره</button>
+				`);
+			} else {
+				$('#modalFooter').html('');
+			}
+			
+			$('#generalModal').modal('show');
+			
+			// Initialize plugins in modal
+			setTimeout(function() {
+				$('#generalModal .select2').select2({
+					dropdownParent: $('#generalModal')
+				});
+			}, 100);
+		}
+
+		function closeModal() {
+			$('#generalModal').modal('hide');
+		}
+
+		function submitModalForm() {
+			const form = $('#modalBody form');
+			if (form.length > 0) {
+				// Trigger form submission based on form's onsubmit handler
+				const onsubmit = form[0].onsubmit;
+				if (onsubmit) {
+					onsubmit.call(form[0], new Event('submit'));
+				} else {
+					// Default form submission if no handler
+					form.submit();
+				}
+			}
+		}
+
+		// ==================== DOCUMENT FUNCTIONS ====================
+
+		function showAddDocumentModal() {
+			$.get('@Url.Action("GetDocumentFormPartial", "WarehouseReceiptOutbound")', { wroId: wroId })
+				.done(function (html) {
+					showModal('ایجاد سند جدید', html);
+				});
+		}
+
+		function submitDocumentForm(form) {
+			var formData = new FormData(form);
+			
+			$.ajax({
+				url: '@Url.Action("UploadDocAjax", "WarehouseReceiptOutbound")',
+				type: 'POST',
+				data: formData,
+				processData: false,
+				contentType: false,
+				success: function (response) {
+					if (response.success) {
+						closeModal();
+						showAlert2('سند با موفقیت ثبت شد', 0);
+						refreshCurrentSection();
+						loadBadgeCounts();
+					} else {
+						showAlert2(response.message || 'خطا در ثبت سند', 1);
+					}
+				},
+				error: function () {
+					showAlert2('خطا در ارتباط با سرور', 1);
+				}
+			});
+			
+			return false;
+		}
+
+		function downloadDocument(docId) {
+			window.location.href = '@Url.Action("GetWroDocFileById", "WarehouseReceiptOutbound")?docId=' + docId;
+		}
+
+		async function removeDocument(docId) {
+			if (await ShowQAlert2(event, 'آیا از حذف این سند مطمئن هستید؟')) {
+				$.post('@Url.Action("RemoveWroDocFileByIdAjax", "WarehouseReceiptOutbound")', { docId: docId, wroId: wroId })
+					.done(function (response) {
+						if (response.success) {
+							showAlert2('سند با موفقیت حذف شد', 0);
+							refreshCurrentSection();
+							loadBadgeCounts();
+						} else {
+							showAlert2(response.message || 'خطا در حذف سند', 1);
+						}
+					});
+			}
+		}
+
+		// ==================== LOADING LICENSE FUNCTIONS ====================
+
+		function showAddLoadingLicenseModal() {
+			$.get('@Url.Action("GetLoadingLicenseFormPartial", "WarehouseReceiptOutbound")', { wroId: wroId })
+				.done(function (html) {
+					showModal('ثبت مجوز بارگیری', html);
+				});
+		}
+
+		function submitLoadingLicenseForm(form) {
+			var formData = $(form).serialize();
+			
+			$.post('@Url.Action("CreateLoadingLicenseAjax", "WarehouseReceiptOutbound")', formData)
+				.done(function (response) {
+					if (response.success) {
+						closeModal();
+						showAlert2('مجوز بارگیری با موفقیت ثبت شد', 0);
+						refreshCurrentSection();
+						loadBadgeCounts();
+					} else {
+						showAlert2(response.message || 'خطا در ثبت مجوز', 1);
+					}
+				})
+				.fail(function () {
+					showAlert2('خطا در ارتباط با سرور', 1);
+				});
+			
+			return false;
+		}
+
+		// ==================== PRODUCT FUNCTIONS ====================
+
+		function showAddProductModal() {
+			$.get('@Url.Action("GetProductFormPartial", "WarehouseReceiptOutbound")', { warehouseReceiptOutboundId: wroId })
+				.done(function (html) {
+					showModal('افزودن کالا جهت خروج', html);
+				});
+		}
+
+		function showAddMultiProductModal() {
+			$.get('@Url.Action("GetProductMultiFormPartial", "WarehouseReceiptOutbound")', { warehouseReceiptOutboundId: wroId })
+				.done(function (html) {
+					showModal('افزودن چند کالا جهت خروج', html);
+				});
+		}
+
+		function editProduct(productId) {
+			$.get('@Url.Action("GetWarehouseReceiptOutboundProductById", "WarehouseReceiptOutbound")', { warehouseReceiptOutboudnProductId: productId })
+				.done(function (html) {
+					showModal('ویرایش کالا', html);
+				});
+		}
+
+		function submitProductForm(form) {
+			var formData = $(form).serialize();
+			
+			$.post('@Url.Action("CreateWarehouseReceiptOutboundProductAjax", "WarehouseReceiptOutbound")', formData)
+				.done(function (response) {
+					if (response.success) {
+						closeModal();
+						showAlert2('کالا با موفقیت ثبت شد', 0);
+						refreshCurrentSection();
+						loadBadgeCounts();
+					} else {
+						showAlert2(response.message || 'خطا در ثبت کالا', 1);
+					}
+				})
+				.fail(function () {
+					showAlert2('خطا در ارتباط با سرور', 1);
+				});
+			
+			return false;
+		}
+
+
+		function submitMultiProductForm(form, event) {
+			event.preventDefault();
+			var formData = $(form).serialize();
+
+			var selectedIds = [];
+			$("#multiProductModalContent input:checkbox.multiProduct-checkbox:checked").each(function () {
+				selectedIds.push($(this).val());
+			});
+
+			if (!selectedIds || selectedIds.length === 0) {
+				showAlert2("هیچ کالایی انتخاب نشده است",1);
+				return;
+			}
+			 
+			$.post('@Url.Action("CreateWarehouseReceiptOutboundMultiProductAjax", "WarehouseReceiptOutbound")', formData)
+				.done(function (response) {
+					if (response.success) {
+						closeModal();
+						showAlert2('کالا با موفقیت ثبت شد', 0);
+						refreshCurrentSection();
+						loadBadgeCounts();
+					} else {
+						showAlert2(response.message || 'خطا در ثبت کالا', 1);
+					}
+				})
+				.fail(function () {
+					showAlert2('خطا در ارتباط با سرور', 1);
+				});
+			
+			return false;
+		}
+
+		async function deleteProduct(productId) {
+			if (await ShowQAlert2(event, 'آیا از حذف این کالا مطمئن هستید؟')) {
+				$.post('@Url.Action("DeleteProductAjax", "WarehouseReceiptOutbound")', { productId: productId })
+					.done(function (response) {
+						if (response.success) {
+							showAlert2('کالا با موفقیت حذف شد', 0);
+							refreshCurrentSection();
+							loadBadgeCounts();
+						} else {
+							showAlert2(response.message || 'خطا در حذف کالا', 1);
+						}
+					})
+					.fail(function () {
+						showAlert2('خطا در ارتباط با سرور', 1);
+					});
+			}
+		}
+
+		// ==================== TRUCK FUNCTIONS ====================
+
+		function showAddTruckModal() {
+			$.get('@Url.Action("GetTruckFormPartial", "WarehouseReceiptOutbound")', { wroId: wroId })
+				.done(function (html) {
+					showModal('ثبت کامیون جدید', html);
+				});
+		}
+
+		function editTruck(truckId) {
+			$.get('@Url.Action("GetTruckById", "WarehouseReceiptOutbound")', { truckId: truckId })
+				.done(function (html) {
+					showModal('ویرایش کامیون', html);
+				});
+		}
+
+		function submitTruckForm(form) {
+			var formData = $(form).serialize();
+			
+			$.post('@Url.Action("AddOrUpdateTruckAjax", "WarehouseReceiptOutbound")', formData)
+				.done(function (response) {
+					if (response.success) {
+						closeModal();
+						showAlert2('کامیون با موفقیت ثبت شد', 0);
+						refreshCurrentSection();
+						loadBadgeCounts();
+					} else {
+						showAlert2(response.message || 'خطا در ثبت کامیون', 1);
+					}
+				})
+				.fail(function () {
+					showAlert2('خطا در ارتباط با سرور', 1);
+				});
+			
+			return false;
+		}
+
+		async function deleteTruck(truckId) {
+			if (await ShowQAlert2(event, 'آیا از حذف این کامیون مطمئن هستید؟')) {
+				$.post('@Url.Action("DeleteTruckAjax", "WarehouseReceiptOutbound")', { truckId: truckId, wroId: wroId })
+					.done(function (response) {
+						if (response.success) {
+							showAlert2('کامیون با موفقیت حذف شد', 0);
+							refreshCurrentSection();
+							loadBadgeCounts();
+						} else {
+							showAlert2(response.message || 'خطا در حذف کامیون', 1);
+						}
+					});
+			}
+		}
+
+		// ==================== USER FUNCTIONS ====================
+
+		function setUsersForWro() {
+			var ids = "";
+			$("input:checkbox[name='availableUserId']:checked").each(function () {
+				if (ids) ids += ',' + $(this).val();
+				else ids = $(this).val();
+			});
+
+			if (!ids) {
+				showAlert2('کاربری انتخاب نشده است', 1);
+				return;
+			}
+
+			$.post('@Url.Action("SetUserForWroAjax", "WarehouseReceiptOutbound")', { 
+				ids: ids, 
+				warehouseReceiptOutboundId: wroId 
+			})
+				.done(function (response) {
+					if (response.success) {
+						showAlert2('کاربران با موفقیت اضافه شدند', 0);
+						refreshCurrentSection();
+						loadBadgeCounts();
+					} else {
+						showAlert2(response.message || 'خطا در ثبت کاربران', 1);
+					}
+				});
+		}
+
+		function removeUsersFromWro() {
+			var ids = "";
+			$("input:checkbox[name='selectedUserId']:checked").each(function () {
+				if (ids) ids += ',' + $(this).val();
+				else ids = $(this).val();
+			});
+
+			if (!ids) {
+				showAlert2('کاربری انتخاب نشده است', 1);
+				return;
+			}
+
+			$.post('@Url.Action("RemoveUserFromWroAjax", "WarehouseReceiptOutbound")', { 
+				ids: ids, 
+				warehouseReceiptOutboundId: wroId 
+			})
+				.done(function (response) {
+					if (response.success) {
+						showAlert2('کاربران با موفقیت حذف شدند', 0);
+						refreshCurrentSection();
+						loadBadgeCounts();
+					} else {
+						showAlert2(response.message || 'خطا در حذف کاربران', 1);
+					}
+				});
+		}
+
+		function filterUsers() {
+			var search = $('#userSearch').val();
+			var userType = $('#userTypeFilter').val();
+			
+			$.get('@Url.Action("GetUsersPartial", "WarehouseReceiptOutbound")', { 
+				wroId: wroId,
+				search: search,
+				userType: userType
+			})
+				.done(function (html) {
+					$('#section-content').html(html);
+					initializePlugins();
+				});
+		}
+
+		// ==================== VOYAGE FUNCTIONS ====================
+
+		function setVoyagesForWro() {
+			var ids = "";
+			$("input:checkbox[name='availableVoyageId']:checked").each(function () {
+				if (ids) ids += ',' + $(this).val();
+				else ids = $(this).val();
+			});
+
+			if (!ids) {
+				showAlert2('شناوری انتخاب نشده است', 1);
+				return;
+			}
+
+			$.post('@Url.Action("SetVoyageForWroAjax", "WarehouseReceiptOutbound")', { 
+				ids: ids, 
+				warehouseReceiptOutboundId: wroId 
+			})
+				.done(function (response) {
+					if (response.success) {
+						showAlert2('شناورها با موفقیت اضافه شدند', 0);
+						refreshCurrentSection();
+						loadBadgeCounts();
+					} else {
+						showAlert2(response.message || 'خطا در ثبت شناورها', 1);
+					}
+				});
+		}
+
+		function removeVoyagesFromWro() {
+			var ids = "";
+			$("input:checkbox[name='selectedVoyageId']:checked").each(function () {
+				if (ids) ids += ',' + $(this).val();
+				else ids = $(this).val();
+			});
+
+			if (!ids) {
+				showAlert2('شناوری انتخاب نشده است', 1);
+				return;
+			}
+
+			$.post('@Url.Action("RemoveVoyageFromWroAjax", "WarehouseReceiptOutbound")', { 
+				ids: ids, 
+				warehouseReceiptOutboundId: wroId 
+			})
+				.done(function (response) {
+					if (response.success) {
+						showAlert2('شناورها با موفقیت حذف شدند', 0);
+						refreshCurrentSection();
+						loadBadgeCounts();
+					} else {
+						showAlert2(response.message || 'خطا در حذف شناورها', 1);
+					}
+				});
+		}
+
+		function activationVoyage(voyageId) {
+			$.post('@Url.Action("ActivationVoyageAjax", "WarehouseReceiptOutbound")', { 
+				warehouseReceiptOutboundId: wroId,
+				voyageId: voyageId
+			})
+				.done(function (response) {
+					if (response.success) {
+						showAlert2('وضعیت شناور تغییر کرد', 0);
+						refreshCurrentSection();
+					} else {
+						showAlert2(response.message || 'خطا در تغییر وضعیت', 1);
+					}
+				});
+		}
+
+		// ==================== EQUIPMENT FUNCTIONS ====================
+
+		function setEquipmentForWro() {
+			var ids = "";
+			$("input:checkbox[name='availableEquipmentId']:checked").each(function () {
+				if (ids) ids += ',' + $(this).val();
+				else ids = $(this).val();
+			});
+
+			if (!ids) {
+				showAlert2('تجهیزی انتخاب نشده است', 1);
+				return;
+			}
+
+			// Show side selection modal
+			showEquipmentSideModal(ids);
+		}
+
+		function showEquipmentSideModal(ids) {
+			var html = `
+				<div class="form-group mt-3">
+					<p>لطفاً مشخص کنید که تجهیزات انتخاب شده در کدام سمت‌ها استفاده شوند:</p>
+					<div class="input-group activeor mb-2">
+						<label>
+							<input type="checkbox" class="normal" id="modalWaterfrontSide" checked>
+							سمت اسکله
+						</label>
+					</div>
+					<div class="input-group activeor">
+						<label>
+							<input type="checkbox" class="normal" id="modalPortSide" checked>
+							سمت محوطه
+						</label>
+					</div>
+				</div>
+				<div class="modal-footer px-0 border-0">
+					<button type="button" class="btn btn-primary" onclick="confirmEquipmentAssignment('${ids}')">تایید و تخصیص</button>
+				</div>
+			`;
+			showModal('تخصیص تجهیزات', html);
+		}
+
+		function confirmEquipmentAssignment(ids) {
+			var waterfrontSide = $("#modalWaterfrontSide").is(':checked');
+			var portSide = $("#modalPortSide").is(':checked');
+
+			$.post('@Url.Action("SetEquipmentForWroAjax", "WarehouseReceiptOutbound")', { 
+				ids: ids, 
+				warehouseReceiptOutboundId: wroId,
+				usedInWaterfrontSide: waterfrontSide,
+				usedInPortSide: portSide
+			})
+				.done(function (response) {
+					if (response.success) {
+						closeModal();
+						showAlert2('تجهیزات با موفقیت اضافه شدند', 0);
+						refreshCurrentSection();
+						loadBadgeCounts();
+					} else {
+						showAlert2(response.message || 'خطا در ثبت تجهیزات', 1);
+					}
+				});
+		}
+
+		function removeEquipmentFromWro() {
+			var ids = "";
+			$("input:checkbox[name='selectedEquipmentId']:checked").each(function () {
+				if (ids) ids += ',' + $(this).val();
+				else ids = $(this).val();
+			});
+
+			if (!ids) {
+				showAlert2('تجهیزی انتخاب نشده است', 1);
+				return;
+			}
+
+			$.post('@Url.Action("RemoveEquipmentFromWroAjax", "WarehouseReceiptOutbound")', { 
+				ids: ids, 
+				warehouseReceiptOutboundId: wroId 
+			})
+				.done(function (response) {
+					if (response.success) {
+						showAlert2('تجهیزات با موفقیت حذف شدند', 0);
+						refreshCurrentSection();
+						loadBadgeCounts();
+					} else {
+						showAlert2(response.message || 'خطا در حذف تجهیزات', 1);
+					}
+				});
+		}
+
+		function activationEquipment(equipmentId) {
+			$.post('@Url.Action("ActivationWroEquipmentAjax", "WarehouseReceiptOutbound")', { 
+				warehouseReceiptOutboundId: wroId,
+				equipmentId: equipmentId
+			})
+				.done(function (response) {
+					if (response.success) {
+						showAlert2('وضعیت تجهیز تغییر کرد', 0);
+						refreshCurrentSection();
+					} else {
+						showAlert2(response.message || 'خطا در تغییر وضعیت', 1);
+					}
+				});
+		}
+
+		function updateEquipmentSide(equipmentId, side, isChecked) {
+			$.post('@Url.Action("UpdateEquipmentSide", "WarehouseReceiptOutbound")', {
+				warehouseReceiptOutboundId: wroId,
+				equipmentId: equipmentId,
+				side: side,
+				isChecked: isChecked
+			})
+				.done(function (response) {
+					if (!response.success) {
+						showAlert2('خطا در به‌روزرسانی وضعیت', 1);
+						// Revert checkbox
+						$(`#${side}${equipmentId}`).prop('checked', !isChecked);
+					}
+				});
+		}
+
+		function filterEquipment() {
+			var search = $('#equipmentSearch').val();
+			var equipmentType = $('#equipmentTypeFilter').val();
+			
+			$.get('@Url.Action("GetEquipmentPartial", "WarehouseReceiptOutbound")', { 
+				wroId: wroId,
+				search: search,
+				equipmentType: equipmentType
+			})
+				.done(function (html) {
+					$('#section-content').html(html);
+					initializePlugins();
+				});
+		}
+
+		// ==================== COMPACT EXPORT FUNCTIONS ====================
+
+		function loadCompactExportPage(page) {
+			$.get('@Url.Action("GetCompactExportPartial", "WarehouseReceiptOutbound")', { 
+				wroId: wroId,
+				page: page
+			})
+				.done(function (html) {
+					$('#section-content').html(html);
+					initializePlugins();
+				});
+		}
+
+		// ==================== COUNTER FILE MODAL ====================
+
+		function ShowCounterFileModal(counterId) {
+			if (counterId == null) return;
+
+			$.post('@Url.Action("GetCounterFiles", "WarehouseReceiptOutbound")', { counterId })
+				.done(function (res) {
+					$("#CounterFileModalId").html(res);
+					$("#CounterFileModal").modal('show');
+				}).fail(function (xhr) {
+					var err = JSON.parse(xhr.responseText);
+					console.error("Error:", JSON.stringify(err));
+				});
+		}
+
+		// ==================== COUNTER GEAR MODAL ====================
+
+		function ShowCounterGearModal(counterId) {
+			if (counterId == null) return;
+
+			$.post('@Url.Action("GetCounterGears", "WarehouseReceiptOutbound")', { counterId })
+				.done(function (res) {
+					$("#CounterGearModalId").html(res);
+					$("#CounterGearModal").modal('show');
+				}).fail(function (xhr) {
+					var err = JSON.parse(xhr.responseText);
+					console.error("Error:", JSON.stringify(err));
+				});
+		}
+
+		// ==================== CHECKLIST MODAL ====================
+
+		function ShowCounterProductFactorModal(counterProductId) {
+			if (counterProductId == null) return;
+
+			$.post('@Url.Action("GetCheckListFactorsPartial", "WarehouseReceiptOutbound")', { counterProductId })
+				.done(function (html) {
+					$('#modalTitle').text('چک لیست');
+					$('#modalBody').html(html);
+					$('#modalFooter').html('<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">بستن</button>');
+					$('#generalModal').modal('show');
+				}).fail(function () {
+					showAlert2('خطا در بارگذاری چک لیست', 1);
+				});
+		}
+
+		// ==================== OUTBOUND TALIES FUNCTIONS ====================
+
+		function refreshCurrentSection() {
+			if (currentSection) {
+				loadSection(currentSection);
+			}
+		}
+
+		// Select all functionality
+		$(document).on('click', '#selectAllAvailable', function () {
+			$('input[name="availableUserId"], input[name="availableVoyageId"], input[name="availableEquipmentId"]').prop('checked', this.checked);
+		});
+
+		$(document).on('click', '#selectAllSelected', function () {
+			$('input[name="selectedUserId"], input[name="selectedVoyageId"], input[name="selectedEquipmentId"]').prop('checked', this.checked);
+		});
+
+		// ==================== COUNTER VALIDATION STATUS FUNCTIONS ====================
+
+		// Handle confirm button click for validation status change
+		$('#counterConfirmStatusChange').on('click', function() {
+			var counterId = $(this).data('counterId');
+			var newStatus = $(this).data('newStatus');
+			var description = $('#counterValidationStatusDescription').val();
+
+			$('#counterValidationStatusModal').modal('hide');
+
+			$.post("@Url.Action("ChangeCounterValidationStatus", "WarehouseReceiptOutbound")", {
+				counterId: counterId,
+				validationStatus: newStatus,
+				description: description
+			})
+			.done(function (res) {
+				if (res.success) {
+					refreshCurrentSection();
+				} else {
+					alert('خطا در به‌روزرسانی وضعیت: ' + (res.message || 'خطای نامشخص'));
+				}
+			})
+			.fail(function (xhr, status, error) {
+				alert('خطا در ارتباط با سرور: ' + error);
+			});
+		});
+
+		function changeCounterValidationStatus(counterId, newStatus) {
+			if (counterId == null) return;
+			$('#counterConfirmStatusChange').data('counterId', counterId);
+			$('#counterConfirmStatusChange').data('newStatus', newStatus);
+			$('#counterValidationStatusDescription').val('');
+			$('#counterValidationStatusModal').modal('show');
+		}
+
+		function showCounterValidationHistory(counterId) {
+			var historyData = window.__counterValidationHistoryData || [];
+
+			// Filter history for this specific counter
+			var counterHistory = historyData.filter(function(h) {
+				return (h && h.counterId && h.counterId.toLowerCase() === counterId.toLowerCase()) ||
+					   (h && h.CounterId && h.CounterId.toLowerCase() === counterId.toLowerCase());
+			});
+
+			// Build the history table HTML
+			var html = '';
+			if (!counterHistory || counterHistory.length === 0) {
+				html = '<div class="alert alert-info text-center">تاریخچه‌ای برای این بارگیری یافت نشد.</div>';
+				html += '<div class="text-center text-muted small mt-2">برای مشاهده تاریخچه، ابتدا وضعیت تأیید را تغییر دهید.</div>';
+			} else {
+				html = '<div class="table-responsive"><table class="table table-striped table-hover">';
+				html += '<thead class="table-dark"><tr>';
+				html += '<th>تاریخ</th>';
+				html += '<th>کاربر</th>';
+				html += '<th>وضعیت قبلی</th>';
+				html += '<th>وضعیت جدید</th>';
+				html += '<th>توضیحات</th>';
+				html += '</tr></thead><tbody>';
+
+				counterHistory.forEach(function(h) {
+					var oldStatus = h.oldStatus !== undefined ? h.oldStatus : h.OldStatus;
+					var newStatus = h.newStatus !== undefined ? h.newStatus : h.NewStatus;
+					var changedDate = h.changedDateFa !== undefined ? h.changedDateFa : h.ChangedDateFa;
+					var description = h.description !== undefined ? h.description : h.Description;
+					var changedByUser = h.changedByUserFullName !== undefined ? h.changedByUserFullName : h.ChangedByUserFullName;
+
+					var oldStatusText = oldStatus === 0 ? "معتبر" : "غیرمعتبر";
+					var newStatusText = newStatus === 0 ? "معتبر" : "غیرمعتبر";
+					var oldStatusClass = oldStatus === 0 ? "text-success" : "text-danger";
+					var newStatusClass = newStatus === 0 ? "text-success" : "text-danger";
+
+					html += '<tr>';
+					html += '<td>' + changedDate + '</td>';
+					html += '<td>' + changedByUser + '</td>';
+					html += '<td class="' + oldStatusClass + ' fw-bold">' + oldStatusText + '</td>';
+					html += '<td class="' + newStatusClass + ' fw-bold">' + newStatusText + '</td>';
+					html += '<td>' + (description || '-') + '</td>';
+					html += '</tr>';
+				});
+
+				html += '</tbody></table></div>';
+			}
+
+			$('#counterValidationHistoryContent').html(html);
+			$('#counterValidationHistoryModal').modal('show');
+		}
+	</script>
+}

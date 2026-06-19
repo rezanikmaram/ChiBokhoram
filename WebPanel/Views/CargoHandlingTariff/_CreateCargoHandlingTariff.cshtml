@@ -1,0 +1,142 @@
+﻿@model CreateCargoHandlingTariffPageDto
+
+
+<input asp-for="CreateCargoHandling.Id" type="hidden" />
+<div class="card-body p-0">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="form-body">
+                <div class="row gy-3">
+
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>نام زیر گروه</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control rounded" asp-for="CreateCargoHandling.Title">
+                                <span asp-validation-for="CreateCargoHandling.Title" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>گروه</label>
+                            <div class="input-group">
+                                <select class="form-control select2 generalmodal" asp-for="CreateCargoHandling.GeneralCargoProductType"
+                                        asp-items="Html.GetEnumSelectList<GeneralCargoProductType>()">
+                                    <option value="">انتخاب کنید</option>
+                                </select>
+                                <span asp-validation-for="CreateCargoHandling.GeneralCargoProductType" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3  align-content-end">
+                        <div class="form-check form-switch">
+                            <input type="checkbox" asp-for="CreateCargoHandling.ShowInProduct" class="form-check-input" role="switch" />
+                            <label class="form-check-label ms-2"> نمایش در مدیریت کالا   </label>
+                            <span asp-validation-for="CreateCargoHandling.ShowInProduct" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-3 align-content-end">
+                        <div class="form-check form-switch">
+                            <input type="checkbox" asp-for="CreateCargoHandling.ShowInGeneralCargoProduct" class="form-check-input" role="switch" />
+                            <label class="form-check-label ms-2"> نمایش در تعرفه باربری  </label>
+                            <span asp-validation-for="CreateCargoHandling.ShowInGeneralCargoProduct" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6 align-content-end">
+                        <div class="form-check form-switch">
+                            <input type="checkbox" asp-for="CreateCargoHandling.ShowInWarehouseProduct" class="form-check-input" role="switch" />
+                            <label class="form-check-label ms-2">نمایش در تعرفه انبارداری</label>
+                            <span asp-validation-for="CreateCargoHandling.ShowInWarehouseProduct" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label>حداقل تناژ</label>
+                        <div class="input-group">
+                            <price-input asp-for="CreateCargoHandling.MinWeightTon"></price-input>
+                            <span asp-validation-for="CreateCargoHandling.MinWeightTon" class="w-100 text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <label> حداکثر تناژ</label>
+                        <div class="input-group">
+                            <price-input asp-for="CreateCargoHandling.MaxWeightTon"></price-input>
+                            <span asp-validation-for="CreateCargoHandling.MaxWeightTon" class="w-100 text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label> اولویت  </label>
+                        <div class="input-group ">
+                            <input type="number" min="0" asp-for="CreateCargoHandling.Priority" class="form-control" />
+                            <span asp-validation-for="CreateCargoHandling.Priority" class="w-100 text-danger"></span>
+                        </div>
+                    </div>
+
+                </div>
+ 
+
+                <div class="row gy-4 mt-1">
+                    <div class="col-md-12">
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered table-hover table-striped cu-table" id="ProductPackings-table">
+                                <thead class="bg-primary">
+                                    <tr>
+                                        <th><input type="checkbox" id="selectAllProductPackings" /></th>
+                                        <th>ردیف</th>
+                                        <th>نام بسته بندی</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (Model.ProductPackings != null && Model.ProductPackings.Any())
+                                    {
+                                        int i = 1;
+                                        foreach (var item in Model.ProductPackings)
+                                        {
+                                            <tr>
+                                                <td class="align-middle bg-light" style="width:30px;"><input type="checkbox" value="@item.Id" name="CreateCargoHandling.ProductPackings" @(Model.ProductPackingsSelected?.Contains(item.Id) == true ? "checked" : "") class="ProductPackings-checkbox" /></td>
+
+                                                <td>@(i++)</td>
+                                                <td>@item.Name</td>
+                                            </tr>
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+ 
+
+<script src="~/assets/js/validation/jquery.validate.min.js"></script>
+<script src="~/assets/js/validation/jquery.validate.unobtrusive.min.js"></script>
+
+<script>
+    $(document).ready(function () {
+        $('select[class*="generalmodal"].select2').select2({
+            dropdownParent: $('#productModal')
+        });
+
+         // $('#selectAllmultiProduct').click(function (e) {
+            // 	var isChecked = this.checked;
+            // 	$('#multiProduct-table tbody tr:visible').find('td input:checkbox.multiProduct-checkbox').prop('checked', isChecked);
+         // });
+
+         $('#selectAllProductPackings').click(function (e) {
+                var isChecked = this.checked;
+                $('#ProductPackings-table tbody tr:visible').find('td input:checkbox.ProductPackings-checkbox').prop('checked', isChecked);
+         });
+    });
+
+
+
+</script>

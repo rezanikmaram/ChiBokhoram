@@ -1,0 +1,192 @@
+﻿@model ShipPageDto
+@{
+    ViewData["Title"] = "لیست کشتی ها";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+    int i = ((Model.Ships.PageNumber - 1) * Model.Ships.PageSize) + 1;
+}
+
+<div class="col-lg-12">
+    <div class="card">
+        <div class="card-header pb-1">
+            <div class="d-flex justify-content-between">
+                
+                    <h3 class="title">
+                        <i class="icon-frane"></i> لیست کشتی ها
+                    </h3>
+
+                    <div>
+                    <a style="border-radius:5px; margin:0px 10px"
+                       class="btn btn-primary"
+                       onclick="createShip();"> <i class="icon-plus align-middle"></i> کشتی جدید </a>
+                    </div>
+                <!-- /.buttons-box -->
+            </div>
+            <!-- /.portlet-heading -->
+            <!-- /.portlet-body -->
+        </div>
+        <div class="card-body pt-0">
+
+            <form id="formFilter" asp-action="Index" asp-route-p="" method="post">
+                <input name="p" id="pageNumber" hidden />
+                <div class="form-body ">
+                    <div class="row col-md-12">
+                        <div class="form-group col-md-4">
+                            <label>جستجو</label>
+                            <div class="input-group">
+                                <input type="text" asp-for="Filter.Search" class="form-control"
+                                       placeholder="نام کشتی/ شناسه IMO" />
+                            </div>
+                        </div>
+
+                        <div class="form-group col-md-2 d-flex justify-content-center flex-wrap align-content-center">
+                            <button style="border-radius:5px; margin-top:30px"
+                                    class="alert-icon btn btn-success "
+                                    type="submit">
+                                <p class="px-3"> جستجو</p>
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </form>
+
+            <div class="table-responsive my-4">
+                <table class="table table-bordered table-hover table-striped" id="data-table">
+                    <thead class="bg-primary">
+                        <tr>
+                            <th>ردیف</th>
+                            <th>کشتی</th>
+                            <th>شناسه IMO</th>
+                            <td>طول</td>
+                            <td>عرض</td>
+                            <td>درفت سینه</td>
+                            <td>درفت پاشنه</td>
+
+                            <td>عملیات</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+
+                        @foreach (var item in Model.Ships.Data)
+                        {
+                            <tr>
+                                <td class="align-middle" >@(i++)</td>
+                                <td class="align-middle" >@item.ShipName</td>
+                                <td class="align-middle" >@item.ImoNumber</td>
+                                <td class="align-middle" >@item.ShipLength</td>
+                                <td class="align-middle" >@item.ShipWidth</td>
+                                <td class="align-middle" >@item.BreastAugmentation</td>
+                                <td class="align-middle" >@item.HeelAugmentation</td>
+
+                                <td class="align-middle">
+                                    <a class="btn btn-warning px-2 btn-sm btn-icon curve" onclick="editShip('@item.Id');"><i class="icon-pencil align-middle fs-7"></i></a>
+                                    <a class="btn btn-danger btn-sm btn-icon curve btn-questions  mx-1 px-2" id="DeleteShip@(i)" onclick="ShowQAlert(event,'DeleteShip@(i)');" asp-action="Delete" asp-route-shipId="@item.Id"> <i class="icon-trash fa-flip-horizontal fs-6 align-middle"></i> </a>
+
+                                </td>
+                            </tr>
+
+                        }
+
+
+
+                    </tbody>
+                </table>
+                <div>
+                    <cs-pager cs-paging-pagesize="@Model.Ships.PageSize"
+                              cs-paging-pagenumber="@Model.Ships.PageNumber"
+                              cs-paging-totalitems="@Model.Ships.TotalItems"
+                              cs-paging-maxpageritems="10"
+                              cs-pagenumber-param="p"
+                              cs-show-first-last="true"
+                              cs-suppress-empty-nextprev="true"
+                              cs-suppress-inactive-firstlast="true"
+                              cs-show-numbered="true"
+                              cs-first-page-text="ابتدا"
+                              cs-last-page-text="انتها"
+                              cs-next-page-title="بعدی"
+                              cs-previous-page-title="قبلی"
+                              cs-first-page-title="ابتدا"
+                              cs-last-page-title="انتها"
+                              cs-next-page-text="بعدی"
+                              cs-previous-page-text="قبلی"
+                              cs-pager-li-current-class="page-item active"
+                              cs-pager-li-other-class="page-item"
+                              cs-pager-li-non-active-class="page-item disabled"
+                              cs-pager-link-current-class="page-link"
+                              cs-pager-link-other-class="page-link"
+                              asp-controller="Ship"
+                              asp-action="Index">
+                    </cs-pager>
+                </div>
+
+            </div>
+            <!-- /.table-responsive -->
+        </div>
+        <!-- /.portlet -->
+    </div>
+</div>
+
+
+
+
+<div id="generalmodal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">ثبت کشتی</h4>
+                <button type="button" class="close btn-close rounded border" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="modalbody">
+                <partial name="_CreateShip" model="Model.CreateDto" />
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section script {
+
+    <script>
+
+        $(document).ready(function () {
+
+
+        });
+
+
+        function createShip() {
+            $("#Id").val('');
+            $("#ShipName").val('');
+            $("#ImoNumber").val('');
+
+            $("#ShipLength").val('');
+            $("#ShipWidth").val('');
+            $("#BreastAugmentation").val('');
+            $("#HeelAugmentation").val('');
+
+            $("#generalmodal").modal('show');
+        }
+
+        function editShip(id) {
+
+            $.post("@Url.Action("GetCreateShipPageById", "Ship")", { shipId: id })
+                .done(function (res) {
+                    $("#modalbody").html(res);
+                    $("#generalmodal").modal('show');
+                })
+                .fail(function (xhr, status, error) {
+                    location.reload();
+                });
+        }
+
+
+        $(".page-link").click(function (event) {
+            event.preventDefault(); // غیرفعال کردن عملکرد پیشفرض href
+
+            var hrefValue = $(this).attr("href");
+            $("#pageNumber").val(hrefValue.split("p=")[1]);
+            $("#formFilter").submit();
+        });
+    </script>
+}

@@ -1,0 +1,204 @@
+﻿@model WroVoyageManagerDto
+@{
+    ViewData["Title"] = "مدیریت شناورها خروج کالا";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+    int i = 1;
+}
+
+<div class="card">
+    
+    <div class="card-header">
+        <div class="d-flex justify-content-between">
+            <div>
+                <span>
+                    <i class="icon-frane"></i>
+                    <a asp-action="Details" asp-route-wroId="@Model.PageInfo.Id"><i class="fa-solid fa-right-to-bracket me-2"></i></a>
+                    مدیریت شناورها خروج کالا
+                </span>
+                <span class="label p-2 mx-2 rounded label-primary">@($"{Model.PageInfo.CaseNumber} - {Model.PageInfo.CardNumber}")</span>
+                <span class="label p-2 mx-2 rounded label-info">@Model.PageInfo.CompanyAndSwrNumber</span>
+            </div>
+            <div>
+                @DateTimeOffset.Now.ToLongPersianDateString()
+                <i class="icon-calendar"></i>
+            </div>
+        </div>
+    </div>
+
+    <partial name="_WroInfo" model="Model.PageInfo" />
+</div>
+
+
+<div class="row mt-5">
+    <div class="col-md-6">
+        <div class="card rounded-3 h-100">
+            <div class="card-header">
+                <div class="d-flex justify-content-between">
+                    <h3 class="title m-0">
+                        <i class="icon-user"></i>
+                        انتخاب شناور
+                    </h3>
+                    <form asp-action="SetVoyageForWro" method="post" id="postVoyage">
+
+                        <a class="btn mb-2 float-end btn-success text-white label rounded" onclick="setVoyageForWro();">اضافه کردن انتخاب شده ها</a>
+                        <input id="selectVoyageId" name="ids" type="hidden" />
+                        <input asp-for="FilterDto.WarehouseReceiptOutboundId" name="warehouseReceiptOutboundId" type="hidden" />
+                    </form>
+                </div><!-- /.portlet-title -->
+            </div><!-- /.portlet-heading -->
+            <div class="card-body pt-0 mb-5">
+
+
+                <table class="table table-bordered ">
+                    <thead class="bg-primary">
+                    <tr>
+                        <th> </th>
+                        <th>شناور</th>
+                        <td> شماره سفر  </td>
+                        <td> شماره دریایی  </td>
+                        <td>تناژ</td>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <form id="formFilter" asp-action="ManageVoyage" asp-route-WarehouseReceiptOutboundId="@Model.FilterDto.WarehouseReceiptOutboundId" method="post">
+                        <input asp-for="FilterDto.WarehouseReceiptOutboundId" type="hidden" />
+                        <div class="form-body mb-5">
+
+                            <div class="row">
+                                <div class="form-group col-lg-5 ">
+                                    <label>جستجو</label>
+                                    <div class="input-group">
+                                            <input asp-for="FilterDto.Search" type="text" placeholder="شماره سفر/دریایی" class="form-control">
+                                    </div>
+                                </div>
+                                 
+                                <div class="col-lg-3">
+                                    <div style="margin-top:32px;" class="d-flex justify-content-around">
+                                        <button class="alert-icon btn btn-success label rounded w-100" type="submit"><p>فیلتر</p></button>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </form>
+                     
+                    @foreach (var item in Model.Voyages)
+                    {
+                        <tr>
+                            <td style="width:30px;"><input type="checkbox" value="@item.Id" name="VoyageId" /></td>
+                            <td>@item.ShipShipName</td>
+                            <td>@item.VoyageNumber</td>
+                            <td>@item.PmoNumber</td>
+                            <td>@item.Tonnage?.ToPrice()</td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+
+                <!-- /.tab-content -->
+
+            </div>
+            <div class="card-footer bg-white border-0 p-0">
+
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card rounded-3 h-100">
+            <div class="card-header">
+                <div class="d-flex justify-content-between d-flex">
+                    <h3 class="title m-0">
+                        <i class="icon-speech"></i>
+                        شناورهای انتخاب شده
+                    </h3>
+                    <form asp-action="RemoveVoyageFromWro" method="post" id="deleteVoyage">
+
+                        <a class="btn btn-danger text-white label rounded" onclick="deleteVoyage();">حذف انتخاب شده ها</a>
+                        <input id="removeIds" name="ids" type="hidden" />
+                        <input asp-for="FilterDto.WarehouseReceiptOutboundId" name="WarehouseReceiptOutboundId" type="hidden" />
+
+                    </form>
+                </div><!-- /.portlet-title -->
+                <!-- /.buttons-box -->
+            </div><!-- /.portlet-heading -->
+            <div class="card-body pt-0">
+                <table class="table table-bordered ">
+                    <thead class="bg-primary">
+                    <tr>
+                        <th> </th>
+                        <th>شناور</th>
+                        <td> شماره سفر  </td>
+                        <td> شماره دریایی  </td>
+                        <td>تناژ</td>
+                        <th>وضعیت</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var item in Model.SelectedVoyages)
+                    {
+                        <tr>
+                            <td style="width:30px;"><input type="checkbox" value="@item.Id" name="selectedVoyageId" /></td>
+                            <td>@item.ShipShipName</td>
+                            <td>@item.VoyageNumber</td>
+                            <td>@item.PmoNumber</td>
+                            <td>@item.Tonnage?.ToPrice()</td>
+                            <td><a id="activeVoyage@(i)" onclick="ShowQAlert(event,'activeVoyage@(i)');" asp-action="ActivationVoyage" asp-route-WarehouseReceiptOutboundId="@Model.FilterDto.WarehouseReceiptOutboundId" asp-route-VoyageId="@item.Id"><span class="label p-2 py-1 rounded label-@(item.IsActive ? "success" : "danger")">@(item.IsActive ? "فعال" : "غیر فعال")</span></a></td>
+                        </tr>
+                        i++;
+                    }
+                    </tbody>
+                </table>
+            </div>
+            <div class="card-footer bg-white border-0 p-0">
+                
+            </div>
+        </div>
+    </div>
+</div>
+
+@section script {
+    <script>
+        function setVoyageForWro() {
+            var ids = "";
+            $("#selectVoyageId").val('');
+            $("input:checkbox[name=VoyageId]:checked").each(function () {
+                if (ids) {
+                    ids += ',' + $(this).val();
+                }
+                else {
+                    ids = $(this).val();
+                }
+            });
+            $("#selectVoyageId").val(ids);
+            if (ids) {
+                $("#postVoyage").submit();
+            }
+            else {
+                showAlert2('شناور انتخاب نشده است', 1);
+                return;
+            }
+        }
+
+        function deleteVoyage() {
+            var ids = "";
+            $("#removeIds").val('');
+            $("input:checkbox[name=selectedVoyageId]:checked").each(function () {
+                if (ids) {
+                    ids += ',' + $(this).val();
+                }
+                else {
+                    ids = $(this).val();
+                }
+            });
+            $("#removeIds").val(ids);
+            if (ids) {
+                $("#deleteVoyage").submit();
+            }
+            else {
+                showAlert2('شناور انتخاب نشده است', 1);
+                return;
+            }
+        }
+    </script>
+}

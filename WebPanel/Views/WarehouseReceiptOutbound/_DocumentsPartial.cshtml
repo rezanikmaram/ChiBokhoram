@@ -1,0 +1,61 @@
+@model WarehouseReceiptOutboundPageDocumentDto
+@using Common.enumeration.Hirman
+
+<div class="d-flex justify-content-between mb-3">
+    <h5>لیست اسناد</h5>
+    <button class="btn btn-success rounded" onclick="showAddDocumentModal()">
+        <i class="fa-solid fa-plus"></i> ایجاد سند جدید
+    </button>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-sm table-bordered table-hover table-striped" id="documents-table">
+        <thead class="bg-primary">
+            <tr>
+                <th style="width: 5%">#</th>
+                <th>نوع سند</th>
+                <th>توضیحات</th>
+                <th>شماره</th>
+                <th>تاریخ</th>
+                <th>عملیات</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model?.List?.Any() == true)
+            {
+                int counter = 1;
+                foreach (var item in Model.List)
+                {
+                    <tr>
+                        <td class="align-middle px-2 text-center">@(counter++)</td>
+                        <td class="align-middle px-2 text-center">@item.TypeTitle</td>
+                        <td class="align-middle px-2 text-center">@item.Description</td>
+                        <td class="align-middle px-2 text-center">@item.Number</td>
+                        <td class="align-middle px-2 text-center">@item.DateFa</td>
+                        <td class="align-middle px-2 text-center">
+                            @if (item.Document != null)
+                            {
+                                <a class="btn btn-primary px-2 my-2 rounded"
+                                   data-bs-toggle="tooltip" data-bs-placement="top" title="@item.Document?.OriginalFileName"
+                                   onclick="downloadDocument('@item.Document.Id')">
+                                    <i class="fa-solid fa-download"></i>
+                                </a>
+                            }
+                            <a class="btn btn-danger px-2 my-2 rounded"
+                               data-bs-toggle="tooltip" data-bs-placement="top" title="حذف"
+                               onclick="removeDocument('@item.Id')">
+                                <i class="fa-solid fa-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="6" class="text-center">هیچ سندی بارگذاری نشده است</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

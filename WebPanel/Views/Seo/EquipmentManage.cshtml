@@ -1,0 +1,192 @@
+﻿@model EquipmentManageDto
+
+
+@{
+    ViewData["Title"] = "مدیریت تجهیزات";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+    int i = 1;
+}
+<div class="col-md-12">
+    <div class="p-3 bg-white rounded-3 border shadow">
+        <div class="d-flex justify-content-between">
+            <div>
+                <span class="fs-5">
+                    @if ((int)ViewBag.returnPage == 1)
+                    {
+                        <i class="icon-frane"></i>
+                        <a asp-controller="Seo" asp-action="SeoAllocationPage" asp-route-seoId="@((Guid)ViewBag.seoId)"><i class="fa-solid fa-right-to-bracket align-middle me-2"></i></a>
+                    }
+                    else
+                    {
+                        <i class="icon-frane"></i>
+                        <a asp-controller="Seo" asp-action="SeoPortOperatorPage" asp-route-seoId="@((Guid)ViewBag.seoId)"><i class="fa-solid fa-right-to-bracket align-middle me-2"></i></a>
+                    }
+                    مدیریت تجهیزات
+                </span>
+                <span class="label  p-2 mx-2 rounded label-primary ">@ViewBag.seocode</span>
+                <span class="label  p-2 mx-2 rounded label-info ">@(((TransportType)ViewBag.seotype).ToDisplay(DisplayProperty.Name))</span>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row mt-3">
+    <div class="col-md-6">
+        <div class="card rounded-3 min-height-600">
+            <div class="card-header">
+                <div class="d-flex justify-content-between d-flex ">
+                    <h3 class="title m-0">
+                        <i class="icon-speech"></i>
+                        انتخاب تجهیــز
+                    </h3>
+                    <form asp-action="SetEquipmentForSeo" method="post" id="postEquipment" asp-route-returnPage="@((int)ViewBag.returnPage)">
+
+                        <a class="btn btn-success text-white label rounded" onclick="setTruckForSeo();">  +  اضافه کردن انتخاب شده ها</a>
+                        <input id="selectEquipmentId" name="ids" type="hidden" />
+                        <input asp-for="FilterDto.SeoId" name="seoId" type="hidden" />
+                    </form>
+                </div><!-- /.portlet-title -->
+
+            </div><!-- /.portlet-heading -->
+            <div class="card-body pt-0">
+
+                <form id="formFilter" asp-action="EquipmentManage" asp-route-seoId="@Model.FilterDto.SeoId" asp-route-returnPage="@((int)ViewBag.returnPage)" method="post">
+                    <input asp-for="FilterDto.SeoId" type="hidden" />
+                    <div class="form-body mb-5 d-flex justify-content-between">
+
+                        <div class="form-group col-md-4 ">
+                            <label>جستجو</label>
+                            <div class="input-group">
+                                <input asp-for="FilterDto.Search" type="text" placeholder="نام" class="form-control">
+                            </div>
+                        </div>
+
+                        <div class="form-group col-md-4 m-r-10 ">
+                            <label>نوع کالا</label>
+                            <div class="input-group">
+                                <select class="form-control select2" style="width:100%!important;"
+                                        asp-for="FilterDto.EquipmentType"
+                                        asp-items="Model.EquipmentTypes">
+                                    <option value="">همه کالا ها</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-md-2">
+                            <div style="margin-top:32px;" class="d-flex justify-content-around">
+                                <button class="alert-icon btn btn-success rounded label" type="submit"><p class="px-2">فیلتر</p></button>
+                            </div>
+                        </div>
+
+                    </div>
+                </form>
+
+                <table class="table table-bordered ">
+                    <tbody>
+                        @foreach (var item in Model.Equipments)
+                        {
+                            <tr>
+                                <td style="width:30px;"><input type="checkbox" value="@item.Id" name="equipmentId" /></td>
+                                <td>@item.Name</td>
+                                <td>@item.EquipmentType.ToDisplay()</td>
+
+
+
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+
+                <!-- /.tab-content -->
+
+            </div><!-- /.portlet-body -->
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card rounded-3">
+            <div class="card-header ">
+                <div class="d-flex justify-content-between d-flex">
+                    <h3 class="title m-0">
+                        <i class="icon-speech"></i>
+                        تجهیزات انتخاب شده
+                    </h3>
+                    <form asp-action="RemoveEquipmentFormSeo" method="post" id="deleteEquipment" asp-route-returnPage="@((int)ViewBag.returnPage)">
+
+                        <a class="btn btn-danger text-white label rounded" onclick="deleteProduct();">   <i class="fa fa-trash me-2"></i>حذف انتخاب شده ها</a>
+                        <input id="removeIds" name="ids" type="hidden" />
+                        <input asp-for="FilterDto.SeoId" name="seoId" type="hidden" />
+
+                    </form>
+                </div><!-- /.portlet-title -->
+                <!-- /.buttons-box -->
+            </div><!-- /.portlet-heading -->
+            <div class="card-body pt-0">
+                <table class="table table-bordered ">
+                    <tbody>
+                        @foreach (var item in Model.SelectedEquipment)
+                        {
+                            <tr>
+                                <td style="width:30px;"><input type="checkbox" value="@item.Id" name="selectequipmentId" /></td>
+                                <td>@item.Name</td>
+                                <td>@item.EquipmentType.ToDisplay()</td>
+                                <td><a id="activeequipment@(i)" onclick="ShowQAlert(event,'activeequipment@(i)');" asp-action="ActivationEquipment" asp-route-seoId="@Model.FilterDto.SeoId" asp-route-equipmentId="@item.Id"><span class="label p-2 py-1 rounded label-@(item.IsActive?"success":"danger")">@(item.IsActive ? "فعال" : "غیر فعال")</span></a></td>
+
+
+
+                            </tr>
+                            i++;
+                        }
+                    </tbody>
+                </table>
+
+                <!-- /.tab-content -->
+
+            </div><!-- /.portlet-body -->
+        </div>
+    </div>
+</div>
+
+@section script {
+    <script>
+        function setTruckForSeo() {
+            var ids = "";
+            $("#selectEquipmentId").val('');
+            $("input:checkbox[name=equipmentId]:checked").each(function () {
+                if (ids) {
+                    ids += ',' + $(this).val();
+                }
+                else {
+                    ids = $(this).val();
+                }
+            });
+            $("#selectEquipmentId").val(ids);
+            if (ids) {
+                $("#postEquipment").submit();
+            }
+            else {
+                showAlert2('تجهیزی انتخاب نشده است', 1);
+                return;
+            }
+        }
+        function deleteProduct() {
+            var ids = "";
+            $("#removeIds").val('');
+            $("input:checkbox[name=selectequipmentId]:checked").each(function () {
+                if (ids) {
+                    ids += ',' + $(this).val();
+                }
+                else {
+                    ids = $(this).val();
+                }
+            });
+            $("#removeIds").val(ids);
+            if (ids) {
+                $("#deleteEquipment").submit();
+            }
+            else {
+                showAlert2('تجهیزی انتخاب نشده است', 1);
+                return;
+            }
+        }
+    </script>
+}
+

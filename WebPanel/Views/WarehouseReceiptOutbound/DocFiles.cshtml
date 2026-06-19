@@ -1,0 +1,205 @@
+﻿@using Common.enumeration.Hirman
+@model WarehouseReceiptOutboundPageDocumentDto
+@{
+	ViewData["Title"] = "اسناد مرتبط";
+	Layout = "~/Views/Shared/AdminLayout.cshtml";
+	int counter = 1;
+}
+
+
+
+<partial name="_WroInfo" model="Model.PageInfo" />
+
+<div class="card">
+	<div class="card-header">
+		<div class="d-flex justify-content-between">
+			<h3 class="title">
+				<a asp-action="Details"
+				   asp-route-wroId="@Model.PageInfo.Id">
+					<i class="fa-solid fa-right-to-bracket me-2 align-middle"></i>
+				</a>
+				اسناد خروج کالا
+			</h3>
+
+			<div>
+				<button class="btn btn-success rounded" onclick="showAddDocumentModal()">
+					<i class="fa-solid fa-plus"></i> ایجاد سند جدید
+				</button>
+
+				<div class="buttons-box">
+					<i class="icon-size-fullscreen"></i>
+					<div class="paper-ripple">
+						<div class="paper-ripple__background"></div>
+						<div class="paper-ripple__waves"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="card-body pt-0">
+		<div class="table-responsive">
+			<table class="table table-sm table-bordered table-hover table-striped" id="documents-table">
+				<thead class="bg-primary">
+					<tr>
+						<th style="width: 5%">#</th>
+						<th>نوع سند</th>
+						<th>توضیحات</th>
+						<th>شماره</th>
+						<th>تاریخ</th>
+
+						<th>عملیات</th>
+					</tr>
+				</thead>
+				<tbody>
+					@if (Model?.List?.Any() == true)
+					{
+						foreach (var item in Model.List)
+						{
+							<tr>
+								<td class="align-middle px-2 text-center">@(counter++)</td>
+								<td class="align-middle px-2 text-center">@item.TypeTitle</td>
+								<td class="align-middle px-2 text-center">@item.Description</td>
+								<td class="align-middle px-2 text-center">@item.Number</td>
+								<td class="align-middle px-2 text-center">@item.DateFa</td>
+
+
+								<td class="align-middle px-2 text-center">
+									@if (item.Document != null)
+									{
+										<a class="btn btn-primary px-2 my-2 rounded"
+										   data-bs-toggle="tooltip" data-bs-placement="top" title="@item.Document?.OriginalFileName"
+										   onclick="DownloadDocFile(event, '@item.Document.Id')">
+											<i class="fa-solid fa-download"></i>
+										</a>
+									}
+
+									<a class="btn btn-primary px-2 my-2 rounded"
+									   data-bs-toggle="tooltip" data-bs-placement="top" title="حذف"
+									   onclick="RemoveDocFile(event, '@item.Id', '@Model.PageInfo.Id')">
+										<i class="fa-solid fa-remove"></i>
+									</a>
+
+								</td>
+							</tr>
+						}
+					}
+					else
+					{
+						<tr>
+							<td colspan="8" class="text-center">هیچ سندی بارگذاری نشده است</td>
+						</tr>
+					}
+				</tbody>
+			</table>
+		</div>
+	</div>
+
+
+</div>
+
+
+
+
+<form asp-action="GetWroDocFileById" asp-controller="WarehouseReceiptOutbound"
+	  method="post" id="FormForDownloadFileId">
+	<input type="hidden" id="docIdForDownload" name="docId" />
+
+</form>
+
+<form asp-action="RemoveWroDocFileById" asp-controller="WarehouseReceiptOutbound"
+	  method="post" id="FormForRemoveFileId">
+	<input type="hidden" id="docIdForRemove" name="DocId" />
+	<input type="hidden" id="WroIdRemove" name="wroId" />
+</form>
+
+<!-- Add Document Modal -->
+<div id="addDocumentModal" class="modal fade" tabindex="-1" role="dialog">
+	<div class="modal-dialog modal-dialog-centered" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title">ایجاد سند جدید</h5>
+				<button type="button" class="close btn-close rounded border" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				<form asp-action="UploadDoc" method="post" enctype="multipart/form-data">
+					<input type="hidden" asp-for="CreateDto.SeoWarehouseReceiptOutboundId" value="@Model.PageInfo.Id" />
+
+					<div class="row gy-3">
+						<div class="form-group col-md-12">
+							<label>نوع سند</label>
+							<select class="form-control" asp-for="CreateDto.Type"
+									asp-items="@Html.GetEnumSelectList<GoodsClearanceType>()" required>
+							</select>
+							<span asp-validation-for="CreateDto.Type" class="text-danger"></span>
+						</div>
+
+						<div class="form-group col-md-12">
+							<label>انتخاب فایل</label>
+							<input type="file" asp-for="CreateDto.FormFile" class="form-control rounded" required>
+							<span asp-validation-for="CreateDto.FormFile" class="text-danger"></span>
+						</div>
+
+						<div class="form-group col-md-12">
+							<label>توضیحات</label>
+							<input type="text" class="form-control" asp-for="CreateDto.Description"
+								   maxlength="300" />
+							<span asp-validation-for="CreateDto.Description" class="text-danger"></span>
+						</div>
+
+						<div class="form-group col-md-6">
+							<label>شماره</label>
+							<input type="text" class="form-control" asp-for="CreateDto.Number" />
+							<span asp-validation-for="CreateDto.Number" class="text-danger"></span>
+						</div>
+
+						<div class="form-group col-md-6">
+							<label>تاریخ سند</label>
+							<input type="text" class="form-control" asp-for="CreateDto.DateFa"
+								   id="documentDate" autocomplete="off" required />
+							<span asp-validation-for="CreateDto.DateFa" class="text-danger"></span>
+						</div>
+					</div>
+
+					<div class="modal-footer px-0 border-0">
+						<button type="button" class="btn btn-danger" data-bs-dismiss="modal">انصراف</button>
+						<button type="submit" class="btn btn-success">افزودن</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+
+@section script {
+	<script>
+		function showAddDocumentModal() {
+			$('#addDocumentModal').modal('show');
+		}
+
+		function DownloadDocFile(event, docId) {
+			event.preventDefault();
+
+			$("#docIdForDownload").val(docId);
+			$("#FormForDownloadFileId").submit();
+		}
+
+		async function RemoveDocFile(event, docId, wroId) {
+			let result = await ShowQAlert2(event);
+
+			if (result === true) {
+				$("#docIdForRemove").val(docId);
+				$('#WroIdRemove').val(wroId);
+				$("#FormForRemoveFileId").submit();
+			}
+		}
+
+		$(document).ready(function () {
+			// Initialize date picker
+			kamaDatepicker('documentDate', customOptions);
+
+			// Initialize DataTable if needed
+			// $('#documents-table').DataTable();
+		});
+	</script>
+}

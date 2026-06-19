@@ -1,0 +1,189 @@
+﻿@model CreateCompanyDto
+@{
+    ViewData["Title"] = "ثبت شرکت";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+<div class="col-lg-12">
+    <div class="card">
+        <div class="card-header ">
+            <div class="d-flex justify-content-between">
+                <h3 class="title">
+                    افزودن شرکت
+                </h3>
+            </div>
+        </div>
+
+        <form asp-action="CreateCompany" method="post">
+            <input type="hidden" asp-for="Id" />
+            <div class="card-body pt-0">
+
+                <div class="form-body">
+                    <div class="row gy-4">
+                        <div class="col-md-4">
+                            <div class="form-group ">
+                                <label>نام شرکت فارسی</label>
+                                <div class="input-group">
+                                    <input type="text" asp-for="CompanyName" class="form-control rounded">
+                                    <span asp-validation-for="CompanyName"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                         <div class="col-md-4">
+                            <div class="form-group ">
+                                <label>نام شرکت انگلیسی</label>
+                                <div class="input-group">
+                                    <input type="text" asp-for="CompanyNameEn" class="form-control rounded">
+                                    <span asp-validation-for="CompanyNameEn"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>کد اقتصادی</label>
+                                <div class="input-group">
+                                    <input type="tel" asp-for="EconomicCode" class="form-control rounded">
+                                    <span asp-validation-for="EconomicCode"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>شناسه ملی  </label>
+                                <div class="input-group">
+                                    <input type="text" asp-for="MeliCode" class="form-control rounded">
+                                    <span asp-validation-for="MeliCode"></span>
+                                </div>
+                            </div>
+                        </div>
+
+
+
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>نوع مشتری</label>
+                                <div class="input-group">
+                                    <select asp-for="CustomerType" class="form-control rounded" asp-items="Html.GetEnumSelectList<Common.enumeration.Hirman.CustomerType>()"></select>
+                                    <span asp-validation-for="CustomerType"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="form-group  ">
+                                <label>نام مدیر عامل</label>
+                                <div class="input-group">
+                                    <input type="text" asp-for="CeoName" class="form-control rounded">
+                                    <span asp-validation-for="CeoName"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>شماره تلفن مدیر عامل</label>
+                                <div class="input-group">
+                                    <input type="number" asp-for="CeoNumber" class="form-control rounded">
+                                    <span asp-validation-for="CeoNumber"></span>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="col-md-4">
+                            <div class="form-group   ">
+                                <label>نام نماینده</label>
+                                <div class="input-group">
+                                    <input type="text" asp-for="RepresentativeName" class="form-control rounded">
+                                    <span asp-validation-for="RepresentativeName"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>شماره تلفن نماینده</label>
+                                <div class="input-group">
+                                    <input type="number" asp-for="RepresentativeNumber" class="form-control rounded">
+                                    <span asp-validation-for="RepresentativeNumber"></span>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="col-md-4">
+                            <div class="form-group   ">
+                                <label>آدرس</label>
+                                <div class="input-group">
+                                    <input type="text" asp-for="Address" class="form-control rounded">
+                                    <span asp-validation-for="Address"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>کد پستی</label>
+                                <div class="input-group">
+                                    <input type="number" asp-for="PostalCode" class="form-control rounded">
+                                    <span asp-validation-for="PostalCode"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                       
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>شماره تماس دفتر</label>
+                                <div class="input-group">
+                                    <input type="number" asp-for="OfficeNumber" class="form-control rounded">
+                                    <span asp-validation-for="OfficeNumber"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                         <div class="col-md-4">
+                            <div class="form-group   ">
+                                <label>شماره تفصیلی 1</label>
+                                <div class="input-group">
+                                    <input type="text" asp-for="SubsidiaryAccountNumber1" class="form-control rounded">
+                                    <span asp-validation-for="SubsidiaryAccountNumber1"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="form-group   ">
+                                <label>شماره تفصیلی 2</label>
+                                <div class="input-group">
+                                    <input type="text" asp-for="SubsidiaryAccountNumber2" class="form-control rounded">
+                                    <span asp-validation-for="SubsidiaryAccountNumber2"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-12">
+                            <div class="input-group">
+                                <label>
+                                    <input asp-for="IsActive" class="form-check-input">
+                                    فعال/غیرفعال
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="form-actions p-4 pb-5" style="float: left;">
+                <a asp-action="Index" class="btn btn-warning btn-round"> <i class="icon-close"> </i> برگشت</a>
+                <button type="submit" class="btn btn-info btn-round">
+                    <i class="icon-check"></i>
+                    ذخیره
+                    <div class="paper-ripple"><div class="paper-ripple__background"></div><div class="paper-ripple__waves"></div></div>
+                </button>
+            </div>
+        </form>
+
+        <section class="fix"></section>
+
+    </div>
+</div>
+

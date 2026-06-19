@@ -1,0 +1,228 @@
+﻿@using Entities.Entities.Hirman
+@model PortTruckExitPageDto
+@{
+    ViewData["Title"] = "بیجک خروج حمل یکسره";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+    int i = 1;
+}
+
+<div class="col-lg-12">
+    <div class="card bg-white">
+        <div class="card-header">
+
+            <div class="d-flex justify-content-between">
+                <h3 class="title">
+                    <i class="icon-frane"></i> بیجک خروج حمل یکسره
+                </h3>
+                <div class="d-none d-md-block">
+                    <a class="btn btn-success rounded" asp-action="ArchivePage">
+                        <i class="fa-solid fa-archive"></i> بیجک های صادر شده
+                    </a>
+
+                    <button id="reportButton" type="submit" form="formFilter" formaction="@Url.Action("CreateReportTruckExitPermit", "PortTruckExit")"
+                            class="btn btn-primary rounded">
+                        <i class="fa-solid fa-download me-2"></i>صدور بیجک خروج
+                    </button>
+ 
+                </div>
+            </div>
+
+            <button id="reportButton" type="submit" form="formFilter" formaction="@Url.Action("CreateReportTruckExitPermit", "PortTruckExit")"
+                    class="btn btn-primary rounded w-100 my-3 d-md-none d-block">
+                <i class="fa-solid fa-download me-2"></i>صدور بیجک خروج
+            </button>
+
+        </div>
+
+        <div class="card-body pt-0">
+
+            <div id="data-table_filter" class="dataTables_filter">
+                <div class="card-body pt-0">
+                    <form id="formFilter" asp-action="index" method="post">
+                        <input name="p" id="pageNumber" hidden />
+
+                        <div class="form-body">
+                            <div class="row gy-4">
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label>نوع پلاک</label>
+                                        <div class="input-group">
+                                            <select class="form-control select2" asp-for="Filter.CarPlatesType">
+                                                <option value="1">پلاک ملی</option>
+                                                <option value="2">پلاک بندری</option>
+                                            </select>
+                                            <span asp-validation-for="Filter.CarPlatesType" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div id="CarPlatesTypeMeli" class="@(Model.Filter.CarPlatesType == CarPlatesType.Number ? "d-none" : "") form-group col-md-10 justify-content-start d-flex ">
+                                    <div class="col-md-2">
+                                        <label>ایران</label>
+                                        <div class="input-group ">
+                                            <input asp-for="Filter.CarPlatesAreaCode" type="text" class="form-control">
+                                            <span asp-validation-for="Filter.CarPlatesAreaCode" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2 mx-3">
+                                        <label>عدد 3 رقمی</label>
+                                        <div class="input-group ">
+                                            <input asp-for="Filter.CarPlatesRight" type="text" class="form-control">
+                                            <span asp-validation-for="Filter.CarPlatesRight" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2 mx-3">
+                                        <div class="form-group ">
+                                            <label>حرف</label>
+                                            <div class="input-group">
+                                                <select class="form-control select2" asp-for="Filter.CarPlatesMiddle">
+                                                    <option value="ع">ع</option>
+                                                    <option value="ک">ک</option>
+                                                    <option value="الف">الف</option>
+                                                    <option value="ب">ب</option>
+                                                    <option value="ت">ت</option>
+                                                    <option value="ج">ج</option>
+                                                    <option value="د">د</option>
+                                                    <option value="س">س</option>
+                                                    <option value="ص">ص</option>
+                                                    <option value="ط">ط</option>
+                                                    <option value="ق">ق</option>
+                                                    <option value="ل">ل</option>
+                                                    <option value="م">م</option>
+                                                    <option value="ن">ن</option>
+                                                    <option value="و">و</option>
+                                                    <option value="ه">ه</option>
+                                                    <option value="ی">ی</option>
+                                                    <option value="پ">پ</option>
+                                                    <option value="گ">گ</option>
+                                                    <option value="ف">ف</option>
+                                                    <option value="ش">ش</option>
+                                                    <option value="ث">ث</option>
+                                                    <option value="ز">ز</option>
+                                                </select>
+                                                <span asp-validation-for="Filter.CarPlatesMiddle" class="text-danger"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label>عدد 2 رقمی</label>
+                                        <div class="input-group ">
+                                            <input type="text" asp-for="Filter.CarPlatesLeft" class="form-control">
+                                            <span asp-validation-for="Filter.CarPlatesLeft" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="CarPlatesTypeBandari" class="col-md-2 @(Model.Filter.CarPlatesType != CarPlatesType.Number ? "d-none" : "") ">
+                                    <div class="form-group m-l-60 ">
+                                        <label>پلاک بندری</label>
+                                        <div class="input-group">
+                                            <input type="text" asp-for="Filter.CarPlates" class="form-control">
+                                            <span asp-validation-for="Filter.CarPlates" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                                <div class="form-group col-md-2">
+                                    <label> از تاریخ:</label>
+                                    <div class="input-group">
+                                        <input asp-for="Filter.DateFrom" type="text" class=" form-control" autocomplete="off">
+                                        <span asp-validation-for="Filter.DateFrom" class="text-danger"></span>
+                                    </div>
+                                </div>
+
+                                <div class="form-group col-md-2">
+                                    <label>تا تاریخ:</label>
+                                    <div class="input-group">
+                                        <input asp-for="Filter.DateTo" type="text" class=" form-control" autocomplete="off">
+                                        <span asp-validation-for="Filter.DateTo" class="text-danger"></span>
+                                    </div>
+                                </div>
+
+                                <div class="form-group col-md-2">
+                                    <button style="border-radius:5px; margin-top:30px" class="alert-icon px-3 btn btn-success "
+                                            type="submit">
+                                        جستجو
+                                    </button>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover table-striped" id="data-table">
+                    <thead class="bg-primary">
+                        <tr>
+                            <td>#</td>
+                            <td>تاریخ  </td>
+                            <td>صاحب کالا</td>
+                            <td>  (شماره سفر) - شماره بارنامه  </td>
+                            <td>وزن به کیلوگرم</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model?.List?.Any() == true)
+                        {
+                            foreach (var item in Model.List)
+                            {
+                                <tr>
+                                    <td>@(i++)</td>
+                                    <td dir="ltr">@item.DateFa</td>
+                                    <td>@item.OwnerName</td>
+                                    <td>@item.VoyageInfo</td>
+                                    <td>@item.WeightLoadTitle</td>
+                                </tr>
+                            }
+                        }
+
+                    </tbody>
+                </table>
+
+            </div>
+
+
+            <!-- /.table-responsive -->
+        </div>
+        <!-- /.portlet-body -->
+        <!-- /.portlet -->
+    </div>
+
+</div>
+
+
+
+@section script {
+
+    <script>
+        $(document).ready(function () {
+            $('.select2').select2();
+
+            kamaDatepicker('Filter_DateFrom', customOptions);
+            kamaDatepicker('Filter_DateTo', customOptions);
+
+            $("#Filter_CarPlatesType").change(function () {
+                var selectedValue = $(this).val();
+
+                if (selectedValue === "1") {
+                    $("#CarPlatesTypeMeli").removeClass("d-none");
+                    $("#CarPlatesTypeBandari").addClass("d-none");
+                } else {
+                    $("#CarPlatesTypeMeli").addClass("d-none");
+                    $("#CarPlatesTypeBandari").removeClass("d-none");
+                }
+            });
+
+            $('#reportButton').click(function(e) {
+                // فقط غیرفعال کردن دکمه
+                // فرم به صورت خودکار ارسال می‌شود
+                //$(this).prop('disabled', true);
+                $(this).addClass('disabled');
+            });
+        });
+
+    </script>
+}

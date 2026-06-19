@@ -1,0 +1,325 @@
+@model SimcardPageDto
+@{
+    ViewData["Title"] = "سیم کارت ها";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+@section style{
+
+    <link href="~/assets/plugins/select2/dist/css/select2.min.css" rel="stylesheet">
+}
+
+
+<div class="col-lg-12">
+    <div class="card">
+        <div class="card-header">
+            <div class="d-flex justify-content-between">
+              
+                    <h3 class="title">
+                        <i class="icon-frane"></i> سیم کارت ها ( تعداد کل @Model.AllSimcardCount.ToPrice() )
+                    </h3>
+
+              <div>
+                    <a class="btn btn-primary rounded" onclick="createSimcard();"><i class="fa-solid fa-plus me-2"></i>سیم کارت جدید</a>
+              </div>
+            </div>
+        </div>
+        <div class="card-body pt-0">
+            <form id="formFilter" asp-action="Index" asp-route-p="" method="post">
+                <input name="p" id="pageNumber" hidden />
+                <div class="form-body">
+                    <div class="row col-md-12">
+                        <div class="form-group col-md-3">
+                            <label>جستجو</label>
+                            <div class="input-group">
+                                <input type="text" asp-for="Filter.Search" class="form-control" placeholder="شماره، IP، سریال، توضیحات"/>
+                            </div>
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label>دستگاه</label>
+                            <div class="input-group">
+                                <select asp-for="Filter.DeviceId" asp-items="Model.Devices" class="form-control select2">
+                                    <option value="">همه</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group col-md-2 d-flex justify-content-center flex-wrap align-content-center">
+                            <button style="border-radius:5px; margin-top:30px"
+                                    class="alert-icon btn btn-success"
+                                    type="submit">
+                                <p class="px-3"> فیلتر</p>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+            <div id="table-container">
+                @await Html.PartialAsync("_SimcardTable", Model)
+            </div>
+        </div>
+
+    </div>
+</div>
+<div id="generalmodal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">ثبت سیم کارت</h4>
+                <button type="button" class="close btn-close rounded border" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="modalbody">
+                <form id="simcardForm" asp-action="CreateSimcard" method="post">
+                    <input asp-for="CreateSimcardDto.Id" type="hidden" />
+                    <div class="card-body pt-0">
+                        <div class="col-md-12">
+                            <div class="form-body">
+
+                                <div class="form-group row gy-3">
+                                    <div class="col-md-6">
+                                        <label> شماره تلفن</label>
+                                        <div class="input-group">
+                                            <input type="text" asp-for="CreateSimcardDto.PhoneNumber" class="form-control">
+                                        </div>
+                                        <span asp-validation-for="CreateSimcardDto.PhoneNumber" class="text-danger"></span>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label> IP </label>
+                                        <div class="input-group">
+                                            <input type="text" asp-for="CreateSimcardDto.Ip" class="form-control" >
+                                        </div>
+                                        <span asp-validation-for="CreateSimcardDto.Ip" class="text-danger"></span>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label> سریال  </label>
+                                        <div class="input-group">
+                                            <input type="text" asp-for="CreateSimcardDto.Serial" class="form-control">
+                                        </div>
+                                        <span asp-validation-for="CreateSimcardDto.Serial" class="text-danger"></span>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label> توضیحات </label>
+                                        <div class="input-group">
+                                            <input type="text" asp-for="CreateSimcardDto.Description" class="form-control">
+                                        </div>
+                                        <span asp-validation-for="CreateSimcardDto.Description" class="text-danger"></span>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <div class=" form-group">
+                                            <label> دستگاه FPN</label>
+                                            <div class="input-group">
+                                                <select style="width:500px !important" class="form-control select2 generalmodal" asp-for="CreateSimcardDto.DeviceId"
+                                                        asp-items="@Model.Devices">
+                                                    <option value="">نامشخص</option>
+                                                </select>
+                                                <span asp-validation-for="CreateSimcardDto.DeviceId" class="text-danger"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12 d-flex">
+                                        <div>
+                                            <div class="input-group activeor">
+                                                <label>
+                                                    <input type="checkbox" asp-for="CreateSimcardDto.IsActive" class="normal">
+                                                    فعال/غیرفعال
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer px-2 border-0 px-0 pb-0">
+                                    <button type="submit" id="btnSaveSimcard" class="btn btn-success btn-round">ذخیره</button>
+                                    <button type="button" class="btn btn-danger btn-round" data-bs-dismiss="modal">بازگشت</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section script {
+
+
+    <script src="~/assets/plugins/select2/dist/js/select2.full.min.js"></script>
+    <script src="~/assets/plugins/select2/dist/js/i18n/fa.js"></script>
+    <script src="~/assets/js/pages/select2.js"></script>
+
+
+    <script>
+        var currentPage = @Model.Simcards.PageNumber;
+        var currentSortColumn = '@(Model.Filter?.SortColumn ?? "phonenumber")';
+        var currentSortDirection = '@(Model.Filter?.SortDirection ?? "asc")';
+
+        function getFilterData() {
+            return {
+                'filter.Search': $("#Filter_Search").val(),
+                'filter.DeviceId': $("#Filter_DeviceId").val(),
+                'filter.SortColumn': currentSortColumn,
+                'filter.SortDirection': currentSortDirection
+            };
+        }
+
+        function loadTable(page) {
+            currentPage = page || 1;
+            var data = Object.assign({ p: currentPage }, getFilterData());
+            $.get('@Url.Action("Table","Simcard")', data)
+                .done(function (html) {
+                    $("#table-container").html(html);
+                });
+        }
+
+        function loadTableWithSort(sortColumn, sortDirection) {
+            currentSortColumn = sortColumn;
+            currentSortDirection = sortDirection;
+            loadTable(1);
+        }
+
+        $(document).on('submit', '#formFilter', function (e) {
+            e.preventDefault();
+            loadTable(1);
+        });
+
+        $(document).on('click', '#table-container .page-link', function (e) {
+            e.preventDefault();
+            var hrefValue = $(this).attr("href") || '';
+            var match = hrefValue.match(/p=(\d+)/);
+            var p = match ? parseInt(match[1]) : 1;
+            loadTable(p);
+        });
+
+        function updateSimcardCount() {
+            $.get('@Url.Action("GetSimcardCount", "Simcard")')
+                .done(function (resp) {
+                    if (resp.count !== undefined) {
+                        $('.title').html('<i class="icon-frane"></i> سیم کارت ها ( تعداد کل ' + resp.count.toLocaleString('fa-IR') + ' )');
+                    }
+                });
+        }
+
+        $(document).ready(function () {
+            $('.select2').select2();
+
+            $('select[class*="generalmodal"]').select2({
+                dropdownParent: $('#generalmodal')
+            });
+        });
+
+
+        function createSimcard() {
+            $("#CreateSimcardDto_PhoneNumber").val('');
+            $("#CreateSimcardDto_Ip").val('');
+            $("#CreateSimcardDto_Id").val('');
+            $("#CreateSimcardDto_DeviceId").val('');
+            $("#CreateSimcardDto_DeviceId").trigger('change');
+            $("#CreateSimcardDto_Serial").val('');
+            $("#CreateSimcardDto_Description").val('');
+            $("#CreateSimcardDto_IsActive").prop('checked', true);
+            $("#generalmodal").modal('show');
+
+        }
+
+        function editSimcard(id) {
+
+            $.post("@Url.Action("GetSimcardById","Simcard")", { SimcardId: id })
+                .done(function (res) {
+                    $('#CreateSimcardDto_PhoneNumber').val(res.phoneNumber);
+                    $("#CreateSimcardDto_Ip").val(res.ip);
+                    $("#CreateSimcardDto_Id").val(res.id);
+                    $("#CreateSimcardDto_DeviceId").val(res.deviceId);
+                    $("#CreateSimcardDto_DeviceId").trigger('change');
+                    $("#CreateSimcardDto_Serial").val(res.serial);
+                    $("#CreateSimcardDto_Description").val(res.description);
+                    $("#CreateSimcardDto_IsActive").prop('checked', res.isActive);
+
+                    $("#generalmodal").modal('show');
+                });
+        }
+
+        $(document).on('submit', '#simcardForm', function (e) {
+            e.preventDefault();
+            var $form = $(this);
+            var $btn = $form.find('button[type="submit"]');
+            $btn.prop('disabled', true).html('<i class="icon-spinner fa-spin"></i> در حال ذخیره...');
+            
+            $.ajax({
+                url: '@Url.Action("CreateSimcard", "Simcard")',
+                type: 'POST',
+                data: $form.serialize(),
+                headers: {
+                    'RequestVerificationToken': $form.find('input[name="__RequestVerificationToken"]').val(),
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            }).done(function (resp) {
+                if (resp && resp.success === false) {
+                    showAlert(resp.message, 1);
+                } else {
+                    var modalEl = document.getElementById('generalmodal');
+                    var modal = bootstrap.Modal.getInstance(modalEl);
+                    modal.hide();
+                    loadTable(currentPage);
+                    updateSimcardCount();
+                    showAlert(resp.message || 'عملیات با موفقیت انجام شد', 0);
+                }
+            }).fail(function (xhr, status, error) {
+                console.error('Error:', error);
+                showAlert('خطا در ارسال درخواست: ' + error, 1);
+            }).always(function() {
+                $btn.prop('disabled', false).html('ذخیره');
+            });
+        });
+
+        $(document).on('click', '.btn-delete-simcard', function () {
+            var id = $(this).data('id');
+            var number = $(this).data('number');
+            
+            Swal.fire({
+                title: 'آیا از حذف سیم کارت "' + number + '" مطمئن هستید؟',
+                text: "این عملیات قابل بازگشت نیست!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'بله، حذف کن',
+                cancelButtonText: 'انصراف'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    deleteSimcard(id);
+                }
+            });
+        });
+
+        function deleteSimcard(id) {
+            $.ajax({
+                url: '@Url.Action("DeleteSimcard", "Simcard")',
+                type: 'POST',
+                data: { simcardId: id },
+                headers: {
+                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').first().val()
+                }
+            }).done(function (resp) {
+                if (resp.success) {
+                    loadTable(currentPage);
+                    updateSimcardCount();
+                    showAlert(resp.message, 0);
+                } else {
+                    showAlert(resp.message, 1);
+                }
+            }).fail(function (xhr, status, error) {
+                console.error('Error:', error);
+                showAlert('خطا در حذف سیم کارت: ' + error, 1);
+            });
+        }
+
+        $(document).on('click', '.btn-activation-simcard', function () {
+            var id = $(this).data('id');
+            $.post('@Url.Action("ActivationSimcard", "Simcard")', { simcardId: id })
+                .done(function (resp) {
+                    loadTable(currentPage);
+                });
+        });
+
+    </script>
+}

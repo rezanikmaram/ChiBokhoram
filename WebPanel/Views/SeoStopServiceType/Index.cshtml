@@ -1,0 +1,245 @@
+﻿@model SeoStopServiceTypePageDto
+@{
+    ViewData["Title"] = "انواع توقف سرویس";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+    int i = ((Model.StopTypes.PageNumber - 1) * Model.StopTypes.PageSize) + 1;
+}
+
+<div class="col-lg-12">
+    <div class="card">
+        <div class="card-header pb-1">
+            <div class="d-flex justify-content-between">
+                <h3 class="title">
+                    <i class="icon-frane"></i> انواع توقف سرویس (تعداد کل @Model.AllStopTypeCount)
+                </h3>
+                <div>
+                    <button type="button" class="btn btn-primary btn-add-type">
+                        <i class="icon-plus align-middle"></i> نوع جدید
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="card-body pt-0">
+            <form id="formFilter" asp-action="Index" asp-route-p="" method="post">
+                <input name="p" id="pageNumber" hidden />
+                <div class="form-body">
+                    <div class="row col-md-12">
+                        <div class="form-group col-md-4">
+                            <label>جستجو</label>
+                            <div class="input-group">
+                                <input type="text" asp-for="Filter.Search" class="form-control" />
+                            </div>
+                        </div>
+                        <div class="form-group col-md-2 d-flex justify-content-center flex-wrap align-content-center">
+                            <button style="border-radius:5px; margin-top:30px" class="alert-icon btn btn-success" type="submit">
+                                <p class="px-3"> فیلتر</p>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+            <div id="table-container">
+                @await Html.PartialAsync("_SeoStopServiceTypeTable", Model)
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="stopTypeModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">ثبت/ویرایش نوع توقف سرویس</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body"></div>
+        </div>
+    </div>
+</div>
+
+@section script {
+    <script>
+        var currentPage = @Model.StopTypes.PageNumber;
+        var currentSortColumn = '@(Model.Filter?.SortColumn ?? "name")';
+        var currentSortDirection = '@(Model.Filter?.SortDirection ?? "asc")';
+
+        function getFilterData() {
+            return {
+                'filter.Search': $("#Filter_Search").val(),
+                'filter.SortColumn': currentSortColumn,
+                'filter.SortDirection': currentSortDirection
+            };
+        }
+
+        function loadTable(page) {
+            currentPage = page || 1;
+            var data = Object.assign({ p: currentPage }, getFilterData());
+            $.get('@Url.Action("Table","SeoStopServiceType")', data)
+                .done(function (html) {
+                    $("#table-container").html(html);
+                })
+                .fail(function (xhr) {
+                    showAlert('خطا در بارگذاری: ' + (xhr.responseText || 'خطای ناشناخته'), 1);
+                });
+        }
+
+        function loadTableWithSort(sortColumn, sortDirection) {
+            currentSortColumn = sortColumn;
+            currentSortDirection = sortDirection;
+            loadTable(1);
+        }
+
+        function updateStopTypeCount() {
+            $.get('@Url.Action("GetStopTypeCount", "SeoStopServiceType")')
+                .done(function (resp) {
+                    if (resp.count !== undefined) {
+                        $('.title').html('<i class="icon-frane"></i> انواع توقف سرویس (تعداد کل ' + resp.count.toLocaleString('fa-IR') + ' )');
+                    }
+                });
+        }
+
+        function openModal(url) {
+            $.get(url).done(function (html) {
+                var $modal = $("#stopTypeModal");
+                $modal.find('.modal-body').html(html);
+                if ($.validator && $.validator.unobtrusive) {
+                    $.validator.unobtrusive.parse($modal);
+                }
+                var modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('stopTypeModal'));
+                modal.show();
+            }).fail(function (xhr) {
+                showAlert('خطا در بارگذاری فرم: ' + (xhr.responseText || 'خطای ناشناخته'), 1);
+            });
+        }
+
+        $(document).on('submit', '#formFilter', function (e) {
+            e.preventDefault();
+            loadTable(1);
+        });
+
+        $(document).on('click', '#table-container .page-link', function (e) {
+            e.preventDefault();
+            var hrefValue = $(this).attr("href") || '';
+            var match = hrefValue.match(/p=(\d+)/);
+            var p = match ? parseInt(match[1]) : 1;
+            loadTable(p);
+        });
+
+        $(document).on('click', '.btn-add-type', function () {
+            openModal('@Url.Action("CreateStopTypeModal","SeoStopServiceType")');
+        });
+
+        $(document).on('click', '.btn-edit-type', function () {
+            var id = $(this).data('id');
+            openModal('@Url.Action("CreateStopTypeModal","SeoStopServiceType")' + '?stopTypeId=' + id);
+        });
+
+        $(document).on('submit', '#stopTypeModal form', function (e) {
+            e.preventDefault();
+            var $form = $(this);
+            var $btn = $form.find('button[type="submit"]');
+            $btn.prop('disabled', true).html('<i class="icon-spinner fa-spin"></i> در حال ذخیره...');
+            $.ajax({
+                url: $form.attr('action'),
+                type: 'POST',
+                data: $form.serialize()
+            }).done(function (resp, status, xhr) {
+                if (typeof resp === 'object' && resp !== null && resp.success) {
+                    var modalEl = document.getElementById('stopTypeModal');
+                    var modal = bootstrap.Modal.getInstance(modalEl);
+                    if (modal) modal.hide();
+                    loadTable(currentPage);
+                    updateStopTypeCount();
+                    showAlert('نوع توقف سرویس با موفقیت ذخیره شد', 0);
+                } else {
+                    $("#stopTypeModal .modal-body").html(resp);
+                    if ($.validator && $.validator.unobtrusive) {
+                        $.validator.unobtrusive.parse('#stopTypeModal');
+                    }
+                }
+            }).fail(function (xhr) {
+                var msg = 'خطا در ذخیره اطلاعات';
+                try {
+                    var resp = JSON.parse(xhr.responseText);
+                    if (resp && resp.message) msg = resp.message;
+                } catch(e) {}
+                showAlert(msg, 1);
+            }).always(function() {
+                $btn.prop('disabled', false).html('ذخیره');
+            });
+        });
+
+        $(document).on('click', '.btn-delete-type', function () {
+            var id = $(this).data('id');
+            Swal.fire({
+                title: 'آیا از حذف این مورد مطمئن هستید؟',
+                text: "این عملیات قابل بازگشت نیست!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'بله، حذف کن',
+                cancelButtonText: 'انصراف'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: '@Url.Action("DeleteStopType","SeoStopServiceType")',
+                        type: 'POST',
+                        data: { stopTypeId: id }
+                    }).done(function (resp) {
+                        if (typeof resp === 'object' && resp !== null && resp.success) {
+                            loadTable(currentPage);
+                            updateStopTypeCount();
+                            showAlert('نوع توقف سرویس با موفقیت حذف شد', 0);
+                        } else {
+                            showAlert(resp.message || 'خطا در حذف', 1);
+                        }
+                    }).fail(function (xhr) {
+                        showAlert('خطا در حذف: ' + (xhr.responseText || 'خطای ناشناخته'), 1);
+                    });
+                }
+            });
+        });
+
+        $(document).on('click', '.btn-activation', function () {
+            var id = $(this).data('id');
+            Swal.fire({
+                title: 'آیا از تغییر وضعیت این مورد مطمئن هستید؟',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'بله',
+                cancelButtonText: 'انصراف'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: '@Url.Action("ActivationStopType","SeoStopServiceType")',
+                        type: 'POST',
+                        data: { stopTypeId: id }
+                    }).done(function (resp) {
+                        if (typeof resp === 'object' && resp !== null && resp.success) {
+                            loadTable(currentPage);
+                            updateStopTypeCount();
+                            showAlert('وضعیت با موفقیت تغییر یافت', 0);
+                        } else {
+                            showAlert(resp.message || 'خطا در تغییر وضعیت', 1);
+                        }
+                    }).fail(function (xhr) {
+                        showAlert('خطا در تغییر وضعیت: ' + (xhr.responseText || 'خطای ناشناخته'), 1);
+                    });
+                }
+            });
+        });
+
+        $(document).off('click', '.sortable-header').on('click', '.sortable-header', function () {
+            var column = $(this).data('column');
+            if (!column || column === 'row') return;
+            var newDirection = 'asc';
+            if (column === currentSortColumn) {
+                newDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
+            }
+            loadTableWithSort(column, newDirection);
+        });
+    </script>
+}

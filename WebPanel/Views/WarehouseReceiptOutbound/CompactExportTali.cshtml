@@ -1,0 +1,209 @@
+@model TaliExportCompactPageDto
+@{
+    ViewData["Title"] = "خلاصه تالی ها صادرات";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+    int i = 1;
+}
+ 
+<partial name="_WroInfo" model="Model.PageInfo" />
+
+<div class="col-lg-12">
+    <div class="card">
+        <div class="card-header">
+            <div class="d-flex justify-content-between">
+                <h3 class="title">
+                    <a asp-action="Details"
+                       asp-route-wroId="@Model.PageInfo.Id">
+                        <i class="fa-solid fa-right-to-bracket me-2 align-middle"></i>
+                    </a>
+                    خلاصه تالی ها صادرات
+                </h3>
+
+                <div>
+                
+                    <div class="buttons-box">
+                        <i class="icon-size-fullscreen"></i>
+                        <div class="paper-ripple">
+                            <div class="paper-ripple__background"></div>
+                            <div class="paper-ripple__waves"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-body pt-0">
+
+            <form id="formFilter" asp-action="CompactExportTali" asp-route-p="" asp-route-wroId="@Model.PageInfo.Id"
+                    method="post">
+                <input name="filter.page" id="pageNumber" hidden />
+                <input asp-for="PageInfo.Id" name="filter.WroId" hidden />
+                
+                <div class="form-body ">
+
+                    <div class="row gy-4">
+
+                        <div class="col-md-3 col-sm-12">
+                            <div class="form-group">
+                                <label>  جستجو:</label>
+                                <div class="input-group">
+                                    <input asp-for="Filter.Search" type="text" class="rounded form-control" placeholder="نام کالا">
+                                    <span asp-validation-for="Filter.Search" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group col-md-2 ">
+                            <button style="border-radius:5px; margin-top:30px" class="alert-icon px-3 btn btn-success "
+                                    type="submit">
+                                فیلتر
+                            </button>
+                        </div>
+
+                    </div>
+
+                </div>
+            </form>
+
+            <div class="table-responsive mt-5">
+                <table class="table table-sm table-bordered table-hover table-striped" id="data-table">
+                    <thead class="bg-primary">
+                        <tr>
+                            <th class="px-1 text-center">#</th>
+                            <th class="px-1 text-center">کالا</th>
+                            <th class="px-1 text-center">تعداد کل</th>
+                            <th class="px-1 text-center">شمارش محوطه</th>
+                            <th class="px-1 text-center">باقیمانده محوطه</th>
+
+                            <th class="px-1 text-center">شمارش اسکله</th>
+                            <th class="px-1 text-center">باقیمانده اسکله</th>
+                           
+                            <th class="px-1 text-center">عملیات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                        @foreach (var item in Model.List)
+                        {
+                            <tr>
+                                <td class="align-middle px-2 text-center">@(i++)</td>
+                                 
+                                <td class="align-middle px-2 text-center">
+                                    @item.ProductTitle
+                                </td>
+
+                                <td class="align-middle px-2 text-center">@item.Count.ToPrice() @item.ProductPackingName </td>
+                                <td class="align-middle px-2 text-center"> <a onclick="ShowModalTaliList('@item.WroProductId', true)" class="btn btn-outline-primary px-2">@item.TaliCount1.ToPrice()  </a></td>
+                                <td class="align-middle px-2 text-center">@item.RemainingTaliCount1.ToPrice()  </td>
+
+                                <td class="align-middle px-2 text-center"> <a onclick="ShowModalTaliList('@item.WroProductId', false)" class="btn btn-outline-primary px-2">@item.TaliCount2.ToPrice()  </a></td>
+                                <td class="align-middle px-2 text-center">@item.RemainingTaliCount2.ToPrice()  </td>
+
+                                <td class="align-middle px-2 text-center">
+                                   @*  @if (item.SeoProductId != null)
+                                    {
+                                        <a class="btn btn-sm btn-outline-primary me-1"   onclick="ShowModalTaliGearList('@item.SeoProductId', true)">
+                                            <i class="fa-solid fa-wrench me-1"></i> تجهیزات اسکله
+                                        </a>
+                                        <a class="btn btn-sm btn-outline-info-2x"  onclick="ShowModalTaliGearList('@item.SeoProductId', false)">
+                                            <i class="fa-solid fa-screwdriver-wrench me-1"></i> تجهیزات محوطه
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    } *@
+                                </td>
+
+                            </tr>
+                        }
+
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<div id="TaliListBody"></div>
+<div id="SeoInfoModalId"></div>
+<div id="SeoProductInfoModalId"></div>
+<div id="WeightTaliListModalId"></div>
+<div id="TaliGearListModalContainer"></div>
+
+@section script {
+
+    <script>
+        $(document).ready(function () {
+            // $('.select2').select2();
+        });
+
+        function ShowModalTaliList(WroProductId, step) {
+            $.post("@Url.Action("GetListCounterOneProduct", "WarehouseReceiptOutbound")", { swrProductId: WroProductId, step: step })
+                .done(function (res) {
+                    $("#TaliListBody").html(res);
+                    $("#taliListModal").modal('show');
+                });
+        }
+
+        function ShowModalWeightTaliList(taliId) {
+            $.post("@Url.Action("GetWeightTaliList", "Voyage")", { taliId: taliId })
+                .done(function (res) {
+                    $("#WeightTaliListModalId").html(res);
+                    $("#WeightTaliListModal").modal('show');
+                });
+        }
+
+        function ShowModalSeoInfo(seoId) {
+            if (seoId == null) return;
+
+            $.post("@Url.Action("GetSeoInfo", "Voyage")", { seoId: seoId })
+                .done(function (res) {
+                    $("#SeoInfoModalId").html(res);
+                    $("#SeoInfoModal").modal('show');
+                }).fail(function (xhr) {
+                    var err = JSON.parse(xhr.responseText)
+                    console.error("Error:", JSON.stringify(err));
+                });
+        }
+
+        function ShowModalSeoProductInfo(seoProductId) {
+            if (seoProductId == null) return;
+
+            $.post("@Url.Action("GetSeoProductInfo", "Voyage")", { seoProductId: seoProductId })
+                .done(function (res) {
+                    $("#SeoProductInfoModalId").html(res);
+                    $("#SeoProductInfoModal").modal('show');
+                }).fail(function (xhr) {
+                    var err = JSON.parse(xhr.responseText)
+                    console.error("Error:", JSON.stringify(err));
+                });
+        }
+
+        function ShowModalTaliGearList(seoProductId, step) {
+            if (seoProductId == null) return;
+            var voyageId = '@Model.PageInfo.Id';
+            $.post("@Url.Action("GetTaliGearList", "Voyage")", { voyageId: voyageId, seoProductId: seoProductId, step: step })
+                .done(function (res) {
+                    $("#TaliGearListModalContainer").html(res);
+                    $("#taliGearListModal").modal('show');
+                }).fail(function (xhr) {
+                    try {
+                        var err = JSON.parse(xhr.responseText);
+                        console.error("Error:", JSON.stringify(err));
+                    } catch (e) {
+                        console.error("Error loading gear list modal", xhr.responseText);
+                    }
+                });
+        }
+
+        $(".page-link").click(function (event) {
+            event.preventDefault(); // غیرفعال کردن عملکرد پیشفرض href
+
+            var hrefValue = $(this).attr("href");
+            $("#pageNumber").val(hrefValue.split("p=")[1]);
+            $("#formFilter").submit();
+        });
+    </script>
+}

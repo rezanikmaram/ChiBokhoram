@@ -1,0 +1,78 @@
+@model GearPageResultDto
+@{
+    int i = ((Model.Result.PageNumber - 1) * Model.Result.PageSize) + 1;
+}
+
+<table class="table table-bordered table-hover table-striped" id="data-table">
+    <thead class="bg-primary">
+        <tr>
+            <th>ردیف</th>
+            <th>نام تجهیز</th>
+            <th>نوع</th>
+            <th>مدل</th>
+             
+            <th>نام شرکت</th>
+           
+            <th>وضعیت تجهیز</th>
+            <th>نوع مالکیت</th>
+            <th>شماره پلاک</th>
+            <th>تناژ</th>
+            <td>عملیات</td>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Result.Data)
+        {
+            <tr>
+                <td class="align-middle">@(i++)</td>
+                <td class="align-middle">@item.Name</td>
+                <td class="align-middle">@item.GearTypeTitle</td>
+                <td class="align-middle">@item.GearModel</td>
+                
+                <td class="align-middle">@item.CompanyTitle</td>
+                
+                <td class="align-middle">@item.GearStateTitle</td>
+                <td class="align-middle">@item.OwnershipTypeTitle</td>
+                <td class="align-middle">@item.Plaque</td>
+                <td class="align-middle">@item.Tonnage?.ToPrice()</td>
+                <td class="d-flex justify-content-start align-items-center gap-2 flex-nowrap">
+
+                    <a class="btn btn-warning px-2 btn-sm btn-icon curve" onclick="editGear('@item.Id');"><i class="icon-pencil align-middle fs-6"></i></a>
+                    <button type="button" class="btn btn-info px-2 btn-sm btn-icon curve" onclick="openChecklistModal(@item.Id, '@item.Name')" title="اتصال چک لیست‌های بازدید روزانه">
+                        <i class="icon-list"></i>
+                    </button>
+                    <button type="button" onclick="deleteGear(@item.Id, this);" class="btn btn-danger px-2 btn-sm btn-icon curve">
+                        <i class="icon-trash fs-6 align-middle fa-flip-horizontal"></i>
+                    </button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+<div>
+    <cs-pager cs-paging-pagesize="@Model.Result.PageSize"
+              cs-paging-pagenumber="@Model.Result.PageNumber"
+              cs-paging-totalitems="@Model.Result.TotalItems"
+              cs-paging-maxpageritems="10"
+              cs-pagenumber-param="p"
+              cs-show-first-last="true"
+              cs-suppress-empty-nextprev="true"
+              cs-suppress-inactive-firstlast="true"
+              cs-show-numbered="true"
+              cs-first-page-text="ابتدا"
+              cs-last-page-text="انتها"
+              cs-next-page-title="بعدی"
+              cs-previous-page-title="قبلی"
+              cs-first-page-title="ابتدا"
+              cs-last-page-title="انتها"
+              cs-next-page-text="بعدی"
+              cs-previous-page-text="قبلی"
+              cs-pager-li-current-class="page-item active"
+              cs-pager-li-other-class="page-item"
+              cs-pager-li-non-active-class="page-item disabled"
+              cs-pager-link-current-class="page-link"
+              cs-pager-link-other-class="page-link"
+              asp-controller="Gear"
+              asp-action="Index">
+    </cs-pager>
+</div>

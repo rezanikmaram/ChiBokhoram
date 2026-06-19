@@ -1,0 +1,198 @@
+@model Entities.DTOs.Web.GearDailyInspectionAssignmentPageDto
+@using Common.enumeration
+@using Common.Utilities
+
+<div class="row gy-3 mb-3">
+    <input type="hidden" id="modalGearId" value="@Model.GearId" />
+    <div class="col-md-8">
+        <label>جستجوی عنوان چک لیست</label>
+        <input class="form-control" id="checklistSearch" value="@Model?.Filter?.Search" placeholder="عنوان چک لیست را وارد کنید..." />
+    </div>
+    <div class="col-md-4 d-flex align-items-end">
+        <button class="btn btn-primary w-100" onclick="searchChecklists()">اعمال فیلتر</button>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-5">
+        <h5>چک لیست‌های قابل اتصال</h5>
+        <select id="unassigned" class="form-control" size="12">
+            @foreach (var c in Model.UnAssignedCheckLists)
+            {
+                <option value="@c.CheckListId">@c.Title</option>
+            }
+        </select>
+    </div>
+    <div class="col-md-2 d-flex flex-column align-items-center justify-content-center gap-3">
+        <div class="w-100 text-center">
+            <div class="mb-2">
+                <label class="form-label">نوع کار</label>
+                <select class="form-select" id="gearTaskType">
+                    @foreach (GearTaskType t in Enum.GetValues(typeof(GearTaskType)))
+                    {
+                        <option value="@t">@t.ToDisplay()</option>
+                    }
+                </select>
+            </div>
+            <button type="button" onclick="assignChecklist()" class="btn btn-success w-100">افزودن »</button>
+        </div>
+        <div class="w-100 text-center">
+            <button type="button" onclick="removeChecklist()" class="btn btn-danger w-100">« حذف</button>
+        </div>
+    </div>
+    <div class="col-md-5">
+        <h5>چک لیست‌های متصل</h5>
+        <select id="assigned" class="form-control" multiple size="12">
+            @foreach (var c in Model.AssignedCheckLists)
+            {
+                var tt = c.GearTaskType.HasValue ? c.GearTaskType.Value.ToDisplay() : "";
+                <option value="@c.CheckListId|@((int)c.GearTaskType.Value)">@c.Title (@tt)</option>
+            }
+        </select>
+    </div>
+</div>
+
+<script>
+    function searchChecklists() {
+        var gearId = $('#modalGearId').val();
+        var search = $('#checklistSearch').val();
+        
+        $.ajax({
+            url: "@Url.Action("ManageChecklistsPartial", "GearDailyInspectionAssignment")",
+            type: "GET",
+            data: { gearId: gearId, search: search },
+            success: function(response) {
+                $('#checklistModalBody').html(response);
+            },
+            error: function() {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'خطا',
+                    text: 'خطا در بارگذاری چک لیست‌ها',
+                    confirmButtonText: 'باشه'
+                });
+            }
+        });
+    }
+
+    function assignChecklist() {
+        var gearId = $('#modalGearId').val();
+        var checkListId = $('#unassigned').val();
+        var gearTaskType = $('#gearTaskType').val();
+        
+        if (!checkListId) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'توجه',
+                text: 'لطفاً یک چک لیست انتخاب کنید',
+                confirmButtonText: 'باشه'
+            });
+            return;
+        }
+        
+        $.ajax({
+            url: "@Url.Action("AssignAjax", "GearDailyInspectionAssignment")",
+            type: "POST",
+            data: { 
+                GearId: gearId, 
+                CheckListId: checkListId, 
+                GearTaskType: gearTaskType 
+            },
+            success: function(response) {
+                if (response.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'موفقیت',
+                        text: response.message,
+                        timer: 1500,
+                        timerProgressBar: true,
+                        showConfirmButton: false
+                    });
+                    searchChecklists();
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'خطا',
+                        text: response.message,
+                        confirmButtonText: 'باشه'
+                    });
+                }
+            },
+            error: function() {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'خطا',
+                    text: 'خطایی رخ داد. لطفاً دوباره تلاش کنید',
+                    confirmButtonText: 'باشه'
+                });
+            }
+        });
+    }
+
+    function removeChecklist() {
+        var gearId = $('#modalGearId').val();
+        var selectedOptions = $('#assigned option:selected');
+        
+        if (selectedOptions.length === 0) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'توجه',
+                text: 'لطفاً حداقل یک چک لیست متصل انتخاب کنید',
+                confirmButtonText: 'باشه'
+            });
+            return;
+        }
+        
+        var ids = Array.from(selectedOptions).map(o => o.value).join(',');
+        
+        Swal.fire({
+            title: 'تایید حذف',
+            text: 'آیا از حذف چک لیست(ها) اطمینان دارید؟',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'بله، حذف شود',
+            cancelButtonText: 'لغو',
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: "@Url.Action("RemoveAjax", "GearDailyInspectionAssignment")",
+                    type: "POST",
+                    data: { 
+                        GearId: gearId, 
+                        Ids: ids 
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'موفقیت',
+                                text: response.message,
+                                timer: 1500,
+                                timerProgressBar: true,
+                                showConfirmButton: false
+                            });
+                            searchChecklists();
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'خطا',
+                                text: response.message,
+                                confirmButtonText: 'باشه'
+                            });
+                        }
+                    },
+                    error: function() {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'خطا',
+                            text: 'خطایی رخ داد. لطفاً دوباره تلاش کنید',
+                            confirmButtonText: 'باشه'
+                        });
+                    }
+                });
+            }
+        });
+    }
+</script>

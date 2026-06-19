@@ -1,0 +1,157 @@
+﻿@model ProductPageDto
+@{
+    ViewData["Title"] = "کالا ها";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+    int i = 1;
+}
+
+
+<div class="col-lg-12">
+    <div class="card">
+        <div class="card-header pb-0">
+            <div class="mb-2">
+                <div class="d-flex justify-content-between">
+                    <h3 class="title">
+                        انواع کالا
+                    </h3>
+                    <a class="btn btn-primary rounded" onclick="createCategory();"><i class="fa-solid fa-plus me-2"></i>دسته جدید</a>
+                </div>
+            </div>
+        </div>
+        <div class="card-body pt-0">
+            <div class="row">
+                <div id="data-table_filter" class="dataTables_filter col-12">
+                    <form id="formFilter" asp-action="index" method="post">
+                        <input name="p" id="pageNumber" hidden />
+                        <div class="form-body">
+                            <div class="row gy-4">
+                                <div class="form-group col-md-4 ">
+                                    <label>جستجو</label>
+                                    <div class="input-group">
+                                        <input asp-for="Filter.Search" type="text" placeholder="نام کالا/نام سردسته" class="form-control">
+                                    </div>
+                                </div>
+                                <div class="col-md-1">
+                                    <div class="d-flex justify-content-around " style="margin-top:28px">
+                                        <button style="border-radius:5px" class="alert-icon btn btn-success " type="submit"><p class="px-3">فیلتر</p></button>
+                                    </div>
+                                </div>
+                                <div class="col-md-2"></div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="table-responsive mt-4">
+                <table class="table table-sm table-bordered table-hover table-striped" id="data-table">
+                    <thead class="bg-primary">
+                        <tr>
+                            <th>ردیف</th>
+                            <th>سردسته</th>
+                            <th>کالاها</th>
+                            <th class="w-auto"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+
+                        @foreach (var item in Model.List)
+                        {
+                            
+                            <tr>
+                                <td class="align-middle">@(i++)</td>
+                                <td class="align-middle">
+                                    <div class="border rounded mx-1 bg-light-dark text-dark p-1">
+                                        <p class="mb-0 "> @item.Title  <i class="fa fa-pencil bg-secondary align-middle mx-1 rounded p-1" type="button" onclick="editCategory('@item.Id');"></i></p>
+                                    </div>
+                                </td>
+                                <td class="align-middle d-flex flex-wrap">
+                                    @foreach (var product in item.Products)
+                                    {
+                                        <div class="border rounded m-1 bg-light-dark px-1 d-flex align-items-center">
+                                            <p class="label text-dark p-2 rounded mb-0"> @product.ProductName </p>
+                                             
+                                            <a class="fa fa-pencil bg-secondary align-middle rounded p-2 m-2"  onclick="editproduct('@product.Id')"></a>
+                                        </div>
+                                    }
+                                </td>
+                                <td class="align-middle px-2 text-center ">
+                                    <a class="btn btn-success rounded  label" onclick="createproduct('@item.Id');">کالای جدید</a>
+                                </td>
+                            </tr>
+                        }
+
+                    </tbody>
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+
+<div id="generalmodal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" tabindex="-1">
+    <div id="modalbody" class="modal-dialog modal-dialog-centered">
+        <partial name="_CreateProductCategory" model="@(new CreateProductCategoryDto())" />
+    </div>
+</div>
+
+
+<div id="generalmodal2" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" tabindex="-1">
+    <div id="modalbody2" class="modal-dialog modal-dialog-centered">
+  
+    </div>
+</div>
+
+@section script {
+    <script>
+        function createCategory() {
+            $("#Name").val('');
+            $("#Id").val('');
+
+            if ($("#btnCategoryDeleteId"))
+                $("#btnCategoryDeleteId").html('');
+           
+            $("#generalmodal").modal('show');
+
+        }
+        function editCategory(id) {
+
+            $.post("@Url.Action("GetProductCategoryById", "Product")", { categoryId: id })
+                .done(function (res) {
+                    $("#modalbody").html(res);
+                    $("#generalmodal").modal('show');
+                });
+        }
+
+
+        function createproduct(id) {
+
+            $("#ProductName").val('');
+            $("#Id").val('');
+            
+
+            $.post("@Url.Action("GetNewProduct", "Product")", { categoryId: id })
+                .done(function (res) {
+                    $("#modalbody2").html(res);
+                    
+                    $("#generalmodal2").modal('show');
+                });
+
+        }
+        function editproduct(id) {
+
+            $.post("@Url.Action("GetProductById", "Product")", { productId: id })
+                .done(function (res) {
+                    $("#modalbody2").html(res);
+                    $("#generalmodal2").modal('show');
+
+                }).fail(function (xhr, status, error) {
+                        location.reload();
+                        });
+        }
+    </script>
+}
+

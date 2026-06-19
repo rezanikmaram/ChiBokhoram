@@ -1,0 +1,70 @@
+﻿@model CreateDriverDto
+@{
+    ViewData["Title"] = "ثبت راننده";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+<div class="col-lg-12">
+    <div class="card">
+        <div class="card-header pb-0">
+            <div class="d-flex justify-content-between">
+                <h3 class="title">
+                    <a asp-action="Details" asp-controller="Company" asp-route-companyId="@Model.CompanyId"><i class="fa-solid fa-right-to-bracket me-2"></i></a>
+                     افزودن راننده
+                </h3>
+            </div>
+        </div>
+
+        <form asp-action="CreateDriver" method="post">
+            <input asp-for="CompanyId"  type="hidden"/>
+            <input asp-for="Id" type="hidden"/>
+            <div class="card-body">
+
+                <div class="form-body px-4">
+                    
+                    <div class="d-flex col-md-12">
+                        <div class="">
+                            <div class="form-group">
+                                <label >نام و نام خانوادگی</label>
+                                <div class="input-group rounded" style="width: 400px;">
+                                    <input type="text" asp-for="Name" class="form-control rounded" required>
+                                    <span asp-validation-for="Name" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mx-3">
+                            <div class="form-group">
+                                <label>کد ملی</label>
+                                <div class="input-group rounded" style="width: 400px;">
+                                    <input type="text" asp-for="CodeMeli" class="form-control rounded">
+                                    <span asp-validation-for="CodeMeli" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mx-3">
+                            <div class="form-group">
+                                <label>تلفن</label>
+                                <div class="input-group rounded" style="width: 400px; ">
+                                    <input type="text" asp-for="Phone" class="form-control rounded" >
+                                    <span asp-validation-for="Phone" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="form-actions mb-4 px-4" style="float: left;">
+                <a asp-action="Drivers" asp-route-companyId="@Model.CompanyId" class="btn btn-warning btn-round"> <i class="icon-close"> </i> برگشت</a>
+                <button type="submit" class="btn btn-info btn-round">
+                    <i class="icon-check"></i>
+                    ذخیره
+                    <div class="paper-ripple"><div class="paper-ripple__background"></div><div class="paper-ripple__waves"></div></div>
+                </button>
+            </div>
+        </form>
+
+        <section class="fix"></section>
+
+    </div>
+</div>
+

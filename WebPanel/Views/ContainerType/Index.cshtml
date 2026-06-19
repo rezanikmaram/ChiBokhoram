@@ -1,0 +1,176 @@
+﻿@model ContainerTypePageResultDto
+@{
+    ViewData["Title"] = "لیست نوع های کانتینر";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+    int i = ((Model.Result.PageNumber - 1) * Model.Result.PageSize) + 1;
+}
+
+<div class="col-lg-12">
+    <div class="card">
+        <div class="card-header">
+            <div class="d-flex justify-content-between">
+                <h3 class="title">
+                    <i class="icon-frane"></i> لیست نوع های کانتینر
+                </h3>
+            <div>
+                    <a class="btn rounded btn-primary" onclick="createContainerType();">  +   نوع کانتینر جدید  </a>
+                    <div class="buttons-box">
+                        <i class="icon-size-fullscreen"></i>
+                        <div class="paper-ripple">
+                            <div class="paper-ripple__background"></div>
+                            <div class="paper-ripple__waves"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-body pt-0">
+            <div class="table-responsive py-0">
+                <table class="table table-bordered table-hover table-striped" id="data-table">
+                    <thead class="bg-primary">
+                        <tr>
+                            <th>شماره ردیف</th>
+                            <th>کد نوع کانتینر</th>
+                            <th>نام نوع کانتینر</th>
+                            <th>نام انگلیسی نوع کانتینر</th>
+                            <th>سایز</th>
+                            <th>کد گروه کانتینر</th>
+                            <th>نام گروه کانتینر</th>
+                            <th>نام انگلیسی کانتینر</th>
+
+                            <td>عملیات</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+
+                        @foreach (var item in Model.Result.Data)
+                        {
+                            <tr>
+                                <td class="align-middle">@(i++)</td>
+                                <td class="align-middle">@item.Code</td>
+                                <td class="align-middle">@item.Name</td>
+                                <td class="align-middle">@item.NameEn</td>
+                                <td class="align-middle">@item.ContainerSizeType.ToDisplay(DisplayProperty.Name)</td>
+                                <td class="align-middle">@item.ContainerGroup.Code</td>
+                                <td class="align-middle">@item.ContainerGroup.Name</td>
+                                <td class="align-middle">@item.ContainerGroup.NameEn</td>
+
+
+                                <td class=" justify-content-between align-items-center">
+
+                                    <a class="btn btn-warning px-2 btn-sm btn-icon curve" onclick="editContainerType('@item.Id');"><i class="icon-pencil align-middle fs-6"></i></a>
+                                    <a id="DeleteContainerType@(i)" onclick="ShowQAlert(event,'DeleteContainerType@(i)');" class="btn btn-danger px-2 btn-sm btn-icon curve btn-questions ms-1"
+                                       asp-action="DeleteContainerType" asp-route-containerTypeId="@item.Id">
+                                        <i class="icon-trash fs-6 align-middle fa-flip-horizontal"></i>
+                                    </a>
+                                </td>
+
+                            </tr>
+
+                        }
+
+
+
+                    </tbody>
+                </table>
+                <div>
+                    <cs-pager cs-paging-pagesize="@Model.Result.PageSize"
+                              cs-paging-pagenumber="@Model.Result.PageNumber"
+                              cs-paging-totalitems="@Model.Result.TotalItems"
+                              cs-paging-maxpageritems="10"
+                              cs-pagenumber-param="p"
+                              cs-show-first-last="true"
+                              cs-suppress-empty-nextprev="true"
+                              cs-suppress-inactive-firstlast="true"
+                              cs-show-numbered="true"
+                              cs-first-page-text="ابتدا"
+                              cs-last-page-text="انتها"
+                              cs-next-page-title="بعدی"
+                              cs-previous-page-title="قبلی"
+                              cs-first-page-title="ابتدا"
+                              cs-last-page-title="انتها"
+                              cs-next-page-text="بعدی"
+                              cs-previous-page-text="قبلی"
+                              cs-pager-li-current-class="page-item active"
+                              cs-pager-li-other-class="page-item"
+                              cs-pager-li-non-active-class="page-item disabled"
+                              cs-pager-link-current-class="page-link"
+                              cs-pager-link-other-class="page-link"
+                              asp-controller="ContainerType"
+                              asp-action="Index">
+                    </cs-pager>
+                </div>
+
+            </div>
+            <!-- /.table-responsive -->
+        </div>
+        <!-- /.portlet -->
+    </div>
+</div>
+
+
+
+
+<div id="generalmodal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">ثبت نوع کانتینر </h4>
+                <button type="button" class="close btn-close rounded border" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="modalbody">
+
+                <partial name="_CreateContainerType" model="new CreateContainerTypeDto{}" />
+
+            </div>
+        </div>
+    </div>
+</div>
+
+@section script {
+
+    <script>
+        $(document).ready(function () {
+
+            $('.select2').select2();
+
+            $('select[class*="generalmodal"].select2').select2({
+                dropdownParent: $('#generalmodal')
+            });
+        });
+
+
+
+
+        function createContainerType() {
+            $("#Name").val('');
+            $("#NameEn").val('');
+            $("#Id").val('');
+            $("#generalmodal").modal('show');
+        }
+
+        function editContainerType(id) {
+
+            $.post("@Url.Action("GetContainerTypeById", "ContainerType")", { containerTypeId: id })
+                .done(function (res) {
+                    $("#modalbody").html(res);
+                    $("#generalmodal").modal('show');
+                });
+        }
+
+        $(".page-link").click(e => {
+            e.preventDefault();
+            const page = new URL($(e.currentTarget).attr('href'), window.location.origin)
+                .searchParams.get('p') || "1";
+
+            $("#pageNumber").val(page);
+            $("#formFilter")
+                .attr("action", (i, val) => val.replace("__PAGE__", page))
+                .submit();
+        });
+
+
+    </script>
+}
+

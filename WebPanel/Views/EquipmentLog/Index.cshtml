@@ -1,0 +1,204 @@
+﻿@model EquipmentStatusLogListPageDto
+@{
+    ViewData["Title"] = "رویداد های تغییر وضعیت تجهیزات";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+    int i = ((Model.List?.PageNumber - 1) * Model.List?.PageSize) + 1 ?? 1;
+}
+
+@section style {
+    
+}
+
+<div class="col-lg-12">
+    <div class="card">
+        <div class="card-header pb-0 ">
+            <div class="d-flex">
+                <div class="portlet-title">
+                    <h3 class="title">
+                        <i class="icon-frane"></i> لیست رویداد ها
+                    </h3>
+                </div>
+            </div>
+            <!-- /.portlet-heading -->
+            <!-- /.portlet-body -->
+        </div>
+        <div class="card-body pt-0 ">
+            <form id="formFilter" asp-action="Index" method="get">
+                <input name="p" id="pageNumber" hidden />
+                <div class="form-body px-2">
+
+                    <div class="row gy-3">
+
+                        <div class="col-md-4 col-sm-12">
+                            <div class="form-group ">
+                                <label>بندر</label>
+                                <div class="input-group">
+                                    <select class="form-control select2" style="width:100%!important;"
+                                            asp-for="Filter.PortId"
+                                            asp-items="Model.Ports">
+                                        <option value="">همه بنادر</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4 col-sm-12">
+                            <div class="form-group ">
+                                <label>نام تجهیز</label>
+                                <div class="input-group">
+                                    <input asp-for="Filter.EntityTitle" type="text" placeholder="نام تجهیز" class="form-control">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4 col-sm-12">
+                            <div class="form-group ">
+                                <label>نوع تجهیز</label>
+                                <div class="input-group">
+                                    <select class="form-control select2" style="width:100%!important;"
+                                            asp-for="Filter.EquipmentLogType"
+                                            asp-items="Model.EquipmentLogTypes">
+                                        <option value="">همه نوع تجهیز</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4 col-sm-12">
+                            <div class="form-group">
+                                <label>از تاریخ:</label>
+                                <div class="input-group flex-column">
+                                    <input asp-for="Filter.DateFrom" type="text" class=" form-control" autocomplete="off">
+                                    <span asp-validation-for="Filter.DateFrom" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="col-md-4 col-sm-12">
+                            <div class="form-group">
+                                <label>تا تاریخ:</label>
+                                <div class="input-group flex-column">
+                                    <input asp-for="Filter.DateTo" type="text" class=" form-control" autocomplete="off">
+                                    <span asp-validation-for="Filter.DateTo" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+
+                    <div class="row text-start-">
+                        <div class="form-group col-md-2 d-flex justify-content-start flex-wrap align-content-center">
+                            <button style="border-radius:5px; margin-top:30px" class="alert-icon btn btn-success "
+                                    type="submit">
+                                <p class="px-3">فیلتر</p>
+                            </button>
+                        </div>
+                    </div>
+
+
+                </div>
+            </form>
+            <div class="col-md-12 table-responsive vh-100 mt-4">
+                <table class="table table-bordered table-hover table-striped" id="data-table">
+                    <thead>
+                        <tr>
+                            <th>ردیف</th>
+                            <th>نام تجهیز</th>
+                            <th>بندر</th>
+                            <th>وضغیت قبلی</th>
+                            <th>وضعیت جدید</th>
+                            <th>نوع تجهیز</th>
+                            <th>کاربر</th>
+                            <td>عملیات</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                        @foreach (var item in Model.List.Data)
+                        {
+                            <tr>
+                                <td>@(i++)</td>
+                                <td>@item.EntityTitle</td>
+                                <td>@item.PortPortName</td>
+                                <td>@item.OldValueTitle</td>
+                                <td>@item.ValueTitle</td>
+                                <td>@item.EquipmentLogTypeTitle</td>
+                                <td>@item.User</td>
+                                <td class="d-flex justify-content-first">
+                                    <div class="dropdown-basic">
+                                        <div class="dropdown">
+                                            <div class="btn-group mb-0">
+                                                <button class="dropbtn btn-light rounded" type="button"><i data-feather="chevron-down" class="text-info"></i></button>
+                                                <div class="dropdown-content">
+
+                                                    <a asp-controller="EquipmentLog" asp-action="EquipmentLogDetail" asp-route-equipmentLogId="@item.Id">جزئیات</a>
+
+                                                </div><!-- /.btn-group -->
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+
+                        }
+
+                    </tbody>
+                </table>
+                <div>
+                    <cs-pager cs-paging-pagesize="@Model.List.PageSize"
+                              cs-paging-pagenumber="@Model.List.PageNumber"
+                              cs-paging-totalitems="@Model.List.TotalItems"
+                              cs-paging-maxpageritems="10"
+                              cs-pagenumber-param="p"
+                              cs-show-first-last="true"
+                              cs-suppress-empty-nextprev="true"
+                              cs-suppress-inactive-firstlast="true"
+                              cs-show-numbered="true"
+                              cs-first-page-text="ابتدا"
+                              cs-last-page-text="انتها"
+                              cs-next-page-title="بعدی"
+                              cs-previous-page-title="قبلی"
+                              cs-first-page-title="ابتدا"
+                              cs-last-page-title="انتها"
+                              cs-next-page-text="بعدی"
+                              cs-previous-page-text="قبلی"
+                              cs-pager-li-current-class="page-item active"
+                              cs-pager-li-other-class="page-item"
+                              cs-pager-li-non-active-class="page-item disabled"
+                              cs-pager-link-current-class="page-link"
+                              cs-pager-link-other-class="page-link"
+                              asp-controller="Vessel"
+                              asp-action="Index">
+                    </cs-pager>
+                </div>
+
+            </div>
+            <!-- /.table-responsive -->
+        </div>
+        <!-- /.portlet -->
+    </div>
+</div>
+
+
+@section script {
+
+    <script>
+        $(document).ready(function () {
+            $("#Filter_PortId").select2().trigger('change');
+            $("#Filter_EquipmentLogType").select2().trigger('change');
+        });
+        kamaDatepicker('Filter_DateFrom', customOptions);
+        kamaDatepicker('Filter_DateTo', customOptions);
+
+        $(".page-link").click(function (event) {
+            event.preventDefault(); // غیرفعال کردن عملکرد پیشفرض href
+
+            var hrefValue = $(this).attr("href");
+            $("#pageNumber").val(hrefValue.split("p=")[1]);
+            $("#formFilter").submit();
+        });
+
+    </script>
+}

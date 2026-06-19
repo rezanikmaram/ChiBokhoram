@@ -1,0 +1,889 @@
+@model Entities.DTOs.Web.Hirman.VoyageReport.SeoReportDetailDto
+@{
+    ViewData["Title"] = "جزئیات بارنامه";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+@section style {
+    <link rel="stylesheet" href="~/assets/css/seo-report-detail.css" asp-append-version="true" />
+}
+
+<!-- SEO Header -->
+<div class="seo-detail-header">
+    <div class="row align-items-center">
+        <div class="col-md-8">
+            <div class="d-flex align-items-center">
+                <div class="back-button" onclick="history.back()">
+                    <i class="fa-solid fa-arrow-right"></i>
+                </div>
+                <div class="header-icon">
+                    <i class="fa-solid fa-clipboard-list"></i>
+                </div>
+                <div class="header-content">
+                    <h1 class="header-title">جزئیات بارنامه @Model.SeoInfo.SeoCode</h1>
+                    <p class="header-subtitle">
+                        @Model.SeoInfo.ProductName - @Model.SeoInfo.ProductOwner
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 text-md-end">
+            <div class="seo-actions">
+                <form asp-action="ExportSeoDetailExcel" method="post" style="display: inline;">
+                    <input type="hidden" name="seoId" value="@Model.SeoInfo.SeoId" />
+                    <button type="submit" class="btn btn-success btn-sm me-2">
+                        <i class="fa-solid fa-file-excel me-1"></i> خروجی Excel
+                    </button>
+                </form>
+                <div class="seo-status-badge d-inline-block">
+                    <span class="badge @(Model.SeoInfo.IsCompleted ? "bg-success" : "bg-warning")">
+                        @Model.SeoInfo.CompletionStatus
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SEO Info Card -->
+<div class="seo-info-card">
+    <div class="row g-4">
+        <div class="col-md-2">
+            <div class="info-item">
+                <label>بارنامه</label>
+                <value>@Model.SeoInfo.BillOfLadingNumber</value>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="info-item">
+                <label>تناژ</label>
+                <value>@Model.SeoInfo.ShipTonnage.ToString("N0")</value>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="info-item">
+                <label>تعداد</label>
+                <value>@Model.SeoInfo.ProductCount</value>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="info-item">
+                <label>وضعیت</label>
+                <value>@Model.SeoInfo.StateTitle</value>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="info-item">
+                <label>تاریخ ایجاد</label>
+                <value>@Model.SeoInfo.CreatedDateFa</value>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="info-item">
+                <label>کد سفر</label>
+                <value>---</value>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Statistics Overview -->
+<div class="stats-overview">
+    <div class="row g-4">
+        <div class="col-lg-3 col-md-6">
+            <div class="stat-card primary">
+                <div class="stat-icon">
+                    <i class="fa-solid fa-weight-hanging"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-value">@(Model.TaliRecords.Where(t => t.ValidationStatus == Common.enumeration.Hirman.ValidationStatus.Valid && t.IsDockTali).Count())</div>
+                    <div class="stat-label">تالی‌ها</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="stat-card success">
+                <div class="stat-icon">
+                    <i class="fa-solid fa-warehouse"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-value">@Model.WarehouseReceipts.Count</div>
+                    <div class="stat-label">قبض انبار ورودی</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="stat-card warning">
+                <div class="stat-icon">
+                    <i class="fa-solid fa-truck-ramp-box"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-value">@Model.OutboundWarehouseReceipts.Count</div>
+                    <div class="stat-label">قبض انبار خروجی</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="stat-card info">
+                <div class="stat-icon">
+                    <i class="fa-solid fa-boxes"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-value">@Model.SeoProducts.Count</div>
+                    <div class="stat-label">کالاها</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Completion Status -->
+<div class="completion-status">
+    <div class="status-header">
+        <h4>وضعیت تکمیل عملیات</h4>
+        <div class="status-indicators">
+            <div class="indicator @(Model.SeoInfo.HasTaliRecords ? "completed" : "pending")">
+                <i class="fa-solid fa-weight-hanging"></i>
+                <span>تالی</span>
+            </div>
+            <div class="indicator @(Model.SeoInfo.HasWarehouseReceipt ? "completed" : "pending")">
+                <i class="fa-solid fa-warehouse"></i>
+                <span>انبار ورودی</span>
+            </div>
+            <div class="indicator @(Model.SeoInfo.HasOutboundWarehouseReceipt ? "completed" : "pending")">
+                <i class="fa-solid fa-truck-ramp-box"></i>
+                <span>انبار خروجی</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Data Sections -->
+<div class="data-container">
+    <!-- Products and TALIs Section -->
+    <div class="data-section">
+        <div class="section-header">
+            <div class="section-title">
+                <i class="fa-solid fa-boxes"></i>
+                <span>کالاها و سوابق تالی</span>
+                <span class="count">@Model.SeoProducts.Count</span>
+            </div>
+            @if (Model.SeoProducts.Any())
+            {
+                <div class="section-summary">
+                    <span>مجموع تعداد: @Model.SeoProducts.Sum(p => p.Count) | تالی‌های معتبر: @(Model.TaliRecords.Where(t => t.ValidationStatus == Common.enumeration.Hirman.ValidationStatus.Valid && t.IsDockTali).Count())</span>
+                </div>
+            }
+        </div>
+        
+        @if (Model.SeoProducts.Any())
+        {
+            <div class="data-table">
+                <div class="table-responsive">
+                    <table class="table table-hover expandable-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 50px;">#</th>
+                                
+                                <th style="width: 250px;">نام کالا</th>
+                                <th style="width: 80px;">تعداد</th>
+                                <th style="width: 80px;">اسکله</th>
+                                <th style="width: 80px;">وضعیت</th>
+                                <th style="width: 120px;">بسته‌بندی</th>
+                                <th style="width: 60px;">تالی‌ها</th>
+                                <th style="width: 40px;"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                                int productIndex = 1;
+                                var validTaliRecords = Model.TaliRecords
+                                    .Where(t => t.ValidationStatus == Common.enumeration.Hirman.ValidationStatus.Valid)
+                                    .ToList();
+                            }
+                            @foreach (var product in Model.SeoProducts)
+                            {
+                                var productTalies = validTaliRecords
+                                    .Where(t => t.ProductId == product.ProductId)
+                                    .ToList();
+                                
+                                var dockTalies = productTalies.Where(t => t.IsDockTali).ToList();
+                                var areaTalies = productTalies.Where(t => t.IsAreaTali).ToList();
+                                var hasTali = productTalies.Any();
+                                var isCompleted = hasTali && dockTalies.Any();
+                                
+                                                                
+                                string rowClass = "";
+                                if (dockTalies.Sum(t => t.Count) != product.Count)
+                                {
+                                    rowClass = "table-warning";
+                                }
+                                else if (isCompleted)
+                                {
+                                    rowClass = "table-success";
+                                }
+                                
+                                <tr class="@rowClass product-main-row" data-product-id="@product.ProductId" data-index="@productIndex">
+                                    <td class="text-center fw-bold text-muted" style="font-size: 0.75rem;">@(productIndex++)</td>
+                                    
+                                    <td>
+                                        <span class="product-name fw-bold">@product.ProductName</span>
+                                        @if (!string.IsNullOrEmpty(product.PackingName))
+                                        {
+                                            <div class="text-muted small">@product.PackingName</div>
+                                        }
+                                    </td>
+                                    <td class="text-center">
+                                        <strong>@product.Count</strong>
+                                        @if (product.Weight > 0)
+                                        {
+                                            <div class="text-muted small">@product.Weight.ToString("N0") kg</div>
+                                        }
+                                    </td>
+                                    <td class="text-center">
+                                        @if (dockTalies.Any())
+                                        {
+                                            <span class="badge bg-primary" style="font-size: 0.625rem;">
+                                                @dockTalies.Sum(t => t.Count)
+                                            </span>
+                                            <div class="text-muted small" style="font-size: 0.625rem;">@dockTalies.Count تالی</div>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">-</span>
+                                        }
+                                    </td>
+                                    <td class="text-center">
+                                        @if (!isCompleted)
+                                        {
+                                            <span class="badge bg-warning" style="font-size: 0.625rem;">ناقص</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-success" style="font-size: 0.625rem;">کامل</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(product.PackingName))
+                                        {
+                                            <span class="text-muted small">@product.PackingName</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">-</span>
+                                        }
+                                    </td>
+                                    <td class="text-center">
+                                        @if (dockTalies.Any())
+                                        {
+                                            <span class="badge bg-info" style="font-size: 0.625rem;">@dockTalies.Count</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">0</span>
+                                        }
+                                    </td>
+                                    <td class="text-center">
+                                        <button class="btn btn-sm btn-outline-primary expand-btn" type="button" 
+                                                data-target="#tali-@productIndex" 
+                                                aria-expanded="false">
+                                            <i class="fa-solid fa-chevron-down"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                
+                                <!-- Expandable TALI Details Row -->
+                                <tr class="tali-details-row">
+                                    <td colspan="9" class="p-0">
+                                        <div class="collapse" id="tali-@productIndex">
+                                            <div class="tali-details-container">
+                                                @if (hasTali)
+                                                {
+                                                    <div class="row">
+                                                        <div class="col-12">
+                                                            <div class="tali-summary-header">
+                                                                <h6 class="mb-3">
+                                                                    <i class="fa-solid fa-water me-2"></i>
+                                                                    جزئیات تالی اسکله برای @product.ProductName
+                                                                    <span class="badge bg-primary ms-2">@dockTalies.Count تالی اسکله</span>
+                                                                </h6>
+                                                            </div>
+                                                            
+                                                            <!-- TALI Table -->
+                                                            <div class="table-responsive tali-table-container">
+                                                                <table class="table table-sm table-hover tali-details-table">
+                                                                    <thead class="table-light">
+                                                                        <tr>
+                                                                            <th style="width: 120px;">پلاک/شاسی</th>
+                                                                            <th style="width: 80px;">تعداد اسکله</th>
+                                                                            <th style="width: 80px;">تعداد محوطه</th>
+                                                                            <th style="width: 120px;">اپراتور اسکله</th>
+                                                                            <th style="width: 120px;">اپراتور محوطه</th>
+                                                                            <th style="width: 100px;">تاریخ اسکله</th>
+                                                                            <th style="width: 100px;">تاریخ محوطه</th>
+                                                                            <th style="width: 60px;">فایل اسکله</th>
+                                                                            <th style="width: 60px;">چک لیست اسکله</th>
+                                                                            <th style="width: 60px;">فایل محوطه</th>
+                                                                            <th style="width: 60px;">چک لیست محوطه</th>
+                                                                            <th>یادداشت</th>
+                                                                        </tr>
+                                                                    </thead>
+                                                                    <tbody>
+                                                                        @foreach (var dockTali in dockTalies)
+                                                                        {
+                                                                            var linkedAreaTali = areaTalies.FirstOrDefault(at => 
+                                                                                at.TruckNumber == dockTali.TruckNumber && 
+                                                                                at.CarPlates == dockTali.CarPlates);
+                                                                            
+                                                                            var showDockVehicleId = dockTali.DockTaliSeoProductIsSelfTransported || dockTali.DockTaliIsSelfTransported;
+                                                                            var dockVehicleId = dockTali.DockTaliSeoProductVehicleIdentificationNumber ?? dockTali.VehicleIdentificationNumber;
+                                                                            var vehicleInfo = "";
+                                                                            
+                                                                            if (showDockVehicleId && !string.IsNullOrEmpty(dockVehicleId))
+                                                                            {
+                                                                                vehicleInfo = $"شاسی: {dockVehicleId}";
+                                                                            }
+                                                                            else if (!string.IsNullOrEmpty(dockTali.CarPlates))
+                                                                            {
+                                                                                vehicleInfo = dockTali.CarPlates;
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                vehicleInfo = dockTali.TruckNumber;
+                                                                            }
+                                                                            
+                                                                            var hasConflict = linkedAreaTali != null && dockTali.Count != linkedAreaTali.Count;
+                                                                            var isUnloadOneTime = dockTali.UnLoadType == Common.enumeration.ServiceUnLoadType.UnloadOneTime;
+                                                                            var isProblemRow = hasConflict && !isUnloadOneTime;
+                                                                            
+                                                                            <tr class="tali-combined-row @(isProblemRow ? "table-danger" : "table-success")">
+                                                                                <td>
+                                                                                    <strong>@vehicleInfo</strong>
+                                                                                </td>
+                                                                                <td class="fw-bold text-primary">
+                                                                                    @dockTali.Count
+                                                                                    @if (dockTali.CountProblem > 0)
+                                                                                    {
+                                                                                        <i class="fa-solid fa-exclamation-triangle text-warning ms-1" 
+                                                                                           title="مشکل در تعداد"></i>
+                                                                                    }
+                                                                                </td>
+                                                                                <td class="fw-bold text-success">
+                                                                                    @(linkedAreaTali?.Count ?? 0)
+                                                                                    @if (linkedAreaTali?.CountProblem > 0)
+                                                                                    {
+                                                                                        <i class="fa-solid fa-exclamation-triangle text-warning ms-1" 
+                                                                                           title="مشکل در تعداد"></i>
+                                                                                    }
+                                                                                </td>
+                                                                                <td>
+                                                                                    <small>@dockTali.PersonelName</small>
+                                                                                </td>
+                                                                                <td>
+                                                                                    <small>@(linkedAreaTali?.PersonelName ?? "-")</small>
+                                                                                </td>
+                                                                                <td>
+                                                                                    <small>@dockTali.CreatedDateFa</small>
+                                                                                </td>
+                                                                                <td>
+                                                                                    <small>@(linkedAreaTali?.CreatedDateFa ?? "-")</small>
+                                                                                </td>
+                                                                                <td class="text-center">
+                                                                                    <i class="fa-solid fa-file @(dockTali.HasFile ? "text-success" : "text-danger")" 
+                                                                                       title="@(dockTali.HasFile ? "فایل دارد" : "فایل ندارد")"></i>
+                                                                                </td>
+                                                                                <td class="text-center">
+                                                                                    <i class="fa-solid fa-list-check @(dockTali.HasCheckList ? "text-success" : "text-danger")" 
+                                                                                       title="@(dockTali.HasCheckList ? "چک لیست دارد" : "چک لیست ندارد")"></i>
+                                                                                </td>
+                                                                                <td class="text-center">
+                                                                                    @if (linkedAreaTali != null)
+                                                                                    {
+                                                                                        <i class="fa-solid fa-file @(linkedAreaTali.HasFile ? "text-success" : "text-danger")" 
+                                                                                           title="@(linkedAreaTali.HasFile ? "فایل دارد" : "فایل ندارد")"></i>
+                                                                                    }
+                                                                                    else
+                                                                                    {
+                                                                                        <i class="fa-solid fa-file text-muted" title="بدون تالی محوطه"></i>
+                                                                                    }
+                                                                                </td>
+                                                                                <td class="text-center">
+                                                                                    @if (linkedAreaTali != null)
+                                                                                    {
+                                                                                        <i class="fa-solid fa-list-check @(linkedAreaTali.HasCheckList ? "text-success" : "text-danger")" 
+                                                                                           title="@(linkedAreaTali.HasCheckList ? "چک لیست دارد" : "چک لیست ندارد")"></i>
+                                                                                    }
+                                                                                    else
+                                                                                    {
+                                                                                        <i class="fa-solid fa-list-check text-muted" title="بدون تالی محوطه"></i>
+                                                                                    }
+                                                                                </td>
+                                                                                <td>
+                                                                                    @if (hasConflict)
+                                                                                    {
+                                                                                        <div class="text-warning small">
+                                                                                            <strong>عدم تطابق:</strong> @dockTali.Count ≠ @linkedAreaTali.Count
+                                                                                        </div>
+                                                                                    }
+                                                                                    @if (dockTali.CountProblem > 0)
+                                                                                    {
+                                                                                        <div class="text-muted small">
+                                                                                            مشکل اسکله: @dockTali.CountProblem
+                                                                                        </div>
+                                                                                    }
+                                                                                    @if (linkedAreaTali?.CountProblem > 0)
+                                                                                    {
+                                                                                        <div class="text-muted small">
+                                                                                            مشکل محوطه: @linkedAreaTali.CountProblem
+                                                                                        </div>
+                                                                                    }
+                                                                                    @if (linkedAreaTali == null)
+                                                                                    {
+                                                                                        <div class="text-muted small">
+                                                                                            بدون تالی محوطه
+                                                                                        </div>
+                                                                                    }
+                                                                                </td>
+                                                                            </tr>
+                                                                        }
+
+                                                                        @foreach (var areaTali in areaTalies.Where(at => !dockTalies.Any(dt => 
+                                                                            dt.TruckNumber == at.TruckNumber && dt.CarPlates == at.CarPlates)))
+                                                                        {
+                                                                            var showAreaVehicleId = areaTali.DockTaliSeoProductIsSelfTransported || areaTali.DockTaliIsSelfTransported;
+                                                                            var areaVehicleId = areaTali.DockTaliSeoProductVehicleIdentificationNumber ?? areaTali.VehicleIdentificationNumber;
+                                                                            var areaVehicleInfo = "";
+                                                                            
+                                                                            if (showAreaVehicleId && !string.IsNullOrEmpty(areaVehicleId))
+                                                                            {
+                                                                                areaVehicleInfo = $"شاسی: {areaVehicleId}";
+                                                                            }
+                                                                            else if (!string.IsNullOrEmpty(areaTali.CarPlates))
+                                                                            {
+                                                                                areaVehicleInfo = areaTali.CarPlates;
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                areaVehicleInfo = areaTali.TruckNumber;
+                                                                            }
+                                                                            
+                                                                            <tr class="tali-orphan-row table-success">
+                                                                                <td>
+                                                                                    <strong>@areaVehicleInfo</strong>
+                                                                                </td>
+                                                                                <td class="text-muted">-</td>
+                                                                                <td class="fw-bold text-warning">
+                                                                                    @areaTali.Count
+                                                                                    @if (areaTali.CountProblem > 0)
+                                                                                    {
+                                                                                        <i class="fa-solid fa-exclamation-triangle text-warning ms-1" 
+                                                                                           title="مشکل در تعداد"></i>
+                                                                                    }
+                                                                                </td>
+                                                                                <td class="text-muted">-</td>
+                                                                                <td>
+                                                                                    <small>@areaTali.PersonelName</small>
+                                                                                </td>
+                                                                                <td class="text-muted">-</td>
+                                                                                <td>
+                                                                                    <small>@areaTali.CreatedDateFa</small>
+                                                                                </td>
+                                                                                <td class="text-center">
+                                                                                    <i class="fa-solid fa-file text-muted" title="بدون تالی اسکله"></i>
+                                                                                </td>
+                                                                                <td class="text-center">
+                                                                                    <i class="fa-solid fa-list-check text-muted" title="بدون تالی اسکله"></i>
+                                                                                </td>
+                                                                                <td class="text-center">
+                                                                                    <i class="fa-solid fa-file @(areaTali.HasFile ? "text-success" : "text-danger")" 
+                                                                                       title="@(areaTali.HasFile ? "فایل دارد" : "فایل ندارد")"></i>
+                                                                                </td>
+                                                                                <td class="text-center">
+                                                                                    <i class="fa-solid fa-list-check @(areaTali.HasCheckList ? "text-success" : "text-danger")" 
+                                                                                       title="@(areaTali.HasCheckList ? "چک لیست دارد" : "چک لیست ندارد")"></i>
+                                                                                </td>
+                                                                                <td>
+                                                                                    <div class="text-warning small">
+                                                                                        <strong>فقط محوطه</strong> - بدون تالی اسکله
+                                                                                    </div>
+                                                                                    @if (areaTali.CountProblem > 0)
+                                                                                    {
+                                                                                        <div class="text-muted small">
+                                                                                            مشکل محوطه: @areaTali.CountProblem
+                                                                                        </div>
+                                                                                    }
+                                                                                </td>
+                                                                            </tr>
+                                                                        }
+                                                                    </tbody>
+                                                                </table>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <div class="text-center text-muted py-4">
+                                                        <i class="fa-solid fa-weight-hanging fa-2x mb-2"></i>
+                                                        <p>هیچ تالی برای این کالا ثبت نشده است</p>
+                                                    </div>
+                                                }
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="empty-section">
+                <i class="fa-solid fa-boxes"></i>
+                <p>هیچ کالایی برای این بارنامه یافت نشد</p>
+            </div>
+        }
+    </div>
+
+    <!-- Warehouse Receipts Section -->
+    <div class="data-section">
+        <div class="section-header">
+            <div class="section-title">
+                <i class="fa-solid fa-warehouse"></i>
+                <span>قبوض انبار ورودی</span>
+                <span class="count">@Model.WarehouseReceipts.Count</span>
+            </div>
+            @if (Model.WarehouseReceipts.Any())
+            {
+                <div class="section-summary">
+                    <span>مجموع وزن: @Model.WarehouseReceipts.Sum(w => w.Weight).ToString("N0") کیلوگرم</span>
+                </div>
+            }
+        </div>
+        
+        @if (Model.WarehouseReceipts.Any())
+        {
+            <div class="data-table">
+                <div class="table-responsive">
+                    <table class="table table-hover expandable-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 50px;">#</th>
+                                <th>شماره قبض</th>
+                                <th>وزن (کیلوگرم)</th>
+                                <th>تعداد</th>
+                                <th>کالاها</th>
+                                <th>ثبت‌کننده</th>
+                                <th>تاریخ</th>
+                                <th style="width: 40px;"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                                int wrIndex = 1;
+                            }
+                            @foreach (var receipt in Model.WarehouseReceipts)
+                            {
+                                var currentIndex = wrIndex;
+                                wrIndex++;
+                                <tr class="receipt-main-row" data-receipt-id="@receipt.ReceiptId" data-index="@currentIndex">
+                                    <td class="text-center fw-bold text-muted" style="font-size: 0.75rem;">@currentIndex</td>
+                                    <td>
+                                        <span class="code-badge">@receipt.ReceiptNumber</span>
+                                    </td>
+                                    <td>@receipt.Weight.ToString("N0")</td>
+                                    <td>@receipt.Count</td>
+                                    <td>
+                                        @if (receipt.Products.Any())
+                                        {
+                                            <span class="badge bg-info" style="font-size: 0.625rem;">@receipt.Products.Count کالا</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">-</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(receipt.SubmittedBy))
+                                        {
+                                            <span class="text-primary small">@receipt.SubmittedBy</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">-</span>
+                                        }
+                                    </td>
+                                    <td>@receipt.CreatedDateFa</td>
+                                    <td class="text-center">
+                                        @if (receipt.Products.Any())
+                                        {
+                                            <button class="btn btn-sm btn-outline-primary expand-btn" type="button" 
+                                                    data-target="#receipt-products-@currentIndex" 
+                                                    aria-expanded="false">
+                                                <i class="fa-solid fa-chevron-down"></i>
+                                            </button>
+                                        }
+                                    </td>
+                                </tr>
+                                
+                                <!-- Expandable Products Row -->
+                                @if (receipt.Products.Any())
+                                {
+                                    <tr class="receipt-details-row">
+                                        <td colspan="9" class="p-0">
+                                            <div class="collapse" id="receipt-products-@currentIndex">
+                                                <div class="receipt-details-container">
+                                                    <div class="table-responsive">
+                                                        <table class="table table-sm table-hover mb-0">
+                                                            <thead class="table-light">
+                                                                <tr>
+                                                                    <th>نام کالا</th>
+                                                                    <th>انبار</th>
+                                                                    <th>تعداد</th>
+                                                                    <th>وزن (کیلوگرم)</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                @foreach (var product in receipt.Products)
+                                                                {
+                                                                    <tr>
+                                                                        <td>@product.ProductName</td>
+                                                                        <td>@product.WarehouseName</td>
+                                                                        <td>@product.Count</td>
+                                                                        <td>@product.Weight.ToString("N0")</td>
+                                                                    </tr>
+                                                                }
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="empty-section">
+                <i class="fa-solid fa-warehouse"></i>
+                <p>هیچ قبض انبار ورودی یافت نشد</p>
+            </div>
+        }
+    </div>
+
+    <!-- Outbound Warehouse Receipts Section -->
+    <div class="data-section">
+        <div class="section-header">
+            <div class="section-title">
+                <i class="fa-solid fa-truck-ramp-box"></i>
+                <span>قبوض انبار خروجی</span>
+                <span class="count">@Model.OutboundWarehouseReceipts.Count</span>
+            </div>
+            @if (Model.OutboundWarehouseReceipts.Any())
+            {
+                <div class="section-summary">
+                    <span>مجموع وزن: @Model.OutboundWarehouseReceipts.Sum(w => w.Weight).ToString("N0") کیلوگرم</span>
+                </div>
+            }
+        </div>
+        
+        @if (Model.OutboundWarehouseReceipts.Any())
+        {
+            <div class="data-table">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>شماره قبض</th>
+                                <th>نام انبار</th>
+                                <th>وزن (کیلوگرم)</th>
+                                <th>تعداد</th>
+                                <th>تاریخ</th>
+                                <th>وضعیت</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var receipt in Model.OutboundWarehouseReceipts)
+                            {
+                                <tr>
+                                    <td>
+                                        <span class="code-badge">@receipt.ReceiptNumber</span>
+                                    </td>
+                                    <td>@receipt.WarehouseName</td>
+                                    <td>@receipt.Weight.ToString("N0")</td>
+                                    <td>@receipt.Count</td>
+                                    <td>@receipt.CreatedDateFa</td>
+                                    <td>
+                                        <span class="badge bg-warning">@receipt.Status</span>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="empty-section">
+                <i class="fa-solid fa-truck-ramp-box"></i>
+                <p>هیچ قبض انبار خروجی یافت نشد</p>
+            </div>
+        }
+    </div>
+
+    </div>
+
+<!-- Timeline View -->
+<div class="timeline-section">
+    <div class="section-header">
+        <div class="section-title">
+            <i class="fa-solid fa-clock-rotate-left"></i>
+            <span>جدول زمانی عملیات</span>
+        </div>
+    </div>
+    
+    <div class="timeline">
+        <div class="timeline-item">
+            <div class="timeline-marker creation">
+                <i class="fa-solid fa-plus"></i>
+            </div>
+            <div class="timeline-content">
+                <div class="timeline-title">ایجاد بارنامه</div>
+                <div class="timeline-date">@Model.SeoInfo.CreatedDateFa</div>
+                <div class="timeline-description">بارنامه @Model.SeoInfo.SeoCode ایجاد شد</div>
+            </div>
+        </div>
+        
+        @if (Model.TaliRecords.Any())
+        {
+            <div class="timeline-item">
+                <div class="timeline-marker tali">
+                    <i class="fa-solid fa-weight-hanging"></i>
+                </div>
+                <div class="timeline-content">
+                    <div class="timeline-title">بارشماری</div>
+                    <div class="timeline-date">@Model.TaliRecords.First().CreatedDateFa</div>
+                    <div class="timeline-description">@Model.TaliRecords.Count رکورد تالی ثبت شد</div>
+                </div>
+            </div>
+        }
+        
+        @if (Model.WarehouseReceipts.Any())
+        {
+            <div class="timeline-item">
+                <div class="timeline-marker warehouse-in">
+                    <i class="fa-solid fa-warehouse"></i>
+                </div>
+                <div class="timeline-content">
+                    <div class="timeline-title">ورود انبار</div>
+                    <div class="timeline-date">@Model.WarehouseReceipts.First().CreatedDateFa</div>
+                    <div class="timeline-description">@Model.WarehouseReceipts.Count قبض انبار ورودی صادر شد</div>
+                </div>
+            </div>
+        }
+        
+        @if (Model.OutboundWarehouseReceipts.Any())
+        {
+            <div class="timeline-item">
+                <div class="timeline-marker warehouse-out">
+                    <i class="fa-solid fa-truck-ramp-box"></i>
+                </div>
+                <div class="timeline-content">
+                    <div class="timeline-title">خروج انبار</div>
+                    <div class="timeline-date">@Model.OutboundWarehouseReceipts.First().CreatedDateFa</div>
+                    <div class="timeline-description">@Model.OutboundWarehouseReceipts.Count قبض انبار خروجی صادر شد</div>
+                </div>
+            </div>
+        }
+        
+        @if (Model.SeoInfo.IsCompleted)
+        {
+            <div class="timeline-item">
+                <div class="timeline-marker completed">
+                    <i class="fa-solid fa-check-circle"></i>
+                </div>
+                <div class="timeline-content">
+                    <div class="timeline-title">تکمیل عملیات</div>
+                    <div class="timeline-date">عملیات تکمیل شد</div>
+                    <div class="timeline-description">تمام مراحل عملیات بارنامه با موفقیت انجام شد</div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@section script {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Handle expandable rows manually
+            const expandButtons = document.querySelectorAll('.expand-btn');
+            
+            expandButtons.forEach((button, index) => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    const targetId = this.getAttribute('data-target');
+                    console.log('Button clicked:', index, 'Target ID:', targetId);
+                    
+                    const targetCollapse = document.querySelector(targetId);
+                    console.log('Found collapse element:', targetCollapse);
+                    
+                    if (targetCollapse) {
+                        const isExpanded = this.getAttribute('aria-expanded') === 'true';
+                        console.log('Is expanded:', isExpanded);
+                        
+                        // Close all other expanded rows
+                        document.querySelectorAll('.collapse.show').forEach(collapse => {
+                            console.log('Closing other collapse:', collapse.id);
+                            if (collapse !== targetCollapse) {
+                                collapse.classList.remove('show');
+                                const otherButton = document.querySelector(`[data-target="#${collapse.id}"]`);
+                                if (otherButton) {
+                                    otherButton.setAttribute('aria-expanded', 'false');
+                                    otherButton.querySelector('i').style.transform = 'rotate(0deg)';
+                                }
+                            }
+                        });
+                        
+                        // Toggle current row
+                        if (isExpanded) {
+                            console.log('Collapsing current row');
+                            targetCollapse.classList.remove('show');
+                            this.setAttribute('aria-expanded', 'false');
+                            this.querySelector('i').style.transform = 'rotate(0deg)';
+                        } else {
+                            console.log('Expanding current row');
+                            targetCollapse.classList.add('show');
+                            this.setAttribute('aria-expanded', 'true');
+                            this.querySelector('i').style.transform = 'rotate(180deg)';
+                        }
+                    } else {
+                        console.error('Collapse element not found for target:', targetId);
+                    }
+                });
+            });
+            
+            // Add smooth animations on scroll
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('animate-in');
+                    }
+                });
+            });
+
+            document.querySelectorAll('.data-section, .timeline-item, .stat-card').forEach(el => {
+                observer.observe(el);
+            });
+        });
+    </script>
+}

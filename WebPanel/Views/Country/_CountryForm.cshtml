@@ -1,0 +1,106 @@
+@model Entities.DTOs.Web.Common.CountryDto
+
+<form asp-action="SaveCountry" method="post" id="countryForm">
+    @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="Id" value="@(Model.Id > 0 ? Model.Id : 0)" />
+
+    <div class="form-body">
+        <div class="row gy-4">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>نام کشور فارسی <span class="text-danger">*</span></label>
+                    <div class="input-group">
+                        <input type="text" asp-for="CountryNameFa" class="form-control rounded">
+                        <span asp-validation-for="CountryNameFa" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>نام کشور انگلیسی</label>
+                    <div class="input-group">
+                        <input type="text" asp-for="CountryNameEn" class="form-control rounded">
+                        <span asp-validation-for="CountryNameEn" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>ملیت فارسی</label>
+                    <div class="input-group">
+                        <input type="text" asp-for="NationalityNameFa" class="form-control rounded">
+                        <span asp-validation-for="NationalityNameFa" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>ملیت انگلیسی</label>
+                    <div class="input-group">
+                        <input type="text" asp-for="NationalityNameEn" class="form-control rounded">
+                        <span asp-validation-for="NationalityNameEn" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>نام دولت فارسی</label>
+                    <div class="input-group">
+                        <input type="text" asp-for="GovernmentNameFa" class="form-control rounded">
+                        <span asp-validation-for="GovernmentNameFa" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>نام دولت انگلیسی</label>
+                    <div class="input-group">
+                        <input type="text" asp-for="GovernmentNameEn" class="form-control rounded">
+                        <span asp-validation-for="GovernmentNameEn" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>کد ISO (ab)</label>
+                    <div class="input-group">
+                        <input type="text" asp-for="ab" class="form-control rounded">
+                        <span asp-validation-for="ab" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-8">
+                <div class="form-group">
+                    <label>آدرس</label>
+                    <div class="input-group">
+                        <input type="text" asp-for="Address" class="form-control rounded">
+                        <span asp-validation-for="Address" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="form-group">
+                    <div class="form-check">
+                        <input type="checkbox" asp-for="IsIMOMember" class="form-check-input">
+                        <label class="form-check-label" asp-for="IsIMOMember">عضو IMO</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-actions p-4 pb-2" style="float: left;">
+        <button type="submit" class="btn btn-info btn-round" id="btnSaveCountry">
+            <i class="icon-check"></i>
+            ذخیره
+        </button>
+    </div>
+</form>

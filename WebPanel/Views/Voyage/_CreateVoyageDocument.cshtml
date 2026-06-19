@@ -1,0 +1,63 @@
+﻿@model CreateVoyageDocumentPageDto
+
+<form asp-action="CreateVoyageDocument" method="post" enctype="multipart/form-data">
+    <input asp-for="CreateVoyageDocument.Id" type="hidden" />
+    <input asp-for="CreateVoyageDocument.VoyageId" type="hidden" />
+
+    <div class="card-body pt-0">
+        <div class="col-md-12">
+            <div class="form-body">
+                <div class="row gy-3">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label>آپلود فایل </label>
+                            <div style="flex-wrap:nowrap" class="input-group round">
+                                <input type="file" asp-for="CreateVoyageDocument.FormFile" class="form-control rounded w-25">
+                                <span asp-validation-for="CreateVoyageDocument.FormFile"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label>نوع سند</label>
+                            <select asp-for="CreateVoyageDocument.VoyageDocType" asp-items="Model.VoyageDocType" class="form-control rounded select2 generalmodal">
+                            </select>
+                            <span asp-validation-for="CreateVoyageDocument.VoyageDocType"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer px-2 border-0 px-0">
+                    <button type="submit" class="btn btn-success btn-round">ذخیره</button>
+                    <button type="button" class="btn btn-danger btn-round" data-bs-dismiss="modal">بازگشت</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<script src="~/assets/js/validation/jquery.validate.min.js"></script>
+<script src="~/assets/js/validation/jquery.validate.unobtrusive.min.js"></script>
+
+<script>
+    $(document).ready(function () {
+        // $('.select2').select2(); // Uncomment if you want to use Select2 for enhanced dropdown styling
+    });
+</script>
+
+
+<script src="~/assets/js/validation/jquery.validate.min.js"></script>
+<script src="~/assets/js/validation/jquery.validate.unobtrusive.min.js"></script>
+
+<script>
+	$(document).ready(function () {
+		//$('.select2').select2();
+
+	});
+
+	
+
+</script>
+
+

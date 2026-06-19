@@ -1,0 +1,231 @@
+﻿@model GearUseInAllocationOfEquDto
+@{
+	ViewData["Title"] = "انتخاب تجهیزات عملیاتی";
+	Layout = "~/Views/Shared/AdminLayout.cshtml";
+	int i = 1;
+}
+
+
+<div class="row">
+	<div class="col-md-6">
+		<div class="card rounded-3 min-height-600">
+			<div class="card-header">
+				<div class="d-flex justify-content-between">
+					<div class="d-flex">
+						<h3 class="title m-0">
+							انتخاب تجهیزات
+						</h3>
+						<a class="mx-3 filter-collapse" data-bs-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false" aria-controls="collapseExample">
+							فیلتر ها <i class="fa-solid fa-angle-down mx-2 align-middle"></i>
+						</a>
+					</div>
+					<form asp-action="SetGeaForUseInAllocationOfEqu" method="post" id="postGear">
+
+						<a class="btn mb-2 float-end btn-success rounded text-white label" onclick="setGeaForUseInAllocationOfEqu();"><i class="fa-solid fa-plus me-2"></i>اضافه کردن انتخاب شده ها</a>
+						<input id="selectGearId" name="ids" type="hidden" />
+					</form>
+				</div><!-- /.portlet-title -->
+			</div><!-- /.portlet-heading -->
+			<div class="card-body pt-0">
+				 <div class="collapse" id="collapseExample">
+					 <form id="formFilter" asp-action="GearUseInAllocationOfEqu" method="post">
+
+						 <div class="form-body mb-5">
+
+							 <div class="row">
+								 <div class="form-group col-lg-4 ">
+									 <label>جستجو</label>
+									 <div class="input-group">
+										 <input asp-for="Filter.GearName" type="text" placeholder="نام" class="form-control">
+									 </div>
+								 </div>
+
+								 <div class="form-group col-lg-4">
+									 <label>نوع تجهیز</label>
+									 <div class="input-group">
+										 <select class="form-control select2" style="width:100%!important;"
+										         asp-for="Filter.GearTypeFilter"
+										         asp-items="Model.GearTypes">
+											 <option value="">همه انواع تجهیز</option>
+										 </select>
+									 </div>
+								 </div>
+
+								 <div class="form-group col-lg-4">
+									 <label> نوع اجاره تجهیز</label>
+									 <div class="input-group">
+										 <select class="form-control rounded select2 generalmodal" asp-for="Filter.EquipmentType" asp-items="@Html.GetEnumSelectList<EquipmentType>()">
+											 <option value="">همه مدل تجهیز</option>
+										 </select>
+									 </div>
+								 </div>
+
+								 <div class="col-lg-3">
+									 <div style="margin-top:32px;" class="d-flex">
+										 <button class="alert-icon btn btn-success rounded label" type="submit">
+											 <p class="">فیلتر</p></button>
+									 </div>
+								 </div>
+							 </div>
+
+						 </div>
+					 </form>
+				 </div>
+				<div class="table-responsive w-100">
+					<table class="table table-bordered ">
+						<thead class="bg-primary">
+						<tr>
+							<th></th>
+							<th>نام</th>
+							<th>شماره اموال</th>
+							<td>نوع اجاره</td>
+
+						</tr>
+						</thead>
+
+						<tbody>
+						@foreach (var item in Model.Gears)
+						{
+							<tr>
+								<td style="width:30px;"><input type="checkbox" value="@item.Id" name="GearId"/></td>
+								<td>@item.Name</td>
+								<td>@item.PropertyNumber</td>
+								<td>@item.EquipmentTypeTitle</td>
+
+							</tr>
+						}
+						</tbody>
+					</table>
+				</div>
+
+				<!-- /.tab-content -->
+			</div>
+			<!-- /.portlet-body -->
+		</div>
+	</div>
+	<div class="col-md-6">
+		<div class="card rounded-3">
+			<div class="card-header">
+				<div class="d-flex justify-content-between d-flex">
+					<h3 class="title m-0">
+						<i class="icon-speech"></i>
+						تجهیزات انتخاب شده
+					</h3>
+					<form asp-action="RemoveGearUseInAllocationOfEqu" method="post" id="deleteGearForm">
+
+						<a class="btn btn-danger text-white label rounded" onclick="deleteGear();"><i class="fa-solid fa-trash me-2"></i>حذف انتخاب شده ها</a>
+						<input id="removeIds" name="ids" type="hidden" />
+						
+					</form>
+				</div>
+			</div>
+			<div class="card-body pt-0">
+				<div class="table-responsive">
+					<table class="table table-bordered ">
+						<thead class="bg-primary">
+							<tr>
+								<th></th>
+								<th>نام</th>
+								<th class="px-1">شماره اموال</th>
+								<td class="px-1">نوع اجاره</td>
+							</tr>
+						</thead>
+						<tbody>
+							@foreach (var item in Model.SelectedGears)
+							{
+								<tr>
+									<td style="width:30px;"><input type="checkbox" value="@item.Id" name="selectedGearId" /></td>
+									<td>@item.Name</td>
+									<td>@item.PropertyNumber</td>
+									<td>@item.EquipmentTypeTitle</td>
+									
+									@* <td style="width:30px;">
+										<input type="checkbox" checked="@item.IsDefault" value="@item.Id" name="selectedDefaultWareHouseId"
+											   onchange="setDefaultWareHouse(this, '@item.Id', '@Model.FilterDto.VoyageId')" />
+									</td> *@
+
+
+								</tr>
+								i++;
+							}
+						</tbody>
+					</table>
+				</div>
+
+				<!-- /.tab-content -->
+
+			</div><!-- /.portlet-body -->
+		</div>
+	</div>
+</div>
+@section script {
+	<script>
+
+		$(document).ready(function () {
+			$("#Filter_GearTypeFilter").select2().trigger('change');
+		});
+
+		function setDefaultWareHouse(checkbox, wareHouseId, VoyageId) {
+			// اطمینان حاصل کنیم که فقط یک چک‌باکس فعال است
+			$("input:checkbox[name=selectedDefaultWareHouseId]").not(checkbox).prop('checked', false);
+
+			// اگر چک‌باکس انتخاب شده بود، متد فراخوانی شود
+			if ($(checkbox).is(':checked')) {
+				$.ajax({
+					url: '@Url.Action("SetDefaultWareHouse")',
+					type: 'POST',
+					data: {
+						id: wareHouseId,
+						VoyageId: VoyageId
+					},
+					success: function () {
+						showAlert2('انبار پیش فرض با موفقیت تنظیم شد', 0);
+					},
+					error: function () {
+						showAlert2('خطا در تنظیم انبار پیش فرض', 1);
+					}
+				});
+			}
+		}
+		function setGeaForUseInAllocationOfEqu() {
+			var ids = "";
+			$("#selectGearId").val('');
+			$("input:checkbox[name=GearId]:checked").each(function () {
+				if (ids) {
+					ids += ',' + $(this).val();
+				}
+				else {
+					ids = $(this).val();
+				}
+			});
+			$("#selectGearId").val(ids);
+			if (ids) {
+				$("#postGear").submit();
+			}
+			else {
+				showAlert2('تجهیزی انتخاب نشده است', 1);
+				return;
+			}
+		}
+		function deleteGear() {
+			var ids = "";
+			$("#removeIds").val('');
+			$("input:checkbox[name=selectedGearId]:checked").each(function () {
+				if (ids) {
+					ids += ',' + $(this).val();
+				}
+				else {
+					ids = $(this).val();
+				}
+			});
+			$("#removeIds").val(ids);
+			if (ids) {
+				$("#deleteGearForm").submit();
+			}
+			else {
+				showAlert2('تجهیزی انتخاب نشده است', 1);
+				return;
+			}
+		}
+	</script>
+}

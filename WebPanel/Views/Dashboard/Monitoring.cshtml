@@ -1,0 +1,290 @@
+@model DashboardMonitoringViewModel
+
+@{
+    ViewData["Title"] = "مانیتورینگ شناورها";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+@section style {
+    <style>
+        .monitoring-wrapper {
+            padding-top: 1rem;
+            padding-bottom: 1rem;
+        }
+
+        .monitoring-banner {
+            background: linear-gradient(120deg, rgba(0, 76, 153, 0.9), rgba(0, 36, 79, 0.95));
+            border-radius: 18px;
+            padding: 1.5rem 2rem;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.25);
+            color: #fff;
+        }
+
+        .monitoring-banner h2 {
+            font-size: 1.8rem;
+            margin-bottom: 0.35rem;
+        }
+
+        .monitoring-banner p {
+            margin: 0;
+            opacity: 0.8;
+        }
+
+        .monitoring-clock {
+            text-align: left;
+        }
+
+        .monitoring-clock span {
+            display: block;
+            font-size: 1.15rem;
+            font-weight: 600;
+        }
+
+        .monitoring-stage {
+            position: relative;
+            margin-top: 2rem;
+            min-height: 520px;
+            overflow: hidden;
+            transition: height 0.6s ease;
+        }
+
+        .monitoring-screen {
+            background: #0c1731;
+            border-radius: 22px;
+            padding: 1.75rem;
+            box-shadow: 0 20px 40px rgba(3, 15, 40, 0.45);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            transform: scale(0.97);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+
+        .monitoring-screen.active {
+            opacity: 1;
+            transform: scale(1);
+            z-index: 2;
+        }
+
+        .screen-title {
+            font-size: 1.5rem;
+            color: #cde6ff;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .table-monitoring {
+            width: 100%;
+            table-layout: fixed;
+        }
+
+        .table-monitoring thead th {
+            background: rgba(255, 255, 255, 0.04);
+            font-weight: 600;
+            color: #96bdf5;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .table-monitoring tbody tr {
+            background: rgba(255, 255, 255, 0.01);
+        }
+
+        .table-monitoring tbody tr:nth-child(even) {
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .table-monitoring td,
+        .table-monitoring th {
+            color: #eff3ff;
+            vertical-align: middle;
+            padding: 0.95rem;
+            word-break: break-word;
+            white-space: normal;
+        }
+
+        .status-pill {
+            padding: 0.45rem 1.2rem;
+            border-radius: 999px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            display: inline-block;
+            white-space: nowrap;
+        }
+
+        .status-berthing { background: rgba(25, 135, 84, 0.3); color: #9ff2c3; }
+        .status-loading { background: rgba(217, 119, 6, 0.3); color: #ffd89c; }
+        .status-unloading { background: rgba(37, 99, 235, 0.35); color: #cbd9ff; }
+        .status-ready { background: rgba(124, 58, 237, 0.35); color: #f1ddff; }
+        .status-delayed { background: rgba(220, 53, 69, 0.4); color: #ffd5dd; }
+
+        @@media (max-width: 992px) {
+            .monitoring-stage {
+                min-height: auto;
+                height: auto !important;
+            }
+
+            .monitoring-screen {
+                position: relative;
+            }
+        }
+    </style>
+}
+
+<div class="container-fluid monitoring-wrapper">
+    <div class="monitoring-banner">
+        <div>
+            <h2>سیستم مانیتورینگ شناورها</h2>
+            <p>@Model.PortName</p>
+        </div>
+        <div class="monitoring-clock">
+            <span>تاریخ امروز: @Model.CurrentDateFa</span>
+            <span id="monitoringTime">@Model.CurrentTime</span>
+        </div>
+    </div>
+
+    <div class="monitoring-stage">
+        <div id="importScreen" class="monitoring-screen active">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="screen-title">🚢 کشتی‌های وارداتی</div>
+                <div class="text-muted small">به‌روزرسانی هر ۸ ثانیه</div>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-borderless table-monitoring">
+                    <thead>
+                        <tr>
+                            <th>شماره سفر</th>
+                            <th>نام کشتی</th>
+                            <th>شرکت کشتیرانی</th>
+                            <th>نوع محموله</th>
+                            <th>اسکله</th>
+                            <th>وضعیت عملیات</th>
+                            <th>اپراتور بندر</th>
+                            <th>زمان ورود</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.ImportVoyages?.Any() == true)
+                        {
+                            foreach (var item in Model.ImportVoyages)
+                            {
+                                <tr>
+                                    <td>@item.VoyageNumber</td>
+                                    <td>@item.VesselName</td>
+                                    <td>@item.ShippingLine</td>
+                                    <td>@item.CargoType</td>
+                                    <td>@item.Waterfront</td>
+                                    <td><span class="status-pill @item.StatusCss">@item.StatusTitle</span></td>
+                                    <td>@item.OperatorName</td>
+                                    <td>@item.ScheduleTime</td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="8" class="text-center text-muted py-4">داده‌ای برای نمایش وجود ندارد</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="exportScreen" class="monitoring-screen">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="screen-title">⚓ کشتی‌های صادراتی</div>
+                <div class="text-muted small">به‌روزرسانی هر ۸ ثانیه</div>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-borderless table-monitoring">
+                    <thead>
+                        <tr>
+                            <th>شماره سفر</th>
+                            <th>نام کشتی</th>
+                            <th>شرکت کشتیرانی</th>
+                            <th>نوع محموله</th>
+                            <th>اسکله</th>
+                            <th>وضعیت عملیات</th>
+                            <th>اپراتور بندر</th>
+                            <th>زمان خروج</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.ExportVoyages?.Any() == true)
+                        {
+                            foreach (var item in Model.ExportVoyages)
+                            {
+                                <tr>
+                                    <td>@item.VoyageNumber</td>
+                                    <td>@item.VesselName</td>
+                                    <td>@item.ShippingLine</td>
+                                    <td>@item.CargoType</td>
+                                    <td>@item.Waterfront</td>
+                                    <td><span class="status-pill @item.StatusCss">@item.StatusTitle</span></td>
+                                    <td>@item.OperatorName</td>
+                                    <td>@item.ScheduleTime</td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="8" class="text-center text-muted py-4">داده‌ای برای نمایش وجود ندارد</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section script {
+    <script>
+        (function () {
+            const screens = [document.getElementById('importScreen'), document.getElementById('exportScreen')];
+            const stage = document.querySelector('.monitoring-stage');
+            let activeIndex = 0;
+            let resizeTimer;
+
+            function syncStageHeight() {
+                if (!stage) return;
+                const active = screens[activeIndex];
+                if (active) {
+                    stage.style.height = active.scrollHeight + 'px';
+                }
+            }
+
+            function rotateScreens() {
+                screens[activeIndex].classList.remove('active');
+                activeIndex = (activeIndex + 1) % screens.length;
+                screens[activeIndex].classList.add('active');
+                setTimeout(syncStageHeight, 60);
+            }
+
+            function tickClock() {
+                const clock = document.getElementById('monitoringTime');
+                if (clock) {
+                    const now = new Date();
+                    const pad = (val) => val.toString().padStart(2, '0');
+                    clock.textContent = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+                }
+            }
+
+            syncStageHeight();
+            setInterval(rotateScreens, 8000);
+            setInterval(tickClock, 30000);
+            window.addEventListener('resize', () => {
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(syncStageHeight, 150);
+            });
+        })();
+    </script>
+}

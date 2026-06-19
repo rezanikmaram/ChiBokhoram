@@ -1,0 +1,130 @@
+﻿@model List<AreaDto>
+@{
+    ViewData["Title"] = "ناحیه ها";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+    int i = 1;
+
+    int categoryId = ViewBag.CategoryId;
+}
+
+
+<!--<div class="col-md-12">
+    <div class="breadcrumb-box border shadow">
+        <ul class="breadcrumb">
+            <li><a href="dashboard.html">پیشخوان</a></li>
+        </ul>
+        <div class="breadcrumb-left">
+            سه شنبه، 1400/04/29
+            <i class="icon-calendar"></i>
+        </div>-->
+<!-- /.breadcrumb-left -->
+<!--</div>
+</div>-->
+<div class="col-lg-12">
+    <div class="card">
+        <div class="card-header">
+            <div class="d-flex justify-content-between">
+
+                <h3 class="title">
+                    <a asp-action="AreaCategories"><i class="fa-solid fa-right-to-bracket me-2"></i></a>
+                    <i class="icon-frane"></i> مدیریت ناحیه ها (@ViewBag.categoryName)
+                </h3>
+  
+                    <div>
+                        <a class="alert-icon btn btn-success round mx-2" onclick="createArea();"> + ناحیه جدید</a>
+                    </div>
+                <!-- /.buttons-box -->
+            </div>
+            <!-- /.portlet-heading -->
+            <!-- /.portlet-body -->
+        </div>
+        <div class="card-body pt-0">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover table-striped" id="data-table">
+                    <thead class="bg-primary">
+                        <tr>
+                            <th>ردیف</th>
+                            <th>نام ناحیه</th>
+                            <th>وضعیت</th>
+                            <td>عملیات</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td class="align-middle" >@(i++)</td>
+                                <td class="align-middle" >@item.Name</td>
+                                <td class="align-middle text-center" >
+                                    <span class="label px-2 py-1 rounded label-@(item.IsActive?"success":"danger")">@(item.IsActive ? "فعال" : "غیر فعال")</span>
+                                </td>
+
+                                <td class="align-middle">
+                                    <a class="btn btn-warning btn-sm px-2 btn-icon curve" onclick="editArea('@item.Id');">
+                                        <i class="icon-pencil fs-6 align-middle"></i>
+                                    </a>
+
+                                    <a id="ChangePass@(i)" onclick="ShowQAlert(event,'ChangePass@(i)');"
+                                       class="btn btn-danger px-2 btn-sm btn-icon curve btn-questions"
+                                       asp-action="RemoveArea" asp-route-areaId="@item.Id" asp-route-categoryId="@categoryId">
+                                        <i class="icon-trash fs-6 align-middle fa-flip-horizontal"></i>
+                                    </a>
+                                </td>
+                            </tr>
+
+                        }
+
+                    </tbody>
+                </table>
+
+
+            </div>
+            <!-- /.table-responsive -->
+        </div>
+        <!-- /.portlet -->
+    </div>
+</div>
+
+
+
+<div id="generalmodal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                
+                <h4 class="modal-title">ثبت محوطه</h4>
+                <button type="button" class="close btn-close rounded border" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="modalbody">
+                <partial name="_CreateArea" model="@(new CreateAreaDto{ AreaCategoryId = categoryId })" />
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+@section script {
+    <script>
+        function createArea() {
+            $("#Name").val('');
+            $("#Id").val('');
+            $("#IsActive").prop('checked', true);
+            $("#generalmodal").modal('show');
+
+        }
+        function editArea(id) {
+
+            $.post("@Url.Action("GetAreaById","AreaPoint")", { areaId: id })
+                .done(function (res) {
+                    $("#modalbody").html(res);
+                    $("#generalmodal").modal('show');
+                });
+        }
+
+
+
+    </script>
+}

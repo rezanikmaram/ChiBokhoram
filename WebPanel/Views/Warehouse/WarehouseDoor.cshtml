@@ -1,0 +1,249 @@
+﻿@model WarehouseDoorPageDto
+@{
+    ViewData["Title"] = "لیست  ورودی های انبار";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+    int i = 1;
+
+    Guid warehouseId = Model.CreateWarehouseDoorDto.WarehouseId;
+}
+
+
+
+
+
+@section style{
+
+    <link href="~/assets/plugins/select2/dist/css/select2.min.css" rel="stylesheet">
+}
+
+
+<div class="col-lg-12">
+    <div class="card">
+        <div class="card-header pb-5">
+    
+                <div class="d-flex justify-content-between">
+                    <h3 class="title">
+                        <i class="icon-frane"></i> لیست  ورودی های انبار (@ViewBag.WarehouseName)
+                    </h3>
+                    <div>
+                        <a style="border-radius:5px; margin:0px 10px" class="btn btn-primary" onclick="createDoor();">ثبت ورودی  </a>
+                    <a class="alert-icon btn btn-success round" asp-action="Warehouses" asp-route-companyId="@(ViewBag.CompanyId == Guid.Empty ? null : ViewBag.CompanyId)">بازگشت به لیست انبار ها</a>
+                        <div class="buttons-box">
+
+                            <i class="icon-size-fullscreen"></i>
+                            <div class="paper-ripple">
+                                <div class="paper-ripple__background"></div>
+                                <div class="paper-ripple__waves"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+        </div>
+        <div class="card-body pt-0">
+            <div class="table-responsive">
+                <table class="table table-sm table-bordered table-hover table-striped" id="data-table">
+                    <thead class="bg-primary">
+                        <tr>
+                            <th>ردیف</th>
+                            <th>نام</th>
+                            <th>توضیحات   </th>
+                            <th>کد FPN</th>
+                            <th>وضعبت</th>
+                            <th>عملیات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+
+                        @foreach (var item in Model.DataList)
+                        {
+                            <tr>
+                                <td class="align-middle" >@(i++)</td>
+                                <td class="align-middle" > @item.Name </td>
+                                <td class="align-middle" >@item.Description</td>
+                                <td class="align-middle" >@item.CodeNameForFpn  </td>
+                                <td class="align-middle" >
+                                    <a id="ActivationDoor@(i)" onclick="ShowQAlert(event,'ActivationDoor@(i)');"
+                                       asp-action="ActivationWarehouseDoor"
+                                       asp-route-WarehouseDoorId="@item.Id" asp-route-WarehouseId="@warehouseId"
+                                       asp-route-companyId="@ViewBag.CompanyId">
+                                        <span class="label px-1 label-@(item.IsActive?"success":"danger")">
+                                            @(item.IsActive ? "فعال" : "غیر فعال")
+                                        </span>
+                                    </a>
+                                </td>
+
+                                <td>
+                                    <a class="btn btn-warning px-2   btn-sm btn-icon curve" onclick="editDoor('@item.Id');"><i class="icon-pencil align-middle"></i></a>
+                                    <a id="DeleteDoor@(i)" onclick="ShowQAlert(event,'DeleteDoor@(i)');" class="btn btn-danger btn-sm btn-icon px-2 curve btn-questions"
+                                       asp-action="DeleteWarehouseDoor" asp-route-WarehouseDoorId="@item.Id" asp-route-WarehouseId="@warehouseId"
+                                       asp-route-companyId="@ViewBag.CompanyId">
+                                        <i class="icon-trash align-middle fa-flip-horizontal"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+
+                    </tbody>
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+<div id="generalmodal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">ثبت ورودی انبار</h4>
+                <button type="button" class="close btn-close rounded border" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="modalbody">
+
+
+                <form asp-action="CreateWarehouseDoor" method="post">
+                    <input asp-for="CreateWarehouseDoorDto.Id" type="hidden" />
+                    <input asp-for="CreateWarehouseDoorDto.WarehouseId" type="hidden" />
+                    <input asp-for="CreateWarehouseDoorDto.CompanyId" value="@ViewBag.CompanyId" type="hidden" />
+                    <div class="card-body pt-0">
+                        <div class="col-md-12">
+                            <div class="form-body row gy-4">
+
+                                <div class="form-group">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <label> نام</label>
+                                            <div class="input-group">
+                                                <input type="text" asp-for="CreateWarehouseDoorDto.Name" class="form-control" required>
+                                            </div>
+                                            <span asp-validation-for="CreateWarehouseDoorDto.Name" class="text-danger"></span>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label> کد مخصوص دستگاه FPN </label>
+                                            <div class="input-group">
+                                                <input type="text" asp-for="CreateWarehouseDoorDto.CodeNameForFpn" class="form-control" required>
+                                            </div>
+                                            <span asp-validation-for="CreateWarehouseDoorDto.CodeNameForFpn" class="text-danger"></span>
+                                        </div>
+                                    </div>                           
+                                </div>
+
+                                <div class="form-group col-md-12">
+                                    <div class="col-md-12">
+                                        <label> توضیحات </label>
+                                        <div class="input-group">
+                                            <input type="text" asp-for="CreateWarehouseDoorDto.Description" class="form-control">
+                                        </div>
+                                        <span asp-validation-for="CreateWarehouseDoorDto.Description" class="text-danger"></span>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                  <div class="row">
+                                        <div class="col-md-6">
+                                            <label> طول موقعیت جغرافیایی    </label>
+                                            <div class="input-group ">
+                                                <input asp-for="CreateWarehouseDoorDto.LonX" class="form-control rounded" placeholder="X">
+                                                <span asp-validation-for="CreateWarehouseDoorDto.LonX" class="text-danger"></span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label> عرض موقعیت جغرافیایی    </label>
+                                            <div class="input-group ">
+                                                <input asp-for="CreateWarehouseDoorDto.LatY" class="form-control rounded" placeholder="Y">
+                                                <span asp-validation-for="CreateWarehouseDoorDto.LatY" class="text-danger"></span>
+                                            </div>
+                                        </div>
+                                  </div>
+                                </div>
+
+                                <div class="col-md-12 d-flex">
+                                    <div>
+                                        <div class="input-group activeor">
+                                            <label>
+                                                <input type="checkbox" asp-for="CreateWarehouseDoorDto.IsActive" class="normal">
+                                                فعال/غیرفعال
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                                <div class="modal-footer">                               
+                                    <button type="button" class="btn btn-danger btn-round" data-bs-dismiss="modal">بازگشت</button>
+                                    <button type="submit" class="btn btn-success btn-round">ذخیره</button>
+                                </div>
+                            </div>
+
+
+
+                        </div>
+                    </div>
+
+                </form>
+
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section script {
+
+
+    <script src="~/assets/plugins/select2/dist/js/select2.full.min.js"></script>
+    <script src="~/assets/plugins/select2/dist/js/i18n/fa.js"></script>
+    <script src="~/assets/js/pages/select2.js"></script>
+
+
+    @*   <script src="~/assets/js/validation/jquery.validate.min.js"></script>
+     <script src="~/assets/js/validation/jquery.validate.unobtrusive.min.js"></script>*@
+
+    <script>
+        $(document).ready(function () {
+            //$('.select2').select2();
+            // $("#CreateWarehouseDoorDto_WarehouseId").select2({
+            //     dropdownParent: $('#generalmodal')
+            // });
+ 
+        });
+
+
+        function createDoor() {
+            $("#CreateWarehouseDoorDto_Name").val('');
+            $("#CreateWarehouseDoorDto_Description").val('');
+            $("#CreateWarehouseDoorDto_Id").val('');
+            $("#CreateWarehouseDoorDto_CodeNameForFpn").val('');
+            $("#CreateWarehouseDoorDto_LatY").val('');
+            $("#CreateWarehouseDoorDto_LonX").val('');
+            $("#CreateWarehouseDoorDto_IsActive").prop('checked', true);
+            $("#generalmodal").modal('show');
+
+        }
+         
+        function editDoor(id) {
+
+            $.post("@Url.Action("GetWarehouseDoorById","Warehouse")", { WarehouseDoorId: id })
+                .done(function (res) {
+                     
+                    $('#CreateWarehouseDoorDto_Name').val(res.name);
+                    $("#CreateWarehouseDoorDto_Description").val(res.description);
+                    $("#CreateWarehouseDoorDto_Id").val(res.id);
+                    $("#CreateWarehouseDoorDto_CodeNameForFpn").val(res.codeNameForFpn);
+                    $("#CreateWarehouseDoorDto_LatY").val(res.latY);
+                    $("#CreateWarehouseDoorDto_LonX").val(res.lonX);
+                    $("#CreateWarehouseDoorDto_IsActive").prop('checked', res.isActive);
+
+                    $("#generalmodal").modal('show');
+                });
+        }
+
+
+
+    </script>
+}
+

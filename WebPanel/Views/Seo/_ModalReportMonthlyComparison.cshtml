@@ -1,0 +1,163 @@
+﻿@model ReportMonthlyComparisonPageDto
+
+<div id="ReportMonthlyComparisonModalId" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" tabindex="-1">
+	<div class="modal-dialog modal-dialog-centered">
+		<div class="modal-content modal-lg">
+			<div class="modal-header">
+
+				<h4 class="modal-title">گزارش مقایسه ماهانه و فصلی</h4>
+				<button type="button" class="close btn-close rounded border" data-bs-dismiss="modal"></button>
+			</div>
+			<div class="modal-body" id="modalbody">
+
+				<div class="card-body pt-0">
+					<ul class="nav nav-tabs mb-4" id="myTab" role="tablist">
+						<li class="nav-item" role="presentation">
+							<button class="nav-link active px-5" id="home-tab" data-bs-toggle="tab" data-bs-target="#home" type="button" role="tab" aria-controls="home" aria-selected="true"> ماهانه </button>
+						</li>
+						<li class="nav-item" role="presentation">
+							<button class="nav-link px-5 ms-2" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button" role="tab" aria-controls="profile" aria-selected="false"> فصلی </button>
+						</li>
+					</ul>
+					<div class="tab-content" id="myTabContent">
+						<div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+							<div class="form-body">
+								<form asp-action="GetReportMonthlyComparisonExcelReport" id="ReportMonthlyComparisonExcelReportId"
+									  asp-controller="AllocationOfEquipment" method="post">
+
+									<div class="row gy-4">
+										<div class="col-sm-6">
+											<div class="form-group">
+												<label> سال اول</label>
+												<div class="input-group">
+													<select class="form-control select2 ReportMonthlyComparison"
+															asp-for="FilterMonthly.YearFrom"
+															asp-items="Model.Years">
+													</select>
+												</div>
+											</div>
+										</div>
+
+										<div class="col-sm-6">
+											<div class="form-group">
+												<label>ماه اول</label>
+												<div class="input-group">
+													<select class="form-control select2 ReportMonthlyComparison" style="width:100%!important;"
+															asp-for="FilterMonthly.MonthFrom"
+															asp-items="Model.Months">
+													</select>
+												</div>
+											</div>
+										</div>
+
+										<div class="col-sm-6">
+											<div class="form-group">
+												<label> سال دوم</label>
+												<div class="input-group">
+													<select class="form-control select2 ReportMonthlyComparison"
+															asp-for="FilterMonthly.YearTo"
+															asp-items="Model.Years">
+													</select>
+												</div>
+											</div>
+										</div>
+
+										<div class="col-sm-6">
+											<div class="form-group">
+												<label>ماه دوم</label>
+												<div class="input-group">
+													<select class="form-control select2 ReportMonthlyComparison" style="width:100%!important;"
+															asp-for="FilterMonthly.MonthTo"
+															asp-items="Model.Months">
+													</select>
+												</div>
+											</div>
+										</div>
+
+									</div>
+
+
+									<div class="modal-footer px-0 pb-0 border-0 mt-3">
+										<button type="button" class="btn btn-success btn-round" onclick="GetReportMonthlyComparisonExcelReport()"> دریافت گزارش </button>
+										<button type="button" class="btn btn-danger btn-round" data-bs-dismiss="modal">بازگشت</button>
+									</div>
+								</form>
+							</div>
+						</div>
+						<div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+							<div class="form-body">
+								<form asp-action="GetReportSeasonalComparisonExcelReport" asp-controller="AllocationOfEquipment" id="ReportSeasonalComparisonExcelReportId" method="post">
+
+									<div class="row gy-4">
+										<div class="col-sm-6">
+											<div class="form-group">
+												<label> سال اول</label>
+												<div class="input-group">
+													<select class="form-control select2 ReportMonthlyComparison"
+															asp-for="FilterSeasonal.YearFrom"
+															asp-items="Model.Years">
+													</select>
+												</div>
+											</div>
+										</div>
+
+										<div class="col-sm-6">
+											<div class="form-group">
+												<label>فصل اول</label>
+												<div class="input-group">
+													<select class="form-control select2 ReportMonthlyComparison" style="width:100%!important;"
+															asp-for="FilterSeasonal.SeasonFrom"
+															asp-items="Model.Seasons">
+													</select>
+												</div>
+											</div>
+										</div>
+
+										<div class="col-sm-6">
+											<div class="form-group">
+												<label> سال دوم</label>
+												<div class="input-group">
+													<select class="form-control select2 ReportMonthlyComparison"
+															asp-for="FilterSeasonal.YearTo"
+															asp-items="Model.Years">
+													</select>
+												</div>
+											</div>
+										</div>
+
+										<div class="col-sm-6">
+											<div class="form-group">
+												<label>فصل دوم</label>
+												<div class="input-group">
+													<select class="form-control select2 ReportMonthlyComparison" style="width:100%!important;"
+															asp-for="FilterSeasonal.SeasonTo"
+															asp-items="Model.Seasons">
+													</select>
+												</div>
+											</div>
+										</div>
+
+									</div>
+
+
+									<div class="modal-footer px-0 pb-0 border-0 mt-3">
+										<button type="button" class="btn btn-success btn-round" onclick="GetReportSeasonalComparisonExcelReport()"> دریافت گزارش </button>
+										<button type="button" class="btn btn-danger btn-round" data-bs-dismiss="modal">بازگشت</button>
+									</div>
+								</form>
+							</div>
+						</div>
+					</div>
+
+
+				</div>
+
+
+			</div>
+		</div>
+	</div>
+</div>
+
+
+<script src="~/assets/js/validation/jquery.validate.min.js"></script>
+<script src="~/assets/js/validation/jquery.validate.unobtrusive.min.js"></script>

@@ -1,0 +1,224 @@
+@model VesselAllocationNoticePageDto
+@{
+    ViewData["Title"] = "لیست اعلام تخصیص شناور";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+    int rowNumber = ((Model.List.PageNumber - 1) * Model.List.PageSize) + 1;
+}
+
+<div class="row">
+    <div class="card">
+        <div class="card-header pb-0 px-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center">
+                    <h3 class="title">
+                        <i class="fa fa-ship"></i> لیست اعلام تخصیص شناور
+                    </h3>
+                    <a class="mx-3 filter-collapse" data-bs-toggle="collapse" href="#filterCollapse" role="button" aria-expanded="false" aria-controls="filterCollapse">
+                        فیلترها <i class="fa-solid fa-angle-down mx-2 align-middle"></i>
+                    </a>
+                </div>
+
+                <div class="d-flex align-items-center">
+                    <span class="badge bg-primary me-2">@Model.List.TotalItems.ToPrice() مورد</span>
+                </div>
+            </div>
+
+            <!-- Filter Section -->
+            <div class="collapse" id="filterCollapse">
+                <div class="card-body">
+                    <form id="formFilter" asp-action="Index" method="get">
+                        <div class="row gy-3">
+                            <div class="col-md-3 col-sm-6">
+                                <div class="form-group">
+                                    <label>جستجو:</label>
+                                    <input asp-for="Filter.Search" type="text" placeholder="نام شناور / شماره سفر / نام شرکت" class="form-control">
+                                </div>
+                            </div>
+
+                            <div class="col-md-3 col-sm-6">
+                                <div class="form-group">
+                                    <label>نمایندگی کشتیرانی:</label>
+                                    <input asp-for="Filter.CompanyName" type="text" placeholder="نمایندگی کشتیرانی" class="form-control">
+                                </div>
+                            </div>
+
+                            <div class="col-md-3 col-sm-6">
+                                <div class="form-group">
+                                    <label>نام شناور:</label>
+                                    <input asp-for="Filter.ShipName" type="text" placeholder="نام شناور" class="form-control">
+                                </div>
+                            </div>
+
+                            <div class="col-md-3 col-sm-6">
+                                <div class="form-group">
+                                    <label>شماره سفر:</label>
+                                    <input asp-for="Filter.VoyageNumber" type="text" placeholder="شماره سفر" class="form-control">
+                                </div>
+                            </div>
+
+                            <div class="col-md-3 col-sm-6">
+                                <div class="form-group">
+                                    <label>از تاریخ:</label>
+                                    <input asp-for="Filter.DateFrom" type="text" class="form-control datepicker" placeholder="از تاریخ" autocomplete="off">
+                                </div>
+                            </div>
+
+                            <div class="col-md-3 col-sm-6">
+                                <div class="form-group">
+                                    <label>تا تاریخ:</label>
+                                    <input asp-for="Filter.DateTo" type="text" class="form-control datepicker" placeholder="تا تاریخ" autocomplete="off">
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>مرتب‌سازی بر اساس:</label>
+                                    <select asp-for="Filter.SortColumn" class="form-control">
+                                        <option value="CreatedDate">تاریخ ثبت</option>
+                                        <option value="ShipName">نام شناور</option>
+                                        <option value="VoyageNumber">شماره سفر</option>
+                                        <option value="CompanyName">نمایندگی کشتیرانی</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>ترتیب:</label>
+                                    <select asp-for="Filter.SortDirection" class="form-control">
+                                        <option value="Desc">نزولی (جدیدترین اول)</option>
+                                        <option value="Asc">صعودی (قدیمی‌ترین اول)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>تعداد در صفحه:</label>
+                                    <select asp-for="Filter.PageSize" class="form-control">
+                                        <option value="10">10</option>
+                                        <option value="20">20</option>
+                                        <option value="50">50</option>
+                                        <option value="100">100</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 col-sm-12 pt-2">
+                                <div class="form-group mt-4">
+                                    <button type="submit" class="btn btn-success">
+                                        <i class="fa fa-search"></i> جستجو
+                                    </button>
+                                    <a href="@Url.Action("Index")" class="btn btn-secondary">
+                                        <i class="fa fa-refresh"></i> پاک کردن
+                                    </a>
+                                </div>
+                            </div>
+                            
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-body px-3">
+            <!-- Data Table -->
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead class="bg-primary">
+                        <tr>
+                            <th style="width: 50px;">#</th>
+                            <th>نام شناور</th>
+                            <th>شماره سفر</th>
+                            <th>نمایندگی کشتیرانی</th>
+                            <th>نوع عملیات</th>
+                            <th>نام کالا</th>
+                            <th>ثبت کننده</th>
+                            <th>بندر</th>
+                            <th>تاریخ ثبت</th>
+                            <th style="width: 100px;">عملیات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.List.Data != null && Model.List.Data.Any())
+                        {
+                            foreach (var item in Model.List.Data)
+                            {
+                                <tr>
+                                    <td>@rowNumber</td>
+                                    <td class="fw-bold">@item.ShipName</td>
+                                    <td>@item.VoyageNumber</td>
+                                    <td>@item.CompanyName</td>
+                                    <td>@item.TransportTypeTitle</td>
+                                    <td>@item.ProductName</td>
+                                    <td>@item.PersonelName</td>
+                                    <td>@item.PortName</td>
+                                    <td dir="ltr">@item.CreatedDateFa</td>
+                                    <td>
+                                        <a href="@Url.Action("Details", new { id = item.Id })" class="btn btn-sm btn-info" title="مشاهده جزئیات">
+                                            <i class="fa fa-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                rowNumber++;
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="10" class="text-center py-4">
+                                    <div class="alert alert-info">
+                                        <i class="fa fa-info-circle"></i> هیچ داده‌ای یافت نشد.
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            @if (Model.List.TotalPages > 1)
+            {
+                <div class="d-flex justify-content-center mt-4">
+                    <cs-pager cs-paging-pagesize="@Model.List.PageSize"
+                              cs-paging-pagenumber="@Model.List.PageNumber"
+                              cs-paging-totalitems="@Model.List.TotalItems"
+                              cs-pagenumber-param="Filter.PageNumber"
+                              cs-show-first-last="true"
+                              cs-show-prev-next="true"
+                              cs-first-page-title="ابتدا"
+                              cs-last-page-title="انتها"
+                              cs-next-page-title="بعدی"
+                              cs-previous-page-title="قبلی"
+                              cs-next-page-text="بعدی"
+                              cs-previous-page-text="قبلی"
+                              cs-pager-li-current-class="page-item active"
+                              cs-pager-li-other-class="page-item"
+                              cs-pager-li-non-active-class="page-item disabled"
+                              cs-pager-link-current-class="page-link"
+                              cs-pager-link-other-class="page-link"
+                              asp-controller="VesselAllocationNotice"
+                              asp-action="Index">
+                    </cs-pager>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section script {
+    <script>
+        $(document).ready(function () {
+            // Initialize datepickers
+            $('.datepicker').persianDatepicker({
+                format: 'YYYY/MM/DD',
+                autoClose: true,
+                observer: true
+            });
+
+            // Auto-submit on sort change
+            $('#Filter_SortColumn, #Filter_SortDirection, #Filter_PageSize').change(function () {
+                $('#formFilter').submit();
+            });
+        });
+    </script>
+}

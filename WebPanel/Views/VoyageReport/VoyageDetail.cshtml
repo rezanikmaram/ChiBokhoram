@@ -1,0 +1,642 @@
+@model Entities.DTOs.Web.Hirman.VoyageReport.VoyageReportDetailDto
+@{
+    ViewData["Title"] = "جزئیات سفر";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+@section style {
+    <link rel="stylesheet" href="~/assets/css/voyage-report-detail.css" asp-append-version="true" />
+    <style>
+        /* Table Search Styles */
+        .table-search-container {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.1);
+        }
+        
+        .search-input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .search-icon {
+            position: absolute;
+            right: 1rem;
+            color: #6c757d;
+            z-index: 10;
+            pointer-events: none;
+        }
+        
+        .search-input {
+            padding-right: 2.5rem !important;
+            padding-left: 3rem !important;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .search-input:focus {
+            border-color: #4a90e2;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+            outline: none;
+        }
+        
+        .clear-search {
+            position: absolute;
+            left: 0.5rem;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid #dee2e6;
+            color: #6c757d;
+            border-radius: 6px;
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+            transition: all 0.2s ease;
+            opacity: 0;
+            visibility: hidden;
+        }
+        
+        .clear-search:hover {
+            background: #f8f9fa;
+            color: #495057;
+            border-color: #adb5bd;
+        }
+        
+        .search-input:not(:placeholder-shown) ~ .clear-search {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .search-results-info {
+            margin-top: 0.75rem;
+            text-align: center;
+        }
+        
+        .search-results-info span {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            display: inline-block;
+        }
+        
+        /* Table row animation */
+        .seo-table tbody tr {
+            transition: all 0.3s ease;
+        }
+        
+        .seo-table tbody tr[style*="display: none"] {
+            opacity: 0;
+            transform: translateX(-20px);
+        }
+        
+        .seo-table tbody tr:not([style*="display: none"]) {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        
+        /* Responsive adjustments */
+        @@media (max-width: 768px) {
+            .table-search-container {
+                padding: 1rem;
+            }
+            
+            .search-input {
+                font-size: 0.9rem;
+            }
+            
+            .search-results-info span {
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+}
+
+<!-- Voyage Header -->
+<div class="voyage-detail-header">
+    <div class="row align-items-center">
+        <div class="col-md-8">
+            <div class="d-flex align-items-center">
+                <div class="back-button" onclick="history.back()">
+                    <i class="fa-solid fa-arrow-right"></i>
+                </div>
+                <div class="header-icon">
+                    <i class="fa-solid fa-ship"></i>
+                </div>
+                <div class="header-content">
+                    <h1 class="header-title">جزئیات سفر @Model.VoyageInfo.VoyageNumber</h1>
+                    <p class="header-subtitle">
+                        @Model.VoyageInfo.ShipName - @Model.VoyageInfo.ShippingCompany
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 text-md-end">
+            <div class="voyage-actions">
+                <form asp-action="ExportVoyageDetailExcel" method="post" style="display: inline;">
+                    <input type="hidden" name="voyageId" value="@Model.VoyageInfo.VoyageId" />
+                    <button type="submit" class="btn btn-success btn-sm me-2">
+                        <i class="fa-solid fa-file-excel me-1"></i> خروجی Excel
+                    </button>
+                </form>
+                <div class="voyage-status-badge d-inline-block">
+                    <span class="badge @(Model.VoyageInfo.VoyageState == Common.enumeration.VoyageState.Open ? "bg-success" : "bg-secondary")">
+                        @Model.VoyageInfo.VoyageStateTitle
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Voyage Info Card -->
+<div class="voyage-info-card">
+    <div class="row g-4">
+        <div class="col-md-3">
+            <div class="info-item">
+                <label>شماره PMO</label>
+                <value>@Model.VoyageInfo.PmoNumber</value>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="info-item">
+                <label>تاریخ شروع</label>
+                <value>@Model.VoyageInfo.StartDateFa</value>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="info-item">
+                <label>تاریخ پایان</label>
+                <value>@Model.VoyageInfo.EndDateFa</value>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="info-item">
+                <label>درصد تکمیل</label>
+                <value class="percentage">@Model.CompletionPercentage.ToString("F1")%</value>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Statistics Overview -->
+<div class="stats-overview">
+    <div class="row g-4">
+        <div class="col-lg-2 col-md-4 col-6">
+            <div class="stat-card primary">
+                <div class="stat-icon">
+                    <i class="fa-solid fa-clipboard-list"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-value">@Model.TotalSeos</div>
+                    <div class="stat-label">کل بارنامه‌ها</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-2 col-md-4 col-6">
+            <div class="stat-card success">
+                <div class="stat-icon">
+                    <i class="fa-solid fa-check-circle"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-value">@Model.CompletedSeos.Count</div>
+                    <div class="stat-label">تکمیل شده</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-2 col-md-4 col-6">
+            <div class="stat-card warning">
+                <div class="stat-icon">
+                    <i class="fa-solid fa-exclamation-triangle"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-value">@Model.IncompleteSeos.Count</div>
+                    <div class="stat-label">ناقص</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-2 col-md-4 col-6">
+            <div class="stat-card info">
+                <div class="stat-icon">
+                    <i class="fa-solid fa-weight-hanging"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-value">@Model.VoyageInfo.TaliCount</div>
+                    <div class="stat-label">تالی‌ها</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-2 col-md-4 col-6">
+            <div class="stat-card secondary">
+                <div class="stat-icon">
+                    <i class="fa-solid fa-boxes"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-value">@Model.VoyageInfo.SeoProductCount</div>
+                    <div class="stat-label">کالاها</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-2 col-md-4 col-6">
+            <div class="stat-card @(Model.VoyageInfo.TaliProgressPercentage >= 100 ? "success" : Model.VoyageInfo.TaliProgressPercentage >= 50 ? "warning" : "danger")">
+                <div class="stat-icon">
+                    <i class="fa-solid fa-chart-line"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-value">@Model.VoyageInfo.TaliProgressPercentage.ToString("F0")%</div>
+                    <div class="stat-label">پیشرفت تالی اسکله</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-2 col-md-4 col-6">
+            <div class="stat-card tertiary">
+                <div class="stat-icon">
+                    <i class="fa-solid fa-warehouse"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-value">@Model.VoyageInfo.WarehouseReceiptCount</div>
+                    <div class="stat-label">قبوض انبار</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Progress Bar -->
+<div class="progress-section">
+    <div class="progress-header">
+        <h4>پیشرفت کلی عملیات</h4>
+        <span class="progress-percentage">@Model.CompletionPercentage.ToString("F1")%</span>
+    </div>
+    <div class="progress-container">
+        <div class="progress">
+            <div class="progress-bar progress-bar-striped progress-bar-animated @(Model.CompletionPercentage >= 80 ? "bg-success" : Model.CompletionPercentage >= 50 ? "bg-warning" : "bg-danger")"
+                 role="progressbar" 
+                 style="width: @Model.CompletionPercentage%"
+                 aria-valuenow="@Model.CompletionPercentage" 
+                 aria-valuemin="0" 
+                 aria-valuemax="100">
+            </div>
+        </div>
+        <div class="progress-labels">
+            <span>شروع عملیات</span>
+            <span>@Model.CompletedSeos.Count تکمیل شده از @Model.TotalSeos</span>
+            <span>پایان</span>
+        </div>
+    </div>
+    <div class="progress-container mt-3">
+        <div class="progress-header">
+            <h4>پیشرفت عملیات تالی</h4>
+            <span class="progress-percentage">@Model.VoyageInfo.TaliProgressPercentage.ToString("F0")%</span>
+        </div>
+        <div class="progress">
+            <div class="progress-bar @(Model.VoyageInfo.TaliProgressPercentage >= 100 ? "bg-success" : Model.VoyageInfo.TaliProgressPercentage >= 50 ? "bg-warning" : "bg-danger")"
+                 role="progressbar" 
+                 style="width: @Model.VoyageInfo.TaliProgressPercentage%"
+                 aria-valuenow="@Model.VoyageInfo.TaliProgressPercentage" 
+                 aria-valuemin="0" 
+                 aria-valuemax="100">
+            </div>
+        </div>
+        <div class="progress-labels">
+            <span>بدون تالی</span>
+            <span>@Model.VoyageInfo.TaliCount.ToString("N0") تالی از @Model.VoyageInfo.SeoProductCount.ToString("N0") کالا</span>
+            <span>کامل</span>
+        </div>
+    </div>
+</div>
+
+<!-- SEOs Table -->
+<div class="seos-table-container">
+    @if (Model.CompletedSeos.Any() || Model.IncompleteSeos.Any())
+    {
+        <!-- Search Box -->
+        <div class="table-search-container">
+            <div class="search-input-wrapper">
+                <i class="fa-solid fa-search search-icon"></i>
+                <input type="text" 
+                       id="seoTableSearch" 
+                       class="form-control search-input" 
+                       placeholder="جستجو در تمام ستون‌ها...">
+                <button class="btn btn-outline-secondary btn-sm clear-search" id="clearSearch" title="پاک کردن جستجو">
+                    <i class="fa-solid fa-times"></i>
+                </button>
+            </div>
+            <div class="search-results-info">
+                <span id="searchResultsCount"></span>
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover seo-table">
+                <thead>
+                    <tr>
+                        <th>وضعیت</th>
+                        <th>شماره بارنامه</th>
+                        <th>کالا</th>
+                        <th>مالک کالا</th>
+                        <th>آمار</th>
+                        <th>عملیات</th>
+                        <th>اقلام ناقص</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var seo in Model.CompletedSeos)
+                    {
+                        <tr class="seo-row completed" onclick="window.location.href='@Url.Action("SeoDetail", new { seoId = seo.SeoId })'">
+                            <td>
+                                <span class="status-badge completed">
+                                    <i class="fa-solid fa-check-circle"></i>
+                                    تکمیل
+                                </span>
+                            </td>
+                            
+                            <td>
+                                <div class="bill-cell">
+                                    <i class="fa-solid fa-file-contract text-muted"></i>
+                                    <span>@seo.BillOfLadingNumber</span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="product-cell">
+                                    <i class="fa-solid fa-box text-muted"></i>
+                                    <span>@seo.ProductName</span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="owner-cell">
+                                    <i class="fa-solid fa-building text-muted"></i>
+                                    <span>@seo.ProductOwner</span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="stats-cell">
+                                    <div class="stat-item">
+                                        <span>@seo.TaliCount.ToString("N0")</span>
+                                        <small>تالی</small>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span>@seo.SeoProductCount.ToString("N0")</span>
+                                        <small>کالا</small>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span>@seo.ShipTonnage.ToString("N0")</span>
+                                        <small>تناژ</small>
+                                    </div>
+                                </div>
+                                <div class="progress" style="height:6px;width:100%;direction:ltr">
+                                    <div class="progress-bar @(seo.TaliProgressPercentage >= 100 ? "bg-success" : seo.TaliProgressPercentage >= 50 ? "bg-warning" : "bg-danger")"
+                                         role="progressbar"
+                                         style="width:@seo.TaliProgressPercentage%"
+                                         aria-valuenow="@seo.TaliProgressPercentage"
+                                         aria-valuemin="0"
+                                         aria-valuemax="100"
+                                         title="پیشرفت تالی اسکله: @seo.TaliProgressPercentage.ToString("F0")% (@seo.TaliCount.ToString("N0") از @seo.SeoProductCount.ToString("N0"))">
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="operations-cell">
+                                    @if (seo.HasTaliRecords)
+                                    {
+                                        <span class="op-indicator success" title="دارای تالی">
+                                            <i class="fa-solid fa-weight-hanging"></i>
+                                        </span>
+                                    }
+                                    @if (seo.HasWarehouseReceipt)
+                                    {
+                                        <span class="op-indicator info" title="دارای قبض انبار ورودی">
+                                            <i class="fa-solid fa-warehouse"></i>
+                                        </span>
+                                    }
+                                    @if (seo.HasOutboundWarehouseReceipt)
+                                    {
+                                        <span class="op-indicator warning" title="دارای قبض انبار خروجی">
+                                            <i class="fa-solid fa-truck-ramp-box"></i>
+                                        </span>
+                                    }
+                                </div>
+                            </td>
+                            <td>
+                                <div class="missing-cell">
+                                    <span class="no-missing">-</span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="action-cell">
+                                    <i class="fa-solid fa-arrow-left"></i>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                    
+                    @foreach (var seo in Model.IncompleteSeos)
+                    {
+                        <tr class="seo-row incomplete" onclick="window.location.href='@Url.Action("SeoDetail", new { seoId = seo.SeoId })'">
+                            <td>
+                                <span class="status-badge incomplete">
+                                    <i class="fa-solid fa-exclamation-triangle"></i>
+                                    ناقص
+                                </span>
+                            </td>
+                            <td>
+                                <div class="bill-cell">
+                                    <i class="fa-solid fa-file-contract text-muted"></i>
+                                    <span>@seo.BillOfLadingNumber</span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="product-cell">
+                                    <i class="fa-solid fa-box text-muted"></i>
+                                    <span>@seo.ProductName</span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="owner-cell">
+                                    <i class="fa-solid fa-building text-muted"></i>
+                                    <span>@seo.ProductOwner</span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="stats-cell">
+                                    <div class="stat-item">
+                                        <span>@seo.TaliCount.ToString("N0")</span>
+                                        <small>تالی</small>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span>@seo.SeoProductCount.ToString("N0")</span>
+                                        <small>کالا</small>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span>@seo.ShipTonnage.ToString("N0")</span>
+                                        <small>تناژ</small>
+                                    </div>
+                                </div>
+                                <div class="progress" style="height:6px;width:100%;direction:ltr">
+                                    <div class="progress-bar @(seo.TaliProgressPercentage >= 100 ? "bg-success" : seo.TaliProgressPercentage >= 50 ? "bg-warning" : "bg-danger")"
+                                         role="progressbar"
+                                         style="width:@seo.TaliProgressPercentage%"
+                                         aria-valuenow="@seo.TaliProgressPercentage"
+                                         aria-valuemin="0"
+                                         aria-valuemax="100"
+                                         title="پیشرفت تالی اسکله: @seo.TaliProgressPercentage.ToString("F0")% (@seo.TaliCount.ToString("N0") از @seo.SeoProductCount.ToString("N0"))">
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="operations-cell">
+                                    @if (seo.HasTaliRecords)
+                                    {
+                                        <span class="op-indicator success" title="دارای تالی">
+                                            <i class="fa-solid fa-weight-hanging"></i>
+                                        </span>
+                                    }
+                                    @if (seo.HasWarehouseReceipt)
+                                    {
+                                        <span class="op-indicator info" title="دارای قبض انبار ورودی">
+                                            <i class="fa-solid fa-warehouse"></i>
+                                        </span>
+                                    }
+                                    @if (seo.HasOutboundWarehouseReceipt)
+                                    {
+                                        <span class="op-indicator warning" title="دارای قبض انبار خروجی">
+                                            <i class="fa-solid fa-truck-ramp-box"></i>
+                                        </span>
+                                    }
+                                </div>
+                            </td>
+                            <td>
+                                <div class="missing-cell">
+                                    @if (!seo.HasTaliRecords || !seo.HasWarehouseReceipt || !seo.HasOutboundWarehouseReceipt)
+                                    {
+                                        <div class="missing-items">
+                                            @if (!seo.HasTaliRecords)
+                                            {
+                                                <span class="missing-item" title="تالی">
+                                                    <i class="fa-solid fa-weight-hanging"></i>
+                                                </span>
+                                            }
+                                            @if (!seo.HasWarehouseReceipt)
+                                            {
+                                                <span class="missing-item" title="قبض انبار ورودی">
+                                                    <i class="fa-solid fa-warehouse"></i>
+                                                </span>
+                                            }
+                                            @if (!seo.HasOutboundWarehouseReceipt)
+                                            {
+                                                <span class="missing-item" title="قبض انبار خروجی">
+                                                    <i class="fa-solid fa-truck-ramp-box"></i>
+                                                </span>
+                                            }
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <span class="no-missing">-</span>
+                                    }
+                                </div>
+                            </td>
+                            <td>
+                                <div class="action-cell">
+                                    <i class="fa-solid fa-arrow-left"></i>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="empty-section">
+            <i class="fa-solid fa-inbox"></i>
+            <p>هیچ بارنامه‌ای برای این سفر وجود ندارد</p>
+        </div>
+    }
+</div>
+
+@section script {
+    <script>
+        // Table search functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('seoTableSearch');
+            const clearButton = document.getElementById('clearSearch');
+            const resultsCount = document.getElementById('searchResultsCount');
+            const table = document.querySelector('.seo-table');
+            const tableRows = table ? table.querySelectorAll('tbody tr') : [];
+            
+            if (!searchInput || !table) return;
+            
+            let originalRowCount = tableRows.length;
+            
+            function updateResultsCount(visibleCount) {
+                if (resultsCount) {
+                    if (searchInput.value.trim()) {
+                        resultsCount.textContent = `${visibleCount} از ${originalRowCount} نتیجه`;
+                    } else {
+                        resultsCount.textContent = '';
+                    }
+                }
+            }
+            
+            function performSearch() {
+                const searchTerm = searchInput.value.toLowerCase().trim();
+                let visibleCount = 0;
+                
+                tableRows.forEach(row => {
+                    if (searchTerm === '') {
+                        row.style.display = '';
+                        visibleCount++;
+                    } else {
+                        const rowText = row.textContent.toLowerCase();
+                        const found = rowText.includes(searchTerm);
+                        row.style.display = found ? '' : 'none';
+                        if (found) visibleCount++;
+                    }
+                });
+                
+                updateResultsCount(visibleCount);
+            }
+            
+            // Search input event
+            searchInput.addEventListener('input', performSearch);
+            searchInput.addEventListener('keyup', performSearch);
+            
+            // Clear button event
+            if (clearButton) {
+                clearButton.addEventListener('click', function() {
+                    searchInput.value = '';
+                    performSearch();
+                    searchInput.focus();
+                });
+            }
+            
+            // Initialize results count
+            updateResultsCount(originalRowCount);
+        });
+        
+        // Add smooth animations on scroll
+        document.addEventListener('DOMContentLoaded', function() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('animate-in');
+                    }
+                });
+            });
+
+            document.querySelectorAll('.seo-card, .stat-card').forEach(el => {
+                observer.observe(el);
+            });
+        });
+    </script>
+}

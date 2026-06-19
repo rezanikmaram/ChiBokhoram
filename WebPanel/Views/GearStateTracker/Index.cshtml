@@ -1,0 +1,263 @@
+﻿@using Entities.DTOs.Public.LogBook
+@model Entities.DTOs.Public.LogBook.LogBookCalendarDto
+@{
+    ViewData["Title"] = "گزارش کارکرد عملیاتی";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+@section style {
+    <link rel="stylesheet" href="/Bootstrap/css/bootstrap.min.css">
+    <style>
+        .calendar-day {
+            height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .calendar-day button {
+            width: 100%;
+            height: 100%;
+        }
+
+        .p-6 {
+            padding: 6px;
+        }
+
+        .btn {
+            padding: unset; 
+        }
+
+        .modal-max-height {
+            height: 700px;
+        }
+    </style>
+}
+<div class=" mt-4">
+    <div class="card">
+        @{
+            var previewMonth = Model.PreviousMonth;
+            var leftMonth = Model.PreviousMonth + 1;
+            var rightMonth = Model.PreviousMonth - 1;
+            var disableClass = Model.PreviousMonth == 0 ? "disabled" : "";
+
+            <div class="d-flex justify-content-between p-4">
+                <span>
+                    <a class="btn btn-lg btn-success px-3 py-1" href="/GearStateTracker/Index?previousMonth=@leftMonth"><i class="fa-solid fa-arrow-right align-middle"></i>  ماه قبلی</a>
+                </span>
+
+                <strong class="bs-info-bg-subtle">ثبت گزارش عملیات @Model.CurrentMonthTitle ماه @Model.CurrentYear</strong>
+
+     
+                    <span>
+                        <a class="btn btn-lg btn-success px-3 py-1 @disableClass" href="/GearStateTracker/Index?previousMonth=@rightMonth">  ماه بعدی<i class="fa-solid fa-arrow-left align-middle ms-1"></i></a>
+                    </span>
+              
+            </div>
+        }
+        
+        <div class="card-body pt-1">
+            <div class="row bg-primary p-0 py-4 rounded-top mb-1">
+                @foreach (var dayOfWeek in Model.DaysOfWeeks)
+                {
+                    <div class="col text-center">
+                        <strong>@dayOfWeek.Title</strong>
+                    </div>
+                }
+            </div>
+            
+            @{
+                var daysOfWeek = Model.DaysOfWeeks;
+                var calendarItems = Model.DateItems;
+
+                // Initialize a list to hold the calendar weeks
+                var calendarMatrix = new List<List<LogBookPersianCalendarDto?>>();
+
+                // Determine the number of weeks required (maximum 6 weeks)
+                int maxWeeks = 6;
+
+                        @if (calendarItems != null && calendarItems.Count > 0)
+                {
+                    // Create matrix for each week
+                    for (int i = 0; i < maxWeeks; i++)
+                    {
+                        calendarMatrix.Add(new List<LogBookPersianCalendarDto?>(new LogBookPersianCalendarDto?[7]));
+                    }
+
+                    // Determine the first day of the month
+                    int firstDayOfWeek = (int)calendarItems.First().DayOfWeek - 1;
+
+                    // Fill the calendar matrix
+                    foreach (var item in calendarItems)
+                    {
+                        int dayOfWeekIndex = (int)item.DayOfWeek - 1;
+                        int currentWeekIndex = (item.PersianDay + firstDayOfWeek - 1) / 7;
+
+                        // Place item in the correct week and day
+                        calendarMatrix[currentWeekIndex][dayOfWeekIndex] = item;
+                    }
+
+                    // Fill the remaining days of the last week with nulls
+                    int lastWeekIndex = calendarMatrix.Count - 1;
+                    for (int i = (int)calendarItems.Last().DayOfWeek; i < 7; i++)
+                    {
+                        calendarMatrix[lastWeekIndex][i] = null;
+                    }
+                }
+            }
+
+            <div class="calendar">
+                @foreach (var week in calendarMatrix)
+                {
+                    <div class="row p-6 py-0">
+                        @foreach (var day in week)
+                        {
+                            if (day != null)
+                            {
+                                string buttonClass = "btn btn-light ";
+                                if (day.GregorianDate <= DateTimeOffset.Now.Date && day.AlreadyInProcessCount == 0) buttonClass = "btn btn-light-green p-0 ";
+                                else if (day.GregorianDate <= DateTimeOffset.Now.Date && day.FinishedStateTrackerCount > 0) buttonClass = "btn btn-light-yellow p-0 ";
+                                else if (day.GregorianDate <= DateTimeOffset.Now.Date && day.FinishedStateTrackerCount == 0) buttonClass = "btn btn-light-red p-0 ";
+
+                                @* if (day.IsCompleted.Value)
+                                {
+                                    buttonClass = "btn btn-success";
+                                }
+                                else if (day.IsIncomplete.Value)
+                                {
+                                    buttonClass = "btn btn-warning";
+                                } *@
+
+                                <div class="col text-center calendar-day p-0 border-start border-end border-bottom">
+                                    <button type="button" 
+                                        disabled="@(day.GregorianDate > DateTimeOffset.Now.Date)"
+                                        class="@buttonClass"
+                                        data-bs-toggle="tooltip" 
+                                        data-bs-placement="top"
+                                        onclick="openStateTrackerModal('@day.GregorianDate');"
+                                        >
+                                        @day.PersianDay
+                                        <div>
+                                            <span class="badge badge-success">تعداد ثبت شده: @day.FinishedStateTrackerCount</span>
+                                            <br />
+                                            <span class="badge bg-success2 mt-2">تعداد منتظر ثبت: @day.AlreadyInProcessCount</span>
+                                        </div>
+                                    </button>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="col calendar-day p-0 border-start border-end border-bottom"></div>
+                            }
+                        }
+                    </div>
+                }
+            </div>
+
+        </div> 
+    </div>
+</div>
+
+
+
+<div id="generalmodal" class="modal fade modal-max-height " data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">ثبت وضعیت تجهیزات</h4>
+                <button type="button" class="close btn-close rounded border" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="modalbody">
+                
+            </div>
+            <div class="modal-footer d-flex justify-content-between px-4">
+                <div>
+                    <button type="button" onclick="openChangeStateModal()" class="btn btn-secondary btn-lg rounded px-4 py-2">ثبت دسته ای وضعیت موارد اننخاب شده</button>
+                    <button type="button" onclick="setDataFromPreviousDate()" class="btn btn-danger btn-lg rounded  px-4 py-2 ms-2">انتقال وضعیت روز قبل به امروز</button>
+                </div>
+                <button class="mt-2 btn btn-success btn-lg pull-right submit-button px-4 py-2 submit-button" type="button">ذخیره</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="changeStateModal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">ثبت وضعیت تجهیزات</h4>
+                <button type="button" class="close btn-close rounded border" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="modalbody">
+
+                <label for="stateDropDown">انتخاب وضعیت</label>
+                <select id="stateDropDown" name="selectedStateItem" class="form-control" asp-items="ViewBag.States">
+                    <option value="">انتخاب وضعیت</option>
+                </select>
+
+                <label for="stateDescription">ثبت توضیحات</label>
+                <input id="stateDescription" name="stateDescription" class="form-control">
+
+                <button type="button" class="mt-3 btn btn-success px-3 py-2" onclick="saveOnSelectedItems()">ثبت</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section script {
+    <script src="~/assets/js/bootstrap/popper.min.js"></script>
+    <script src="~/assets/js/bootstrap/bootstrap.min.js"></script>
+    <script>
+        function navigateToDashboardVessel(date,entityId) {
+            var url = "@Url.Action("DashboardVessel", "Vessel")";
+
+            $.get(url, { date: date, vesselId :entityId })
+                .done(function (res) {
+
+                    var redirectUrl = url + "?date=" + encodeURIComponent(date);
+
+                    if (entityId !== null) {
+                        redirectUrl += "&vesselId=" + encodeURIComponent(entityId);
+                    }
+
+                    window.location.href = redirectUrl;
+                })
+                .fail(function () {
+                    // Handle the error case if needed
+                    alert('Error occurred while processing your request.');
+                });
+        }
+        
+        var currentDateSelected;
+        function openStateTrackerModal(targetDate) {
+            currentDateSelected = targetDate;
+
+            $.ajax({
+                url: '@Url.Action("LoadGearStateTracker", "GearStateTracker")',
+                type: 'GET',
+                data: { targetDate: targetDate },
+                success: function (result) {
+                    $('#modalbody').html(result);
+                    $("#generalmodal").modal('show');
+                }
+            });
+
+        }
+
+        function openChangeStateModal() {
+            var table = $('#gearGrid');
+            var inputcheckboxes = $('td input[type=checkbox]:checked', table);
+            if (inputcheckboxes.length == 0) {
+                alert('موردی انتخاب نشده است')
+                return;
+            }
+
+            $("#changeStateModal").modal('show');
+
+        }
+
+        document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(tooltipNode => {
+            new bootstrap.Tooltip(tooltipNode);
+        });
+    </script>
+}

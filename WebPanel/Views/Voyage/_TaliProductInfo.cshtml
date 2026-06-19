@@ -1,0 +1,153 @@
+﻿@model Entities.DTOs.Web.Hirman.SeoProductDto
+
+<div id="SeoProductInfoModal" class="modal fade" data-bs-keyboard="false" role="dialog" tabindex="-1">
+	<div class="modal-dialog modal-dialog-centered">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h4 class="modal-title"> مشخصات کالا در بارنامه </h4>
+				<button type="button" class="close btn-close rounded border" data-bs-dismiss="modal"></button>
+			</div>
+			<div class="modal-body">
+				<div class="row gy-3">
+					<div class="col-12">
+						<div class=" border rounded-3 bg-light p-2 ">
+							<p class="my-0 text-dark">   @Model.CountTitle @Model.ProductTitle (@Model.SeoProductPackingName)</p>
+						</div>
+					</div>
+					<div class="col-12">
+						<div class=" border rounded-3 bg-light p-2 ">
+							<p class="my-0 text-dark">  HSCode: @Model.ProductHSCodeTitle</p>
+						</div>
+					</div>
+				</div>
+
+				@if (Model.IsSelfTransported || !string.IsNullOrWhiteSpace(Model.VehicleIdentificationNumber))
+				{
+					<div class="my-3">
+						<div class="row gy-3">
+
+							<div class="col-12">
+								<div class=" border rounded-3 bg-light p-2 ">
+									<p class="my-0 text-dark">  شماره شاسی: @Model.VehicleIdentificationNumber</p>
+								</div>
+							</div>
+						</div>
+					</div>
+				}
+
+				@if(!string.IsNullOrEmpty( Model.ContainerTitle))
+				{
+					<div class="my-3">
+						<div class="row gy-3">
+							<div class="col-6">
+								<div class="border rounded-3 bg-light p-2">
+									<p class="my-0 text-dark"> شماره کانتینر: @Model.ContainerNumber</p>
+								</div>
+							</div>
+							<div class="col-6">
+								<div class="border rounded-3 bg-light p-2">
+									<p class="my-0 text-dark"> پلمپ کانتینر: @Model.ContainerSealNumber</p>
+								</div>
+							</div>
+							<div class="col-6">
+								<div class="border rounded-3 bg-light p-2">
+									<p class="my-0 text-dark"> نوع کانتینر: @Model.ContainerType</p>
+								</div>
+
+							</div>
+							<div class="col-6">
+								<div class="border rounded-3 bg-light p-2">
+									<p class="my-0 text-dark"> نوع انتقال: @Model.ContainerMoveType</p>
+								</div>
+							</div>
+						</div>
+					</div>
+				}
+
+				<div class="my-3">
+					<div class="row gy-3">
+						<div class="col-6">
+							<div class="border rounded-3 bg-light p-2">
+								<p class="my-0 text-dark"> وزن خالص: @Model.WeightNetTitle</p>
+							</div>
+						</div>
+						<div class="col-6">
+							<div class="border rounded-3 bg-light p-2">
+								<p class="my-0 text-dark"> وزن ناخالص: @Model.WeightGrossTitle</p>
+							</div>
+						</div>
+						<div class="col-6">
+							<div class="border rounded-3 bg-light p-2">
+								<p class="my-0 text-dark"> حجم: @Model.VolumeTitle</p>
+							</div>
+
+						</div>
+						<div class="col-6">
+							<div class="border rounded-3 bg-light p-2">
+								<p class="my-0 text-dark"> اندازه: @Model.Size</p>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="">
+					<div class="row">
+						<div class="col-6">
+							<div class="border rounded-3 bg-light p-2">
+								<p class="my-0 text-dark"> فارسی: @Model.NameFa</p>
+							</div>
+						</div>
+						<div class="col-6">
+							<div class="border rounded-3 bg-light p-2">
+								<p class="my-0 text-dark"> انگلیسی: @Model.NameEn</p>
+							</div>
+						</div>
+					</div>
+				</div>
+
+
+				<div class="border rounded-3 bg-light p-2 my-3">
+					<p class="mb-0 text-dark">  توضیحات: @Model.Description</p>
+				</div>
+
+
+				<div class="border rounded-3 bg-light p-2 my-3">
+					<p class="mb-0 text-dark">
+						ویژگی های کالا:
+						@if (Model.IsDangerous)
+						{
+							<span class="p-1 bg-primary mx-1 rounded"> کالا خطرناک </span>
+						}
+
+						@if (Model.IsBigVolume)
+						{
+							<span class="p-1 bg-primary mx-1 rounded"> کالا حجیم </span>
+						}
+
+						@if (Model.IsUnusual)
+						{
+							<span class="p-1 bg-primary mx-1 rounded"> کالا نامتعارف </span>
+						}
+
+						@if (Model.IsRawMaterials)
+						{
+							<span class="p-1 bg-primary mx-1 rounded">   مواد اولیه </span>
+						}
+						@if (Model.IsNeedsSpecialEquipment)
+						{
+							<span class="p-1 bg-primary mx-1 rounded">   تجهیزات ویژه </span>
+						}
+
+						@if (Model.IsSelfTransported)
+						{
+							<span class="p-1 bg-primary mx-1 rounded">خودران بودن کالا </span>
+						}
+					</p>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<a class="btn btn-success" asp-action="ProductManage" asp-controller="Seo" asp-route-seoId="@Model.SeoId" target="_blank">مدیریت کالا</a>
+			</div>
+		</div>
+	</div>
+</div>

@@ -1,0 +1,262 @@
+﻿@model VoyageWarehouseManagerDto
+@{
+	ViewData["Title"] = "مدیریت انبار های سفر";
+	Layout = "~/Views/Shared/AdminLayout.cshtml";
+	int i = 1;
+}
+
+<div class="col-md-12">
+	<div class="bg-white rounded-3 p-3 shadow-sm">
+		<div class="d-flex justify-content-between">
+			<span class="d-flex align-items-end align-items-center">
+				<span class="d-flex align-items-center">
+					<a asp-controller="Voyage" class="fs-6" asp-action="VoyageSeo" asp-route-VoyageId="@Model.VoyageInfo.Id"><i class="fa-solid fa-right-to-bracket me-2"></i></a>
+					<p class="mb-0 fs-6">مدیریت انبار های  سفر</p>
+				</span>
+				<span class="label p-2 mx-2 rounded label-primary">@Model.VoyageInfo.ShipShipName</span>
+				<span class="label p-2 mx-2 rounded label-info">@Model.VoyageInfo.TransportTypeTitle</span>
+			</span>
+			
+			<div class="d-flex align-items-center">
+				@DateTimeOffset.Now.ToLongPersianDateString()
+				<i class="icon-calendar"></i>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="row mt-3">
+	<div class="col-md-6">
+		<div class="card rounded-3 min-height-600">
+			<div class="card-header pb-0">
+				<div class="d-flex justify-content-between">
+					<h3 class="title m-0">
+						<i class="icon-user"></i>
+						انتخاب انبار
+					</h3>
+					<form asp-action="SetWareHouseForVoyage" method="post" id="postWareHouse">
+
+						<a class="btn mb-2 float-end btn-success rounded text-white label" onclick="setWareHouseForVoyage();">  +  اضافه کردن انتخاب شده ها</a>
+						<input id="selectWareHouseId" name="ids" type="hidden" />
+						<input asp-for="FilterDto.VoyageId" name="VoyageId" type="hidden" />
+					</form>
+					
+				</div>
+				<form id="formFilter" asp-action="ManageWarehouse" asp-route-VoyageId="@Model.FilterDto.VoyageId" method="post">
+					<input asp-for="FilterDto.VoyageId" type="hidden" />
+					<div class="form-body mb-2">
+
+						<div class="row">
+							<div class="form-group col-lg-5 ">
+								<label>جستجو</label>
+								<div class="input-group">
+									<input asp-for="FilterDto.Search" type="text" placeholder="نام" class="form-control">
+								</div>
+							</div>
+
+							<div class="form-group col-lg-4">
+								<label>نوع کالا</label>
+								<div class="input-group">
+									<select class="form-control select2" style="width:100%!important;"
+									        asp-for="FilterDto.ProductCategoryId"
+									        asp-items="Model.ProductCategories">
+										<option value="">همه کالا ها</option>
+									</select>
+								</div>
+							</div>
+
+							<div class="col-lg-3">
+								<div style="margin-top:32px;" class="d-flex justify-content-around">
+									<button class="alert-icon btn btn-success rounded label w-100" type="submit"><p class="mb-0">فیلتر</p></button>
+								</div>
+							</div>
+						</div>
+
+					</div>
+				</form>
+
+			</div>
+			
+			<div class="card-body pt-0">
+				<div class="table-responsive w-100">
+					<table id="TableUnSelected" class="table table-bordered ">
+						<thead class="bg-primary">
+							<tr>
+								<th><input type="checkbox" id="selectAllTableUnSelected" /></th>
+								<th>نام</th>
+								<th>حداکثر  </th>
+								<td>ظرفیت جاری</td>
+								<td>خالی</td>
+								<td>محصول</td>
+
+							</tr>
+						</thead>
+
+						<tbody>
+							@foreach (var item in Model.WareHouses)
+							{
+								<tr>
+									<td style="width:30px;"><input type="checkbox" value="@item.Id" name="WareHouseId" class="row-selector" /></td>
+									<td>@item.Name</td>
+									<td>@item.MaxCapacity.ToPrice()</td>
+									<td>@item.CurrentCapacity.ToPrice()</td>
+									<td>@item.EmptyCapacity.ToPrice()</td>
+									<td>@item.ProductCategoryName</td>
+								</tr>
+							}
+						</tbody>
+					</table>
+				</div>
+
+				<!-- /.tab-content -->
+			</div>
+			<!-- /.portlet-body -->
+		</div>
+	</div>
+	<div class="col-md-6">
+		<div class="card rounded-3">
+			<div class="card-header">
+				<div class="d-flex justify-content-between d-flex">
+					<h3 class="title m-0">
+						<i class="icon-speech"></i>
+						انبار های انتخاب شده
+					</h3>
+					<form asp-action="RemoveWareHouseFormVoyage" method="post" id="deleteWareHouse">
+
+						<a class="btn btn-danger text-white label rounded" onclick="deleteProduct();"> <i class="fa fa-trash me-2"></i> حذف انتخاب شده ها </a>
+						<input id="removeIds" name="ids" type="hidden" />
+						<input asp-for="FilterDto.VoyageId" name="VoyageId" type="hidden" />
+
+					</form>
+				</div><!-- /.portlet-title -->
+				<!-- /.buttons-box -->
+			</div><!-- /.portlet-heading -->
+			<div class="card-body pt-0">
+				<div class="table-responsive">
+					<table id="TableSelected" class="table table-bordered ">
+						<thead class="bg-primary">
+							<tr>
+								<th><input type="checkbox" id="selectAllTableSelected" /></th>
+								<th>نام</th>
+								<th>حداکثر</th>
+								<td>ظرفیت جاری</td>
+								<td>خالی</td>
+								<td>محصول</td>
+								<td>انبار پیش فرض</td>
+							</tr>
+						</thead>
+						<tbody>
+							@foreach (var item in Model.SelectedWareHouses)
+							{
+								<tr>
+									<td style="width:30px;"><input type="checkbox" value="@item.Id" name="selectedWareHouseId" class="row-selector" /></td>
+									<td>@item.Name</td>
+									<td>@item.MaxCapacity</td>
+									<td>@item.CurrentCapacity</td>
+									<td>@item.EmptyCapacity</td>
+									<td>@item.ProductCategoryName</td>
+									<td style="width:30px;">
+										<input type="checkbox" checked="@item.IsDefault" value="@item.Id" name="selectedDefaultWareHouseId"
+											   onchange="setDefaultWareHouse(this, '@item.Id', '@Model.FilterDto.VoyageId')" />
+									</td>
+
+
+								</tr>
+								i++;
+							}
+						</tbody>
+					</table>
+				</div>
+
+				<!-- /.tab-content -->
+
+			</div><!-- /.portlet-body -->
+		</div>
+	</div>
+</div>
+@section script {
+	<script>
+
+		$(document).ready(function () {
+			$("#FilterDto_ProductCategoryId").select2().trigger('change');
+		});
+
+		function setDefaultWareHouse(checkbox, wareHouseId, VoyageId) {
+			// اطمینان حاصل کنیم که فقط یک چک‌باکس فعال است
+			$("input:checkbox[name=selectedDefaultWareHouseId]").not(checkbox).prop('checked', false);
+
+			// اگر چک‌باکس انتخاب شده بود، متد فراخوانی شود
+			if ($(checkbox).is(':checked')) {
+				$.ajax({
+					url: '@Url.Action("SetDefaultWareHouse")',
+					type: 'POST',
+					data: {
+						id: wareHouseId,
+						VoyageId: VoyageId
+					},
+					success: function () {
+						showAlert2('انبار پیش فرض با موفقیت تنظیم شد', 0);
+					},
+					error: function () {
+						showAlert2('خطا در تنظیم انبار پیش فرض', 1);
+					}
+				});
+			}
+		}
+		function setWareHouseForVoyage() {
+			var ids = "";
+			$("#selectWareHouseId").val('');
+			$("input:checkbox[name=WareHouseId]:checked").each(function () {
+				if (ids) {
+					ids += ',' + $(this).val();
+				}
+				else {
+					ids = $(this).val();
+				}
+			});
+			$("#selectWareHouseId").val(ids);
+			if (ids) {
+				$("#postWareHouse").submit();
+			}
+			else {
+				showAlert2('انباری انتخاب نشده است', 1);
+				return;
+			}
+		}
+		function deleteProduct() {
+			var ids = "";
+			$("#removeIds").val('');
+			$("input:checkbox[name=selectedWareHouseId]:checked").each(function () {
+				if (ids) {
+					ids += ',' + $(this).val();
+				}
+				else {
+					ids = $(this).val();
+				}
+			});
+			$("#removeIds").val(ids);
+			if (ids) {
+				$("#deleteWareHouse").submit();
+			}
+			else {
+				showAlert2('انباری انتخاب نشده است', 1);
+				return;
+			}
+		}
+				$(document).ready(function () {
+
+			$('#selectAllTableUnSelected').click(function (e) {
+					var isChecked = this.checked;
+				// Only select/deselect visible checkboxes
+				$('#TableUnSelected tbody tr:visible').find('td input:checkbox.row-selector').prop('checked', isChecked);
+			});
+
+
+			$('#selectAllTableSelected').click(function (e) {
+					var isChecked = this.checked;
+				// Only select/deselect visible checkboxes
+				$('#TableSelected tbody tr:visible').find('td input:checkbox.row-selector').prop('checked', isChecked);
+			});
+		});
+
+	</script>
+}

@@ -1,0 +1,319 @@
+﻿@model GetAssignedCheckListFactorDto
+@{
+	ViewData["Title"] = $"شاخص های ({Model.CheckListTitle})";
+	Layout = "~/Views/Shared/AdminLayout.cshtml";
+	int i = 1;
+}
+
+<div class="card-header bg-white p-15 rounded">
+	<div class="d-flex justify-content-between">
+		<h3 class="title m-0">
+			<a asp-action="Index">
+				<i class="fa-solid fa-right-to-bracket align-middle me-2"></i>
+			</a>
+			شاخص های (@Model.CheckListTitle)
+		</h3>
+	</div>
+</div>
+
+<div class="row mt-3">
+	<div class="col-md-6">
+		<div class="card rounded-3 min-height-600">
+			<div class="card-header">
+				<div class="d-flex justify-content-between">
+					<h3 class="title m-0">
+						<i class="icon-user"></i>
+						انتخاب شاخص ها به چک لیست
+					</h3>
+					<form asp-action="AssignedCheckListFactorToCheckList"   method="post" id="postAssignedCheckList">
+
+						<a class="btn mb-2 float-end btn-success rounded text-white label" onclick="assignedCheckListFactorToCheckList();">اضافه کردن انتخاب شده ها</a>
+						<input id="selectCheckListFactorId" name="Ids" type="hidden" />
+
+						<input name="CheckListId" type="hidden" value="@Model.CheckListId" />
+					</form>
+				</div><!-- /.portlet-title -->
+			</div><!-- /.portlet-heading -->
+			<div class="card-body pt-0">
+				<form id="formFilter" asp-action="GetAssignedCheckListFactor" method="post">
+					<input type="hidden" asp-for="CheckListId" />
+					<div class="form-body mb-5">
+
+						<div class="row">
+							<div class="form-group col-lg-4 ">
+								<label>جستجو</label>
+								<div class="input-group">
+									<input asp-for="Filter.Search" type="text" class="form-control">
+								</div>
+							</div>
+
+
+							<div class="col-lg-3">
+								<div style="margin-top:32px;" class="d-flex justify-content-around">
+									<button class="alert-icon btn btn-success rounded label w-100" type="submit"><p class="">فیلتر</p></button>
+								</div>
+							</div>
+						</div>
+
+					</div>
+				</form>
+
+
+
+				<div class="table-responsive w-100">
+					<table id="TableUnSelected" class="table table-bordered ">
+						<thead class="bg-primary">
+							<tr>
+								<th><input type="checkbox" id="selectAllTableUnSelected" /></th>
+								<th>نام شاخص</th>
+								 
+							</tr>
+						</thead>
+
+						<tbody>
+							@foreach (var item in Model.UnAssignedCheckListFactors)
+							{
+								<tr>
+									<td style="width:30px;"><input type="checkbox" value="@item.Id" name="CheckListFactorId" class="row-selector" /></td>
+									<td>@item.Title</td>
+
+								</tr>
+							}
+						</tbody>
+					</table>
+				</div>
+
+				<!-- /.tab-content -->
+			</div>
+			<!-- /.portlet-body -->
+		</div>
+	</div>
+	<div class="col-md-6">
+		<div class="card rounded-3">
+			<div class="card-header">
+				<div class="d-flex justify-content-between d-flex">
+					<h3 class="title m-0">
+						<i class="icon-speech"></i>
+						شاخص های متصل شده به چک لیست
+					</h3>
+					<form asp-action="RemoveAssignedCheckListFactorFromCheckList" method="post" id="deleteAssignedCheckListFactorForm">
+
+						<a class="btn btn-danger text-white label rounded" onclick="deleteAssignedCheckListFactorInList();">حذف انتخاب شده ها</a>
+						<input id="removeIds" name="Ids" type="hidden" />
+						<input name="CheckListId" type="hidden" value="@Model.CheckListId" />
+
+
+					</form>
+				</div><!-- /.portlet-title -->
+				<!-- /.buttons-box -->
+			</div><!-- /.portlet-heading -->
+			<div class="card-body pt-0">
+				<div class="table-responsive">
+					<table id="TableSelected" class="table table-bordered ">
+						<thead class="bg-primary">
+							<tr>
+								<th><input type="checkbox" id="selectAllTableSelected" /></th>
+								<th>نام شاخص</th>
+								@if(Model.CheckListType == EnumCheckListType.UnloadingAndLoading)
+								{
+									<th>نمایش در</th>
+								}
+								
+							</tr>
+						</thead>
+						<tbody>
+							@foreach (var item in Model.AssignedCheckListFactors)
+							{
+								<tr>
+									<td style="width:30px;"><input type="checkbox" value="@item.Id" name="selectedCheckListFactorId" class="row-selector" /></td>
+									<td>@item.Title</td>
+									@if (Model.CheckListType == EnumCheckListType.UnloadingAndLoading)
+									{
+										<td>
+											<div class="form-check form-check-inline">
+												<input class="form-check-input" type="checkbox" id="waterfront@(item.Id)" checkListFactor-id="@item.Id" @(item.UsedInWaterfrontSide ? "checked" : "") onchange="updateCheckListFactorSide('@Model.CheckListId', '@item.Id', 'waterfront', this.checked)">
+												<label class="form-check-label" for="waterfront@(item.Id)">سمت اسکله</label>
+											</div>
+											<div class="form-check form-check-inline">
+												<input class="form-check-input" type="checkbox" id="port@(item.Id)" checkListFactor-id="@item.Id" @(item.UsedInPortSide ? "checked" : "") onchange="updateCheckListFactorSide('@Model.CheckListId', '@item.Id', 'port', this.checked)">
+												<label class="form-check-label" for="port@(item.Id)">سمت محوطه</label>
+											</div>
+										</td>
+									}
+									
+								</tr>
+								i++;
+							}
+						</tbody>
+					</table>
+				</div>
+
+				<!-- /.tab-content -->
+
+			</div><!-- /.portlet-body -->
+		</div>
+	</div>
+</div>
+
+<div class="modal fade" id="checkListAssignmentModal" tabindex="-1" role="dialog" aria-labelledby="checkListAssignmentModalLabel" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="checkListAssignmentModalLabel">تخصیص شاخص</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				<p>لطفاً مشخص کنید که شاخص انتخاب شده در کدام سمت‌ها استفاده شوند:</p>
+				<div class="form-group mt-3">
+					<div class="input-group activeor mb-2">
+						<label>
+							<input type="checkbox"
+								   class="normal"
+								   id="modalWaterfrontSide"
+								   checked>
+							سمت اسکله
+						</label>
+					</div>
+
+					<div class="input-group activeor">
+						<label>
+							<input type="checkbox"
+								   class="normal"
+								   id="modalPortSide"
+								   checked>
+							سمت محوطه
+						</label>
+					</div>
+				</div>
+
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-primary" onclick="confirmCheckListAssignment()">تایید و تخصیص</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+
+@section script {
+	<script>
+
+		$(document).ready(function () {
+			$("#Filter_GearTypeFilter").select2().trigger('change');
+			$("#Filter_GearModelFitler").select2().trigger('change');
+		});
+
+
+		function confirmCheckListAssignment() {
+			var ids = $("#selectCheckListFactorId").val();
+			var waterfrontSide = $("#modalWaterfrontSide").is(':checked');
+			var portSide = $("#modalPortSide").is(':checked');
+
+			// Add hidden fields to the form
+			$('<input>').attr({
+				type: 'hidden',
+				name: 'usedInWaterfrontSide',
+				value: waterfrontSide
+			}).appendTo('#postAssignedCheckList');
+
+			$('<input>').attr({
+				type: 'hidden',
+				name: 'usedInPortSide',
+				value: portSide
+			}).appendTo('#postAssignedCheckList');
+
+			// Hide modal and submit form
+			$('#checkListAssignmentModal').modal('hide');
+			$("#postAssignedCheckList").submit();
+		}
+
+		function assignedCheckListFactorToCheckList() {
+			var ids = "";
+			$("#selectCheckListFactorId").val('');
+			$("input:checkbox[name=CheckListFactorId]:checked").each(function () {
+				if (ids) {
+					ids += ',' + $(this).val();
+				}
+				else {
+					ids = $(this).val();
+				}
+			});
+			$("#selectCheckListFactorId").val(ids);
+			if (ids) {
+
+				if(@((int)Model.CheckListType) == @((int)EnumCheckListType.UnloadingAndLoading))
+					$('#checkListAssignmentModal').modal('show');
+				else
+					$("#postAssignedCheckList").submit();
+			}
+			else {
+				showAlert2('شاخصی انتخاب نشده است', 1);
+				return;
+			}
+		}
+		function deleteAssignedCheckListFactorInList() {
+			var ids = "";
+			$("#removeIds").val('');
+			$("input:checkbox[name=selectedCheckListFactorId]:checked").each(function () {
+				if (ids) {
+					ids += ',' + $(this).val();
+				}
+				else {
+					ids = $(this).val();
+				}
+			});
+			$("#removeIds").val(ids);
+			if (ids) {
+				$("#deleteAssignedCheckListFactorForm").submit();
+			}
+			else {
+				showAlert2('شاخصی انتخاب نشده است', 1);
+				return;
+			}
+		}
+
+		$(document).ready(function () {
+
+			$('#selectAllTableUnSelected').click(function (e) {
+					var isChecked = this.checked;
+				// Only select/deselect visible checkboxes
+				$('#TableUnSelected tbody tr:visible').find('td input:checkbox.row-selector').prop('checked', isChecked);
+			});
+
+
+			$('#selectAllTableSelected').click(function (e) {
+					var isChecked = this.checked;
+				// Only select/deselect visible checkboxes
+				$('#TableSelected tbody tr:visible').find('td input:checkbox.row-selector').prop('checked', isChecked);
+			});
+		});
+
+
+		function updateCheckListFactorSide(checkListId, checkListFactorId, side, isChecked) {
+			$.ajax({
+				url: '/CheckList/UpdateAssignedCheckListFactorSide',
+				type: 'POST',
+				data: {
+					checkListId: checkListId,
+					checkListFactorId: checkListFactorId,
+					side: side,
+					isChecked: isChecked
+				},
+				success: function (response) {
+					// Optionally show success message
+				},
+				error: function (xhr, status, error) {
+					showAlert2('خطا در به‌روزرسانی وضعیت شاخص: ' + error, 1);
+					// Revert checkbox state on error
+					if (side === 'waterfront') {
+						$('#waterfront' + checkListFactorId).prop('checked', !isChecked);
+					} else {
+						$('#port' + checkListFactorId).prop('checked', !isChecked);
+					}
+				}
+			});
+		}
+
+	</script>
+}

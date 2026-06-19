@@ -1,0 +1,70 @@
+﻿@model CreatePortDto
+ 
+<form asp-action="CreatePorts" method="post">
+    <input asp-for="Id" type="hidden" />
+    <input asp-for="IsActive" type="hidden" />
+
+    <div class="card-body pt-0">
+
+        <div class="form-body">
+            <div class="row">
+
+                <div class="col-sm-6">
+                    <div class="form-group  ">
+                        <label>نام بندر</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" asp-for="PortName" required>
+                            <span asp-validation-for="PortName" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label> شناسه بندر برای دستگاه های FPN</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" asp-for="CodeForFpn">
+                            <span asp-validation-for="CodeForFpn" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-sm-6">
+                    <div class="form-group my-3">
+                        <label>طول جغرافیایی</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" asp-for="LonX" required placeholder="X">
+                            <span asp-validation-for="LonX" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-sm-6">
+                    <div class="form-group my-3">
+                        <label>عرض جغرافیایی</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" asp-for="LatY" placeholder="Y">
+                            <span asp-validation-for="LatY" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+                 
+            </div>
+
+            <div class="modal-footer border-0 pb-0 px-0">
+                <button type="submit" class="btn btn-success btn-round">ذخیره</button>
+                <button type="button" class="btn btn-danger btn-round" data-bs-dismiss="modal">بازگشت</button>
+            </div>
+        </div>
+
+
+
+
+    </div>
+
+</form>
+
+  <script src="~/assets/js/validation/jquery.validate.min.js"></script>
+ <script src="~/assets/js/validation/jquery.validate.unobtrusive.min.js"></script>
+
+

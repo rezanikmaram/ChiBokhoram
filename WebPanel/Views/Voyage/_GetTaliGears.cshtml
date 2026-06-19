@@ -1,0 +1,53 @@
+@model List<TaliGearDetailItemDto>
+
+@{
+    var index = 1;
+    var items = Model ?? new List<TaliGearDetailItemDto>();
+}
+
+<div id="TaliGearModal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">لیست تجهیزات ثبت شده</h4>
+                <button type="button" class="close btn-close rounded border" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive mt-4">
+                    <table class="table table-sm table-bordered table-hover table-striped">
+                        <thead class="bg-primary">
+                            <tr>
+                                <th class="px-1 text-center">#</th>
+                                <th class="px-1 text-center">نام تجهیز</th>
+                                <th class="px-1 text-center">نوع</th>
+                                <th class="px-1 text-center">مدل</th>
+                                <th class="px-1 text-center">جایگاه</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (items.Count == 0)
+                            {
+                                <tr>
+                                    <td colspan="5" class="text-center py-3">تجهیزی برای این تالی ثبت نشده است.</td>
+                                </tr>
+                            }
+                            else
+                            {
+                                foreach (var item in items)
+                                {
+                                    <tr>
+                                        <td class="align-middle px-2 text-center">@(index++)</td>
+                                        <td class="align-middle px-2 text-center">@item.GearName</td>
+                                        <td class="align-middle px-2 text-center">@(!string.IsNullOrWhiteSpace(item.GearTypeTitle) ? item.GearTypeTitle : "---")</td>
+                                        <td class="align-middle px-2 text-center">@(!string.IsNullOrWhiteSpace(item.GearModelTitle) ? item.GearModelTitle : "---")</td>
+                                        <td class="align-middle px-2 text-center">@((item.IsPrimaryGear) ? "اصلی" : "جانبی")</td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

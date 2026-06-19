@@ -1,0 +1,165 @@
+﻿@model CargoHandlingTariffPageDto
+
+@{
+    ViewData["Title"] = "سرفصل کالاها";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+    int groupIndex = 1;
+}
+
+<div class="col-lg-12">
+    <div class="card">
+        <div class="card-header pb-0">
+            <div class="d-flex justify-content-between mb-4">
+                <h3 class="title">
+                    <button type="button" class="btn bg-transparent p-0 fs-6 text-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+                        <i class="fa-solid fa-right-to-bracket me-2"></i>
+                    </button>
+                    سرفصل کالاها
+                </h3>
+
+                <a class="btn btn-success d-md-block d-none" style="border-radius:5px" onclick="showCreateProductModal()">
+                    <i class="icon-plus"></i> ثبت زیر گروه 
+                </a>
+            </div>
+            <form id="formFilter" asp-action="List" method="post">
+                <input name="p" id="pageNumber" hidden />
+                <div class="row gy-4">
+                    <div class="form-group col-md-3 m-0">
+                        <label>جستجو</label>
+                        <input asp-for="Filter.Search" class="form-control" placeholder="زیر گروه">
+                        <span asp-validation-for="Filter.Search" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-2 m-0">
+                        <button style="margin-top:30px; border-radius:5px" class="btn btn-success" type="submit">
+                            فیلتر
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="card-body pt-3">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover table-striped">
+                    <thead class="bg-primary">
+                        <tr>
+                            <th>ردیف</th>
+                            <th>گروه</th>
+                            <th>زیر گروه</th>
+                            <th>ویژگی ها</th>
+                            
+                            <th>عملیات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var group in Model.Data)
+                        {
+                            var cargoHandlings = group.BaseCargoHandlingTariffs;
+                            var rowspan = cargoHandlings.Count;
+                            var typeName = group.GeneralCargoProductType.ToDisplay();
+
+                            for (int i = 0; i < rowspan; i++)
+                            {
+                                var product = cargoHandlings[i];
+                                <tr>
+                                    @if (i == 0)
+                                    {
+                                        <td class="align-middle" rowspan="@rowspan">@groupIndex</td>
+                                        <td class="align-middle" rowspan="@rowspan">@typeName</td>
+                                        groupIndex++;
+                                    }
+                                    <td class="align-middle">@product.Title</td>
+                                    <td class="align-middle">
+                                         
+                                        @if (product.ProductPackingTitle?.Any() == true)
+                                        {
+                                            foreach (var pk in product.ProductPackingTitle)
+                                            {
+                                                <span class="bg-success my-1 border p-1 rounded">@(pk)</span>
+                                            }
+                                        }
+
+                                        @if(product.MinWeightTon>0 )
+                                        {
+                                            <span class="bg-warning my-1 border p-1 rounded">@($"حداقل تناژ: {product.MinWeightTon.ToPrice()}")</span>
+                                        }
+                                        @if (product.MaxWeightTon > 0)
+                                        {
+                                            <span class="bg-warning d-inline-block my-1 border p-1 rounded">@($"حداکثر تناژ: {product.MaxWeightTon.ToPrice()}")</span>
+                                        }
+                                    </td>
+                                    
+                                    <td class="align-middle">
+                                        <a class="btn btn-warning px-2 btn-sm btn-icon curve" onclick="editTariff('@product.Id');"><i class="icon-pencil align-middle fs-7"></i></a>
+
+                                        <a class="btn btn-danger px-2 btn-sm" id="Delete@(product.Id)" onclick="ShowQAlert(event,'Delete@(product.Id)');"
+                                           asp-action="Delete" asp-route-baseCargoHandlingId="@product.Id">
+                                            <i class="icon-trash align-middle fs-6"></i>
+                                        </a>
+                                        
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="col-lg-12">
+</div>
+
+<!-- Modal -->
+<form asp-action="Create" method="post">
+    <div id="productModal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable modal-dialog-centered">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h4 class="modal-title">ثبت زیرگروه جدید</h4>
+                    <button type="button" class="close btn-close rounded border" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="modalBody">
+                    <partial name="_CreateCargoHandlingTariff" model="@Model.Create" />
+                </div>
+                <div class="modal-footer border-0 mt-4">
+                    <button type="submit" class="btn btn-success btn-round">ذخیره</button>
+                    <button type="button" class="btn btn-danger btn-round" data-bs-dismiss="modal">بازگشت</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section script {
+    <script>
+        $(document).ready(function () {
+
+            $('select[class*="generalmodal"].select2').select2({
+                dropdownParent: $('#productModal')
+            });
+        });
+
+        function showCreateProductModal() {
+             $("#Id").val('');
+            $('#productModal').modal('show');
+
+            $.post("@Url.Action("GetBaseCargoHandlingById", "CargoHandlingTariff")" )
+                .done(function (res) {
+                    $("#modalBody").html(res);
+                    $("#productModal").modal('show');
+                });
+
+        }
+
+        function editTariff(id) {
+            $.post("@Url.Action("GetBaseCargoHandlingById", "CargoHandlingTariff")", { baseCargoHandlingId: id })
+                .done(function (res) {
+                    $("#modalBody").html(res);
+                    $("#productModal").modal('show');
+                });
+        }
+    </script>
+}

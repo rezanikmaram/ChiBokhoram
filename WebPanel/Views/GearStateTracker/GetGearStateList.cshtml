@@ -1,0 +1,219 @@
+﻿@model GearStateTrackerPageDto
+@{
+    ViewData["Title"] = "گزارش وضعیت آماده به کاری تجهیزات";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+    int i = ((Model.GearStateResult.PageNumber - 1) * Model.GearStateResult.PageSize) + 1;
+}
+
+
+<div class="col-lg-12">
+    <div class="card">
+        <div class="card-header">
+            <div class="d-flex justify-content-between">
+                <h3 class="title">
+                    <i class="icon-frane"></i> لیست تجهیزات
+                </h3>
+                <div>
+                    <a class="btn btn-sm px-2 btn-primary rounded"
+                       onclick="ShowModalReportList(event)">
+                        <i class="fa-solid fa-download align-middle mx-1"></i> دانلود گزارش
+                    </a>
+                    <!-- /.portlet-title -->
+                    <div class="buttons-box">
+
+                        <i class="icon-size-fullscreen"></i>
+                        <div class="paper-ripple">
+                            <div class="paper-ripple__background"></div>
+                            <div class="paper-ripple__waves"></div>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.buttons-box -->
+            </div>
+            <!-- /.portlet-heading -->
+            <!-- /.portlet-body -->
+        </div>
+        <div class="card-body pt-0">
+            <form id="formFilter" asp-action="GetGearStateList" asp-route-p="" method="post">
+                <input name="p" id="pageNumber" hidden />
+                <div class="form-body">
+                    <div class="row gy-4">
+                        <div class="form-group col-sm-2">
+                            <label>تاریخ گزارش:</label>
+                            <div class="input-group">
+                                <input asp-for="Filter.Date" type="text" class=" form-control" autocomplete="off">
+                                <span asp-validation-for="Filter.Date" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-sm-2 d-flex align-content-center flex-wrap">
+                            <div class="">
+                                <button style="margin-top:30px; border-radius:5px" class="alert-icon btn btn-success " type="submit">فیلتر</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+            <div class="table-responsive mt-4">
+                <table class="table table-bordered table-hover table-striped" id="data-table">
+                    <thead class="bg-primary">
+                        <tr>
+                            <th>ردیف</th>
+                            <th>نام تجهیز</th>
+                            <th>شماره اموال</th>
+                            <td>وضعیت ثبت شده</td>
+                            <td>تاریخ خارج از سرویسی</td>
+                            <td>توضیحات</td>
+                            
+                        </tr>
+                    </thead>
+                    <tbody>
+
+
+                        @foreach (var item in Model.GearStateResult.Data)
+                        {
+                            <tr>
+                                <td class="align-middle">@(i++)</td>
+                                <td class="align-middle">@item.GearName</td>
+                                <td class="align-middle">@item.PropertyNumber</td>
+                                <td class="align-middle">@item.GearStateName  </td>
+                                <td class="align-middle">@item.PreviousReadyStatusDate</td>
+                                <td class="align-middle">@item.Description</td>
+                                
+
+                            </tr>
+
+                        }
+
+
+
+                    </tbody>
+                </table>
+                <div>
+                    <cs-pager cs-paging-pagesize="@Model.GearStateResult.PageSize"
+                              cs-paging-pagenumber="@Model.GearStateResult.PageNumber"
+                              cs-paging-totalitems="@Model.GearStateResult.TotalItems"
+                              cs-paging-maxpageritems="10"
+                              cs-pagenumber-param="p"
+                              cs-show-first-last="true"
+                              cs-suppress-empty-nextprev="true"
+                              cs-suppress-inactive-firstlast="true"
+                              cs-show-numbered="true"
+                              cs-first-page-text="ابتدا"
+                              cs-last-page-text="انتها"
+                              cs-next-page-title="بعدی"
+                              cs-previous-page-title="قبلی"
+                              cs-first-page-title="ابتدا"
+                              cs-last-page-title="انتها"
+                              cs-next-page-text="بعدی"
+                              cs-previous-page-text="قبلی"
+                              cs-pager-li-current-class="page-item active"
+                              cs-pager-li-other-class="page-item"
+                              cs-pager-li-non-active-class="page-item disabled"
+                              cs-pager-link-current-class="page-link"
+                              cs-pager-link-other-class="page-link"
+                              asp-controller="Imas"
+                              asp-action="VesselList">
+                    </cs-pager>
+                </div>
+
+            </div>
+            <!-- /.table-responsive -->
+        </div>
+        <!-- /.portlet -->
+    </div>
+</div>
+
+
+<div id="ReportListModal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+
+                <h4 class="modal-title">گزارش لیست وضعیت تجهیزات</h4>
+                <button type="button" class="close btn-close rounded border" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="modalbody">
+
+                <div class="card-body pt-0">
+
+                    <div class="form-body">
+
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <div class="form-group">
+                                    <label>نوع گزارش</label>
+                                    <div class="input-group">
+                                        <select class="form-control"
+                                                id="listGearStateReportType"
+                                                name="reportType"
+                                                asp-items="Html.GetEnumSelectList<ReportType>()">
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+
+
+                        </div>
+
+
+                        <div class="modal-footer px-0 pb-0 border-0">
+                            <button type="button" class="btn btn-success btn-round" onclick="GetReportList(event)"> دریافت گزارش </button>
+                            <button type="button" class="btn btn-danger btn-round" data-bs-dismiss="modal">بازگشت</button>
+
+                            <button id="excel1" type="submit" form="formFilter" formaction="/GearStateTracker/GetGearStateReportList?reportType=1&filter.date=@Model.Filter.Date"
+                                    class="btn w-100 mx-0 d-none my-2 px-2 btn-outline-primary-2x rounded-0">
+                                گزارش  اکسل
+                            </button>
+                            <button id="pdf1" type="submit" form="formFilter" formaction="/GearStateTracker/GetGearStateReportList?reportType=0&filter.date=@Model.Filter.Date"
+                                    class="btn d-none w-100 mx-0 my-2 px-2 btn-outline-primary-2x rounded-0">
+                                گزارش  Pdf
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+@section script {
+    <script>
+         $(document).ready(function () {
+              $(".select2").select2();
+          });
+
+          function GetReportList(event) {
+            $("#ReportListModal").modal('hide');
+            let selectValue = document.getElementById("listGearStateReportType").value;
+
+            if(selectValue == 0)
+                $("#pdf1").click();
+            else if(selectValue == 1)
+                $("#excel1").click();
+        }
+
+         function ShowModalReportList(event) {
+            event.preventDefault();
+
+            $("#ReportListModal").modal('show');
+        }
+
+
+        kamaDatepicker('Filter_Date', customOptions);
+
+        $(".page-link").click(function (event) {
+               event.preventDefault(); // غیرفعال کردن عملکرد پیشفرض href
+
+               var hrefValue = $(this).attr("href");
+               $("#pageNumber").val(hrefValue.split("=")[1]);
+               $("#formFilter").submit();
+           });
+    </script>
+}

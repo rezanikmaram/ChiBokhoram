@@ -1,0 +1,10 @@
+﻿@model RfidDeviceSelectedOfSeoDto
+
+<tr>
+    <td style="width:30px;"><input type="checkbox" value="@Model.Selected.Id" name="DeviceId" /></td>
+    <td>@Model.Selected.Name</td>
+    <td>@Model.Selected.DeviceCode</td>
+    <td>@Model.Selected.Place</td>
+    <td><a id="ActivationRfidDevice@(Model.Selected.Id)" onclick="ShowQAlert(event,'ActivationRfidDevice@(Model.Selected.Id)');" asp-action="ActivationRfidDevice" asp-route-seoId="@Model.SeoId" asp-route-deviceId="@Model.Selected.Id"><span class="label label-@(Model.Selected.IsActive?"success":"danger")">@(Model.Selected.IsActive ? "فعال" : "غیر فعال")</span></a></td>
+
+</tr>

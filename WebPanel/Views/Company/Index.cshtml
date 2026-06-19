@@ -1,0 +1,206 @@
+@model CompanyPageDto
+@{
+    ViewData["Title"] = "لیست شرکت ها";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+    int i = ((Model.Companies.PageNumber - 1) * Model.Companies.PageSize) + 1;
+}
+
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-header pb-1">
+                    <div class="d-flex justify-content-between">
+        
+                        <h3 class="title">
+                            <i class="icon-frane"></i> لیست شرکت ها ( تعداد کل @Model.AllCompanyCount.ToPrice() )
+                        </h3>
+                    <div>
+    
+                    <button type="button" class="alert-icon btn btn-success mx-2 round btn-export-excel">
+                        <i class="icon-download"></i> خروجی اکسل
+                    </button>
+                    <button type="button" class="alert-icon btn btn-primary round btn-add-company"> <i class="icon-plus align-middle"></i> شرکت جدید </button>
+                    
+                </div>
+            </div>
+        </div>
+        <div class="card-body pt-0">
+
+            <form id="formFilter" asp-action="Index" asp-route-p="" method="post">
+                <input name="p" id="pageNumber" hidden />
+                <div class="form-body ">
+                    <div class="row col-md-12">
+                        
+                        <div class="form-group col-md-4">
+                            <label>جستجو</label>
+                            <div class="input-group">
+                                <input type="text" asp-for="Filter.Search" class="form-control"/>
+                            </div>
+                        </div>
+
+                        <div class="form-group col-md-2 d-flex justify-content-center flex-wrap align-content-center">
+                            <button style="border-radius:5px; margin-top:30px"
+                                    class="alert-icon btn btn-success "
+                                    type="submit">
+                                <p class="px-3"> فیلتر</p>
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </form>
+            <div id="table-container">
+                @await Html.PartialAsync("_CompanyTable", Model)
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for Create/Edit Company -->
+<div class="modal fade" id="companyModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">ثبت/ویرایش شرکت</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body"></div>
+        </div>
+    </div>
+    
+</div>
+
+@section script {
+    <script>
+        var currentPage = @Model.Companies.PageNumber;
+        var currentSortColumn = '@(Model.Filter?.SortColumn ?? "companyname")';
+        var currentSortDirection = '@(Model.Filter?.SortDirection ?? "asc")';
+
+        // Restore filter state when returning from details page
+        $(document).ready(function() {
+            var storedState = sessionStorage.getItem('companyFilterState');
+            if (storedState) {
+                var filterState = JSON.parse(storedState);
+                var currentTime = new Date().getTime();
+                var timeDiff = currentTime - filterState.timestamp;
+                
+                // Only restore if less than 30 minutes old (1800000 ms)
+                if (timeDiff < 1800000) {
+                    // Restore search value
+                    if (filterState.search) {
+                        $('#Filter_Search').val(filterState.search);
+                    }
+                    
+                    // Restore page number
+                    if (filterState.page) {
+                        currentPage = parseInt(filterState.page);
+                        $('#pageNumber').val(currentPage);
+                    }
+                    
+                    // Restore sort state
+                    if (filterState.sortColumn) {
+                        currentSortColumn = filterState.sortColumn;
+                    }
+                    if (filterState.sortDirection) {
+                        currentSortDirection = filterState.sortDirection;
+                    }
+                    
+                    // Load table with restored filters
+                    loadTable(currentPage);
+                }
+                
+                // Clear the stored state after restoring
+                sessionStorage.removeItem('companyFilterState');
+            }
+        });
+
+        function getFilterData() {
+            return {
+                'filter.Search': $("#Filter_Search").val(),
+                'filter.SortColumn': currentSortColumn,
+                'filter.SortDirection': currentSortDirection
+            };
+        }
+
+        function loadTable(page) {
+            currentPage = page || 1;
+            var data = Object.assign({ p: currentPage }, getFilterData());
+            $.get('@Url.Action("Table","Company")', data)
+                .done(function (html) {
+                    $("#table-container").html(html);
+                });
+        }
+
+        function loadTableWithSort(sortColumn, sortDirection) {
+            currentSortColumn = sortColumn;
+            currentSortDirection = sortDirection;
+            loadTable(1); // Reset to first page when sorting changes
+        }
+
+        function openCompanyModal(url) {
+            $.get(url).done(function (html) {
+                var $modal = $("#companyModal");
+                $modal.find('.modal-body').html(html);
+                if ($.validator && $.validator.unobtrusive) {
+                    $.validator.unobtrusive.parse($modal);
+                }
+                var modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('companyModal'));
+                modal.show();
+            });
+        }
+
+        $(document).on('submit', '#formFilter', function (e) {
+            e.preventDefault();
+            loadTable(1);
+        });
+
+        $(document).on('click', '#table-container .page-link', function (e) {
+            e.preventDefault();
+            var hrefValue = $(this).attr("href") || '';
+            var match = hrefValue.match(/p=(\d+)/);
+            var p = match ? parseInt(match[1]) : 1;
+            loadTable(p);
+        });
+
+$(document).on('click', '.btn-add-company', function () {
+            openCompanyModal('@Url.Action("CreateCompanyModal","Company")');
+        });
+
+        $(document).on('click', '.btn-export-excel', function () {
+            var filterData = getFilterData();
+            var url = '@Url.Action("ExportToExcel", "Company")';
+            var queryString = $.param(filterData);
+            if (queryString) {
+                url += '?' + queryString;
+            }
+            window.location.href = url;
+        });
+
+        $(document).on('click', '.btn-edit-company', function () {
+            var id = $(this).data('id');
+            openCompanyModal('@Url.Action("CreateCompanyModal","Company")' + '?companyId=' + id);
+        });
+
+        $(document).on('submit', '#companyModal form', function (e) {
+            e.preventDefault();
+            var $form = $(this);
+            var action = $form.attr('action') || '@Url.Action("SaveCompany","Company")';
+            $.ajax({
+                url: action,
+                type: 'POST',
+                data: $form.serialize()
+            }).done(function (resp, status, xhr) {
+                if (typeof resp === 'object' && resp !== null && resp.success) {
+                    var modalEl = document.getElementById('companyModal');
+                    var modal = bootstrap.Modal.getInstance(modalEl);
+                    modal.hide();
+                    loadTable(currentPage);
+                } else {
+                    $("#companyModal .modal-body").html(resp);
+                    if ($.validator && $.validator.unobtrusive) {
+                        $.validator.unobtrusive.parse('#companyModal');
+                    }
+                }
+            });
+        });
+    </script>
+}

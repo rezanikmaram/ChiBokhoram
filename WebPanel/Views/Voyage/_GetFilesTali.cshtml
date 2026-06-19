@@ -1,0 +1,63 @@
+﻿@model List<TaliProductFileDto>
+
+@{
+    var i = 1;
+}
+
+<div id="TaliFileModal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">جزئیات فایل‌ها</h4>
+                <button type="button" class="close btn-close rounded border" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive mt-5">
+                    <table class="table table-sm table-bordered table-hover table-striped" id="data-table">
+                        <thead class="bg-primary">
+                            <tr>
+                                <th class="px-1 text-center">#</th>
+                                <th class="px-1 text-center">عنوان فایل</th>
+                                <th class="px-1 text-center">دانلود</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                                int indexFile = 1;
+                            }
+                            @foreach (var item in Model)
+                            {
+                                @foreach(var file in item.Files)
+                                {
+                                    <tr>
+                                        <td class="align-middle px-2 text-center">@(i++)</td>
+                                        <td class="align-middle px-2 text-center">
+                                            @file.FileTitle
+                                        </td>
+                                        <td class="align-middle px-2 text-center">
+                                            @if (!string.IsNullOrWhiteSpace(file.FullName))
+                                            {
+                                                <a asp-action="TaliFile"
+                                                   asp-route-TaliProductId="@item.TaliProductId"
+                                                   asp-route-FileName="@file.FileName"
+                                                   class="btn btn-primary p-2 py-0 mb-1" target="_blank">فایل @(i)</a>
+                                            }
+                                            else
+                                            {
+                                                <span>فایل در دسترس نیست</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                    {
+                                        indexFile++;
+                                    }
+                                }
+                                
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

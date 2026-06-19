@@ -1,0 +1,160 @@
+﻿@model SeoWarehouseReceiptProductFullInfoDto
+
+<div id="swrProductFullInfoModal" class="modal fade" data-bs-keyboard="false" role="dialog" tabindex="-1">
+	<div class="modal-dialog modal-dialog-centered">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h4 class="modal-title"> مشخصات کالا در قبض انبار </h4>
+				<button type="button" class="close btn-close rounded border" data-bs-dismiss="modal"></button>
+			</div>
+			<div class="modal-body">
+				<div class="row gy-3">
+					<div class="col-12">
+						<div class=" border rounded-3 bg-light p-2 ">
+							<p class="my-0 text-dark"> مارک:  @Model.Marks  </p>
+						</div>
+					</div>
+					<div class="col-12">
+						<div class=" border rounded-3 bg-light p-2 ">
+							<p class="my-0 text-dark">  HSCode: @Model.ProductHSCodeTitle </p>
+						</div>
+					</div>
+				</div>
+
+				@if (Model.IsSelfTransported || !string.IsNullOrWhiteSpace(Model.VehicleIdentificationNumber))
+				{
+					<div class="my-3">
+						<div class="row gy-3">
+
+							<div class="col-12">
+								<div class=" border rounded-3 bg-light p-2 ">
+									<p class="my-0 text-dark">  شماره شاسی: @Model.VehicleIdentificationNumber</p>
+								</div>
+							</div>
+						</div>
+					</div>
+				}
+
+				@if(!string.IsNullOrEmpty( Model.ContainerTitle))
+				{
+					<div class="my-3">
+						<div class="row gy-3">
+							<div class="col-12">
+								<div class="border rounded-3 bg-light p-2">
+									<p class="my-0 text-dark"> مشخصات کانتینر: @Model.ContainerTitle</p>
+								</div>
+							</div>
+							 
+						</div>
+					</div>
+				}
+
+				@if (Model.IsStrip)
+				{
+					<div class="my-3">
+						<div class="row gy-3">
+							<div class="col-6">
+								<div class="border rounded-3 bg-light p-2">
+									<p class="my-0 text-dark">   کانتینر استریپ شده: @Model.MasterProductName</p>
+								</div>
+							</div>
+
+						</div>
+					</div>
+				}
+				 
+				 
+				<div class="border rounded-3 bg-light p-2 my-3">
+					<p class="mb-0 text-dark">
+						ویژگی های کالا:
+						@if (Model.IsDangerous)
+						{
+							<span class="p-1 bg-primary mx-1 rounded"> کالا خطرناک </span>
+						}
+
+						@if (Model.IsBigVolume)
+						{
+							<span class="p-1 bg-primary mx-1 rounded"> کالا حجیم </span>
+						}
+
+						@if (Model.IsUnusual)
+						{
+							<span class="p-1 bg-primary mx-1 rounded"> کالا نامتعارف </span>
+						}
+
+						@if (Model.IsRawMaterials)
+						{
+							<span class="p-1 bg-primary mx-1 rounded">   مواد اولیه </span>
+						}
+
+						@if (Model.IsSelfTransported)
+						{
+							<span class="p-1 bg-primary mx-1 rounded">خودران بودن کالا </span>
+						}
+					</p>
+				</div>
+
+				@if(Model.TariffInfos != null)
+				{
+					<span> تعرفه ها : </span>
+						<div class="mb-0 text-dark">
+					
+							@if (Model.TariffInfos.ContainerFreightProductTariffId != null)
+							{
+								<div class="border rounded-3 bg-light p-2 my-1">
+									<span class="p-1 fw-bold text-primary mb-2"> تعرفه باربری کانتینری  </span>
+
+								<span class="d-block my-1 text-dark"> عنوان تعرفه: @($"({Model.TariffInfos.ContainerFreightProduct_ContainerFreightType?.ToDisplay()}) {Model.TariffInfos.ContainerFreightTitle}")  </span>
+
+									<span class="d-block my-1 text-dark"> قیمت: @Model.TariffInfos.ContainerFreightPriceTitle @Model.TariffInfos.ContainerFreightCurrencyType?.ToDisplay()  </span>
+								</div>
+							}
+							 
+							@if (Model.TariffInfos.ContainerWarehouseProductTariffId != null)
+							{
+								<div class="border rounded-3 bg-light p-2 my-1">
+									<span class="p-1 fw-bold text-primary mb-2"> تعرفه انبارداری کانتینری  </span>
+
+								<span class="d-block my-1 text-dark"> عنوان تعرفه: @($"({Model.TariffInfos.ContainerWarehouseProduct_ContainerType?.ToDisplay()}) {Model.TariffInfos.ContainerWarehouseTitle}")  </span>
+								</div>
+							}
+
+							@if (Model.TariffInfos.ContainerStripProductTariffId != null)
+							{
+								<div class="border rounded-3 bg-light p-2 my-1">
+									<span class="p-1 fw-bold text-primary mb-2"> تعرفه استریپ کانتینر  </span>
+
+								<span class="d-block my-1 text-dark"> عنوان تعرفه: @($"({Model.TariffInfos.ContainerStripProduct_ContainerFreightType?.ToDisplay()}) {Model.TariffInfos.ContainerStripTitle}")  </span>
+
+									<span class="d-block my-1 text-dark"> قیمت: @Model.TariffInfos.ContainerStripPriceTitle @Model.TariffInfos.ContainerStripCurrencyType?.ToDisplay()  </span>
+								</div>
+								
+							}
+
+							@if (Model.TariffInfos.GeneralCargoProductTariffId != null)
+							{
+								<div class="border rounded-3 bg-light p-2 my-1">
+									<span class="p-1 fw-bold text-primary mb-2">  تعرفه باربری غیر کانتینری  </span>
+
+								<span class="d-block my-1 text-dark"> عنوان تعرفه: @($"({Model.TariffInfos.GeneralCargoProduct_GeneralCargoProductType?.ToDisplay()}) {Model.TariffInfos.GeneralCargoTitle}")  </span>
+
+									<span class="d-block my-1 text-dark"> قیمت: @Model.TariffInfos.GeneralCargoPriceTitle @Model.TariffInfos.GeneralCargoCurrencyType?.ToDisplay()  </span>
+								</div>
+								
+							}
+
+							@if (Model.TariffInfos.NonContainerWarehouseProductTariffId != null)
+							{
+								<div class="border rounded-3 bg-light p-2 my-1">
+									<span class="d-block my-1 fw-bold text-primary">  تعرفه انبارداری غیر کانتینری  </span>
+
+								<span class="d-block my-1 text-dark"> عنوان تعرفه: @($"({Model.TariffInfos.NonContainerWarehouseProduct_NonContainerWarehouseProductType?.ToDisplay()}) {Model.TariffInfos.NonContainerWarehouseTitle}")   </span>
+								</div>
+							}
+						</div>
+				}
+			</div>
+			 
+		</div>
+	</div>
+</div>

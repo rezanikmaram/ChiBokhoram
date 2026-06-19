@@ -1,0 +1,75 @@
+@model SeoWarehouseReceiptOutboundPageDto
+
+<div class="d-flex justify-content-between mb-3">
+    <h5>لیست کالاها</h5>
+    <div class="d-flex justify-content-end">
+        <button class="btn btn-success rounded mx-2" onclick="showAddProductModal()">
+            <i class="fa-solid fa-plus"></i> افزودن کالا جهت خروج
+        </button>
+
+        <button class="btn btn-success rounded" onclick="showAddMultiProductModal()">
+            <i class="fa-solid fa-plus"></i> افزودن چند کالا جهت خروج
+        </button>
+    </div>
+</div>
+
+<div class="table-responsive vh-100">
+    <table class="table table-bordered table-hover table-striped" id="products-data-table">
+        <thead class="bg-primary">
+            <tr>
+                <th class="align-middle">ردیف</th>
+                <th class="align-middle">شماره پرونده</th>
+                <th class="align-middle">شماره قبض انبار</th>
+                <th class="align-middle">بارنامه</th>
+                <th class="align-middle">نام کالا</th>
+                <th class="px-0"><div class="px-3">تعداد</div> <hr class="my-1" /> <div class="px-3">باقیمانده</div></th>
+                <th class="px-0"><div class="px-3">وزن خالص</div> <hr class="my-1" /> <div class="px-3">باقیمانده</div></th>
+                <th class="align-middle">حجم</th>
+                <th class="align-middle">عملیات</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                int j = 1;
+            }
+            @foreach (var product in Model.List)
+            {
+                <tr>
+                    <td class="align-middle" style="display:none">@product.SeoWarehouseReceiptOutboundProductId</td>
+                    <td class="align-middle">@(j++)</td>
+                    <td class="align-middle">@product.SeoWarehouseReceiptOutboundCaseNumber</td>
+                    <td class="align-middle">
+                        <a target="_blank" href="/Seo/SeoWarehouseReceipt?seoId=@product.SeoId">
+                            @product.SeoWarehouseReceiptNumber
+                        </a>
+                    </td>
+                    <td class="align-middle">
+                        <a target="_blank" href="/Seo/seoAccessPage?seoId=@product.SeoId">
+                            @product.SeoWarehouseReceiptBillOfLadingNumber
+                        </a>
+                    </td>
+                    <td class="align-middle">@product.ProductName</td>
+                    <td class="align-middle px-0">
+                        <div class="px-3">@product.Count.ToPrice()</div>
+                        <hr class="my-1" />
+                        <div class="px-3">@product.RemainingCount.ToPrice()</div>
+                    </td>
+                    <td class="align-middle px-0">
+                        <div class="px-3">@product.Weight.ToPrice()</div>
+                        <hr class="my-1" />
+                        <div class="px-3">@product.RemainingWeight.ToPrice()</div>
+                    </td>
+                    <td class="align-middle">@product.Volume.ToPrice()</td>
+                    <td class="align-middle">
+                        <a onclick="editProduct('@product.SeoWarehouseReceiptOutboundProductId')" class="btn btn-primary px-2 my-2 rounded">
+                            <i class="fa-solid fa-edit"></i> ویرایش
+                        </a>
+                        <a onclick="deleteProduct('@product.SeoWarehouseReceiptOutboundProductId')" class="btn btn-danger px-2 my-2 rounded">
+                            <i class="fa-solid fa-trash"></i> حذف
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

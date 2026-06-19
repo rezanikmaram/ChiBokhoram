@@ -1,0 +1,295 @@
+﻿@model CreateSeoCustomsDto
+
+<form asp-action="CreateSeoCustoms" method="post" enctype="multipart/form-data" id="CreateCustomsForm">
+    <input asp-for="Id" type="hidden" />
+    <input asp-for="SeoId" type="hidden" />
+
+    <div class="card-body pt-0">
+        <div class="col-md-12">
+            <div class="form-body">
+
+                <div class="row gy-3">
+
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>شماره پذیرش</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" asp-for="AcceptanceNumber">
+                                <span asp-validation-for="AcceptanceNumber"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>نوع مجوز</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" asp-for="LicenseType">
+                                <span asp-validation-for="LicenseType"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="form-group ">
+                            <label>تاریخ صدور مجوز</label>
+                            <div class="input-group d-flex flex-column">
+                                <input type="text" class="form-control d-flex" asp-for="LicenseIssueDateFa" autocomplete="off" required>
+                                <span asp-validation-for="LicenseIssueDateFa" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>شماره اظهارنامه</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" asp-for="CustomsDeclarationNumber">
+                                <span asp-validation-for="CustomsDeclarationNumber"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>صادر کننده</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" asp-for="Exporter">
+                                <span asp-validation-for="Exporter"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>گیرنده</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" asp-for="Consignee">
+                                <span asp-validation-for="Consignee"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>اظهار کننده</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" asp-for="Declarant">
+                                <span asp-validation-for="Declarant"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>صاحب کالا</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" asp-for="GoodsOwner">
+                                <span asp-validation-for="GoodsOwner"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>کوتاژ</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" asp-for="CottageNumber">
+                                <span asp-validation-for="CottageNumber"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>کشور صادر کننده</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" asp-for="OriginCountry">
+                                <span asp-validation-for="OriginCountry"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>کشور مقصد</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" asp-for="DestinationCountry">
+                                <span asp-validation-for="DestinationCountry"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>شماره باسکول</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" asp-for="WeighbridgeNumber">
+                                <span asp-validation-for="WeighbridgeNumber"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>رویه</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" asp-for="CustomsProcedure">
+                                <span asp-validation-for="CustomsProcedure"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>گمرک ورودی</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" asp-for="EntryCustomsOffice">
+                                <span asp-validation-for="EntryCustomsOffice"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>گمرک خروجی</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" asp-for="ExitCustomsOffice">
+                                <span asp-validation-for="ExitCustomsOffice"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>محل ارزیابی</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" asp-for="AssessmentLocation">
+                                <span asp-validation-for="AssessmentLocation"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label>شرح کالا</label>
+                            <div class="input-group">
+                                <textarea class="form-control" asp-for="GoodsDescription" rows="3"></textarea>
+                                <span asp-validation-for="GoodsDescription"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>نوع بسته بندی</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" asp-for="PackagingType">
+                                <span asp-validation-for="PackagingType"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>تعداد بسته بندی</label>
+                            <div class="input-group">
+                                <input type="number" class="form-control" asp-for="PackageQuantity">
+                                <span asp-validation-for="PackageQuantity"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>وزن ناخالص (کیلوگرم)</label>
+                            <div class="input-group">
+                                <input type="number" class="form-control" asp-for="GrossWeightKg">
+                                <span asp-validation-for="GrossWeightKg"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>وزن خالص (کیلوگرم)</label>
+                            <div class="input-group">
+                                <input type="number" class="form-control" asp-for="NetWeightKg">
+                                <span asp-validation-for="NetWeightKg"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label>ارزش گمرکی</label>
+                        <div class="input-group d-flex flex-column">
+                            <price-input asp-for="CustomsValue" placeholder="به ریال"></price-input>
+                            <span asp-validation-for="CustomsValue"></span>
+                        </div>
+                    </div>
+                </div>
+                
+                    <div class="col-md-9">
+                        <div class="form-group">
+                            <label>آپلود فایل </label>
+                            <div style="flex-wrap:nowrap" class="input-group round">
+                                <input type="file" asp-for="FormFile" class="form-control rounded w-25">
+                                <span asp-validation-for="FormFile"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="modal-footer px-2 border-0 px-0">
+                    <button type="button" class="btn btn-danger btn-round" data-bs-dismiss="modal">بازگشت</button>
+                    <button type="submit" class="btn btn-success btn-round">ذخیره</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<script src="~/assets/js/validation/jquery.validate.min.js"></script>
+<script src="~/assets/js/validation/jquery.validate.unobtrusive.min.js"></script>
+
+<script>
+    $(document).ready(function () {
+        kamaDatepicker('LicenseIssueDateFa', {
+            // Your existing datepicker options
+            buttonsColor: "red",
+            forceFarsiDigits: true,
+            markToday: true,
+            markHolidays: true,
+            highlightSelectedDay: true,
+            sync: true,
+            gotoToday: true,
+
+            // Add this to validate on change
+            selectedDateChanged: function () {
+                validateDateField();
+            }
+        });
+
+        // Add validation before form submission
+        $('#CreateCustomsForm').submit(function (e) {
+            if (!validateDateField()) {
+                e.preventDefault();
+                return false;
+            }
+            return true;
+        });
+
+        function validateDateField() {
+            var dateValue = $('#LicenseIssueDateFa').val();
+            if (!dateValue || dateValue.trim() === '') {
+                $('#LicenseIssueDateFa').addClass('is-invalid');
+                $('[data-valmsg-for="LicenseIssueDateFa"]').text('تاریخ صدور مجوز الزامی است');
+                return false;
+            }
+            $('#LicenseIssueDateFa').removeClass('is-invalid');
+            return true;
+        }
+    });
+</script>

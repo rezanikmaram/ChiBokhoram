@@ -1,0 +1,19 @@
+﻿@model SeoMinInfo2Dto
+
+<div id="SeoInfoModal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" tabindex="-1">
+	<div class="modal-dialog modal-dialog-centered">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h4 class="modal-title"> مشخصات بارنامه </h4>
+				<button type="button" class="close btn-close rounded border" data-bs-dismiss="modal"></button>
+			</div>
+			<div class="modal-body">
+				<p>شماره بارنامه: @Model.BillOfLadingNumber</p>
+				<p>صاحب کالا: @Model.ProductCompanyName</p>
+			</div>
+			<div class="modal-footer">
+				<a class="btn btn-success" asp-action="seoAccessPage" asp-controller="Seo" asp-route-seoId="@Model.Id" target="_blank">مدیریت بارنامه</a>
+			</div>
+		</div>
+	</div>
+</div>

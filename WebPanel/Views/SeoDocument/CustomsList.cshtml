@@ -1,0 +1,177 @@
+﻿@model SeoCustomsPageDto
+@{
+    ViewData["Title"] = "مجوز گمرک ها";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+    int i = 1;
+}
+
+
+<div class="card p-2 mb-4">
+    <div class="row">
+        <div class="col-md-1 align-middle align-content-center px-4">
+            <i class="fa-solid fa-circle-info fs-4 align-middle"></i>
+        </div>
+        <div class="col-md-11 px-5">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="glass-bg px-2 py-1">
+                    <p class="fs-6 m-0"> @Model.SeoInfo?.ShipShipName </p>
+                </div>
+                <div>
+                    <p class="fs-6 m-0"> @Model.SeoInfo?.ProductOwnerCompanyCompanyName </p>
+                </div>
+                <div>
+                    <p class="fs-6 m-0">@Model.SeoInfo?.TransportTypeTitle</p>
+                </div>
+                <div>
+                    <p class="fs-6 m-0">شماره بارنامه: @Model.SeoInfo?.BillOfLadingNumber</p>
+                </div>
+                <div>
+                    <p class="fs-6 m-0">کالا: @Model.SeoInfo?.ProductProductName</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="col-lg-12">
+    <div class="card">
+        <div class="card-header pb-2">
+            <div class="d-flex justify-content-between">
+
+                <h3 class="title">
+                    <a asp-controller="Seo" asp-action="SeoAccessPage" asp-route-seoId="@Model.SeoInfo?.Id"><i class="fa-solid fa-right-to-bracket me-2"></i></a>
+                    <i class="icon-frane"></i>مجوزات گمرکی
+                </h3>
+
+                <div>
+                    <a class="btn mx-2 btn-success rounded"
+                       onclick="CustomsShowModal(null, '@Model.SeoInfo.Id');">
+                        <i class="icon-plus align-middle"></i>
+                        مجوز جدید
+                    </a>
+                </div>
+                
+            </div>
+
+        </div>
+        <div class="card-body pt-0">
+
+            <div class="table-responsive mt-4">
+                <table class="table table-sm table-bordered table-hover table-striped" id="data-table">
+                    <thead class="bg-primary">
+                        <tr>
+                            <th class="px-1 text-center">#</th>
+                            <th class="px-1 text-center">شماره پذیرش</th>
+                            <th class="px-1 text-center">نوع مجوز گمرکی</th>
+
+                            <th class="px-1 text-center">تاریخ صدور</th>
+                            <th class="px-1 text-center">شماره اظهارنامه</th>
+                            <th class="px-1 text-center">صادر کننده</th>
+
+                            <th class="px-1 text-center">عملیات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+
+                        @foreach (var item in Model.List)
+                        {
+                            <tr>
+                                <td class="align-middle px-2 text-center">@(i++)</td>
+                                <td class="align-middle px-2 text-center"> @item.AcceptanceNumber </td>
+
+                                <td class="align-middle px-2 text-center"> @item.LicenseType </td>
+
+                                <td class="align-middle px-2 text-center">@item.LicenseIssueDateFa</td>
+                                <td class="align-middle px-2 text-center">@item.CustomsDeclarationNumber </td>
+
+                                <td class="align-middle px-2 text-center">@item.Exporter </td>
+
+
+
+                                <td class="align-middle px-2 text-center">
+                                    @if (item.SeoDocument != null)
+                                    {
+                                        <a class="btn btn-primary px-2 my-2 rounded"
+                                           data-bs-toggle="tooltip" data-bs-placement="top" title="@item.SeoDocument.Document?.OriginalFileName"
+                                           onclick="DownloadDocFile(event, '@item.SeoDocument.DocumentId')">
+                                            <i class="fa-solid fa-download"></i>
+                                        </a>
+                                    }
+
+
+                                    <a class="btn btn-warning px-2 btn-sm btn-icon curve" onclick="CustomsShowModal('@item.Id', '@Model.SeoInfo.Id');"><i class="icon-pencil fs-6 align-middle"></i></a>
+
+                                    <a id="DeleteSeoCustoms@(i)" onclick="ShowQAlert(event,'DeleteSeoCustoms@(i)');" class="btn btn-danger px-2 btn-sm btn-icon curve btn-questions"
+                                       asp-action="DeleteSeoCustoms" asp-route-seoCustomsId="@item.Id">
+                                        <i class="icon-trash fs-6 align-middle fa-flip-horizontal"></i>
+                                    </a>
+
+                                </td>
+                            </tr>
+                        }
+
+                    </tbody>
+                </table>
+
+
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<form asp-action="GetSeoCustomsDocFileById" asp-controller="SeoDocument"
+      method="post" id="FormForDownloadFileId">
+    <input type="hidden" id="docIdForDownload" name="docId" />
+
+</form>
+
+<div id="generalmodal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">ثبت مجوز گمرک</h4>
+                <button type="button" class="close btn-close rounded border" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="modalbody">
+
+                <partial name="_CreateCustoms" model="new CreateSeoCustomsDto()" />
+
+            </div>
+        </div>
+    </div>
+</div>
+
+@section script {
+
+    <script>
+        $(document).ready(function () {
+            //$('.select2').select2();
+
+        });
+
+        function DownloadDocFile(event, docId) {
+            event.preventDefault();
+
+            $("#docIdForDownload").val(docId);
+            $("#FormForDownloadFileId").submit();
+        }
+
+
+        function CustomsShowModal(seoCustomsId, seoId) {
+            $.post("@Url.Action("GetCreateSeoCustomsDtoById", "SeoDocument")", { seoCustomsId, seoId })
+                .done(function (res) {
+                    $("#modalbody").html(res);
+                    $("#generalmodal").modal('show');
+                })
+                .fail(function (xhr, status, error) {
+                    location.reload();
+                });
+        }
+
+    </script>
+}
+

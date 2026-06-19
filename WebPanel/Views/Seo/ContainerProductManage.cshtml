@@ -1,0 +1,475 @@
+﻿@model SeoContainerProductManageDto
+
+
+@{
+	ViewData["Title"] = "مدیریت کالاها درون کانتینر";
+	Layout = "~/Views/Shared/AdminLayout.cshtml";
+	int i = 1;
+}
+<div class="col-md-12">
+	<div class="p-3 bg-white rounded-3 border-0">
+		<div class="d-flex justify-content-between">
+			<div>
+				<span>
+					<i class="icon-frane"></i>
+					<a asp-controller="Seo" asp-action="ProductManage" asp-route-seoId="@Model.SeoId"><i class="fa-solid fa-right-to-bracket align-middle me-2"></i></a>
+					مدیریت کالاها درون کانتینر
+				</span>
+
+				<span class="label label-primary p-1 mx-2 rounded"> شماره بارنامه: @Model.BillOfLadingNumber</span>
+
+				<span class="label label-info p-1 rounded mx-2">@Model.SeoProductDto.ContainerNumber </span>
+				
+				<span class="label label-info p-1 rounded mx-2">پلمپ  @Model.SeoProductDto.ContainerSealNumber</span>
+			</div>
+		</div>
+
+		<!-- /.breadcrumb-left -->
+	</div><!-- /.breadcrumb-box -->
+</div>
+<div class="  justify-content-between mt-4">
+	@* <div class="card">
+		<div class="card-body">
+			<form asp-action="SetFirstContainerProductDataDto" method="post">
+
+				<input type="hidden" asp-for="FirstDataDto.SeoProductId" />
+				<div class="form-body ">
+					<div class="row gy-4">
+
+						<div class="col-md-2 col-sm-12">
+							<div class="form-group  ">
+								<label>شماره درخواست استریپ</label>
+								<div class="input-group">
+									<input asp-for="FirstDataDto.StripContainerRequestNumber" type="text" class="rounded form-control">
+									<span asp-validation-for="FirstDataDto.StripContainerRequestNumber" class="text-danger"></span>
+								</div>
+							</div>
+						</div>
+
+						<div class="col-md-2 col-sm-12">
+							<div class="  form-group ">
+								<label>تاریخ درخواست</label>
+								<div class="input-group">
+									<input asp-for="FirstDataDto.DateStripContainerFa" type="text" class=" form-control rounded" autocomplete="off">
+									<span asp-validation-for="FirstDataDto.DateStripContainerFa" class="text-danger"></span>
+								</div>
+							</div>
+						</div>
+
+
+						<div class="form-group col-md-2">
+							<label>ساعت درخواست:</label>
+							<div class="input-group clockpicker">
+								<input type="text" class="form-control" asp-for="FirstDataDto.TimeStripContainer">
+								<span class="input-group-addon">
+									<span class="glyphicon glyphicon-time"></span>
+								</span>
+							</div>
+						</div>
+
+
+						<div class="col-md-1 mt-4">
+							<div class="form-group align-content-center mb-3 text-end">
+								<button style="border-radius:5px; margin-top:30px" class="alert-icon px-5 btn btn-success "
+										type="submit">
+									ذخیره
+								</button>
+							</div>
+						</div>
+					</div>
+
+				</div>
+			</form>
+		</div>
+	</div> *@
+	<div class="col-md-12">
+
+		<div class=" card rounded-3 min-height-600 ">
+			<div class="card-header pb-0">
+				<div class="d-flex justify-content-between d-flex ">
+					<h3 class="title m-0">
+						<i class="icon-speech"></i>
+						لیست کالا های درون کانتنر
+					</h3>
+					<a class="btn btn-primary rounded" onclick="addProduct();">کالا جدید</a>
+				</div><!-- /.portlet-title -->
+
+			</div><!-- /.portlet-heading -->
+			<div class="card-body">
+				<table class="table table-bordered ">
+					<thead class="bg-primary">
+						<tr>
+							<th style="width: 5%"> ردیف </th>
+							<th>نام  </th>
+							<th>HS Code</th>
+
+							<th>شماره شاسی  </th>
+
+							<th>تعداد  </th>
+
+							<th>وزن ناخالص </th>
+							<th>وزن خالص </th>
+							<th>حجم </th>
+
+							<th>اندازه </th>
+							<th>خطرناک </th>
+
+							<th>صاحب کالا </th>
+							<th>انبار </th>
+
+							<th>عملیات </th>
+						</tr>
+					</thead>
+
+					<tbody>
+						@foreach (var item in Model.SelectedProduct)
+						{
+							<tr>
+								<td class="align-middle">@(i++)</td>
+								<td>@item.ProductTitle</td>
+								<td>@item.ProductHSCodeTitle</td>
+
+
+								<td>@item.VehicleIdentificationNumber</td>
+								<td>@item.CountTitle</td>
+
+								<td>@item.WeightGrossTitle</td>
+								<td>@item.WeightNetTitle</td>
+								<td>@item.VolumeTitle</td>
+
+								<td>@item.Size</td>
+
+								<td class="align-middle text-center">
+									<span class="label rounded px-2 py-1 label-@(!item.IsDangerous ? "success" : "danger")">@(item.IsDangerous ? "خطرناک" : "معمولی")</span>
+								</td>
+
+								<td>@item.OwnerCompanyCompanyName</td>
+								<td>@item.WarehouseTitle</td>
+
+								<td class="align-middle px-1 text-center">
+									<a class="btn btn-warning px-2 btn-sm btn-icon curve" onclick="editProduct('@item.Id');"><i class="icon-pencil fs-6 align-middle"></i></a>
+									<a id="DeleteProduct@(i)" onclick="ShowQAlert(event,'DeleteProduct@(i)');" class="btn btn-danger px-2 btn-sm btn-icon curve btn-questions"
+									   asp-action="DeleteProductFromSeoProduct" asp-route-seoContainerProductId="@item.Id">
+										<i class="icon-trash align-middle fs-6 fa-flip-horizontal"></i>
+									</a>
+								</td>
+							</tr>
+						}
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+
+</div>
+
+<div id="generalmodal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" tabindex="-1">
+	<div class="modal-dialog modal-lg modal-dialog-centered">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h4 class="modal-title">ثبت کالا</h4>
+				<button type="button" class="close btn-close rounded border" data-bs-dismiss="modal"></button>
+			</div>
+			<div class="modal-body" id="modalbody">
+
+				<form asp-action="AddOrUpdateProductToSeoProduct" method="post">
+					<input asp-for="SeoProductDto.Id" id="AddProductToSeoProduct_SeoProductId" name="AddProductToSeoProduct.SeoProductId" type="hidden" />
+					<input asp-for="AddProductToSeoProduct.Id" type="hidden" />
+					<div class="form-body  row gy-4">
+
+						<div class="form-group col-md-6 ">
+							<label>کالا</label>
+							<div class="input-group">
+								<select class="form-control border select2" style="width:100%!important;"
+										asp-for="AddProductToSeoProduct.ProductId" asp-items="Model.Products">
+								</select>
+								<span asp-validation-for="AddProductToSeoProduct.ProductId" class="text-danger"></span>
+							</div>
+						</div>
+						<div class="form-group col-md-6 ">
+							<label>HS Code</label>
+							<div class="input-group">
+								<select class="form-control border select2" style="width:100%!important;"
+										asp-for="AddProductToSeoProduct.ProductHSCodeId"
+										asp-items="Model.ProductHSCodes">
+									<option value="">نامشخص</option>
+								</select>
+								<span asp-validation-for="AddProductToSeoProduct.ProductHSCodeId" class="text-danger"></span>
+							</div>
+						</div>
+
+						<div class="form-group col-md-6 ">
+							<label>صاحب کالا</label>
+							<div class="input-group">
+								<select class="form-control border select2" style="width:100%!important;"
+										asp-for="AddProductToSeoProduct.OwnerCompanyId"
+										asp-items="Model.Companies">
+									<option value="">نامشخص</option>
+								</select>
+								<span asp-validation-for="AddProductToSeoProduct.OwnerCompanyId" class="text-danger"></span>
+							</div>
+						</div>
+
+						<div class="form-group col-md-6 ">
+							<label>انبار</label>
+							<div class="input-group">
+								<select class="form-control border select2" style="width:100%!important;"
+										asp-for="AddProductToSeoProduct.WarehouseJson"
+										asp-items="Model.Warehouses">
+									<option value="">نامشخص</option>
+								</select>
+								<span asp-validation-for="AddProductToSeoProduct.WarehouseJson" class="text-danger"></span>
+							</div>
+						</div>
+
+						<div class="col-md-2">
+							<label> تعداد</label>
+							<div class="input-group">
+								<input asp-for="AddProductToSeoProduct.Count" min="1" max="@int.MaxValue" type="number" class="form-control w-100 ">
+								<span asp-validation-for="AddProductToSeoProduct.Count" class="w-100 text-danger"></span>
+							</div>
+						</div>
+
+						<div class="col-md-2">
+							<label> وزن ناخالص</label>
+							<div class="input-group">
+								<input asp-for="AddProductToSeoProduct.WeightGross" min="0" max="@int.MaxValue" type="number" class="form-control w-100 ">
+								<span asp-validation-for="AddProductToSeoProduct.WeightGross" class="w-100 text-danger"></span>
+							</div>
+						</div>
+
+						<div class="col-md-2">
+							<label> وزن خالص</label>
+							<div class="input-group">
+								<input asp-for="AddProductToSeoProduct.WeightNet" min="0" max="@int.MaxValue" type="number" class="form-control w-100 ">
+								<span asp-validation-for="AddProductToSeoProduct.WeightNet" class="w-100 text-danger"></span>
+							</div>
+						</div>
+
+
+						<div class="col-md-2">
+							<label> حجم  </label>
+							<div class="input-group">
+								<input asp-for="AddProductToSeoProduct.Volume" min="0" max="@int.MaxValue" type="number" class="form-control w-100 ">
+								<span asp-validation-for="AddProductToSeoProduct.Volume" class="w-100 text-danger"></span>
+							</div>
+						</div>
+
+
+						<div class="col-md-4">
+							<label> اندازه  </label>
+							<div class="input-group">
+								<input asp-for="AddProductToSeoProduct.Size" type="text" class="form-control w-100 ">
+								<span asp-validation-for="AddProductToSeoProduct.Size" class="w-100 text-danger"></span>
+							</div>
+						</div>
+
+
+
+						<div class="col-md-12">
+							<label> توضیحات  </label>
+							<div class="input-group">
+								<input asp-for="AddProductToSeoProduct.Description" type="text" placeholder="توضیحات/برند/MARKS" class="form-control w-100 ">
+								<span asp-validation-for="AddProductToSeoProduct.Description" class="w-100 text-danger"></span>
+							</div>
+						</div>
+
+
+						<div class="col-md-4">
+							<label> شماره شاسی  </label>
+							<div class="input-group">
+								<input asp-for="AddProductToSeoProduct.VehicleIdentificationNumber" type="text" class="form-control w-100 ">
+								<span asp-validation-for="AddProductToSeoProduct.VehicleIdentificationNumber" class="w-100 text-danger"></span>
+							</div>
+						</div>
+
+						<div class="col-md-4">
+							<label> نام فارسی  </label>
+							<div class="input-group">
+								<input asp-for="AddProductToSeoProduct.VehicleIdentificationNumber" type="text" class="form-control w-100 ">
+								<span asp-validation-for="AddProductToSeoProduct.VehicleIdentificationNumber" class="w-100 text-danger"></span>
+							</div>
+						</div>
+
+						<div class="col-md-4">
+							<label> نام انگلیسی  </label>
+							<div class="input-group">
+								<input asp-for="AddProductToSeoProduct.NameFa" type="text" class="form-control w-100 ">
+								<span asp-validation-for="AddProductToSeoProduct.NameFa" class="w-100 text-danger"></span>
+							</div>
+						</div>
+
+
+						<div class="col-md-3">
+							<div class="form-check form-switch">
+								<input type="checkbox" asp-for="AddProductToSeoProduct.IsDangerous" class="form-check-input" role="switch" />
+								<label class="form-check-label ms-2">کالا خطرناک است؟ </label>
+								<span asp-validation-for="AddProductToSeoProduct.IsDangerous" class="text-danger"></span>
+							</div>
+						</div>
+
+						<div class="col-md-3">
+							<div class="form-check form-switch">
+								<input type="checkbox" asp-for="AddProductToSeoProduct.IsBigVolume" class="form-check-input" role="switch" />
+								<label class="form-check-label ms-2">کالا حجیم است؟ </label>
+								<span asp-validation-for="AddProductToSeoProduct.IsBigVolume" class="text-danger"></span>
+							</div>
+						</div>
+
+						<div class="col-md-3">
+							<div class="form-check form-switch">
+								<input type="checkbox" asp-for="AddProductToSeoProduct.IsDangerous" class="form-check-input" role="switch" />
+								<label class="form-check-label ms-2">کالا نامتعارف است؟ </label>
+								<span asp-validation-for="AddProductToSeoProduct.IsDangerous" class="text-danger"></span>
+							</div>
+						</div>
+
+						<div class="col-md-3">
+							<div class="form-check form-switch">
+								<input type="checkbox" asp-for="AddProductToSeoProduct.IsBigVolume" class="form-check-input" role="switch" />
+								<label class="form-check-label ms-2">کالا مواد اولیه است؟ </label>
+								<span asp-validation-for="AddProductToSeoProduct.IsBigVolume" class="text-danger"></span>
+							</div>
+						</div>
+
+						<div class="col-md-12">
+							<div class="form-check form-switch">
+								<input type="checkbox" asp-for="AddProductToSeoProduct.IsSelfTransported" class="form-check-input" role="switch" />
+								<label class="form-check-label ms-2">کالا خودران است؟ برای جابجایی نیاز به کامیون ندارد </label>
+								<span asp-validation-for="AddProductToSeoProduct.IsSelfTransported" class="text-danger"></span>
+							</div>
+						</div>
+
+
+
+						<div class="col-md-2 ">
+							<div class="d-flex justify-items-start">
+								<button class="alert-icon btn btn-success rounded label" type="submit"><p class="px-2 m-0">ثبت</p></button>
+							</div>
+						</div>
+
+					</div>
+				</form>
+
+			</div>
+		</div>
+	</div>
+</div>
+
+
+@section script {
+	<script>
+		$(document).ready(function () {
+
+			$(".select2").select2().select2({
+				dropdownParent: $('#generalmodal')
+			});
+
+
+			 $('.clockpicker').clockpicker({
+				placement: 'bottom',
+				align: 'left',
+				donetext: 'تایید'
+			});
+
+			kamaDatepicker('FirstDataDto_DateStripContainerFa', customOptions);
+
+			$("#AddProductToSeoProduct_ProductId").trigger('change');
+
+		});
+
+		function addProduct() {
+			var seoProductId = "@Html.Raw(Model.SeoProductDto.Id)";
+			$("#AddProductToSeoProduct_Id").val('');
+			$("#AddProductToSeoProduct_SeoProductId").val(seoProductId);
+
+			$("#AddProductToSeoProduct_ProductId").val('');
+			$("#AddProductToSeoProduct_ProductHSCodeId").val('');
+
+			$("#AddProductToSeoProduct_ProductId").trigger('change');
+			$("#AddProductToSeoProduct_ProductHSCodeId").trigger('change');
+
+			$("#AddProductToSeoProduct_WarehouseJson").val('');
+			$("#AddProductToSeoProduct_WarehouseJson").trigger('change');
+
+			$("#AddProductToSeoProduct_OwnerCompanyId").val('');
+			$("#AddProductToSeoProduct_OwnerCompanyId").trigger('change');
+
+			$("#AddProductToSeoProduct_Count").val('1');
+			$("#AddProductToSeoProduct_WeightNet").val('0');
+			$("#AddProductToSeoProduct_WeightGross").val('0');
+			$("#AddProductToSeoProduct_Volume").val('0');
+
+			$("#AddProductToSeoProduct_Description").val('');
+			$("#AddProductToSeoProduct_Size").val('');
+			$("#AddProductToSeoProduct_NameFa").val('');
+			$("#AddProductToSeoProduct_NameEn").val('');
+			$("#AddProductToSeoProduct_VehicleIdentificationNumber").val('');
+
+			$("#AddProductToSeoProduct_IsDangerous").prop('checked', false);
+			$("#AddProductToSeoProduct_IsBigVolume").prop('checked', false);
+			$("#AddProductToSeoProduct_IsUnusual").prop('checked', false);
+			$("#AddProductToSeoProduct_IsRawMaterials").prop('checked', false);
+			$("#AddProductToSeoProduct_IsSelfTransported").prop('checked', false);
+
+			$("#AddProductToSeoProduct_ContainerNumber").val('');
+			$("#AddProductToSeoProduct_ContainerSize").val('0');
+			$("#AddProductToSeoProduct_ContainerSealNumber").val('');
+			$("#AddProductToSeoProduct_ContainerType").val('');
+			$("#AddProductToSeoProduct_ContainerMoveType").val('');
+
+			$("#generalmodal").modal('show');
+
+		}
+
+		function editProduct(id) {
+
+			$.post("@Url.Action("GetSeoContainerProductById", "Seo")", { seoContainerProductId: id })
+				.done(function (res) {
+					//$("#modalbody").html(res);
+
+					$("#AddProductToSeoProduct_Id").val(res.id);
+					$("#AddProductToSeoProduct_ProductId").val(res.productId);
+					$("#AddProductToSeoProduct_ProductId").trigger('change');
+
+					$("#AddProductToSeoProduct_ProductHSCodeId").val(res.productHSCodeId);
+					$("#AddProductToSeoProduct_ProductHSCodeId").trigger('change');
+
+					$("#AddProductToSeoProduct_WarehouseJson").val(res.warehouseJson);
+					$("#AddProductToSeoProduct_WarehouseJson").trigger('change');
+
+					$("#AddProductToSeoProduct_OwnerCompanyId").val(res.ownerCompanyId);
+					$("#AddProductToSeoProduct_OwnerCompanyId").trigger('change');
+
+					$("#AddProductToSeoProduct_Count").val(res.count);
+					$("#AddProductToSeoProduct_WeightNet").val(res.weightNet);
+					$("#AddProductToSeoProduct_WeightGross").val(res.weightGross);
+					$("#AddProductToSeoProduct_Volume").val(res.volume);
+
+					$("#AddProductToSeoProduct_Description").val(res.description);
+					$("#AddProductToSeoProduct_Size").val(res.size);
+					$("#AddProductToSeoProduct_NameFa").val(res.nameFa);
+					$("#AddProductToSeoProduct_NameEn").val(res.nameEn);
+					$("#AddProductToSeoProduct_VehicleIdentificationNumber").val(res.vehicleIdentificationNumber);
+
+					$("#AddProductToSeoProduct_IsDangerous").prop('checked', res.isDangerous);
+					$("#AddProductToSeoProduct_IsBigVolume").prop('checked', res.isBigVolume);
+					$("#AddProductToSeoProduct_IsUnusual").prop('checked', res.isUnusual);
+					$("#AddProductToSeoProduct_IsRawMaterials").prop('checked', res.isRawMaterials);
+					$("#AddProductToSeoProduct_IsSelfTransported").prop('checked', res.isSelfTransported);
+
+					$("#AddProductToSeoProduct_ContainerNumber").val(res.containerNumber);
+					$("#AddProductToSeoProduct_ContainerSize").val(res.containerSize);
+					$("#AddProductToSeoProduct_ContainerSealNumber").val(res.containerSealNumber);
+					$("#AddProductToSeoProduct_ContainerType").val(res.containerType);
+					$("#AddProductToSeoProduct_ContainerMoveType").val(res.containerMoveType);
+
+					$("#generalmodal").modal('show');
+				});
+		}
+
+
+
+	</script>
+}
+

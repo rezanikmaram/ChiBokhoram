@@ -1,0 +1,93 @@
+﻿@model VoyageAllocationPage
+@{
+	ViewData["Title"] = " اجاره تجهیزات سفر";
+	Layout = "~/Views/Shared/AdminLayout.cshtml";
+	int i = 1;
+}
+
+<div class="card p-2 mb-4">
+	<div class="row">
+		<div class="col-md-1 align-middle align-content-center px-4">
+			<i class="fa-solid fa-circle-info fs-4 align-middle"></i>
+		</div>
+		<div class="col-md-11 px-5">
+			<div class="d-flex justify-content-between align-items-center">
+				<div class="glass-bg px-2 py-1">
+					<p class="fs-6 m-0"> @Model.VogageInfo?.ShipShipName </p>
+				</div>
+				<div>
+					<p class="fs-6 m-0"> @Model.VogageInfo?.CompanyShippingCompanyName </p>
+				</div>
+				<div>
+					<p class="fs-6 m-0">@Model.VogageInfo?.TransportTypeTitle</p>
+				</div>
+				<div>
+					<p class="fs-6 m-0">شماره سفر: @Model.VogageInfo?.VoyageNumber</p>
+				</div>
+				<div>
+					<p class="fs-6 m-0">شماره دریایی: @Model.VogageInfo?.PmoNumber</p>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="row">
+	<div class="card">
+		<div class="card-header">
+			<div class="row gy-4 ">
+
+				<div class="col-md-4 d-flex align-items-center">
+					<h3 class="title">
+						<a asp-action="VoyageSeo" asp-route-VoyageId="@Model.VogageInfo.Id"><i class="fa-solid fa-right-to-bracket me-2"></i></a>
+						<i class="icon-frane"></i>  اجاره تجهیزات سفر
+					</h3>
+
+				</div>
+
+
+				<!-- /.buttons-box -->
+			</div>
+			<!-- /.portlet-heading -->
+			<!-- /.portlet-body -->
+		</div>
+		<div class="card-body pt-3 border-top">
+			<div class="row gy-3 align-items-center">
+
+				<div class="col-lg-2 col-md-3">
+					<a asp-action="DocFiles" asp-controller="AllocationOfEquipment" asp-route-allocationEquId="@Model.AllocationEquId" asp-route-reternPage="3" class="btn btn-light w-100 px-0 py-2">
+						<i class="fa-solid fa-boxes-packing me-2"></i>
+						مستندات
+					</a>
+				</div>
+
+				<div class="col-lg-2 col-md-3">
+					<a asp-action="PreFactor" asp-controller="AllocationOfEquipment" asp-route-allocationEquId="@Model.AllocationEquId" class="btn btn-light w-100 px-0 py-2">
+						<i class="fa-solid fa-boxes-packing me-2"></i>
+						صدور پیش فاکتور
+					</a>
+				</div>
+
+				@if (Model.AllocationEquipmentState > AllocationEquipmentState.InOperation)
+				{
+					<div class="col-lg-2 col-md-3">
+						<a asp-action="Factor" asp-controller="AllocationOfEquipmentFactor"
+						   asp-route-allocationEquId="@Model.AllocationEquId" class="btn btn-light w-100 px-0 py-2">
+							<i class="fa-solid fa-boxes-packing me-2"></i>
+							صدور صورتحساب
+						</a>
+					</div>
+				}
+
+			</div>
+		</div>
+
+	</div>
+</div>
+
+
+@section script {
+	<script>
+
+	</script>
+}
+

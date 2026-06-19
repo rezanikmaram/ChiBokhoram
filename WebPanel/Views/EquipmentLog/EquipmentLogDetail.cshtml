@@ -1,0 +1,52 @@
+﻿@using Entities.DTOs.Public
+@model EquipmentStatusLogDetailDto
+@{
+    ViewData["Title"] = "جزئیات رویداد تجهیز";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+<div class="col-md-12">
+    <div class="row">
+        <div class="col-md-5">
+            <div class="portlet box border shadow">
+                <div class="portlet-heading">
+                    <div class="portlet-title">
+                        <h3 class="title">
+
+                            جزئیات رویداد @Model.EntityTitle 
+                        </h3>
+                    </div><!-- /.portlet-title -->
+                    <div class="buttons-box">
+
+                        <div class="code-modal hide">
+                        </div>
+                        <a class="btn btn-sm btn-default btn-round btn-collapse" rel="tooltip" title="" href="#" data-bs-original-title="کوچک کردن">
+                            <i class="icon-arrow-up"></i>
+                            <div class="paper-ripple"><div class="paper-ripple__background"></div><div class="paper-ripple__waves"></div></div>
+                        </a>
+
+                    </div><!-- /.buttons-box -->
+                </div><!-- /.portlet-heading -->
+                @*جزئیات CHO*@
+                <div class="portlet-body min-height-700">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-striped table-hover">
+
+                            <tbody>
+                                <tr><td>شناسه تجهیز </td><td>@Model.EntityId</td></tr>
+                                <tr><td>نام تجهیز </td><td>@Model.EntityId</td></tr>
+                                <tr><td>وضغیت قبلی </td><td>@Model.OldValueTitle</td></tr>
+                                <tr><td>وضعیت جدید </td><td>@Model.ValueTitle</td></tr>
+                                <tr><td>نوع تجهیز </td><td>@Model.EquipmentLogTypeTitle</td></tr>
+                                <tr><td>بندر </td><td>@Model.PortPortName</td></tr>
+                                <tr><td>عملیات </td><td>@Model.SeoSeoCode</td></tr>
+                                <tr><td>کاربر</td><td>@Model.User</td></tr>
+                            </tbody>
+                        </table>
+                    </div><!-- /.table-responsive -->
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

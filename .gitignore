@@ -7,11 +7,7 @@
 .env
 .opencode/
 
-
-
-
-
 /WebPanel/Properties/launchSettings.json
 /APIservice/Properties/launchSettings.json
-/APIservice/Properties/launchSettings.json
 /WebPanel/Error_log
+WebPanel/wwwroot/assets/js/editor/ckeditor/

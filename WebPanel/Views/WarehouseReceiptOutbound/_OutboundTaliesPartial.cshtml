@@ -1,0 +1,97 @@
+@model WroOutboundTaliPageDto
+
+<div class="d-flex justify-content-between mb-3">
+    <h5>لیست بارگیری های ثبت شده (@Model.Data.Count)</h5>
+    <a href="@Url.Action("DownloadListBijak", new { outboundId = Model.PageInfo.Id })" target="_blank" class="btn btn-primary">
+        <i class="fa-solid fa-download"></i> دانلود لیست بیجک ها
+    </a>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-sm table-bordered table-hover table-striped" id="outbound-talies-table">
+        <thead class="bg-primary text-white">
+            <tr>
+                <th class="px-1 align-middle">#</th>
+                <th class="px-1 align-middle">بیجک</th>
+                <th class="px-1 align-middle">نام کالا</th>
+                <th class="px-1 align-middle">تعداد / باقیمانده</th>
+                <th class="px-1 align-middle">وزن / باقیمانده</th>
+                <th class="px-1 align-middle">حجم</th>
+                <th class="px-1 align-middle">نام شمارنده</th>
+                <th class="px-1 align-middle">نوع شمارنده</th>
+                <th class="px-1 align-middle">پلاک خودرو</th>
+                <th class="px-1 align-middle">کد ملی راننده</th>
+                <th class="px-1 align-middle">تلفن راننده</th>
+                <th class="px-1 align-middle">زمان ثبت</th>
+                <th class="px-1 align-middle">عملیات</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                int i = 1;
+            }
+            @foreach (var item in Model.Data)
+            {
+                int productIndex = 0;
+                foreach (var product in item.Products)
+                {
+                    <tr>
+                        @if (productIndex == 0)
+                        {
+                            <td rowspan="@item.Products.Count" class="align-middle text-center">@i</td>
+                            <td rowspan="@item.Products.Count" class="align-middle text-center">@item.OutBoundTaliReceiptCode</td>
+                        }
+                        <td class="align-middle text-center">@product.GetProductNameForWarehouseReceipt</td>
+                        <td class="align-middle text-center">
+                            <div>@product.Count.ToPrice()</div>
+                            <small class="text-muted">باقیمانده: @product.RemainingCount.ToPrice()</small>
+                        </td>
+                        <td class="align-middle text-center">
+                            <div>@product.Weight.ToPrice()</div>
+                            <small class="text-muted">باقیمانده: @product.RemainingWeight.ToPrice()</small>
+                        </td>
+                        <td class="align-middle text-center">@product.Volume.ToPrice()</td>
+
+                        @if (productIndex == 0)
+                        {
+                            <td rowspan="@item.Products.Count" class="align-middle text-center">@item.FirstName @item.LastName</td>
+                            <td rowspan="@item.Products.Count" class="align-middle text-center">@item.Type.ToDisplay()</td>
+                            <td rowspan="@item.Products.Count" class="align-middle text-center">
+                                @if (item.IsSelfTransported )
+                                {
+                                    <text>خودران</text>
+                                }
+                                else if (item.CarPlatesTitle != null)
+                                {
+                                    @item.CarPlatesTitle
+                                }
+                                else
+                                {
+                                    <text>نامشخص</text>
+                                }
+                            </td>
+                            <td rowspan="@item.Products.Count" class="align-middle text-center">@item.DriverNationalCode</td>
+                            <td rowspan="@item.Products.Count" class="align-middle text-center">@item.DriverPhoneNumber</td>
+                            <td rowspan="@item.Products.Count" class="align-middle text-center">@item.DateFa</td>
+                            <td rowspan="@item.Products.Count" class="align-middle text-center">
+                                <a class="btn btn-primary px-2 my-2 rounded" href="@Url.Action("DownloadBijak", new { outboundTaliId = item.Id })" target="_blank">
+                                    <i class="fa-solid fa-download"></i>
+                                </a>
+                            </td>
+                        }
+                    </tr>
+                    productIndex++;
+                }
+                i++;
+            }
+        </tbody>
+    </table>
+</div>
+
+<style>
+    .table td small {
+        display: block;
+        font-size: 0.75rem;
+        color: #6c757d;
+    }
+</style>

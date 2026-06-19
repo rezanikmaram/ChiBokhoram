@@ -1,0 +1,146 @@
+﻿@model AllocationEquDamagedPageDto
+
+
+
+<div class="col-lg-12">
+    <div class="card">
+        <div class="card-header">
+            <div class="d-flex justify-content-between">
+                
+                    <h3 class="title">
+                        <i class="icon-frane"></i> خسارت وارد شده به تجهیزات
+                    </h3>
+                   <div>
+                        <a class="btn btn-primary rounded"
+                           onclick="damagedShowModal();">
+                            <i class="icon-plus align-middle"></i>
+                            مقدار جدید
+                        </a>
+
+
+                        <!-- /.portlet-title -->
+                        <div class="buttons-box">
+
+                            <i class="icon-size-fullscreen"></i>
+                            <div class="paper-ripple">
+                                <div class="paper-ripple__background"></div>
+                                <div class="paper-ripple__waves"></div>
+                            </div>
+                        </div>
+                    </div>
+                <!-- /.buttons-box -->
+            </div>
+            <!-- /.portlet-heading -->
+            <!-- /.portlet-body -->
+        </div>
+        <div class="card-body pt-0">
+            <div id="DamagedListId">
+                <partial name="_DamagedList" model="Model.List" />
+            </div>
+
+        </div>
+        <!-- /.portlet -->
+    </div>
+</div>
+
+
+
+<div id="Damagedmodal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">  ثبت خسارت به تجهیز</h4>
+                <button type="button" class="close btn-close rounded border" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="modalbody">
+
+                <div class="card-body pt-0">
+
+                    <div class="form-body">
+
+
+                        <input asp-for="CreateDamagedDto.Id" hidden />
+                        <input asp-for="CreateDamagedDto.AllocationEquipmentId" hidden />
+                        <div class="row gy-3">
+
+                            <div class="col-sm-12">
+                                <div class="form-group">
+                                    <label>نوع </label>
+                                    <div class="input-group col-sm-6"  >
+                                        <select class="form-control select2 " asp-for="CreateDamagedDto.SeoEquipmentId"
+                                                asp-items="Model.EquipmentsTitle" style="width:100%!important;">
+                                        </select>
+                                        
+                                        
+
+                                    </div>
+                                    <span asp-validation-for="CreateDamagedDto.SeoEquipmentId"
+                                          class="text-danger"></span>
+
+                                </div>
+                            </div>
+
+                            <div class="col-sm-12">
+                                <div class="form-group  ">
+                                    <label>شرح خسارت </label>
+                                    <div class="input-group">
+                                        <input type="text" asp-for="CreateDamagedDto.Description" class="form-control">
+                                    </div>
+                                    <span asp-validation-for="CreateDamagedDto.Description" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-sm-6">
+                                <div class="form-group  ">
+                                    <label>مبلغ (ريال) </label>
+                                    <div class="input-group">
+                                        <input type="number" asp-for="CreateDamagedDto.Price" min="0" class="form-control">
+                                    </div>
+                                    <span asp-validation-for="CreateDamagedDto.Price" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-sm-6">
+                                <div class="form-group  ">
+                                    <label>تاریخ</label>
+                                    <div class="input-group">
+                                        <input type="text" asp-for="CreateDamagedDto.DateFa" required autocomplete="off" class="form-control">
+                                    </div>
+                                    <span asp-validation-for="CreateDamagedDto.DateFa" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-sm-12">
+                                <div class="input-group activeor">
+                                    <label>
+                                        <input type="checkbox" asp-for="CreateDamagedDto.PayByCompanyOwner" class="normal">
+                                        پرداخت خسارت با صاحب کالا است؟
+                                    </label>
+                                </div>
+                            </div>
+
+                        </div>
+
+
+                        <div class="modal-footer px-0 border-0">
+                            <a onclick="addOrUpdateDamaged()" class="btn btn-success btn-round">  ثبت</a>
+                            <button type="button" class="btn btn-danger btn-round" data-bs-dismiss="modal">بازگشت</button>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+

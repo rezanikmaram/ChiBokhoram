@@ -1,0 +1,175 @@
+﻿@*  بدون استفاده *@
+@model RfidDeviceManageDto
+
+
+@{
+    ViewData["Title"] = "مدیریت دستگاه های Rfid";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+    
+}
+<div class="col-md-12">
+    <div class="breadcrumb-box border shadow">
+        <ul class="breadcrumb">
+            <li>
+                <a href="#">مدیریت دستگاه های </a>
+                <span class="label label-primary">@ViewBag.seocode</span>
+                <span class="label label-info">@(((TransportType)ViewBag.seotype).ToDisplay(DisplayProperty.Name))</span>
+            </li>
+        </ul>
+        <div class="breadcrumb-left">
+            @(DateTimeOffset.Now.ToPersianDateTextify())
+            <i class="icon-calendar"></i>
+        </div><!-- /.breadcrumb-left -->
+    </div><!-- /.breadcrumb-box -->
+</div>
+<div class="d-flex justify-content-between">
+    <div class="col-md-6">
+        <div class="card min-height-600">
+            <div class="card-header pb-0">
+                <div class="d-flex justify-content-between">
+                    <h3 class="title">
+                        <i class="icon-speech"></i>
+                        لیست دستگاه های Rfid
+                    </h3>
+
+                </div><!-- /.portlet-title -->
+
+            </div><!-- /.portlet-heading -->
+            <div>
+                <div class="card-body pt-0">
+                    <table class="table table-bordered ">
+                        <thead class="bg-primary">
+                            <tr>
+                                <th>اسم دستگاه</th>
+                                <th>کد دستگاه</th>
+                                <th>مکان دستگاه</th>
+                                <th>عملیات</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.RfidDevicess)
+                            {
+                                <tr id="tr@(item.Id)">
+                                    @*<td style="width:30px;"><input type="checkbox" value="@item.Id" name="deviceId" /></td>*@
+                                    <td>@item.Name</td>
+                                    <td>@item.DeviceCode</td>
+                                    <td><input class="form-control" id="place@(item.Id)" placeholder="مکان دستگاه" /></td>
+                                    <td><a class="btn btn-primary" onclick="setRfidToSeo(@item.Id);">افزودن</a></td>
+
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+
+                    <!-- /.tab-content -->
+
+                </div>
+            </div><!-- /.portlet-body -->
+        </div>
+    </div>
+    <div class="col-md-5">
+        <div class="card ">
+            <div class="card-header pb-0">
+                <div class="d-flex justify-content-between d-flex">
+                    <h3 class="title m-0">
+
+                        Rfidهای انتخاب شده
+                    </h3>
+                    <form asp-action="RemoveRfidDeviceFormSeo" method="post" id="deleteRfid">
+
+                        <a class="btn btn-danger text-white label m-r-15" onclick="deleteProduct();">حذف انتخاب شده ها</a>
+                        <input id="removeIds" name="ids" type="hidden" />
+                        <input asp-for="SeoId" type="hidden" />
+
+                    </form>
+                </div><!-- /.portlet-title -->
+                <!-- /.buttons-box -->
+            </div><!-- /.portlet-heading -->
+            <div class="card-body pt-0">
+                <table id="listSelectedRfidDevice" class="table table-bordered ">
+                    <tbody>
+                        @foreach (var item in Model.SelectedRfidDevices)
+                        {
+                            @await Html.PartialAsync("_rfidDeviceSelected",
+                               new RfidDeviceSelectedOfSeoDto
+                                   {
+                                       Selected = item,
+                                       SeoId = Model.SeoId
+                                   });
+
+                            @*<tr>
+                                    <td style="width:30px;"><input type="checkbox" value="@item.Id" name="DeviceId" /></td>
+                                    <td>@item.Name</td>
+                                    <td>@item.DeviceCode</td>
+                                    <td>@item.Place</td>
+                                    <td><a id="ActivationRfidDevice@(i)" onclick="ShowQAlert(event,'ActivationRfidDevice@(i)');" asp-action="ActivationRfidDevice" asp-route-seoId="@Model.SeoId" asp-route-deviceId="@item.Id"><span class="label label-@(item.IsActive?"success":"danger")">@(item.IsActive? "فعال" :"غیر فعال")</span></a></td>
+
+                                </tr>
+                                i++;*@
+                        }
+                    </tbody>
+                </table>
+
+                <!-- /.tab-content -->
+
+            </div><!-- /.portlet-body -->
+        </div>
+    </div>
+
+</div>
+
+@section script{
+    <script>
+    function setRfidToSeo(id) {
+        let deviceId = id;
+        let seoId = '@Model.SeoId';
+        let place = $("#place" + id).val();
+
+        if (place) {
+            
+            $.post("@Url.Action("SetRfidDeviceForSeo","Seo")", { deviceId: id, place: place, seoId: seoId })
+                .done(function (result) {
+                    //window.location.reload();
+                    //alert(result.name);
+                    $("#tr" + id).remove();
+                    //alert(result);
+                    $('#listSelectedRfidDevice').append(result);
+                })
+                .fail(function () {
+                    showAlert2('خطایی رخ داده است', 1);
+                });
+        }
+        else {
+            showAlert2('مکان دستگاه را وارد کنید',1);
+            return;
+        }
+
+
+     }
+
+     function deleteProduct() {
+         var ids = "";
+         $("#removeIds").val('');
+         $("input:checkbox[name=DeviceId]:checked").each(function () {
+             if (ids) {
+                 ids += ',' + $(this).val();
+             }
+             else {
+                 ids = $(this).val();
+             }
+         });
+         $("#removeIds").val(ids);
+         if (ids) {
+             $("#deleteRfid").submit();
+         }
+         else {
+             showAlert2('دستگاهی انتخاب نشده است',1);
+             return;
+         }
+     }
+
+
+
+    </script>
+}
+

@@ -1,0 +1,44 @@
+﻿<div id="NewEquModal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">  افزودن تجهیز</h4>
+                <button type="button" class="close btn-close rounded border" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="modalbody">
+
+                <div class="portlet-body">
+
+                    <div class="form-body">
+
+
+                        <input id="AllocationEquEndReportTypeId" name="AllocationEquEndReportType" hidden />
+
+                        <div class="row">
+
+                            <div class="col-sm-12">
+                                <div class="form-group  ">
+                                    <label>نام تجهیز</label>
+                                    <div class="input-group">
+                                        <input type="text" name="EquipmentName" id="EquipmentNameId" required class="form-control">
+                                    </div>
+
+                                </div>
+                            </div>
+
+                        </div>
+
+
+                        <div class="modal-footer px-0 border-0">
+                            <a onclick="newEquipment()" class="btn btn-success btn-round">  ثبت</a>
+                            <button type="button" class="btn btn-danger btn-round" data-bs-dismiss="modal">بازگشت</button>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>

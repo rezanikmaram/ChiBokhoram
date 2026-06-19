@@ -1,0 +1,33 @@
+@model List<CounterEditHistoryDto>
+
+<div class="table-responsive">
+    <table class="table table-sm table-bordered table-hover table-striped mb-0">
+        <thead class="bg-primary">
+            <tr>
+                <th>#</th>
+                <th>تاریخ ویرایش</th>
+                <th>ویرایشگر</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model?.Any() == true)
+            {
+                int i = 1;
+                foreach (var item in Model)
+                {
+                    <tr>
+                        <td class="text-center">@(i++)</td>
+                        <td>@item.ArchiveDateFa</td>
+                        <td>@item.EditedByPersonelName</td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="3" class="text-center">تاریخچه ویرایشی وجود ندارد</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

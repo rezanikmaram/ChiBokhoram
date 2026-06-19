@@ -1,0 +1,122 @@
+﻿@model CreateWaterfrontDto 
+@{
+    ViewData["Title"] = "ثبت اسکله";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+<div class="col-lg-12">
+    <div class="card">
+        <div class="card-header pb-0">
+            <div class="d-flex justify-content-between">
+                <h3 class="title">
+                    <i class="icon-anchor"></i> افزودن اسکله
+                </h3>
+            </div>
+        </div>
+        <form asp-action="CreateWaterfront" method="post" enctype="multipart/form-data">
+            <input asp-for="Id" type="hidden" />
+            <div class="card-body pt-0">
+                <div class="form-body">
+                    <ul class="d-flex col-md-12">
+                        <li class="col-md-4">
+                            <div class="form-group m-l-60 ">
+                                <label >نام اسکله</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" asp-for="WaterfrontName" required>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="col-md-4">
+                            <div class="form-group">
+                                <label  >شماره اسکله</label>
+                                <div class="input-group">
+                                    <input  type="tel" class="form-control" asp-for="WaterfrontNumber">
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                    <ul class="d-flex col-md-12">
+                        <li class="col-md-4">
+                            <ul class="form-group m-l-60 d-flex col-md-12">
+                                <li class="col-md-5">
+                                    <label  >طول جغرافیایی</label>
+                                    <div class="input-group " >
+                                        <input class="form-control m-l-10" asp-for="LonX" placeholder="X">
+                                        <span asp-validation-for="LonX" class="text-danger"></span>
+                                    </div>
+                                </li>
+                                <li class="col-md-5">
+                                    <label >عرض جغرافیایی</label>
+                                    <div class="input-group " >
+                                        <input   class="form-control" asp-for="LatY" placeholder="Y">
+                                        <span asp-validation-for="LatY" class="text-danger"></span>
+                                    </div>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="col-md-4">
+                            <label  >عمق </label>
+                            <div class="input-group " >
+                                <input  type="text" class="form-control m-l-10" asp-for="Depth">
+                            </div>
+                        </li>
+                    </ul>
+                    <ul class="d-flex col-md-12">
+                        <li class="col-md-4">
+                            <div class="form-group m-l-60">
+                                <label>نوع اسکله</label>
+                                <div class="input-group">
+                                    <select class="form-control" style=" cursor: pointer;" asp-for="WaterfrontKind" asp-items="Html.GetEnumSelectList<WaterfrontType>()">
+                                    </select>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="col-md-4">
+                            <label >حداکثر تناژ ورودی کشتی </label>
+                            <div class="input-group ">
+                                <input  type="text" class="form-control m-l-10" asp-for="MaximumInputTonnage">
+                            </div>
+                        </li>
+                    </ul>
+
+                    <ul class="col-md-12">
+                        <li class="col-md-4">
+                            <div class="form-group">
+                                <label>آپلود فایل</label>
+                                <div style="flex-wrap:nowrap" class="input-group round">
+                                    <input type="text" class="form-control file-input" placeholder="برای آپلود کلیک کنید">
+                                    <input type="file" class="form-control">
+                                    <span class="input-group-btn input-group-sm">
+                                        <button type="button" class="btn btn-info">
+                                            
+                                            آپلود فایل
+                                            <div class="paper-ripple"><div class="paper-ripple__background"></div><div class="paper-ripple__waves"></div></div>
+                                        </button>
+                                    </span>
+                                </div>
+                            </div>
+                           </li>
+                       </ul>
+                  
+                </div>
+            </div>
+            <div class="form-actions" style="float: left;">
+                <button type="submit" class="btn btn-info btn-round">
+                    <i class="icon-check"></i>
+                    ذخیره
+                    <div class="paper-ripple"><div class="paper-ripple__background"></div><div class="paper-ripple__waves"></div></div>
+                </button>
+                <a class="btn btn-warning btn-round" asp-action="Index">
+                    <i class="icon-close"></i>
+                    بازگشت
+                    <div class="paper-ripple"><div class="paper-ripple__background"></div><div class="paper-ripple__waves"></div></div>
+                </a>
+            </div>
+            </form>
+
+        <section class="fix" ></section>
+           
+
+    </div>
+</div>
+

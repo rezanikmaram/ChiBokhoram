@@ -1,0 +1,262 @@
+﻿@using Entities.Entities.Hirman
+@model PortTruckExitPermitArchivePageDto
+@{
+	ViewData["Title"] = "بیجک های صادر شده - حمل یکسره";
+	Layout = "~/Views/Shared/AdminLayout.cshtml";
+	int i = ((Model.List.PageNumber - 1) * Model.List.PageSize) + 1;
+}
+
+<div class="col-lg-12">
+	<div class="card bg-white">
+		<div class="card-header pb-0 px-3">
+			<div class="d-flex justify-content-between align-items-center">
+				<h3 class="title">
+					<i class="icon-frane"></i>
+					<a asp-action="Index"><i class="fa-solid fa-right-to-bracket me-2"></i></a>
+					بیجک های صادر شده - حمل یکسره
+				</h3>
+				<div class="d-flex align-items-center">
+				</div>
+			</div>
+
+		</div>
+
+		<div class="card-body pt-0">
+
+			<div id="data-table_filter" class="dataTables_filter">
+				<div class="card-body pt-0">
+					<form id="formFilter" asp-action="ArchivePage" method="post">
+						<input name="p" id="pageNumber" hidden />
+
+						<div class="form-body">
+							<div class="row gy-4">
+
+								<div class="form-group col-md-2">
+									<label>شماره بیجک:</label>
+									<div class="input-group">
+										<input asp-for="Filter.PermitNumber" type="text" class=" form-control">
+										<span asp-validation-for="Filter.PermitNumber" class="text-danger"></span>
+									</div>
+								</div>
+
+								<div class="col-md-2">
+									<div class="form-group">
+										<label>نوع پلاک</label>
+										<div class="input-group">
+											<select class="form-control select2" asp-for="Filter.CarPlatesTypeEnum">
+												<option value="">همه پلاک ها  </option>
+												<option value="1">پلاک ملی</option>
+												<option value="2">پلاک بندری</option>
+											</select>
+											<span asp-validation-for="Filter.CarPlatesTypeEnum" class="text-danger"></span>
+										</div>
+									</div>
+								</div>
+
+								<div id="CarPlatesTypeMeli" class="@(Model.Filter.CarPlatesTypeEnum == CarPlatesType.Meli ? "": "d-none") form-group col-md-8 justify-content-start d-flex mt-4 ">
+									<div class="col-md-2">
+										<label>ایران</label>
+										<div class="input-group ">
+											<input asp-for="Filter.CarPlatesAreaCode" type="text" class="form-control m-l-10">
+											<span asp-validation-for="Filter.CarPlatesAreaCode" class="text-danger"></span>
+										</div>
+									</div>
+									<div class="col-md-2 mx-3">
+										<label>عدد 3 رقمی</label>
+										<div class="input-group ">
+											<input asp-for="Filter.CarPlatesRight" type="text" class="form-control m-l-10">
+											<span asp-validation-for="Filter.CarPlatesRight" class="text-danger"></span>
+										</div>
+									</div>
+									<div class="col-md-2 mx-3">
+										<div class="form-group ">
+											<label>حرف</label>
+											<div class="input-group">
+												<select class="form-control select2" asp-for="Filter.CarPlatesMiddle">
+													<option value="ع">ع</option>
+													<option value="ک">ک</option>
+													<option value="الف">الف</option>
+													<option value="ب">ب</option>
+													<option value="ت">ت</option>
+													<option value="ج">ج</option>
+													<option value="د">د</option>
+													<option value="س">س</option>
+													<option value="ص">ص</option>
+													<option value="ط">ط</option>
+													<option value="ق">ق</option>
+													<option value="ل">ل</option>
+													<option value="م">م</option>
+													<option value="ن">ن</option>
+													<option value="و">و</option>
+													<option value="ه">ه</option>
+													<option value="ی">ی</option>
+													<option value="پ">پ</option>
+													<option value="گ">گ</option>
+													<option value="ف">ف</option>
+													<option value="ش">ش</option>
+													<option value="ث">ث</option>
+													<option value="ز">ز</option>
+												</select>
+												<span asp-validation-for="Filter.CarPlatesMiddle" class="text-danger"></span>
+											</div>
+										</div>
+									</div>
+									<div class="col-md-2">
+										<label>عدد 2 رقمی</label>
+										<div class="input-group ">
+											<input type="text" asp-for="Filter.CarPlatesLeft" class="form-control">
+											<span asp-validation-for="Filter.CarPlatesLeft" class="text-danger"></span>
+										</div>
+									</div>
+								</div>
+								<div id="CarPlatesTypeBandari" class="col-md-2 @(Model.Filter.CarPlatesTypeEnum == CarPlatesType.Number ? "" : "d-none"  ) ">
+									<div class="form-group m-l-60 ">
+										<label>پلاک بندری</label>
+										<div class="input-group">
+											<input type="text" asp-for="Filter.CarPlates" class="form-control">
+											<span asp-validation-for="Filter.CarPlates" class="text-danger"></span>
+										</div>
+									</div>
+								</div>
+
+
+								<div class="form-group col-md-2">
+									<label> از تاریخ:</label>
+									<div class="input-group">
+
+										<input asp-for="Filter.DateFrom" type="text" class=" form-control" autocomplete="off">
+										<span asp-validation-for="Filter.DateFrom" class="text-danger"></span>
+									</div>
+								</div>
+
+								<div class="form-group col-md-2">
+									<label>تا تاریخ:</label>
+									<div class="input-group">
+										<input asp-for="Filter.DateTo" type="text" class=" form-control" autocomplete="off">
+										<span asp-validation-for="Filter.DateTo" class="text-danger"></span>
+									</div>
+								</div>
+
+								<div class="form-group col-md-2 ">
+									<button style="border-radius:5px; margin-top:30px" class="alert-icon px-3 btn btn-success "
+											type="submit">
+										جستجو
+									</button>
+								</div>
+
+							</div>
+
+						</div>
+					</form>
+				</div>
+			</div>
+
+			<div class="table-responsive">
+				<table class="table table-bordered table-hover table-striped" id="data-table">
+					<thead class="bg-primary">
+						<tr>
+							<td>#</td>
+							<td>تاریخ  </td>
+							<td>بیجک</td>
+							<td>  شماره پلاک </td>
+							<td>وزن به کیلوگرم</td>
+							<td>صادر کننده</td>
+						</tr>
+					</thead>
+					<tbody>
+						@if (Model?.List?.Data?.Any() == true)
+						{
+							foreach (var item in Model.List.Data)
+							{
+								<tr>
+									<td>@(i++)</td>
+									<td dir="ltr">@item.DateExitPermitFa</td>
+									<td>@item.PermitNumber</td>
+									<td>@item.CarPlates</td>
+									<td>@item.SumWeightLoad.ToPrice()</td>
+									<td>@item.UserFullName</td>
+								</tr>
+							}
+						}
+
+					</tbody>
+				</table>
+				<div class="mt-4">
+					<cs-pager cs-paging-pagesize="@Model.List.PageSize"
+							  cs-paging-pagenumber="@Model.List.PageNumber"
+							  cs-paging-totalitems="@Model.List.TotalItems"
+							  cs-paging-maxpageritems="10"
+							  cs-pagenumber-param="p"
+							  cs-show-first-last="true"
+							  cs-suppress-empty-nextprev="true"
+							  cs-suppress-inactive-firstlast="true"
+							  cs-show-numbered="true"
+							  cs-first-page-text="ابتدا"
+							  cs-last-page-text="انتها"
+							  cs-next-page-title="بعدی"
+							  cs-previous-page-title="قبلی"
+							  cs-first-page-title="ابتدا"
+							  cs-last-page-title="انتها"
+							  cs-next-page-text="بعدی"
+							  cs-previous-page-text="قبلی"
+							  cs-pager-li-current-class="page-item active"
+							  cs-pager-li-other-class="page-item"
+							  cs-pager-li-non-active-class="page-item disabled"
+							  cs-pager-link-current-class="page-link"
+							  cs-pager-link-other-class="page-link"
+							  asp-controller="PortTruckExit"
+							  asp-action="ArchivePage">
+					</cs-pager>
+				</div>
+			</div>
+
+
+			<!-- /.table-responsive -->
+		</div>
+		<!-- /.portlet-body -->
+		<!-- /.portlet -->
+	</div>
+
+</div>
+
+
+
+@section script {
+
+	<script>
+		$(document).ready(function () {
+
+			$(".page-link").click(function (event) {
+				event.preventDefault();
+				var hrefValue = $(this).attr("href");
+				$("#pageNumber").val(hrefValue.split("p=")[1]);
+				$("#formFilter").submit();
+			});
+
+			$('.select2').select2();
+
+			kamaDatepicker('Filter_DateFrom', customOptions);
+			kamaDatepicker('Filter_DateTo', customOptions);
+
+			$("#Filter_CarPlatesTypeEnum").change(function () {
+				var selectedValue = $(this).val();
+				 
+				if (selectedValue === "1") {
+					$("#CarPlatesTypeMeli").removeClass("d-none");
+					$("#CarPlatesTypeBandari").addClass("d-none");
+				} else if (selectedValue === "2") {
+					$("#CarPlatesTypeMeli").addClass("d-none");
+					$("#CarPlatesTypeBandari").removeClass("d-none");
+				}
+				else 
+				{
+					$("#CarPlatesTypeMeli").addClass("d-none");
+					$("#CarPlatesTypeBandari").addClass("d-none");
+				}
+			});
+
+
+		});
+
+	</script>
+}

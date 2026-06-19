@@ -1,0 +1,65 @@
+@model SeoWarehouseReceiptOutboundMultiProductPageDto
+@{
+    int i = 1;
+}
+
+<form onsubmit="return submitMultiProductForm(this, event);">
+    <input type="hidden" asp-for="SeoWarehouseReceiptOutboundId" />
+
+    <div class="table-responsive">
+        <table class="table table-sm table-bordered table-hover table-striped cu-table" id="multiProduct-table">
+            <thead class="bg-primary">
+                <tr>
+                    <th><input type="checkbox" id="selectAllmultiProduct" /></th>
+                    <th>ردیف</th>
+                    <th>نام</th>
+                    <th> در دسترس تعداد </th>
+                    <th>وزن ناخالص</th>
+                    <th>وزن خالص</th>
+                    <th>حجم</th>
+                </tr>
+            </thead>
+            <tbody id="multiProductModalContent">
+                @if (Model.SeoWarehouseReceiptProducts != null && Model.SeoWarehouseReceiptProducts.Any())
+                {
+                    foreach (var item in Model.SeoWarehouseReceiptProducts)
+                    {
+                        <tr>
+                            <td class="align-middle bg-light" style="width:30px;"><input type="checkbox" value="@item.SeoWarehouseReceiptProductId" name="SeoWarehouseReceiptProductIds" class="multiProduct-checkbox" /></td>
+                            <td>@(i++)</td>
+                            <td>@item.ProductTitle</td>
+                            <td>@item.RemainingCount.ToPrice()</td>
+                            <td>@item.RemainingWeightGross.ToPrice()</td>
+                            <td>@item.RemainingWeightNet.ToPrice()</td>
+                            <td>@item.RemainingVolume.ToPrice()</td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="7" class="text-center">کالایی یافت نشد</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="modal-footer border-0 mt-3">
+        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">انصراف</button>
+        <button type="submit" class="btn btn-success">ذخیره</button>
+    </div>
+</form>
+
+<script>
+    $(document).ready(function () {
+        $('#generalModal .select2').select2({
+            dropdownParent: $('#generalModal')
+        });
+         
+        $('#selectAllmultiProduct').click(function (e) {
+            var isChecked = this.checked;
+            $('#multiProduct-table tbody tr:visible').find('td input:checkbox.multiProduct-checkbox').prop('checked', isChecked);
+        });
+    });
+</script>

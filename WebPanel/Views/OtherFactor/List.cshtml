@@ -1,0 +1,235 @@
+﻿@model OtherFactorPageDto
+@{
+    ViewData["Title"] = "سایر درآمد ها";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+    int i = ((Model.List?.PageNumber - 1) * Model.List?.PageSize) + 1 ?? 1;
+}
+
+
+<div class="col-lg-12">
+    <div class="card">
+        <div class="card-header pb-2">
+            <div class="d-flex justify-content-between">
+                <h3 class="title">
+                    <i class="icon-frane"></i>
+                    سایر درآمد ها
+                </h3>
+                <div>
+                    <a class="btn btn-primary rounded" id="newOtherFactor"> در آمد جدید</a>
+                </div>
+            </div>
+        </div>
+        <div class="card-body pt-0">
+            <form id="formFilter" asp-action="list" asp-route-p="" method="post">
+                <input name="p" id="pageNumber" hidden />
+                <div class="form-body ">
+                    <div class="row gy-4">
+                        <div class="col-md-3 col-sm-12">
+                            <div class="form-group">
+                                <label>  جستجو:</label>
+                                <div class="input-group">
+                                    <input asp-for="Filter.Search" type="text" class="rounded form-control">
+                                    <span asp-validation-for="Filter.Search" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-2 col-sm-12">
+                            <div class="form-group">
+                                <label>از تاریخ:</label>
+                                <div class="input-group">
+                                    <input asp-for="Filter.DateFrom" type="text" class=" form-control" autocomplete="off">
+                                    <span asp-validation-for="Filter.DateFrom" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-2 col-sm-12">
+                            <div class="form-group">
+                                <label>تا تاریخ:</label>
+                                <div class="input-group">
+                                    <input asp-for="Filter.DateTo" type="text" class=" form-control" autocomplete="off">
+                                    <span asp-validation-for="Filter.DateTo" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-2 col-sm-12 align-content-end">
+                            <div class="form-check form-switch">
+                                <input type="checkbox" asp-for="Filter.RemainderPrice" class="form-check-input" role="switch" />
+                                <label class="form-check-label ms-2" for="Filter.RemainderPrice">فقط داری بدهی </label>
+                                <span asp-validation-for="Filter.RemainderPrice" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="form-group col-md-2 ">
+                            <button style="border-radius:5px; margin-top:30px" class="alert-icon px-3 btn btn-success "
+                                    type="submit">
+                                فیلتر
+                            </button>
+                        </div>
+
+                    </div>
+                    
+                </div>
+            </form>
+
+            <div class="table-responsive mt-4">
+                <table class="table table-sm table-bordered table-hover table-striped" id="data-table">
+                    <thead class="bg-primary">
+                        <tr>
+                            <th class="px-1 text-center">ردیف</th>
+                            <th class="px-1 text-center">شماره</th>
+                            <th class="px-1 text-center">تاریخ   </th>
+                            <th class="px-1 text-center">طرف حساب</th>
+                            <th class="px-1 text-center">سهم شرکت</th>
+                            <th class="px-1 text-center">سهم سازمان</th>
+                            <th class="px-1 text-center">باقی مانده شرکت</th>
+                            <th class="px-1 text-center"> باقی مانده سازمان  </th>
+                            <th class="px-1 text-center">جزئیات</th>
+                            <th class="px-1 text-center">عملیات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                        @foreach (var item in Model.List.Data)
+                        {
+                            <tr>
+                                <td class="align-middle">@(i++)</td>
+                                <td class="align-middle"> @item.NumberFactor </td>
+                                <td class="align-middle">@item.DateFa</td>
+                                <td class="align-middle">@item.InvoiceRecipientCompanyName</td>
+                                <td class="align-middle">@item.PriceCompany.ToPrice()  </td>
+                                <td class="align-middle">@item.PriceOrg.ToPrice()  </td>
+                                <td class="align-middle">@item.RemainderPriceCompany.ToPrice()  </td>
+                                <td class="align-middle">@item.RemainderPriceOrg.ToPrice()  </td>
+
+                                <td class="align-middle">
+                                    <button class="btn btn-success w-100">
+                                        <a class="text-white" asp-action="Details" asp-route-factorId="@item.Id">جزئیات</a>
+                                    </button>
+                                </td>
+
+                                <td class="align-middle px-2 text-center">
+                                    <a id="Deletefactor@(i)" onclick="ShowQAlert(event,'Deletefactor@(i)');" class="btn btn-danger px-2 btn-sm btn-icon curve btn-questions"
+                                       asp-action="Deletefactor" asp-route-factorId="@item.Id">
+                                        <i class="icon-trash fs-6 align-middle fa-flip-horizontal"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+
+                    </tbody>
+                </table>
+
+                <div class="mt-4">
+                    <cs-pager cs-paging-pagesize="@Model.List.PageSize"
+                              cs-paging-pagenumber="@Model.List.PageNumber"
+                              cs-paging-totalitems="@Model.List.TotalItems"
+                              cs-paging-maxpageritems="10"
+                              cs-pagenumber-param="p"
+                              cs-show-first-last="true"
+                              cs-suppress-empty-nextprev="true"
+                              cs-suppress-inactive-firstlast="true"
+                              cs-show-numbered="true"
+                              cs-first-page-text="ابتدا"
+                              cs-last-page-text="انتها"
+                              cs-next-page-title="بعدی"
+                              cs-previous-page-title="قبلی"
+                              cs-first-page-title="ابتدا"
+                              cs-last-page-title="انتها"
+                              cs-next-page-text="بعدی"
+                              cs-previous-page-text="قبلی"
+                              cs-pager-li-current-class="page-item active"
+                              cs-pager-li-other-class="page-item"
+                              cs-pager-li-non-active-class="page-item disabled"
+                              cs-pager-link-current-class="page-link"
+                              cs-pager-link-other-class="page-link"
+                              asp-controller="OtherFactor"
+                              asp-action="List">
+                    </cs-pager>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<div class="modal fade" id="CraeteFactorModal" tabindex="-1"  aria-hidden="true">
+    <div class="modal-dialog ">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" > مشخصات صورتحساب</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form asp-action="CreateOtherFactor" method="post">
+                    <input asp-for="CreateDto.Id" type="hidden" />
+                     <div class="card-body pt-0 px-0">
+                        <div class="row gy-4">
+                            <div class="col-md-12">
+                                <div class="form-group ">
+                                    <label>طرف حساب</label>
+                                    <div class="input-group">
+                                        <select class="form-control select2"
+                                                asp-for="CreateDto.InvoiceRecipientId"
+                                                asp-items="Model.Companies">
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                              
+                            <div class="col-12">
+                                <div class="d-flex justify-content-end" style="margin-top: 28px;">
+                                    <button type="submit" class="btn btn-info d-flex ms-2 align-items-center p-1 px-2">
+                                        <i class="icon-check me-2"></i>
+                                        <p class="m-1">ایجاد صورتحساب</p>
+                                        <div class="paper-ripple"><div class="paper-ripple__background"></div><div class="paper-ripple__waves"></div></div>
+                                    </button>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section script {
+
+
+    <script>
+        $(document).ready(function () {
+            //$('.select2').select2();
+
+            kamaDatepicker('Filter_DateFrom', customOptions);
+            kamaDatepicker('Filter_DateTo', customOptions);
+
+            $("#CreateDto_InvoiceRecipientId").select2({
+                dropdownParent: $('#CraeteFactorModal')
+            });
+        });
+
+
+        $(".page-link").click(function (event) {
+            event.preventDefault(); // غیرفعال کردن عملکرد پیشفرض href
+
+            var hrefValue = $(this).attr("href");
+            $("#pageNumber").val(hrefValue.split("p=")[1]);
+            $("#formFilter").submit();
+        });
+
+        $(document).on('click', '#newOtherFactor', function (event) {
+                event.stopPropagation();
+                $('#CraeteFactorModal').modal('show');
+            })
+
+    </script>
+}
+

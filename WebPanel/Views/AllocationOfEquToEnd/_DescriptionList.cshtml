@@ -1,0 +1,58 @@
+﻿@model List<AllocationEquDescriptionDto>
+
+@{
+    int rowDescription = 1;
+}
+
+<div class="table-responsive">
+    <table class="table table-sm table-bordered table-hover table-striped" id="data-table">
+        <thead>
+            <tr>
+                <th style="width: 5%">ردیف</th>
+
+                <th> شرح </th>
+                <td>تاریخ</td>
+
+                <td>عملیات</td>
+            </tr>
+        </thead>
+        <tbody>
+
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td class="align-middle" >@(rowDescription)</td>
+                    <td class="align-middle"  style="display:none" id="description_id@(rowDescription)">@item.Id </td>
+
+                    <td class="align-middle" id="description_des@(rowDescription)"> @item.Description </td>
+                    <td class="align-middle" id="description_DateFa@(rowDescription)"> @item.DateFa </td>
+
+                    <td class="align-middle">
+                        <a class="btn btn-warning px-2 btn-sm btn-icon curve" onclick="editDescription('@rowDescription');"><i class="icon-pencil fs-6 align-middle"></i></a>
+
+                        <a onclick="DeleteDescription(event, '@item.Id');" class="btn btn-danger px-2 btn-sm btn-icon curve btn-questions">
+                            <i class="icon-trash fs-6 align-middle fa-flip-horizontal"></i>
+                        </a>
+                    </td>
+                    @{
+                        rowDescription++;
+                    }
+                </tr>
+            }
+
+
+        </tbody>
+    </table>
+
+</div>
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,43 @@
+﻿@model List<VoyagelistDto>
+@{
+
+    int i = 1;
+}
+
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th class="px-1 text-center">نام کشتی</th>
+            <th class="px-1 text-center">نام شرکت</th>
+            <th class="px-1 text-center">شماره دریایی</th>
+            <th class="px-1 text-center">شماره سفر</th>
+            <th class="px-1 text-center">عملیات</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td class="align-middle px-2 text-center">@item.ShipShipName</td>
+                <td class="align-middle px-2 text-center">@item.CompanyShippingCompanyName</td>
+                <td class="align-middle px-2 text-center">@item.PmoNumber</td>
+                <td class="align-middle px-2 text-center">@item.VoyageNumber</td>
+                <td class="align-middle px-2 text-center"><button onclick="setActiveVoyageForUser('@ViewBag.personelId','@item.Id')" class="btn btn-success" type="button">انتخاب به عنوان سفر فعال</button></td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<form id="setActiveVoyageForm" asp-action="SetActiveVoyage" method="post">
+    <input id="activeVoyageId"  type="hidden" name="voyageId" value="" />
+    <input id="personelId" type="hidden" name="personelId" value="" />
+</form>
+
+<script>
+    function setActiveVoyageForUser(personelId, voyageId) {
+        $('#activeVoyageId').val(voyageId);
+        $('#personelId').val(personelId);
+        $('#setActiveVoyageForm').submit();
+    }
+</script>

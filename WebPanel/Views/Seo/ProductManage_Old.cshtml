@@ -1,0 +1,196 @@
+﻿@model ProductManageDto
+
+
+@{
+    ViewData["Title"] = "مدیریت کالاها";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+    int i = 1;
+}
+<div class="col-md-12">
+    <div class="p-3 bg-white rounded-3 border-0">
+        <div class="d-flex justify-content-between">
+            <div>
+                <span>
+                    <i class="icon-frane"></i>
+                    <a asp-controller="Seo" asp-action="SeoAccessPage" asp-route-seoId="@Model.SeoInfo.Id"><i class="fa-solid fa-right-to-bracket align-middle me-2"></i></a>
+                    مدیریت کالاها
+                </span>
+                <span class="label label-primary px-2 mx-2">@Model.SeoInfo.ShipShipName</span>
+                <span class="label label-info px-2">@Model.SeoInfo.TransportTypeTitle</span>
+            </div>
+        </div>
+
+        <!-- /.breadcrumb-left -->
+    </div><!-- /.breadcrumb-box -->
+</div>
+<div class="d-flex justify-content-between mt-4">
+    <div class="col-md-12">
+        <div class="card rounded-3 min-height-600">
+            <div class="card-header">
+                <div class="d-flex justify-content-between d-flex ">
+                    <h3 class="title m-0">
+                        <i class="icon-speech"></i>
+                        افزودن کالا
+                    </h3>
+
+                </div><!-- /.portlet-title -->
+
+            </div><!-- /.portlet-heading -->
+            <div class="card-body py-0">
+
+                <form asp-action="AddProductToSeo" method="post">
+                    <input asp-for="SeoInfo.Id" name="addProductToSeo.SeoId" type="hidden" />
+                    <div class="form-body mb-5 row">
+
+                        <div class="form-group col-md-4 ">
+                            <label>کالا</label>
+                            <div class="input-group">
+                                <select class="form-control border select2" style="width:100%!important;"
+                                        asp-for="AddProductToSeo.ProductId">
+                                    @foreach (var product in Model.Products)
+                                    {
+                                        <option value="@product.Id" data-type="@product.TrafficType">@product.Title</option>
+                                    }
+                                </select>
+                                <span asp-validation-for="AddProductToSeo.ProductId" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="form-group col-md-4 ">
+                            <label>بسته بندی کالا</label>
+                            <div class="input-group">
+                                <select class="form-control border select2" style="width:100%!important;"
+                                        asp-for="AddProductToSeo.ProductPackingId"
+                                        asp-items="Model.ProductPackaging">
+                                </select>
+                                <span asp-validation-for="AddProductToSeo.ProductPackingId" class="text-danger"></span>
+                            </div>
+                        </div>
+
+
+                        <div class="col-md-2">
+                            <label> تعداد</label>
+                            <div class="input-group">
+                                <input asp-for="AddProductToSeo.Count" min="1" max="@int.MaxValue" type="number" class="form-control w-100 ">
+                                <span asp-validation-for="AddProductToSeo.Count" class="w-100 text-danger"></span>
+                            </div>
+                        </div>
+
+
+                        <div class="col-md-2">
+                            <label> وزن خالص</label>
+                            <div class="input-group">
+                                <input asp-for="AddProductToSeo.WeightNet" min="0" max="@int.MaxValue" type="number" class="form-control w-100 ">
+                                <span asp-validation-for="AddProductToSeo.WeightNet" class="w-100 text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-md-2">
+                            <label> وزن ناخالص</label>
+                            <div class="input-group">
+                                <input asp-for="AddProductToSeo.WeightGross" min="0" max="@int.MaxValue" type="number" class="form-control w-100 ">
+                                <span asp-validation-for="AddProductToSeo.WeightGross" class="w-100 text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-md-2">
+                            <label> حجم  </label>
+                            <div class="input-group">
+                                <input asp-for="AddProductToSeo.Volume" min="0" max="@int.MaxValue" type="number" class="form-control w-100 ">
+                                <span asp-validation-for="AddProductToSeo.Volume" class="w-100 text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div id="continerInputId" class="d-none">
+                            <div class="col-md-6  mt-3">
+                                <label style="">وضعیت کانتینر</label>
+                                <div class="input-group mt-2 activeor">
+                                    <label>
+                                        <input type="checkbox" class="normal"
+                                               name="IsFree"
+                                               value="true"
+                                        @(Model.AddProductToSeo.IsFree == true ? "checked" : "")>
+                                        کانتینر خالی است؟
+                                    </label>
+
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="col-md-2 ">
+                            <div style="margin-top:32px;" class="d-flex justify-items-start">
+                                <button class="alert-icon btn btn-success rounded label" type="submit"><p class="px-2">افزودن</p></button>
+                            </div>
+                        </div>
+
+                    </div>
+                </form>
+                <!-- /.tab-content -->
+
+            </div><!-- /.portlet-body -->
+
+        </div>
+
+        <div class=" card rounded-3 min-height-600 ">
+            <div class="card-body mt-4">
+                <table class="table table-bordered ">
+                    <thead class="bg-primary">
+                        <tr>
+                            <th style="width: 5%"> ردیف </th>
+
+                            <th>نام کالا - دسته بندی</th>
+                            <th>نوع </th>
+                            <th>بسته بندی </th>
+
+                            <th>تعداد </th>
+
+                            <th>وزن خالص </th>
+                            <th>وزن ناخالص </th>
+                            <th>حجم </th>
+
+                            <th>عملیات </th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @foreach (var item in Model.SelectedProduct)
+                        {
+                            <tr>
+                                <td class="align-middle">@(i++)</td>
+                                <td>@item.Product.ProductName - @item.Product?.ProductCategory?.Name</td>
+                                <td>@item.Product?.ProductCategory?.TrafficTypeTitle</td>
+                                <td>@item.ProductPacking.Name</td>
+
+                                <td>@item.CountTitle</td>
+
+                                <td>@item.WeightNetTitle</td>
+                                <td>@item.WeightGrossTitle</td>
+                                <td>@item.VolumeTitle</td>
+
+                                <td class="align-middle px-1 text-center">
+                                    @* <a class="btn btn-warning px-2 btn-sm btn-icon curve" onclick="editBaskool('@item.Id');"><i class="icon-pencil fs-6 align-middle"></i></a> *@
+                                    <a id="DeleteProduct@(i)" onclick="ShowQAlert(event,'DeleteProduct@(i)');" class="btn btn-danger px-2 btn-sm btn-icon curve btn-questions"
+                                       asp-action="DeleteProductFromSeo" asp-route-seoProductId="@item.Id">
+                                        <i class="icon-trash align-middle fs-6 fa-flip-horizontal"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+@section script {
+    <script>
+        $(document).ready(function () {
+            $("#AddProductToSeo_ProductPackingId").select2().trigger('change');
+            $("#AddProductToSeo_ProductId").select2().trigger('change');
+        });
+    </script>
+}
+

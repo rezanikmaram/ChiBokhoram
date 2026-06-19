@@ -1,0 +1,99 @@
+﻿@model CreateCompanyDto
+
+@{
+    ViewData["Title"] = "خدمات شرکت";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+
+    string GetDisplayName(Enum enumValue)
+    {
+        var field = enumValue.GetType().GetField(enumValue.ToString());
+        var attribute = (System.ComponentModel.DataAnnotations.DisplayAttribute)Attribute.GetCustomAttribute(
+            field,
+            typeof(System.ComponentModel.DataAnnotations.DisplayAttribute)
+        );
+        return attribute?.Name ?? enumValue.ToString();
+    }
+
+}
+<div class="row">
+    <div class="card">
+        <div class="card-header pb-0 px-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <h3 class="title">
+                    <i class="icon-frane"></i>
+                    <a asp-action="Index"><i class="fa-solid fa-right-to-bracket me-2"></i></a>
+                    خدمات شرکت
+                </h3>
+                @*  <div class="d-flex align-items-center">
+
+                </div> *@
+            </div>
+            <div class="row">
+            </div>
+        </div>
+        <div class="card-body pt-0 px-2">
+            <div class="bg-primary rounded-3 mt-4 p-3">
+                <div class="row gy-3 align-items-center">
+                    @* <div class="col-2">
+                    <img src="~/assets/images/logo/abi-dark.png" alt="" class="img-fluid h-55px">
+                    </div> *@
+                    <div class="col-1">
+                    </div>
+                    <div class="col-3">
+                        <p class="fs-6 fw-bold"> نام شرکت: @Model.CompanyName </p>
+                    </div>
+                    <div class="col-3">
+                        <p class="fs-6 fw-bold"> شناسه ملی: @Model.MeliCode </p>
+                    </div>
+                    <div class="col-3">
+                        <p class="fs-6 fw-bold"> کد اقتصادی: @Model.EconomicCode </p>
+                    </div>
+                    <div class="col-2">
+                        <p class="fs-6 fw-bold"> نوع مشتری: @GetDisplayName(Model.CustomerType) </p>
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-4 gy-3">
+                <div class="col-md-4">
+                    <div class="bg-light-dark p-3 rounded-3 h-100">
+                        <h3 class="text-dark mb-4 mt-2"> <i class="fa-solid fa-gears me-2 align-middle"></i>  خدمات حمل و نقل  </h3>
+                        <a asp-controller="Transportation" asp-action="CreateTruck" asp-route-companyId="@Model.Id" class="btn btn-light w-100 btn-air-light my-2 text-start fs-6 py-2"> <i class="fa-solid fa-gear align-middle mx-2"></i>  افزودن کامیون  </a>
+                        <a asp-controller="Transportation" asp-action="CreateDriver" asp-route-companyId="@Model.Id" class="btn btn-light w-100 btn-air-light my-2 text-start fs-6 py-2"> <i class="fa-solid fa-gear align-middle mx-2"></i>  افزودن راننده  </a>
+                        <a asp-controller="Transportation" asp-action="Truks" asp-route-companyId="@Model.Id" class="btn btn-light w-100 btn-air-light my-2 text-start fs-6 py-2"> <i class="fa-solid fa-gear align-middle mx-2"></i>  مدیریت کامیون ها  </a>
+                        <a asp-controller="Transportation" asp-action="Drivers" asp-route-companyId="@Model.Id" class="btn btn-light w-100 btn-air-light my-2 text-start fs-6 py-2"> <i class="fa-solid fa-gear align-middle mx-2"></i>  مدیریت راننده ها  </a>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="bg-light-dark p-3 rounded-3 h-100">
+                        <h3 class="text-dark mb-4 mt-2"><i class="fa-solid fa-gears align-middle me-2"></i> خدمات انبار داری </h3>
+                        <a asp-controller="Warehouse" asp-action="GetWarehouseKeeper" asp-route-companyId="@Model.Id" class="btn btn-light w-100 btn-air-light my-2 text-start fs-6 py-2"><i class="fa-solid fa-gear align-middle mx-2"></i> انبار دار ها </a>
+                        <a asp-controller="Warehouse" asp-action="Site" asp-route-companyId="@Model.Id" class="btn btn-light w-100 btn-air-light my-2 text-start fs-6 py-2"><i class="fa-solid fa-gear align-middle mx-2"></i> مدیریت سایت  ها </a>
+                        <a asp-controller="Warehouse" asp-action="Warehouses" asp-route-companyId="@Model.Id" class="btn btn-light w-100 btn-air-light my-2 text-start fs-6 py-2"><i class="fa-solid fa-gear align-middle mx-2"></i> مدیریت انبار ها </a>
+                        <a asp-controller="Warehouse" asp-action="CreateWarehouse" asp-route-companyId="@Model.Id" class="btn btn-light w-100 btn-air-light my-2 text-start fs-6 py-2"><i class="fa-solid fa-gear align-middle mx-2"></i> انبار جدید </a>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="bg-light-dark p-3 rounded-3 h-100">
+                        <h3 class="text-dark mb-4 mt-2"><i class="fa-solid fa-gears me-2 align-middle"></i> خدمات بارشمار </h3>
+                        <a asp-controller="Company" asp-action="GetLoadCunterUser" asp-route-companyId="@Model.Id" class="btn btn-light w-100 btn-air-light my-2 text-start fs-6 py-2"><i class="fa-solid fa-gear align-middle mx-2"></i> بارشمار ها </a>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="bg-light-dark p-3 rounded-3 h-100">
+                        <h3 class="text-dark mb-4 mt-2"><i class="fa-solid fa-gears align-middle me-2"></i> خدمات تجهیراتی </h3>
+                        <a asp-controller="Equipment" asp-action="EquipmentCompany" asp-route-companyId="@Model.Id" class="btn btn-light w-100 btn-air-light my-2 text-start fs-6 py-2"><i class="fa-solid fa-gear align-middle mx-2"></i> مدیریت تجهیزات </a>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="bg-light-dark p-3 rounded-3 h-100">
+                        <h3 class="text-dark mb-4 mt-2"><i class="fa-solid fa-gears align-middle me-2"></i> خدمات صاحب کالا </h3>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+

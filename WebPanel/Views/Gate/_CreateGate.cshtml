@@ -1,0 +1,100 @@
+﻿@model CreateGateDto
+
+
+<form asp-action="CreateGate" method="post">
+    <input asp-for="Id" type="hidden" />
+    <div class="card-body pt-0">
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="form-body">
+
+                    <div class="justify-content-between row gy-4">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>نام دروازه</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control rounded" asp-for="Name">
+                                    <span asp-validation-for="Name" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-6">
+                            <div class="form-group ">
+                                <label>نوع دروازه</label>
+                                <div class="input-group">
+                                    <select class="form-control rounded select2 generalmodal" style=" cursor: pointer;" asp-for="Type" asp-items="Html.GetEnumSelectList<GateType>()">
+                                    </select>
+                                    <span asp-validation-for="Type" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-6">
+                            <div class="form-group ">
+                                <label>کاربری دروازه</label>
+                                <div class="input-group">
+                                    <select class="form-control rounded select2 generalmodal" style=" cursor: pointer;" asp-for="CargoType" asp-items="Html.GetEnumSelectList<CargoType>()">
+                                        <option value="">بدون انتخاب</option>
+                                    </select>
+                                    <span asp-validation-for="CargoType" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>کد مربوط به دستگاه FPN</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control rounded" asp-for="CodeNameForFpn">
+                                    <span asp-validation-for="CodeNameForFpn" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="col-md-6">
+                            <label> طول موقعیت جغرافیایی    </label>
+                            <div class="input-group ">
+                                <input asp-for="LonX" class="form-control " placeholder="X">
+                                <span asp-validation-for="LonX" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label> عرض موقعیت جغرافیایی    </label>
+                            <div class="input-group ">
+                                <input asp-for="LatY" class="form-control" placeholder="Y">
+                                <span asp-validation-for="LatY" class="text-danger"></span>
+                            </div>
+                        </div>
+
+
+                    </div>
+
+
+
+
+                    <div class="modal-footer border-0 px-0">
+                        <button type="submit" class="btn btn-success btn-round">ذخیره</button>
+                        <button type="button" class="btn btn-danger btn-round" data-bs-dismiss="modal">بازگشت</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</form>
+
+
+<script src="~/assets/js/validation/jquery.validate.min.js"></script>
+<script src="~/assets/js/validation/jquery.validate.unobtrusive.min.js"></script>
+<script>
+
+    $(document).ready(function () {
+        $('select[class*="generalmodal"].select2').select2({
+            dropdownParent: $('#generalmodal')
+        });
+
+    });
+</script>

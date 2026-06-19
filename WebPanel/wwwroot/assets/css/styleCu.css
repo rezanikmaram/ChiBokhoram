@@ -1,0 +1,61 @@
+.safar-card{
+    transition: 0.3s;
+}
+.safar-card:hover{
+    background-color: #4948e1 !important;
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 50px 100px -20px, rgba(0, 0, 0, 0.3) 0px 30px 60px -30px !important;
+    transform: translateY(-3px);
+}
+.min-h-177px{
+    min-height: 177px !important;
+}
+.min-h-155px{
+    min-height: 155px !important;
+}
+/* Add to your CSS file */
+input[type="text"][inputmode="decimal"] {
+    text-align: left;
+    direction: ltr;
+}
+
+/* Optional: Show a clear indication of decimal input */
+.price-input-container {
+    position: relative;
+}
+
+.price-input-container::after {
+    content: attr(data-currency);
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #666;
+}
+.select2-container--open {
+    z-index: 9999999; /* Higher than Bootstrap modal's z-index (usually 1050-1060) */
+}
+
+.accordion-button::after{
+    margin-right: auto !important;
+    margin-left: unset !important;
+}
+
+@media screen and (max-width: 1500px) {
+    .fs-11px {
+        font-size: 11px !important;
+    }
+}
+
+@media screen and (min-width: 1800px) {
+    .responsive-accordion-btn {
+        display: flex !important;
+    }
+    .responsive-mt3{
+        margin-top: 0px !important;
+    }
+}
+.cu-dropdown-content{
+    right: unset !important;
+    left: 60px !important;
+    top: -5px !important;
+}

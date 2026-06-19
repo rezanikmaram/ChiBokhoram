@@ -1,0 +1,128 @@
+﻿@model AllocationEquMovingDoorPageDto
+
+
+
+<div class="col-lg-12">
+    <div class="card">
+        <div class="card-header">
+            <div class="d-flex justify-content-between">
+                
+                    <h3 class="title">
+                        <i class="icon-frane align-middle"></i>    تعداد جابجایی درب انبار
+                    </h3>
+
+                    <div>
+                        <a class="btn btn-primary rounded"
+                           onclick="movingDoorShowModal();">
+                            <i class="icon-plus align-middle"></i>
+                            مقدار جدید
+                        </a>
+
+
+                        <!-- /.portlet-title -->
+                        <div class="buttons-box">
+
+                            <i class="icon-size-fullscreen"></i>
+                            <div class="paper-ripple">
+                                <div class="paper-ripple__background"></div>
+                                <div class="paper-ripple__waves"></div>
+                            </div>
+                        </div>
+                    </div>
+                <!-- /.buttons-box -->
+            </div>
+            <!-- /.portlet-heading -->
+            <!-- /.portlet-body -->
+        </div>
+        <div class="card-body pt-0">
+            <div id="MovingDoorListId">
+                <partial name="_MovingDoorList" model="Model.List" />
+            </div>
+
+        </div>
+        <!-- /.portlet -->
+    </div>
+</div>
+
+
+
+<div id="MovingDoormodal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">  تعداد جابجایی درب انبار</h4>
+                <button type="button" class="close btn-close rounded border" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="modalbody">
+
+                <div class="card-body pt-0">
+
+                    <div class="form-body">
+
+
+                        <input asp-for="CreateMovingDoorDto.Id" hidden />
+                        <input asp-for="CreateMovingDoorDto.AllocationEquipmentId" hidden />
+                        <div class="row">
+
+                            <div class="col-sm-12">
+                                <div class="form-group">
+                                    <label>نوع </label>
+                                    <div class="input-group col-sm-6" >
+                                        <select class="form-control select2 " asp-for="CreateMovingDoorDto.SeoEquipmentId"
+                                                asp-items="Model.EquipmentsTitle" style="width:100%!important;">
+                                        </select>
+
+                                       
+                                       
+                                    </div>
+                                    <span asp-validation-for="CreateMovingDoorDto.SeoEquipmentId"
+                                          class="text-danger"></span>
+
+                                </div>
+                            </div>
+
+                            <div class="col-sm-6 my-3">
+                                <div class="form-group  ">
+                                    <label>تعداد جابجایی </label>
+                                    <div class="input-group">
+                                        <input type="number" asp-for="CreateMovingDoorDto.CountMoving" min="0" class="form-control">
+                                    </div>
+                                    <span asp-validation-for="CreateMovingDoorDto.CountMoving" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-sm-6 my-3">
+                                <div class="form-group  ">
+                                    <label>تاریخ</label>
+                                    <div class="input-group">
+                                        <input type="text" asp-for="CreateMovingDoorDto.DateFa" required autocomplete="off" class="form-control">
+                                    </div>
+                                    <span asp-validation-for="CreateMovingDoorDto.DateFa" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                        </div>
+
+
+                        <div class="modal-footer px-0 border-0">
+                            <a onclick="addOrUpdateMovingDoor()" class="btn btn-success btn-round">  ثبت</a>
+                            <button type="button" class="btn btn-danger btn-round" data-bs-dismiss="modal">بازگشت</button>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,142 @@
+﻿@model CreateWaterfrontDto
+
+<link href="~/assets/plugins/select2/dist/css/select2.min.css" rel="stylesheet">
+
+<form asp-action="CreateWaterfront" method="post">
+    <input asp-for="Id" type="hidden" />
+
+    <div class="card-body pt-0">
+
+        <div class="form-body">
+            <div class="row gy-3">
+
+                <div class="col-sm-6">
+                    <div class="form-group  ">
+                        <label>نام اسکله</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control rounded" asp-for="WaterfrontName" required>
+                            <span asp-validation-for="WaterfrontName" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label>شماره اسکله</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control rounded" asp-for="WaterfrontNumber">
+                            <span asp-validation-for="WaterfrontNumber" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-sm-6">
+                    <div class="form-group  ">
+                        <label>طول جغرافیایی</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control rounded" asp-for="LonX" required placeholder="X">
+                            <span asp-validation-for="LonX" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label>عرض جغرافیایی</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control rounded" asp-for="LatY" placeholder="Y">
+                            <span asp-validation-for="LatY" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>  
+
+                <div class="col-sm-6">
+                    <div class="form-group ">
+                        <label>نوع اسکله</label>
+                        <div class="input-group">
+                            <select class="form-control rounded" style=" cursor: pointer;" asp-for="WaterfrontKind" asp-items="Html.GetEnumSelectList<WaterfrontType>()">
+                            </select>
+                            <span asp-validation-for="WaterfrontKind" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="col-sm-6">
+                    <div class="form-group ">
+                        <label>نوع مدیریت</label>
+                        <div class="input-group">
+                            <select class="form-control rounded" style=" cursor: pointer;" asp-for="WaterFrontManagementType" asp-items="Html.GetEnumSelectList<WaterFrontManagementType>()">
+                            <option value="">بدون انتخاب</option>
+                            </select>
+                            <span asp-validation-for="WaterFrontManagementType" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label>حداکثر تناژ ورودی کشتی</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control rounded" asp-for="MaximumInputTonnage">
+                            <span asp-validation-for="MaximumInputTonnage" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label>حداکثر آبخور مجاز</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control rounded" asp-for="MaximumInputWaterIntake">
+                            <span asp-validation-for="MaximumInputWaterIntake" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label>عمق</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control rounded" asp-for="Depth">
+                            <span asp-validation-for="Depth" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                @*  <div class="col-sm-12">
+                <div class="form-group">
+                <label>آپلود فایل</label>
+                <div style="flex-wrap:nowrap" class="input-group round">
+                <input type="text" class="form-control file-input" placeholder="برای آپلود کلیک کنید">
+                <input type="file" class="form-control">
+                <span class="input-group-btn input-group-sm">
+                <button type="button" class="btn btn-info">
+
+                آپلود فایل
+                <div class="paper-ripple"><div class="paper-ripple__background"></div><div class="paper-ripple__waves"></div></div>
+                </button>
+                </span>
+                </div>
+                </div>
+                </div> *@
+
+            </div>
+
+            <div class="modal-footer border-0 px-0 pb-0">
+                <button type="submit" class="btn btn-success btn-round">ذخیره</button>
+                <button type="button" class="btn btn-danger btn-round" data-bs-dismiss="modal">بازگشت</button>
+            </div>
+        </div>
+
+
+
+
+    </div>
+
+</form>
+
+<script src="~/assets/js/validation/jquery.validate.min.js"></script>
+<script src="~/assets/js/validation/jquery.validate.unobtrusive.min.js"></script>
+
+

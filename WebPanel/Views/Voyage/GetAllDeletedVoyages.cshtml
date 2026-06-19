@@ -1,0 +1,78 @@
+@model List<DeletedVoyageDto>
+@{
+    ViewData["Title"] = "سفرهای حذف شده";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+<div class="row">
+    <div class="card">
+        <div class="card-header py-3 d-flex justify-content-between align-items-center">
+            <h3 class="title mb-0">
+                <i class="icon-trash fa-flip-horizontal me-2"></i> سفرهای حذف شده
+            </h3>
+            <div class="d-flex gap-2">
+                <a asp-action="CascadeSoftDeleteDeletedVoyages" class="btn btn-warning" onclick="return confirm('آیا از بروزرسانی (سافت دلیت) تمام سفرهای حذف شده مطمئن هستید؟')">
+                    <i class="fa-solid fa-rotate me-2"></i> سافت دلیت زیرمجموعه‌ها
+                </a>
+                <a asp-action="CascadeHardDeleteDeletedVoyages" class="btn btn-danger" onclick="return confirm('⚠️ هشدار: تمام اطلاعات و فایل‌های این سفرها برای همیشه حذف می‌شوند.\nآیا مطمئن هستید؟')">
+                    <i class="fa-solid fa-trash-can me-2"></i> حذف کامل (به همراه فایل‌ها)
+                </a>
+                <a asp-action="Index" class="btn btn-info ms-2">
+                    <i class="fa-solid fa-arrow-right me-2"></i> بازگشت
+                </a>
+            </div>
+        </div>
+        @if (Model != null && Model.Any())
+        {
+            <div class="card-body px-2">
+                <table class="table table-striped table-bordered">
+                    <thead>
+                        <tr>
+                            <th>ردیف</th>
+                            <th>اطلاعات سفر</th>
+                            <th>نوع عملیات</th>
+                            <th>اسکله</th>
+                            <th>تاریخ حذف</th>
+                            <th>بارنامه‌ها</th>
+                            <th>اسناد</th>
+                            <th>کاربران</th>
+                            <th>تالی‌ها</th>
+                            <th>صورتحساب‌ها</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            int row = 1;
+                        }
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>@(row++)</td>
+                                <td>
+                                    <strong>@item.Title</strong><br />
+                                    <small class="text-muted">@item.CompanyShippingCompanyName</small>
+                                </td>
+                                <td>@item.TransportTypeTitle</td>
+                                <td>@item.WaterfrontWaterfrontName</td>
+                                <td>@item.DeletedDateFa</td>
+                                <td class="text-center">@item.RelatedSeoCount.ToPrice()</td>
+                                <td class="text-center">@item.RelatedDocumentCount.ToPrice()</td>
+                                <td class="text-center">@item.RelatedUserCount.ToPrice()</td>
+                                <td class="text-center">@item.RelatedTaliCount.ToPrice()</td>
+                                <td class="text-center">@item.RelatedFactorCount.ToPrice()</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="card-body">
+                <div class="alert alert-info text-center">
+                    <i class="fa-solid fa-info-circle me-2"></i> هیچ سفر حذف شده‌ای یافت نشد
+                </div>
+            </div>
+        }
+    </div>
+</div>

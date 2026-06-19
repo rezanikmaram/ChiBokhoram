@@ -1,0 +1,274 @@
+@model PersonelPageDto
+@{
+	ViewData["Title"] = "کاربران موبایل";
+	Layout = "~/Views/Shared/AdminLayout.cshtml";
+	int i = ((Model.Personels.PageNumber - 1) * Model.Personels.PageSize) + 1;
+}
+
+
+@section style {
+	<style>
+		.modal-max-height {
+			height: 700px;
+		}
+	</style>
+}
+
+
+<div class="col-lg-12">
+	<div class="card">
+		<div class="card-header">
+			<div class="d-flex justify-content-between">
+
+				<h3 class="title">
+					<i class="icon-frane"></i> کاربران موبایل
+				</h3>
+
+				<div>
+					<a style="border-radius:5px; margin:0px 10px"
+					   class="btn btn-primary"
+					   onclick="createPersonel();">  +   کاربر جدید</a>
+				</div>
+			</div>
+			<!-- /.portlet-heading -->
+			<!-- /.portlet-body -->
+		</div>
+		<div class="card-body pt-0">
+
+			<form id="formFilter" asp-action="UserList" asp-route-p="" method="post">
+				<input name="p" id="pageNumber" hidden />
+				<div class="form-body ">
+					<div class="row  ">
+						<div class="form-group col-md-3">
+							<label>نوع کاربر</label>
+							<div class="input-group">
+								<select class="form-control select2" asp-for="Filter.UserType"
+										asp-items="Html.GetEnumSelectList<UserMobileType>().OrderBy(x=> x.Text)"
+										style="width:100%!important;">
+									<option value="">همه کاربران</option>
+								</select>
+							</div>
+						</div>
+
+						<div class="form-group col-md-4">
+							<label>جستجو</label>
+							<div class="input-group">
+								<input type="text" asp-for="Filter.Search" class="form-control"
+									   placeholder="نام و نام خانوادگی/ تلفن/ کدملی/ نام شرکت" />
+							</div>
+						</div>
+
+						<div class="form-group col-md-2 d-flex justify-content-center flex-wrap align-content-center">
+							<button style="border-radius:5px; margin-top:30px"
+									class="alert-icon btn btn-success "
+									type="submit">
+								<p class="px-3"> جستجو</p>
+							</button>
+						</div>
+					</div>
+
+				</div>
+			</form>
+
+			<div class="table-responsive mt-5">
+				<table class="table table-bordered table-hover table-striped" id="data-table">
+					<thead class="bg-primary">
+						<tr>
+							<th>ردیف</th>
+							<th>کاربر</th>
+							<th>نوع</th>
+							<th>تلفن</th>
+							<th>کد ملی</th>
+							<th>شرکت</th>
+							<th>شماره قرارداد</th>
+							<th>سفر فعال</th>
+							<th>وضعیت</th>
+							<td>عملیات</td>
+						</tr>
+					</thead>
+					<tbody>
+
+
+						@foreach (var item in Model.Personels.Data)
+						{
+							<tr>
+								<td class="align-middle">@(i++)</td>
+								<td class="align-middle">@item.FirstName @item.LastName</td>
+								<td class="align-middle">@item.Type.ToDisplay()</td>
+								<td class="align-middle">@item.Phone</td>
+								<td class="align-middle">@item.MeliCode</td>
+								<td class="align-middle">@item.CompanyName</td>
+								<td class="align-middle">@item.ContractNumber</td>
+								<td class="align-middle">@item.ActiveVoyageName</td>
+								<td class="align-middle">
+									<span class="label rounded px-2 py-1 label-@(item.IsActive?"success":"danger")">@(item.IsActive ? "فعال" : "غیر فعال")</span>
+								</td>
+								<td class="align-middle">
+									<a class="btn px-2 btn-warning btn-sm btn-icon curve" onclick="editPersonel('@item.Id');"><i class="icon-pencil align-middle"></i></a>
+
+									<a id="ChangePass@(i)" onclick="ShowQAlert(event,'ChangePass@(i)', 'بازنشانی رمز عبور ', 'رمز عبور کاربر به کد ملی آن بازنشانی شود؟');" class="btn px-2 btn-danger btn-sm btn-icon curve btn-questions" asp-controller="Personel" asp-action="ChangePass" asp-route-personId="@item.Id"><i class="fa fa-key align-middle"></i></a>
+
+									<a class="btn px-2 btn-info btn-sm btn-icon curve btn-questions" onclick="showPickVoyageModal('@item.Id');"> <i class="fas fa-anchor"></i> </a>
+									@*<a id="DeleteCompany@(i)" onclick="ShowQAlert(event,'DeleteCompany@(i)');" class="btn btn-danger btn-icon curve btn-questions" asp-action="DeleteCompany" asp-route-companyId="@item.Id"><i class="icon-trash fa-flip-horizontal"></i></a>*@
+								</td>
+							</tr>
+
+						}
+
+
+
+					</tbody>
+				</table>
+				<div class="mt-4">
+					<cs-pager cs-paging-pagesize="@Model.Personels.PageSize"
+							  cs-paging-pagenumber="@Model.Personels.PageNumber"
+							  cs-paging-totalitems="@Model.Personels.TotalItems"
+							  cs-paging-maxpageritems="10"
+							  cs-pagenumber-param="p"
+							  cs-show-first-last="true"
+							  cs-suppress-empty-nextprev="true"
+							  cs-suppress-inactive-firstlast="true"
+							  cs-show-numbered="true"
+							  cs-first-page-text="ابتدا"
+							  cs-last-page-text="انتها"
+							  cs-next-page-title="بعدی"
+							  cs-previous-page-title="قبلی"
+							  cs-first-page-title="ابتدا"
+							  cs-last-page-title="انتها"
+							  cs-next-page-text="بعدی"
+							  cs-previous-page-text="قبلی"
+							  cs-pager-li-current-class="page-item active"
+							  cs-pager-li-other-class="page-item"
+							  cs-pager-li-non-active-class="page-item disabled"
+							  cs-pager-link-current-class="page-link"
+							  cs-pager-link-other-class="page-link"
+							  asp-controller="Personel"
+							  asp-action="UserList">
+					</cs-pager>
+				</div>
+
+			</div>
+			<!-- /.table-responsive -->
+		</div>
+		<!-- /.portlet -->
+	</div>
+</div>
+
+
+<div id="generalmodal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" tabindex="-1">
+	<div class="modal-dialog modal-dialog-centered">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h4 class="modal-title">ثبت کاربر </h4>
+				<button type="button" class="close btn-close rounded border" data-bs-dismiss="modal"></button>
+			</div>
+			<div class="modal-body" id="modalbody">
+				<partial name="_CreatePerson" model="Model.CreatePeronelPageDto" />
+			</div>
+		</div>
+	</div>
+</div>
+
+
+<div id="voyageModal" class="modal fade modal-max-height" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" tabindex="-1">
+	<div class="modal-dialog modal-dialog-centered modal-lg">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h4 class="modal-title">تخصیص سفر</h4>
+				<button type="button" class="close btn-close rounded border" data-bs-dismiss="modal"></button>
+			</div>
+			<div class="modal-body" id="voyageModalbody">
+				
+			</div>
+		</div>
+	</div>
+</div>
+
+
+@section script {
+
+
+
+	<script>
+
+		$(document).ready(function () {
+
+			$("#CreatePeronelDto_CompanyId").select2({
+				dropdownParent: $('#generalmodal')
+			});
+
+			$("#CreatePeronelDto_SeoId").select2({
+				dropdownParent: $('#generalmodal')
+			});
+
+			$("#Filter_UserType").select2();
+
+		});
+
+
+		function createPersonel() {
+			$("#CreatePeronelDto_FirstName").val('');
+			$("#CreatePeronelDto_LastName").val('');
+			$("#CreatePeronelDto_Id").val('');
+			$("#CreatePeronelDto_Phone").val('');
+			$("#CreatePeronelDto_MeliCode").val('');
+			$("#CreatePeronelDto_CompanyId").val('');
+			$("#CreatePeronelDto_Type").val('');
+			$("#CreatePeronelDto_ContractId").val('');
+			$("#CreatePeronelDto_IsActive").prop('checked', true);
+
+			 $("#CreatePeronelDto_CompanyId").select2({
+				dropdownParent: $('#generalmodal')
+			});
+
+			$("#CreatePeronelDto_Type").select2({
+				dropdownParent: $('#generalmodal')
+			});
+
+			$("#CreatePeronelDto_ContractId").select2({
+				dropdownParent: $('#generalmodal')
+			});
+
+			$("#CreatePeronelDto_CompanyId").trigger('change');
+			$("#CreatePeronelDto_Type").trigger('change');
+			$("#CreatePeronelDto_ContractId").trigger('change');
+
+			$("#generalmodal").modal('show');
+
+		}
+
+		function editPersonel(id) {
+
+			$.post("@Url.Action("GetPersonelPageById", "Personel")", { personId: id })
+				.done(function (res) {
+					$("#modalbody").html(res);
+					$("#generalmodal").modal('show');
+				})
+				.fail(function (xhr, status, error) {
+					location.reload();
+				});
+		}
+
+		function showPickVoyageModal(personelId) {
+
+			$.post("@Url.Action("GetAllActiveVoyages", "Personel")", { personelId: personelId })
+				.done(function (res) {
+					$("#voyageModalbody").html(res);
+					$("#voyageModal").modal('show');
+				})
+				.fail(function (xhr, status, error) {
+					location.reload();
+				});
+		}
+
+
+
+		$(".page-link").click(function (event) {
+			event.preventDefault(); // غیرفعال کردن عملکرد پیشفرض href
+
+			var hrefValue = $(this).attr("href");
+			$("#pageNumber").val(hrefValue.split("p=")[1]);
+			$("#formFilter").submit();
+		});
+	</script>
+}

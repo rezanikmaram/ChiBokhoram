@@ -1,0 +1,124 @@
+﻿@model PageResult<CreateTruckDto>
+@{
+    ViewData["Title"] = "همه کامیون ها";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+    int i = ((Model.PageNumber - 1) * Model.PageSize) + 1;
+}
+
+<div class="col-lg-12">
+    <div class="card">
+        <div class="card-header pb-0">
+            <div class="d-flex justify-content-between">
+                    <h3 class="title">
+                        <i class="icon-frane"></i> لیست کامیون های
+                    </h3>
+                    <div>
+                        <a class="alert-icon btn btn-primary round" asp-controller="Transportation" asp-action="CreateTruck" asp-route-companyId="@ViewBag.companyId"> <i class="icon-plus align-middle"></i> افزودن کامیون </a>
+                    </div>
+            </div>
+        </div>
+
+            <div class="card-body">
+                <div>
+                    <table class="table table-bordered table-hover table-striped" id="data-table">
+                        <thead class="bg-primary">
+                            <tr>
+                                <th>ردیف</th>
+                                <th>کامیون</th>
+                                <th>شرکت</th>
+                                <th>شناسه</th>
+                                <td>پلاک</td>
+                                <td>ظرفیت</td>
+                                <td>وزن خالی</td>
+                                <td>وضعیت</td>
+                                <td>تلفن</td>
+
+                                <td>عملیات</td>
+                            </tr>
+                        </thead>
+                        <tbody>
+
+
+                            @foreach (var item in Model.Data)
+                            {
+                                <tr>
+                                    <td class="align-middle" >@(i++)</td>
+                                    <td class="align-middle" >@item.TruckName</td>
+                                    <td class="align-middle" >@(item.CompanyCompanyName ?? "---")</td>
+                                    <td class="align-middle" >@item.TruckNumberId</td>
+                                    <td class="align-middle" >@item.CarPlates</td>
+                                    <td class="align-middle" >@(item.PortableCapacity > 0 ? @item.PortableCapacity : "----") </td>
+                                    <td class="align-middle" >@(item.WeightFree > 0 ? @item.WeightFree : "----") </td>
+
+                                    <td class="align-middle" style="width:15%">
+                                        <a id="ActivationTruck@(i)" onclick="ShowQAlert(event,'ActivationTruck@(i)');"
+                                           asp-action="ActivationTruck" asp-route-truckId="@item.Id"
+                                           asp-route-companyId="@item.CompanyId">
+                                            <span class="label px-2 py-1 rounded label-@(item.Status?"success":"danger")">
+                                                @(item.Status ? "فعال" : "خارج ازسرویس")
+                                            </span>
+                                        </a>
+                                    </td>
+                                    <td class="align-middle">@item.Telephone</td>
+
+                                    <td class="d-flex justify-content-first">
+                                        <div class="dropdown-basic">
+                                            <div class="dropdown">
+                                                <div class="btn-group mb-0">
+                                                    <button class="dropbtn btn-light rounded" type="button"><i data-feather="chevron-down" class="text-info"></i></button>
+                                                    <div class="dropdown-content rounded    ">
+
+                                                        <a asp-controller="Transportation" asp-action="CreateTruck" asp-route-companyId="@item.CompanyId" asp-route-truckId="@item.Id"><i class="icon-pencil"></i> ویرایش</a>
+
+                                                        <a id="DeleteTruck@(i)" onclick="ShowQAlert(event,'DeleteTruck@(i)');" asp-controller="Transportation" asp-action="DeleteTruck" asp-route-companyId="@item.CompanyId" asp-route-truckId="@item.Id"><i class="icon-trash fa-flip-horizontal"> </i> حذف</a>
+
+                                                    </div><!-- /.btn-group -->
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                            }
+
+
+
+                        </tbody>
+                    </table>
+                </div>
+                    <div>
+                        <cs-pager cs-paging-pagesize="@Model.PageSize"
+                                  cs-paging-pagenumber="@Model.PageNumber"
+                                  cs-paging-totalitems="@Model.TotalItems"
+                                  cs-paging-maxpageritems="10"
+                                  cs-pagenumber-param="p"
+                                  asp-route-companyId="@ViewBag.companyId"
+                                  cs-show-first-last="true"
+                                  cs-suppress-empty-nextprev="true"
+                                  cs-suppress-inactive-firstlast="true"
+                                  cs-show-numbered="true"
+                                  cs-first-page-text="ابتدا"
+                                  cs-last-page-text="انتها"
+                                  cs-next-page-title="بعدی"
+                                  cs-previous-page-title="قبلی"
+                                  cs-first-page-title="ابتدا"
+                                  cs-last-page-title="انتها"
+                                  cs-next-page-text="بعدی"
+                                  cs-previous-page-text="قبلی"
+                                  cs-pager-li-current-class="page-item active"
+                                  cs-pager-li-other-class="page-item"
+                                  cs-pager-li-non-active-class="page-item disabled"
+                                  cs-pager-link-current-class="page-link"
+                                  cs-pager-link-other-class="page-link"
+                                  asp-controller="Transportation"
+                                  asp-action="AllTruks">
+                        </cs-pager>
+                    </div>
+
+                <!-- /.table-responsive -->
+            </div>
+            <!-- /.portlet-body -->
+        </div>
+        <!-- /.portlet -->
+    </div>
+

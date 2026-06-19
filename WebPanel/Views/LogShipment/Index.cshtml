@@ -1,0 +1,207 @@
+@model LogShipmentListPageDto
+@{
+    ViewData["Title"] = "گزارش تراکنش‌های درخواست";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+    int i = ((Model.List?.PageNumber - 1) * Model.List?.PageSize) + 1 ?? 1;
+}
+
+<div class="col-lg-12">
+    <div class="card">
+        <div class="card-header pb-0">
+            <div class="d-flex">
+                <div class="portlet-title">
+                    <h3 class="title">
+                        <i class="icon-frane"></i> گردش‌کار درخواست‌ها test
+                    </h3>
+                </div>
+            </div>
+        </div>
+        <div class="card-body pt-0">
+            <form id="formFilter" asp-action="Index" method="get">
+                <input name="p" id="pageNumber" hidden />
+                <div class="form-body px-2">
+                    <div class="row gy-3">
+                        <div class="col-md-3 col-sm-12">
+                            <div class="form-group">
+                                <label>از تاریخ</label>
+                                <div class="input-group flex-column">
+                                    <input asp-for="Filter.FromDate" type="text" class="form-control" autocomplete="off" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-sm-12">
+                            <div class="form-group">
+                                <label>تا تاریخ</label>
+                                <div class="input-group flex-column">
+                                    <input asp-for="Filter.ToDate" type="text" class="form-control" autocomplete="off" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-sm-12">
+                            <div class="form-group">
+                                <label>کاربر</label>
+                                <div class="input-group">
+                                    <input asp-for="Filter.UserName" type="text" placeholder="نام کاربری" class="form-control" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-sm-12">
+                            <div class="form-group">
+                                <label>کد وضعیت</label>
+                                <div class="input-group">
+                                    <input asp-for="Filter.StatusCode" type="number" class="form-control" placeholder="مثال: 200" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-sm-12">
+                            <div class="form-group">
+                                <label>روش</label>
+                                <div class="input-group">
+                                    <select class="form-control select2" asp-for="Filter.Method" asp-items="Model.Methods">
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-sm-12">
+                            <div class="form-group">
+                                <label>وضعیت اجرا</label>
+                                <div class="input-group">
+                                    <select class="form-control select2" asp-for="Filter.IsSuccess" asp-items="Model.Statuses">
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-sm-12">
+                            <div class="form-group">
+                                <label>آدرس کامل</label>
+                                <div class="input-group">
+                                    <input asp-for="Filter.Url" type="text" class="form-control" placeholder="بخشی از آدرس یا دامنه" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-sm-12">
+                            <div class="form-group">
+                                <label>مسیر</label>
+                                <div class="input-group">
+                                    <input asp-for="Filter.Path" type="text" class="form-control" placeholder="بخشی از مسیر" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-md-2 d-flex justify-content-start align-items-end">
+                            <button class="alert-icon btn btn-success" type="submit">
+                                <span class="px-3">جستجو</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+            <div class="col-md-12 table-responsive vh-100 mt-4">
+                <table class="table table-bordered table-hover table-striped" id="data-table">
+                    <thead>
+                        <tr>
+                            <th>ردیف</th>
+                            <th>تاریخ درخواست</th>
+                            <th>کاربر</th>
+                            <th>روش</th>
+                            <th>آدرس</th>
+                            <th>کد وضعیت</th>
+                            <th>مدت (میلی‌ثانیه)</th>
+                            <th>وضعیت</th>
+                            <th>جزئیات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.List?.Data != null)
+                        {
+                            foreach (var item in Model.List.Data)
+                            {
+                                <tr>
+                                    <td>@(i++)</td>
+                                    <td>@item.RequestTimeFa</td>
+                                    <td>@(string.IsNullOrWhiteSpace(item.UserName) ? "---" : item.UserName)</td>
+                                    <td>@item.Method</td>
+                                    <td class="text-break">@item.Url</td>
+                                    <td>@item.StatusCode</td>
+                                    <td>@(item.DurationMs.HasValue ? item.DurationMs.Value.ToString("N0") : "-")</td>
+                                    <td>
+                                        <span class="badge @(item.IsSuccess ? "badge-success" : "badge-danger")">
+                                            @item.StatusTitle
+                                        </span>
+                                    </td>
+                                    <td class="d-flex justify-content-start">
+                                        <div class="dropdown-basic">
+                                            <div class="dropdown">
+                                                <div class="btn-group mb-0">
+                                                    <button class="dropbtn btn-light rounded" type="button">
+                                                        <i data-feather="chevron-down" class="text-info"></i>
+                                                    </button>
+                                                    <div class="dropdown-content">
+                                                        <a asp-action="Detail" asp-route-id="@item.Id">مشاهده</a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+                <div>
+                    <cs-pager cs-paging-pagesize="@Model.List.PageSize"
+                              cs-paging-pagenumber="@Model.List.PageNumber"
+                              cs-paging-totalitems="@Model.List.TotalItems"
+                              cs-paging-maxpageritems="10"
+                              cs-pagenumber-param="p"
+                              cs-show-first-last="true"
+                              cs-suppress-empty-nextprev="true"
+                              cs-suppress-inactive-firstlast="true"
+                              cs-show-numbered="true"
+                              cs-first-page-text="اول"
+                              cs-last-page-text="آخر"
+                              cs-next-page-title="بعدی"
+                              cs-previous-page-title="قبلی"
+                              cs-first-page-title="اول"
+                              cs-last-page-title="آخر"
+                              cs-next-page-text="بعدی"
+                              cs-previous-page-text="قبلی"
+                              cs-pager-li-current-class="page-item active"
+                              cs-pager-li-other-class="page-item"
+                              cs-pager-li-non-active-class="page-item disabled"
+                              cs-pager-link-current-class="page-link"
+                              cs-pager-link-other-class="page-link"
+                              asp-controller="LogShipment"
+                              asp-action="Index">
+                    </cs-pager>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section script {
+    <script>
+        $(document).ready(function () {
+            $("#Filter_Method").select2({ width: '100%' }).trigger('change');
+            $("#Filter_IsSuccess").select2({ width: '100%' }).trigger('change');
+        });
+
+        kamaDatepicker('Filter_FromDate', customOptions);
+        kamaDatepicker('Filter_ToDate', customOptions);
+
+        $(".page-link").click(function (event) {
+            event.preventDefault();
+            var hrefValue = $(this).attr("href");
+            if (!hrefValue) {
+                return;
+            }
+            var parts = hrefValue.split("p=");
+            if (parts.length > 1) {
+                $("#pageNumber").val(parts[1]);
+                $("#formFilter").submit();
+            }
+        });
+    </script>
+}

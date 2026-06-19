@@ -1,0 +1,90 @@
+@model SeoStopServiceTypePageDto
+@{
+    int i = ((Model.StopTypes.PageNumber - 1) * Model.StopTypes.PageSize) + 1;
+    var currentSortColumn = Model.Filter?.SortColumn ?? "name";
+    var currentSortDirection = Model.Filter?.SortDirection ?? "asc";
+}
+
+<div class="table-responsive mt-4">
+    <table class="table table-bordered table-hover table-striped" id="data-table">
+        <thead class="bg-primary">
+            <tr>
+                <th class="sortable-header" data-column="row" style="width:5%">ردیف</th>
+                <th class="sortable-header" data-column="name" style="cursor: pointer;">
+                    عنوان
+                    @if (currentSortColumn == "name")
+                    {
+                        <i class="icon-arrow-@(currentSortDirection == "asc" ? "up" : "down") text-white"></i>
+                    }
+                    else
+                    {
+                        <i class="icon-sort text-white-50"></i>
+                    }
+                </th>
+                <th class="sortable-header" data-column="isactive" style="cursor: pointer;width:15%">
+                    فعال/غیرفعال
+                    @if (currentSortColumn == "isactive")
+                    {
+                        <i class="icon-arrow-@(currentSortDirection == "asc" ? "up" : "down") text-white"></i>
+                    }
+                    else
+                    {
+                        <i class="icon-sort text-white-50"></i>
+                    }
+                </th>
+                <th style="width:15%">عملیات</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.StopTypes.Data)
+            {
+                <tr>
+                    <td class="align-middle">@(i++)</td>
+                    <td class="align-middle">@item.Name</td>
+                    <td class="align-middle">
+                        <span class="label px-2 py-1 rounded label-@(item.IsActive?"success":"danger") btn-activation" data-id="@item.Id" style="cursor:pointer">
+                            @(item.IsActive ? "فعال" : "غیر فعال")
+                        </span>
+                    </td>
+                    <td class="align-middle">
+                        <div class="d-flex">
+                            <button type="button" class="btn btn-warning btn-sm btn-icon curve mx-1 px-2 btn-edit-type" data-id="@item.Id">
+                                <i class="icon-pencil align-middle fs-6"></i>
+                            </button>
+                            <button type="button" class="btn btn-danger btn-sm btn-icon curve mx-1 px-2 btn-delete-type" data-id="@item.Id">
+                                <i class="icon-trash fa-flip-horizontal fs-6 align-middle"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <div class="mt-3">
+        <cs-pager cs-paging-pagesize="@Model.StopTypes.PageSize"
+                  cs-paging-pagenumber="@Model.StopTypes.PageNumber"
+                  cs-paging-totalitems="@Model.StopTypes.TotalItems"
+                  cs-paging-maxpageritems="10"
+                  cs-pagenumber-param="p"
+                  cs-show-first-last="true"
+                  cs-suppress-empty-nextprev="true"
+                  cs-suppress-inactive-firstlast="true"
+                  cs-show-numbered="true"
+                  cs-first-page-text="ابتدا"
+                  cs-last-page-text="انتها"
+                  cs-next-page-title="بعدی"
+                  cs-previous-page-title="قبلی"
+                  cs-first-page-title="ابتدا"
+                  cs-last-page-title="انتها"
+                  cs-next-page-text="بعدی"
+                  cs-previous-page-text="قبلی"
+                  cs-pager-li-current-class="page-item active"
+                  cs-pager-li-other-class="page-item"
+                  cs-pager-li-non-active-class="page-item disabled"
+                  cs-pager-link-current-class="page-link"
+                  cs-pager-link-other-class="page-link"
+                  asp-controller="SeoStopServiceType"
+                  asp-action="Table">
+        </cs-pager>
+    </div>
+</div>

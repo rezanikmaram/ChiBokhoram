@@ -1,0 +1,354 @@
+﻿@model SeoFactorPageDto
+@{
+	ViewData["Title"] = "صورتحساب";
+	Layout = "~/Views/Shared/AdminLayout.cshtml";
+	int i = ((Model.List?.PageNumber - 1) * Model.List?.PageSize) + 1 ?? 1;
+	var returnPage = (int?)ViewBag.returnPage;
+}
+
+
+<div class="card p-2 mb-4">
+	<div class="row">
+		<div class="col-md-1 align-middle align-content-center px-4">
+			<i class="fa-solid fa-circle-info fs-4 align-middle"></i>
+		</div>
+		<div class="col-md-11 px-5">
+			<div class="d-flex justify-content-between align-items-center">
+				<div class="glass-bg px-2 py-1">
+					<p class="fs-6 m-0"> @Model.SeoInfo?.ShipShipName </p>
+				</div>
+				<div>
+					<p class="fs-6 m-0"> @Model.SeoInfo?.ProductOwnerCompanyCompanyName </p>
+				</div>
+				<div>
+					<p class="fs-6 m-0">@Model.SeoInfo?.TransportTypeTitle</p>
+				</div>
+				<div>
+					<p class="fs-6 m-0">شماره بارنامه: @Model.SeoInfo?.BillOfLadingNumber</p>
+				</div>
+				<div>
+					<p class="fs-6 m-0">کالا: @Model.SeoInfo?.ProductProductName</p>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="col-lg-12">
+	<div class="card">
+		<div class="card-header pb-2">
+			<div class="d-flex justify-content-between">
+
+				<h3 class="title">
+					<i class="icon-frane"></i>
+					@if(returnPage == 100 && Model.SeoInfo.InlandExportManifestId != null)
+					{
+						<a asp-action="Details" asp-controller="InlandExportManifest" asp-route-Id="@Model.SeoInfo.InlandExportManifestId"><i class="fa-solid fa-right-to-bracket me-2"></i></a>
+					}
+					else
+					{
+						<a asp-action="seoAccessPage" asp-controller="Seo" asp-route-seoId="@Model.SeoId"><i class="fa-solid fa-right-to-bracket me-2"></i></a>
+					}
+					مالی - صورتحساب ها
+				</h3>
+
+				<div>
+					@* <a class="btn btn-primary rounded" asp-action="CreateSeoFactor"
+					   asp-route-seoId="@Model.SeoId">درآمد جدید</a> *@
+					   <a class="btn btn-primary rounded" id="newSeoFactor"> <i class="icon-plus align-middle"></i>  ایجاد صورتحساب </a>
+				</div>
+				<!-- /.buttons-box -->
+			</div>
+			<!-- /.portlet-heading -->
+
+
+		</div>
+		<div class="card-body pt-0">
+
+			<form id="formFilter" asp-action="list" asp-route-seoId="@Model.SeoId" asp-route-p="" method="post">
+				<input name="p" id="pageNumber" hidden />
+				<input type="hidden" asp-for="SeoId" name="filter.seoId" />
+				<div class="form-body ">
+
+					<div class="row gy-4">
+
+						<div class="col-md-3 col-sm-12">
+							<div class="form-group">
+								<label>  جستجو:</label>
+								<div class="input-group">
+									<input asp-for="Filter.Search" type="text" class="rounded form-control">
+									<span asp-validation-for="Filter.Search" class="text-danger"></span>
+								</div>
+							</div>
+						</div>
+
+
+						<div class="col-md-2 col-sm-12">
+							<div class="form-group">
+								<label>از تاریخ:</label>
+								<div class="input-group">
+									<input asp-for="Filter.DateFrom" type="text" class=" form-control" autocomplete="off">
+									<span asp-validation-for="Filter.DateFrom" class="text-danger"></span>
+								</div>
+							</div>
+						</div>
+
+
+						<div class="col-md-2 col-sm-12">
+							<div class="form-group">
+								<label>تا تاریخ:</label>
+								<div class="input-group">
+									<input asp-for="Filter.DateTo" type="text" class=" form-control" autocomplete="off">
+									<span asp-validation-for="Filter.DateTo" class="text-danger"></span>
+								</div>
+							</div>
+						</div>
+
+						<div class="col-md-2 col-sm-12 align-content-end">
+							<div class="form-check form-switch">
+								<input type="checkbox" asp-for="Filter.RemainderPrice" class="form-check-input" role="switch" />
+								<label class="form-check-label ms-2" for="Filter.RemainderPrice">فقط داری بدهی </label>
+								<span asp-validation-for="Filter.RemainderPrice" class="text-danger"></span>
+							</div>
+						</div>
+
+						<div class="form-group col-md-2 ">
+							<button style="border-radius:5px; margin-top:30px" class="alert-icon px-3 btn btn-success "
+									type="submit">
+								فیلتر
+							</button>
+						</div> 
+					</div>
+				</div>
+			</form>
+
+			<div class="table-responsive mt-3">
+				<table class="table table-sm table-bordered table-hover table-striped" id="data-table">
+					<thead class="bg-primary">
+						<tr>
+							<th>ردیف</th>
+							<th>شماره</th>
+							<th>تاریخ   </th>
+							<th>سهم شرکت</th>
+							<th>سهم سازمان</th>
+							<th>باقی مانده شرکت</th>
+							<th> باقی مانده سازمان  </th>
+							<th>قبض انبار</th>
+							<th>جزئیات</th>	
+							<th>عملیات</th>
+						</tr>
+					</thead>
+					<tbody>
+
+
+						@foreach (var item in Model.List.Data)
+						{
+							<tr>
+								<td class="align-middle">@(i++)</td>
+								<td class="align-middle"> @item.NumberFactor </td>
+								<td class="align-middle">@item.DateFa</td>
+								<td class="align-middle">@item.PriceCompany.ToPrice()  </td>
+								<td class="align-middle">@item.PriceOrg.ToPrice()  </td>
+								<td class="align-middle">@item.RemainderPriceCompany.ToPrice()  </td>
+								<td class="align-middle">@item.RemainderPriceOrg.ToPrice()  </td>
+
+								<td class="align-middle">
+									@if(item.SeoWarehouseReceiptId.HasValue)
+									{
+										<button class="btn btn-success w-100">
+											<a class="text-white" asp-controller="Seo" asp-action="GetFileWarehouseReceiptById" asp-route-seoWarehouseReceiptId="@item.SeoWarehouseReceiptId">@item.SeoWarehouseReceiptNumber</a>
+										</button>
+									}
+									
+								</td>
+
+								<td class="align-middle">
+									<button class="btn btn-info w-100">
+										<a class="text-white" asp-action="Details" asp-route-factorId="@item.Id">جزئیات</a>
+									</button>
+								</td>
+
+								<td class="align-middle px-2 text-center">
+									<a id="Deletefactor@(i)" onclick="ShowQAlert(event,'Deletefactor@(i)');" class="btn btn-danger px-2 btn-sm btn-icon curve btn-questions"
+									   asp-action="Deletefactor" asp-route-factorId="@item.Id" asp-route-seoId="@item.SeoId">
+										<i class="icon-trash fs-6 align-middle fa-flip-horizontal"></i>
+									</a>
+								</td>
+							</tr>
+						}
+
+					</tbody>
+				</table>
+
+				<div class="mt-4">
+					<cs-pager cs-paging-pagesize="@Model.List.PageSize"
+							  cs-paging-pagenumber="@Model.List.PageNumber"
+							  cs-paging-totalitems="@Model.List.TotalItems"
+							  cs-paging-maxpageritems="10"
+							  cs-pagenumber-param="p"
+							  cs-show-first-last="true"
+							  cs-suppress-empty-nextprev="true"
+							  cs-suppress-inactive-firstlast="true"
+							  cs-show-numbered="true"
+							  cs-first-page-text="ابتدا"
+							  cs-last-page-text="انتها"
+							  cs-next-page-title="بعدی"
+							  cs-previous-page-title="قبلی"
+							  cs-first-page-title="ابتدا"
+							  cs-last-page-title="انتها"
+							  cs-next-page-text="بعدی"
+							  cs-previous-page-text="قبلی"
+							  cs-pager-li-current-class="page-item active"
+							  cs-pager-li-other-class="page-item"
+							  cs-pager-li-non-active-class="page-item disabled"
+							  cs-pager-link-current-class="page-link"
+							  cs-pager-link-other-class="page-link"
+							  asp-controller="SeoFactor"
+							  asp-action="List">
+					</cs-pager>
+				</div>
+
+			</div>
+
+		</div>
+
+	</div>
+</div>
+
+<!-- Hidden form for submission -->
+<form id="createFactorForm" asp-action="CreateSeoFactor" method="get" style="display: none;">
+	<input type="hidden" name="seoId" value="@Model.SeoId" />
+	<input type="hidden" name="seoWarehouseReceiptId" id="selectedReceiptId" value="" />
+</form>
+
+<div class="modal fade" id="selectReceiptModal" tabindex="-1" aria-labelledby="selectReceiptModalLabel" aria-hidden="true">
+	<div class="modal-dialog modal-lg">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="selectReceiptModalLabel">انتخاب قبض انبار (اختیاری)</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				<div class="alert alert-info mb-3">
+					<i class="fa fa-info-circle me-2"></i> انتخاب قبض انبار اختیاری می باشد. در صورت نیاز می توانید از لیست زیر انتخاب نمایید.
+				</div>
+
+				@if (Model.SeoWarehouseReciepts?.Any() == true)
+				{
+					<div class="table-responsive">
+						<table class="table table-sm table-bordered table-hover">
+							<thead class="bg-primary">
+								<tr>
+									<th>شماره قبض</th>
+									<th>نوع ورود</th>
+									<th>ثبت کننده</th>
+									<th>تعداد کالاها</th>
+									<th>تعداد روز در انبار</th>
+									<th>انتخاب</th>
+								</tr>
+							</thead>
+							<tbody>
+								@foreach (var receipt in Model.SeoWarehouseReciepts)
+								{
+									<tr>
+										<td>@receipt.Number</td>
+										<td>@receipt.EntryRouteType.ToDisplay()</td>
+										<td>@receipt.RegisterUserFullName</td>
+										<td>@(receipt.ProductCount.ToPrice() )</td>
+										<td>@receipt.StockDayInWarehouse</td>
+										<td>
+											<button class="btn btn-sm btn-primary select-receipt"
+													data-receipt-id="@receipt.Id"
+													data-receipt-number="@receipt.Number">
+												انتخاب
+											</button>
+										</td>
+									</tr>
+								}
+							</tbody>
+						</table>
+					</div>
+				}
+				else
+				{
+					<div class="alert alert-warning">
+						هیچ قبض انبار دارای موجودی برای این بارنامه موجود نمی باشد.
+					</div>
+				}
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">بستن</button>
+				<button type="button" class="btn btn-success proceed-without-receipt">
+					ادامه بدون انتخاب قبض
+				</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+@section script {
+
+
+	<script>
+		$(document).ready(function () {
+			//$('.select2').select2();
+
+			kamaDatepicker('Filter_DateFrom', customOptions);
+			kamaDatepicker('Filter_DateTo', customOptions);
+
+
+			
+
+			// Handle receipt selection
+			$(document).on('click', '.select-receipt', function () {
+				var receiptId = $(this).data('receipt-id');
+				var receiptNumber = $(this).data('receipt-number');
+
+				// Set the selected receipt ID in the hidden form
+				$('#selectedReceiptId').val(receiptId);
+
+				// Submit the form
+				$('#createFactorForm').submit();
+
+				// Close the modal
+				$('#selectReceiptModal').modal('hide');
+			});
+
+			// Handle proceeding without selecting a receipt
+			$(document).on('click', '.proceed-without-receipt', function () {
+				// Clear any previously selected receipt
+				$('#selectedReceiptId').val('');
+
+				// Submit the form
+				$('#createFactorForm').submit();
+
+				// Close the modal
+				$('#selectReceiptModal').modal('hide');
+			});
+
+
+			$(document).on('click', '#newSeoFactor', function (event) {
+				event.stopPropagation();
+				$('#selectReceiptModal').modal('show');
+			})
+
+		});
+
+
+
+		function createFactor(){
+
+		}
+
+
+		$(".page-link").click(function (event) {
+			event.preventDefault(); // غیرفعال کردن عملکرد پیشفرض href
+
+			var hrefValue = $(this).attr("href");
+			$("#pageNumber").val(hrefValue.split("p=")[1]);
+			$("#formFilter").submit();
+		});
+
+	</script>
+}
+

@@ -1,0 +1,103 @@
+﻿@model AddProductPageDto
+
+
+<div id="addProductModal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" tabindex="-1">
+    <div id="modalbody" class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title mx-2">کالا</h4>
+                <button type="button" class="close btn-close rounded border" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addProductForm">
+
+                    <div class="card-body pt-0 px-0">
+                        <div class="row gy-4">
+                            <div class="col-md-12 mt-3">
+                                <label>دسته بندی</label>
+                                <div class="input-group ">
+                                    <select class="form-control addProductModal  select2 w-100" asp-for="AddModel.ProductCategoryId"
+                                            asp-items="Model.ProductCategorys">
+                                    </select>
+                                </div>
+                                <span asp-validation-for="AddModel.ProductCategoryId"
+                                      class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-12">
+                                <label style="">عنوان</label>
+                                <div class="input-group">
+                                    <input asp-for="AddModel.ProductName" type="text" class="form-control rounded w-100">
+                                </div>
+                                <span asp-validation-for="AddModel.ProductName"
+                                      class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6 mt-3">
+                                <label style="">شماره</label>
+                                <div class="input-group">
+                                    <input asp-for="AddModel.Number" type="text" class="form-control rounded w-100">
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 mt-3">
+                                <label>نوع چک لیست</label>
+                                <div class="input-group ">
+                                    <select class="form-control addProductModal  select2 w-100" asp-for="AddModel.CheckListId"
+                                            asp-items="Model.CheckLists">
+                                        <option value="">بدون چک لیست</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            
+
+                            <div class="col-12">
+                                <div class="d-flex justify-content-end" style="margin-top: 28px;">
+                                    <button type="submit" class="btn btn-info d-flex ms-2 align-items-center p-1 px-2">
+                                        <i class="icon-check me-2"></i>
+                                        <p class="m-1">ذخیره</p>
+                                        <div class="paper-ripple"><div class="paper-ripple__background"></div><div class="paper-ripple__waves"></div></div>
+                                    </button>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+
+
+        </div>
+    </div>
+</div>
+
+
+<script src="~/assets/js/validation/jquery.validate.min.js"></script>
+<script src="~/assets/js/validation/jquery.validate.unobtrusive.min.js"></script>
+<script>
+     $.validator.unobtrusive.parse('#addProductForm');
+
+    $(document).on("submit", "#addProductForm", function (e) {
+        e.preventDefault();
+
+        const form = $(this);
+
+        if (!form.valid()) {
+            return;
+        }
+
+        $.ajax({
+            url: '/Product/AddProduct',
+            type: 'POST',
+            data: form.serialize(),
+            success: function (productId) {
+
+                document.activeElement?.blur();
+                $("#addProductModal").modal("hide");
+                addProductToMainSelect(productId);
+            }
+        });
+    });
+
+</script>

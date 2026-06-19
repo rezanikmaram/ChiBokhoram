@@ -1,0 +1,172 @@
+﻿@model GatePageResultDto
+@{
+    ViewData["Title"] = "لیست دروازه ها";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+    int i = ((Model.Result.PageNumber - 1) * Model.Result.PageSize) + 1;
+}
+
+<div class="col-lg-12">
+    <div class="card">
+        <div class="card-header">
+            <div class="d-flex justify-content-between">
+                
+                    <h3 class="title">
+                        <i class="icon-frane"></i> لیست دروازه ها
+                    </h3>
+
+               <div>
+
+                    <a class="btn rounded btn-primary" onclick="createGate();"><i class="fa-solid fa-plus me-2"></i> دروازه جدید  </a>
+
+               </div>
+               
+            </div>
+          
+        </div>
+        <div class="card-body pt-0">
+
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover table-striped" id="data-table">
+                    <thead class="bg-primary">
+                        <tr>
+                            <th>ردیف</th>
+                            <th>نام دروازه</th>
+                            <th>کد FPN</th>
+                            <th>نوع دروازه</th>
+                            <th>کاربری دروازه</th>
+                            <th>طول جغرافیایی</th>
+                            <th>عرض جغرافیایی</th>
+                            <td>عملیات</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+
+                        @foreach (var item in Model.Result.Data)
+                        {
+                            <tr>
+                                <td class="align-middle" >@(i++)</td>
+                                <td class="align-middle" >@item.Name</td>
+                                <td class="align-middle">@item.CodeNameForFpn</td>
+                                <td class="align-middle">@item.Type.ToDisplay(DisplayProperty.Name)</td>
+                                <td class="align-middle">@item.CargoType?.ToDisplay(DisplayProperty.Name)</td>
+                                <td class="align-middle">@item.LonX</td>
+                                <td class="align-middle">@item.LatY</td>
+                                
+                                
+                                <td class="d-flex justify-content-between align-items-center">
+
+                                                <a class="btn btn-warning px-2 btn-sm btn-icon curve" onclick="editGate('@item.Id');"><i class="icon-pencil align-middle fs-6"></i></a>
+                                                <a id="DeleteGate@(i)" onclick="ShowQAlert(event,'DeleteGate@(i)');" class="btn btn-danger px-2 btn-sm btn-icon curve btn-questions ms-1"
+                                                   asp-action="DeleteGate" asp-route-gateId="@item.Id">
+                                                    <i class="icon-trash fs-6 align-middle fa-flip-horizontal"></i>
+                                                </a>
+                                </td>
+
+                            </tr>
+
+                        }
+
+
+
+                    </tbody>
+                </table>
+                <div>
+                    <cs-pager cs-paging-pagesize="@Model.Result.PageSize"
+                              cs-paging-pagenumber="@Model.Result.PageNumber"
+                              cs-paging-totalitems="@Model.Result.TotalItems"
+                              cs-paging-maxpageritems="10"
+                              cs-pagenumber-param="p"
+                              cs-show-first-last="true"
+                              cs-suppress-empty-nextprev="true"
+                              cs-suppress-inactive-firstlast="true"
+                              cs-show-numbered="true"
+                              cs-first-page-text="ابتدا"
+                              cs-last-page-text="انتها"
+                              cs-next-page-title="بعدی"
+                              cs-previous-page-title="قبلی"
+                              cs-first-page-title="ابتدا"
+                              cs-last-page-title="انتها"
+                              cs-next-page-text="بعدی"
+                              cs-previous-page-text="قبلی"
+                              cs-pager-li-current-class="page-item active"
+                              cs-pager-li-other-class="page-item"
+                              cs-pager-li-non-active-class="page-item disabled"
+                              cs-pager-link-current-class="page-link"
+                              cs-pager-link-other-class="page-link"
+                              asp-controller="Gate"
+                              asp-action="Index">
+                    </cs-pager>
+                </div>
+
+            </div>
+            <!-- /.table-responsive -->
+        </div>
+        <!-- /.portlet -->
+    </div>
+</div>
+
+
+
+
+<div id="generalmodal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">ثبت دروازه</h4>
+                <button type="button" class="close btn-close rounded border" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="modalbody">
+
+                <partial name="_CreateGate" model="new CreateGateDto{}" />
+
+            </div>
+        </div>
+    </div>
+</div>
+
+@section script {
+
+    <script>
+        $(document).ready(function () {
+
+            $('.select2').select2();
+
+            $('select[class*="generalmodal"].select2').select2({
+                dropdownParent: $('#generalmodal')
+        });
+        });
+
+
+
+
+        function createGate() {
+            $("#Name").val('');
+            $("#Id").val('');
+            $("#generalmodal").modal('show');
+        }
+
+        function editGate(id) {
+
+            $.post("@Url.Action("GetGateById", "Gate")", { gateId: id })
+                .done(function (res) {
+                    $("#modalbody").html(res);
+                    $("#generalmodal").modal('show');
+                });
+        }
+
+        $(".page-link").click(e => {
+            e.preventDefault();
+            const page = new URL($(e.currentTarget).attr('href'), window.location.origin)
+                .searchParams.get('p') || "1";
+
+            $("#pageNumber").val(page);
+            $("#formFilter")
+                .attr("action", (i, val) => val.replace("__PAGE__", page))
+                .submit();
+        });
+
+
+    </script>
+}
+

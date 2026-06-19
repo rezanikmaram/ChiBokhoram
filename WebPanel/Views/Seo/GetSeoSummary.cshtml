@@ -1,0 +1,326 @@
+﻿@model Entities.DTOs.Public.GetSeoSummaryPage
+
+@{
+    ViewData["Title"] = "خلاصه عملکرد بارنامه";
+
+    var seo = Model.SeoInfo;
+
+
+
+    var color = "";
+    var imageSrc = "";
+    switch (Model.SeoInfo.State)
+    {
+        case SeoState.Active:
+            color = "bg-primary";
+            imageSrc = "craneShip.png";
+            break;
+        case SeoState.Stoped:
+            color = "bg-warning";
+            imageSrc = "ship.png";
+            break;
+        case SeoState.Finish:
+            color = "bg-success2";
+            imageSrc = "Eship.png";
+            break;
+        default:
+            color = "bg-primary";
+            imageSrc = "craneShip.png";
+            break;
+
+    }
+}
+
+<div class="card">
+    <div class="card-header pb-0 px-3">
+        <div class="d-flex justify-content-between align-items-center">
+            <h3 class="title">
+                <i class="icon-frane"></i>
+                <a asp-action="SeoAccessPage" asp-route-seoId="@Model.SeoInfo.Id"><i class="fa-solid fa-right-to-bracket me-2"></i></a>
+                خلاصه عملکرد
+            </h3>
+        </div>
+    </div>
+    <div class="card-body pt-0">
+        <div class="bg-primary rounded-3 mt-4 p-3">
+            <div class="row gy-3 align-items-center">
+                <div class="col-1">
+                    <img src="~/assets/images/@imageSrc" alt="" class="img-fluid">
+                </div>
+                <div class="col-3">
+                    <p class="fs-6 fw-bold">@Model.SeoInfo.ShipShipName</p>
+                    <p class="fs-6 fw-bold">تاریخ شروع: @Model.SeoInfo.StartFa</p>
+                </div>
+                <div class="col-3">
+                    <p class="fs-6 fw-bold">اسکله: @Model.SeoInfo.WaterfrontWaterfrontName</p>
+                    <p class="fs-6 fw-bold">کالا: @Model.SeoInfo.ProductProductName</p>
+                </div>
+                <div class="col-3">
+                    <p class="fs-6 fw-bold">تناژ: @Model.SeoInfo.TonnageTitle</p>
+                    <p class="fs-6 fw-bold">صاحب کالا: @Model.SeoInfo.ProductOwnerCompanyCompanyName</p>
+                </div>
+                <div class="col-2">
+                    <p class="fs-6 fw-bold">نوع عملیات: @Model.SeoInfo.TransportTypeTitle</p>
+                    <p class="fs-6 fw-bold">وضعیت: @Model.SeoInfo.StateTitle</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Table 1: TaliMultiHeadeds -->
+<div class="card">
+    <div class="card-header pb-0 bg-white">
+        <h5 class="fw-bold mb-3 fs-6">بخش 1 – چند سره بودن تخلیه/بارگیری</h5>
+    </div>
+    <div class="card-body pt-0">
+        <div>
+            @if (Model.TaliMultiHeadeds?.Any() == true)
+            {
+                <table class="table table-bordered text-center">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>چند سره بودن</th>
+                            <th>تعداد تالی</th>
+                            <th>وزن بارنامه(میانگین)</th>
+                            <th>وزن باسکول</th>
+
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.TaliMultiHeadeds)
+                        {
+                            <tr>
+                                <td>@item.UnloadingStageCount سره</td>
+                                <td>@item.TaliCount.ToPrice()</td>
+                                <td>@item.TotalWeight.ToPrice()</td>
+                                <td>@item.TaliWeight.ToPrice()</td>
+
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <div class="alert alert-info">هیچ داده‌ای برای چند سره موجود نیست.</div>
+            }
+        </div>
+    </div>
+</div>
+
+
+<!-- Table 2: TaliLaborGroups -->
+<div class="card">
+    <div class="card-header pb-0 bg-white">
+        <h5 class="fw-bold mb-3 fs-6">بخش 2 – عملکرد گروه کارگری</h5>
+    </div>
+    <div class="card-body pt-0">
+        <div class="">
+            @if (Model.TaliLaborGroups?.Any() == true)
+            {
+                <table class="table table-bordered text-center">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>عنوان گروه</th>
+                            <th>تعداد تالی</th>
+
+                            <th>قیمت گروه</th>
+                            <th>وزن بارنامه(میانگین)</th>
+                            <th>وزن باسکول</th>
+
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.TaliLaborGroups)
+                        {
+                            <tr>
+                                <td>@item.LaborWorkingGroupTitle </td>
+                                <td>@item.TaliCount</td>
+
+                                <td>@item.LaborWorkingGroupPrice.ToPrice()</td>
+                                <td>@item.TotalWeight.ToPrice()</td>
+                                <td>@item.TaliWeight.ToPrice()</td>
+
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <div class="alert alert-info">هیچ گروه کارگری ثبت نشده است.</div>
+            }
+        </div>
+    </div>
+</div>
+
+
+<!-- Table 3: TaliFullTimeTransportations -->
+<div class="card">
+    <div class="card-header pb-0 bg-white">
+        <h5 class="fw-bold mb-3 fs-6">بخش 3 – حمل یکسره یا ورود به انبار</h5>
+    </div>
+    <div class="card-body pt-0">
+        <div>
+            @if (Model.TaliFullTimeTransportations?.Any() == true)
+            {
+                <table class="table table-bordered text-center">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>نوع تخلیه</th>
+                            <th>تعداد تالی</th>
+                            <th>وزن بارنامه(میانگین)</th>
+                            <th>وزن باسکول</th>
+
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.TaliFullTimeTransportations)
+                        {
+                            <tr>
+                                <td>@item.ServiceUnLoadTypeTitle</td>
+                                <td>@item.TaliCount.ToPrice()</td>
+                                <td>@item.TotalWeight.ToPrice()</td>
+                                <td>@item.TaliWeight.ToPrice()</td>
+
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <div class="alert alert-info">داده‌ای برای حمل و نقل تمام‌وقت یافت نشد.</div>
+            }
+        </div>
+    </div>
+</div>
+
+
+<!-- Table 4: Gear -->
+<div class="card">
+    <div class="card-header pb-0 bg-white">
+        <h5 class="fw-bold mb-3 fs-6">بخش 4 – عملکرد تجهیزات</h5>
+    </div>
+    <div class="card-body pt-0">
+        <div>
+            @if (Model.TaliFullTimeTransportations?.Any() == true)
+            {
+                <table class="table table-bordered text-center">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>نام تجهیز</th>
+                            <th>تعداد تالی</th>
+
+                            <th>وزن بارنامه(میانگین)</th>
+                            <th>وزن باسکول</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.TaliGearGroups)
+                        {
+                            <tr>
+                                <td>@item.EquipmentTitle</td>
+                                <td>@item.TaliCount.ToPrice()</td>
+
+                                <td>@item.TotalWeight.ToPrice()</td>
+                                <td>@item.TaliWeight.ToPrice()</td>
+
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <div class="alert alert-info">داده‌ای برای تجهیزات یافت نشد.</div>
+            }
+        </div>
+    </div>
+</div>
+
+
+<!-- Table 5: Gear -->
+<div class="card">
+    <div class="card-header pb-0 bg-white">
+        <h5 class="fw-bold mb-3 fs-6">بخش 5 – کالاهای درون بارنامه</h5>
+    </div>
+    <div class="card-body pt-0">
+        <div>
+            @if (Model.TaliProductGroups?.Any() == true)
+            {
+                <table class="table table-bordered text-center">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>نام کالا</th>
+                            <th>تعداد در بارنامه</th>
+                            <th>شمارش اسکله</th>
+                            <th>باقی مانده اسکله</th>
+                            <td>تعداد کامیون</td>
+                            <td>وزن بارنامه(میانگین)</td>
+                            <td>وزن باسکول</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.TaliProductGroups)
+                        {
+                            <tr>
+                                <td>@item.ProductTitle</td>
+                                <td>@item.SeoProductCount.ToPrice()</td>
+                                <td>@item.ProductTaliCount.ToPrice()</td>
+                                <td>@((item.SeoProductCount - item.ProductTaliCount).ToPrice())</td>
+                                <td>@item.TaliCount.ToPrice()</td>
+                                <td>@item.TotalWeight.ToPrice()</td>
+                                <td>@item.TaliWeight.ToPrice()</td>
+
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <div class="alert alert-info">داده‌ای برای کالای درون بارنامه یافت نشد.</div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Table 6: SeparatedOrSorted -->
+<div class="card">
+    <div class="card-header pb-0 bg-white">
+        <h5 class="fw-bold mb-3 fs-6">بخش 6 – وضعیت تالی ها تفکیک/صفافی </h5>
+    </div>
+    <div class="card-body pt-0">
+        <div>
+            @if (Model.TaliSeparatedOrSorted != null)
+            {
+                <table class="table table-bordered text-center">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>وضعیت تالی</th>
+                            <th>تعداد تالی</th>
+                            <td>وزن باسکول</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                        <tr>
+                            <td>@Model.TaliSeparatedOrSorted.Title</td>
+                            <td>@Model.TaliSeparatedOrSorted.TaliCount.ToPrice()</td>
+                            <td>@Model.TaliSeparatedOrSorted.TaliWeight.ToPrice()</td>
+                        </tr>
+
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <div class="alert alert-info">داده‌ای برای وضعیت تالی ها تفکیک/صفافی یافت نشد.</div>
+            }
+        </div>
+    </div>
+</div>
+

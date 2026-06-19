@@ -1,0 +1,179 @@
+﻿@model PageResult<FpnDeviceListDto>
+@{
+    ViewData["Title"] = "لیست دستگاه ها";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+    int i = ((Model.PageNumber - 1) * Model.PageSize) + 1;
+}
+
+<div class="col-lg-12">
+    <div class="card">
+        <div class="card-header">
+            <div class="d-flex justify-content-between">
+                
+                    <h3 class="title">
+                        <i class="icon-frane"></i> لیست دستگاه ها
+                    </h3>
+
+               <div>
+
+                    <a class="btn rounded btn-primary" onclick="createDevice();"><i class="fa-solid fa-plus me-2"></i>دستگاه جدید  </a>
+                    
+               </div>
+                <!-- /.buttons-box -->
+            </div>
+            <!-- /.portlet-heading -->
+            <!-- /.portlet-body -->
+        </div>
+        <div class="card-body pt-0">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover table-striped" id="data-table">
+                    <thead class="bg-primary">
+                        <tr>
+                            <th>ردیف</th>
+                            <th>نام دستگاه</th>
+                            <th>سریال دستگاه</th>
+                            <th>تعداد رادیو</th>
+                            <th>وضعیت</th>
+                            <th>اخرین تاریخ</th>
+                            <td>وضعیت</td>
+
+                            <td>عملیات</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+
+                        @foreach (var item in Model.Data)
+                        {
+                            <tr>
+                                <td class="align-middle" >@(i++)</td>
+                                <td class="align-middle" >@item.Name</td>
+                                <td class="align-middle" >@item.Sn</td>
+                                <td class="align-middle" >@item.RadioCount</td>
+                                <td class="align-middle" >@item.FpnDeviceStatusTitle</td>
+                                <td class="align-middle" >@item.LastDateConnect</td>
+                                <td class="align-middle" >
+                                    <a id="Activation@(i)" onclick="ShowQAlert(event,'Activation@(i)');"
+                                       asp-action="ActivationDevice" asp-route-DeviceId="@item.Id">
+                                        <span class="label rounded px-2 py-1 label-@(item.IsActive?"success":"danger")">
+                                            @(item.IsActive ? "فعال" : "غیر فعال")
+                                        </span>
+                                    </a>
+                                </td>
+
+
+                                <td class="d-flex justify-content-first">
+                                    <div class="dropdown-basic">
+                                        <div class="dropdown">
+                                            <div class="btn-group mb-0">
+                                                <button class="dropbtn btn-light rounded" type="button"><i data-feather="chevron-down" class="text-info"></i></button>
+                                                <div class="dropdown-content">
+
+                                                    <a onclick="editDevice('@item.Id');"><i class="icon-pencil"></i> ویرایش</a>
+
+                                                    <a asp-action="DeviceRadios" asp-route-deviceId="@item.Id">مدیریت رادیوها</a>
+
+                                                    <a id="DeleteDevice@(i)" onclick="ShowQAlert(event,'DeleteDevice@(i)');" asp-action="DeleteDevice" asp-route-deviceId="@item.Id"><i class="icon-trash fa-flip-horizontal"> </i> حذف</a>
+
+                                                </div><!-- /.btn-group -->
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+
+                            </tr>
+
+                        }
+
+
+
+                    </tbody>
+                </table>
+                <div>
+                    <cs-pager cs-paging-pagesize="@Model.PageSize"
+                              cs-paging-pagenumber="@Model.PageNumber"
+                              cs-paging-totalitems="@Model.TotalItems"
+                              cs-paging-maxpageritems="10"
+                              cs-pagenumber-param="p"
+                              cs-show-first-last="true"
+                              cs-suppress-empty-nextprev="true"
+                              cs-suppress-inactive-firstlast="true"
+                              cs-show-numbered="true"
+                              cs-first-page-text="ابتدا"
+                              cs-last-page-text="انتها"
+                              cs-next-page-title="بعدی"
+                              cs-previous-page-title="قبلی"
+                              cs-first-page-title="ابتدا"
+                              cs-last-page-title="انتها"
+                              cs-next-page-text="بعدی"
+                              cs-previous-page-text="قبلی"
+                              cs-pager-li-current-class="page-item active"
+                              cs-pager-li-other-class="page-item"
+                              cs-pager-li-non-active-class="page-item disabled"
+                              cs-pager-link-current-class="page-link"
+                              cs-pager-link-other-class="page-link"
+                              asp-controller="Device"
+                              asp-action="Index">
+                    </cs-pager>
+                </div>
+
+            </div>
+            <!-- /.table-responsive -->
+        </div>
+        <!-- /.portlet -->
+    </div>
+</div>
+
+
+
+
+<div id="generalmodal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">ثبت دستگاه FPN</h4>
+                <button type="button" class="close btn-close rounded border" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="modalbody">
+
+                <partial name="_CreateDevice" model="new CreateDeviceDto{ IsActive = true}" />
+
+            </div>
+        </div>
+    </div>
+</div>
+
+@section script {
+
+    <script>
+        $(document).ready(function () {
+            //$('.select2').select2();
+            // $("#CreateWarehouseDoorDto_WarehouseId").select2({
+            //     dropdownParent: $('#generalmodal')
+            // });
+
+        });
+
+
+        function createDevice() {
+            $("#Name").val('');
+            $("#Sn").val('');
+            $("#Id").val('');
+            $("#IsActive").prop('checked', true);
+            $("#generalmodal").modal('show');
+        }
+
+        function editDevice(id) {
+
+            $.post("@Url.Action("GetDeviceById", "Device")", { deviceId: id })
+                .done(function (res) {
+                    $("#modalbody").html(res);
+                    $("#generalmodal").modal('show');
+                });
+        }
+
+
+
+    </script>
+}
+

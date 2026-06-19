@@ -1,0 +1,53 @@
+﻿@model VesselDetailDto
+@{
+    ViewData["Title"] = "جزئیات شناور";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+<div class="col-md-12">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header pb-2">
+                    <div class="d-flex justify-content-between">
+                        <h3 class="title">
+
+                            جزئیات @Model.Name
+                        </h3>
+                    </div>
+                </div>
+                @*جزئیات CHO*@
+                <div class="card-body px-0">
+                    <div class="table-responsive vh-100">
+                        <table class="table table-bordered table-striped table-hover">
+
+                            <tbody>
+                                <tr><td>نام شناور </td><td>@Model.Name</td></tr>
+                                <tr><td>بندر محل فعالیت </td><td>@Model.PortPortName</td></tr>
+                                <tr><td>قرارداد </td><td>@Model.Contract</td></tr>
+                                <tr><td>بندر ثبت </td><td>@Model.RegisterPort</td></tr>
+                                <tr><td>شماره آیمو </td><td>@Model.IMONo</td></tr>
+                                <tr><td>علامت خطاب </td><td>@Model.CallSign</td></tr>
+                                <tr><td>نوع شناور فارسی </td><td>@Model.PersianTypeOfVessel</td></tr>
+                                <tr><td>نوع شناور </td><td>@Model.TypeOfVessel</td></tr>
+                                <tr><td>محل ساخت شناور </td><td>@Model.PersianPlaceOfBuilt</td></tr>
+                                <tr><td>محل ساخت شناور </td><td>@Model.PlaceOfBuilt</td></tr>
+                                <tr><td>شرکت سازنده </td><td>@Model.CompanyOfBuilt</td></tr>
+                                <tr><td>تحت کلاس </td><td>@Model.PersianClassedBy</td></tr>
+                                <tr><td>تحت کلاس </td><td>@Model.ClassedBy</td></tr>
+                                <tr><td>ظرفیت ناخالص </td><td>@Model.GT</td></tr>
+                                <tr><td>ظرفیت خالص </td><td>@Model.NT</td></tr>
+                                <tr><td>طول سرتاسری </td><td>@Model.LengthOveral</td></tr>
+                                <tr><td>عرض میانی </td><td>@Model.MouldedBreadth</td></tr>
+                                <tr><td>عمق </td><td>@Model.MouldedDepth</td></tr>
+                                <tr><td>مالک </td><td>@Model.Owner</td></tr> 
+                                <tr><td>وضعیت </td><td>@Model.EquipmentStatus</td></tr> 
+                            </tbody>
+                        </table>
+                    </div><!-- /.table-responsive -->
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

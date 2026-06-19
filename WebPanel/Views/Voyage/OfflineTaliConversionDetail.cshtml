@@ -1,0 +1,342 @@
+@model OfflineTaliConversionDetailDto
+@{
+    ViewData["Title"] = "تبدیل تالی آفلاین";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+<div class="card p-2 mb-4">
+    <div class="row">
+        <div class="col-md-1 align-middle align-content-center px-4">
+            <i class="fa-solid fa-circle-info fs-4 align-middle"></i>
+        </div>
+        <div class="col-md-11 px-5">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="glass-bg px-2 py-1">
+                    <p class="fs-6 m-0"> @Model.VogageInfo?.ShipShipName </p>
+                </div>
+                <div>
+                    <p class="fs-6 m-0"> @Model.VogageInfo?.CompanyShippingCompanyName </p>
+                </div>
+                <div>
+                    <p class="fs-6 m-0">شماره سفر: @Model.VogageInfo?.VoyageNumber</p>
+                </div>
+                <div>
+                    <p class="fs-6 m-0">شماره دریایی: @Model.VogageInfo?.PmoNumber</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h3 class="title m-0"><i class="icon-frane"></i> تبدیل تالی آفلاین</h3>
+        <a asp-action="OfflineTaliConversionPage" asp-route-voyageId="@Model.VoyageId" class="btn btn-secondary">بازگشت</a>
+    </div>
+    <div class="card-body">
+        <div class="alert alert-secondary">
+            <div class="row">
+                <div class="col-md-3"><strong>پلاک:</strong> @(Model.TruckId != null ? (Model.TruckCarPlates ?? Model.CarPlates) : Model.CarPlates)</div>
+                <div class="col-md-3"><strong>نوع پلاک:</strong> @Model.CarTypePlates</div>
+                <div class="col-md-3"><strong>کد منطقه:</strong> @Model.CarPlatesAreaCode</div>
+                <div class="col-md-3"><strong>اپراتور:</strong> @Model.PersonelFullName</div>
+            </div>
+            <div class="row mt-2">
+                <div class="col-md-3"><strong>چپ:</strong> @Model.CarPlatesLeft</div>
+                <div class="col-md-3"><strong>حرف:</strong> @Model.CarPlatesMiddle</div>
+                <div class="col-md-3"><strong>راست:</strong> @Model.CarPlatesRight</div>
+            </div>
+        </div>
+
+        <form asp-action="ConvertOfflineTali" method="post">
+            <input type="hidden" name="VoyageId" value="@Model.VoyageId" />
+            <input type="hidden" name="OfflineTaliId" value="@Model.OfflineTaliId" />
+
+            <input type="hidden" id="ParentTaliId" name="ParentTaliId" />
+
+            <div class="mb-3">
+                <label class="form-label">انتخاب تالی والد (اسکله)</label>
+                <div>
+                    <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#parentTaliModal">
+                        انتخاب تالی والد
+                    </button>
+                    <span id="selectedParentSummary" class="ms-3 text-muted"></span>
+                </div>
+            </div>
+
+            <div class="table-responsive mt-4">
+                <table class="table table-striped align-middle">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>کالا (SEO)</th>
+                            <th>توضیحات</th>
+                            <th>تعداد</th>
+                            <th>تعداد مشکل</th>
+                            <th>انبار</th>
+                            <th>قطعه انبار</th>
+                            <th>کالای والد</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (int i = 0; i < (Model.OfflineProducts?.Count ?? 0); i++)
+                        {
+                            var op = Model.OfflineProducts[i];
+                            <tr>
+                                <td>@(i + 1)</td>
+                                <td>@op.SeoProductTitle</td>
+                                <td>@op.Description</td>
+                                <td>@op.Count</td>
+                                <td>@op.CountProblem</td>
+                                <td>@op.WarehouseName</td>
+                                <td>@op.WarehouseSegmentName</td>
+                                <td>
+                                    <input type="hidden" name="Mappings[@i].OfflineTaliProductId" value="@op.OfflineTaliProductId" />
+                                    <select name="Mappings[@i].ParentTaliProductId" class="form-select mapping-select" data-index="@i" required disabled>
+                                        <option value="">-- ابتدا تالی والد را انتخاب کنید --</option>
+                                    </select>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="mt-3">
+                <button type="submit" class="btn btn-success">ثبت تبدیل</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Parent Tali Modal -->
+<div id="parentTaliModal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">انتخاب تالی والد (اسکله)</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="d-flex flex-wrap gap-2 mb-3 align-items-center">
+                    <input type="text" id="parentSearch" class="form-control" style="max-width: 320px;" placeholder="جستجو (پلاک یا اپراتور)..." />
+                    <label class="ms-2 mb-0">مرتب‌سازی بر اساس:</label>
+                    <select id="parentSortKey" class="form-select" style="max-width: 200px;">
+                        <option value="date">تاریخ</option>
+                        <option value="plate">پلاک</option>
+                        <option value="operator">اپراتور</option>
+                    </select>
+                    <select id="parentSortDir" class="form-select" style="max-width: 160px;">
+                        <option value="desc">نزولی</option>
+                        <option value="asc">صعودی</option>
+                    </select>
+                </div>
+                <div class="row g-3" id="parentTaliListModal">
+                    @foreach (var p in Model.ParentTaliOptions)
+                    {
+                        <div class="col-12">
+                            <div class="card parent-tali-card" data-tali-id="@p.TaliId" data-summary="@p.DisplayTitle - @p.PersonelFullName - @p.CreatedDate.ToShortPersianDateTimeString()" data-plate="@p.DisplayTitle" data-operator="@p.PersonelFullName" data-date="@p.CreatedDate.ToUnixTimeSeconds()">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <strong>پلاک:</strong> @p.DisplayTitle
+                                        <span class="mx-2">|</span>
+                                        <strong>اپراتور:</strong> @p.PersonelFullName
+                                        <span class="mx-2">|</span>
+                                        <strong>تاریخ:</strong> @p.CreatedDate.ToShortPersianDateTimeString()
+                                    </div>
+                                    <button type="button" class="btn btn-outline-primary btn-sm" onclick="selectParentTali('@p.TaliId', this)">انتخاب</button>
+                                </div>
+                                <div class="card-body p-2">
+                                    <div class="table-responsive">
+                                        <table class="table table-sm table-striped mb-0">
+                                            <thead>
+                                                <tr>
+                                                    <th>کالا (SEO)</th>
+                                                    <th>انبار کشتی</th>
+                                                    <th>تعداد</th>
+                                                    <th>تعداد مشکل</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach (var pp in p.Products)
+                                                {
+                                                    <tr>
+                                                        <td>@pp.SeoProductTitle</td>
+                                                        <td>@pp.ShipWarehouseNumber</td>
+                                                        <td>@pp.Count</td>
+                                                        <td>@pp.CountProblem</td>
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">بستن</button>
+            </div>
+        </div>
+    </div>
+    
+</div>
+
+@section script {
+    <script>
+        // Build a simple map of parent tali -> products
+        const parentTaliData = @Html.Raw(JsonConvert.SerializeObject(Model.ParentTaliOptions.Select(x => new {
+            x.TaliId,
+            Products = x.Products?.Select(p => new { p.TaliProductId, p.SeoProductTitle, p.ShipWarehouseNumber, p.Count, p.CountProblem }).ToList()
+        })));
+
+        const parentMap = {};
+        for (const item of parentTaliData) {
+            parentMap[item.TaliId] = item.Products || [];
+        }
+
+        function selectParentTali(taliId, btn) {
+            // set hidden
+            document.getElementById('ParentTaliId').value = taliId;
+
+            // update selected summary
+            // clear highlight from all cards then highlight selected
+            document.querySelectorAll('.parent-tali-card').forEach(c => c.classList.remove('border','border-2','border-primary'));
+            const selectedCard = document.querySelector(`.parent-tali-card[data-tali-id="${taliId}"]`);
+            if (selectedCard) {
+                selectedCard.classList.add('border', 'border-2', 'border-primary');
+                const summary = selectedCard.getAttribute('data-summary');
+                document.getElementById('selectedParentSummary').textContent = summary || '';
+            }
+
+            // rebuild mapping selects to only show products of selected parent
+            const products = parentMap[taliId] || [];
+            document.querySelectorAll('.mapping-select').forEach(sel => {
+                sel.innerHTML = '';
+                const optEmpty = document.createElement('option');
+                optEmpty.value = '';
+                optEmpty.textContent = '-- انتخاب --';
+                sel.appendChild(optEmpty);
+
+                for (const p of products) {
+                    const opt = document.createElement('option');
+                    opt.value = p.TaliProductId;
+                    opt.textContent = `${p.SeoProductTitle} (انبار کشتی: ${p.ShipWarehouseNumber} | تعداد: ${p.Count} | مشکل: ${p.CountProblem})`;
+                    sel.appendChild(opt);
+                }
+
+                sel.value = '';
+                sel.disabled = false;
+            });
+
+            // close modal
+            const modalEl = document.getElementById('parentTaliModal');
+            const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+            modal.hide();
+        }
+
+        // auto open modal on first load if not selected
+        (function(){
+            const parentId = document.getElementById('ParentTaliId').value;
+            if(!parentId){
+                const modalEl = document.getElementById('parentTaliModal');
+                const modal = new bootstrap.Modal(modalEl, { backdrop: 'static', keyboard: false });
+                modal.show();
+            }
+        })();
+        // simple client-side validation
+        (function(){
+            const form = document.querySelector('form[asp-action="ConvertOfflineTali"]') || document.querySelector('form');
+            if(!form) return;
+            form.addEventListener('submit', function(e){
+                const parentId = document.getElementById('ParentTaliId').value;
+                if(!parentId){
+                    e.preventDefault();
+                    alert('ابتدا تالی والد را انتخاب کنید');
+                    return false;
+                }
+                const selects = document.querySelectorAll('.mapping-select');
+                for(const sel of selects){
+                    if(sel.disabled || !sel.value){
+                        e.preventDefault();
+                        alert('برای تمامی اقلام، کالای والد را انتخاب کنید');
+                        return false;
+                    }
+                }
+            });
+        })();
+
+        // Search and sort within modal (stable list + digit normalization)
+        (function(){
+            const container = document.getElementById('parentTaliListModal');
+            const searchInput = document.getElementById('parentSearch');
+            const sortKeySel = document.getElementById('parentSortKey');
+            const sortDirSel = document.getElementById('parentSortDir');
+
+            // Keep a stable copy of ALL rows so we can restore after filtering
+            const allRows = Array.from(container.querySelectorAll(':scope > .col-12'));
+
+            // Normalize function to handle Persian/Arabic digits and spaces
+            const normalize = (s) => {
+                if(!s) return '';
+                // Eastern Arabic-Indic ۰۱۲۳۴۵۶۷۸۹ and Arabic-Indic ٠١٢٣٤٥٦٧٨٩
+                return s
+                    .replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d))
+                    .replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d))
+                    .toLowerCase()
+                    .trim();
+            };
+
+            function applyFilterSort(){
+                const termRaw = (searchInput?.value || '');
+                const term = normalize(termRaw);
+                const key = (sortKeySel?.value || 'date');
+                const dir = (sortDirSel?.value || 'desc');
+
+                // filter against the STABLE full list
+                const filtered = allRows.filter(row => {
+                    const card = row.querySelector('.parent-tali-card');
+                    const plate = normalize(card?.dataset.plate || '');
+                    const oper = normalize(card?.dataset.operator || '');
+                    if(!term) return true;
+                    return plate.includes(term) || oper.includes(term);
+                });
+
+                // sort
+                filtered.sort((a,b) => {
+                    const ca = a.querySelector('.parent-tali-card');
+                    const cb = b.querySelector('.parent-tali-card');
+                    let va, vb;
+                    if(key === 'date'){
+                        va = parseInt(ca?.dataset.date || '0');
+                        vb = parseInt(cb?.dataset.date || '0');
+                    } else if(key === 'plate'){
+                        va = normalize(ca?.dataset.plate || '');
+                        vb = normalize(cb?.dataset.plate || '');
+                    } else { // operator
+                        va = normalize(ca?.dataset.operator || '');
+                        vb = normalize(cb?.dataset.operator || '');
+                    }
+                    if(va < vb) return dir === 'asc' ? -1 : 1;
+                    if(va > vb) return dir === 'asc' ? 1 : -1;
+                    return 0;
+                });
+
+                // clear and re-append filtered set
+                container.innerHTML = '';
+                for(const row of filtered){
+                    container.appendChild(row);
+                }
+            }
+
+            if(searchInput && sortKeySel && sortDirSel){
+                searchInput.addEventListener('input', applyFilterSort);
+                sortKeySel.addEventListener('change', applyFilterSort);
+                sortDirSel.addEventListener('change', applyFilterSort);
+                applyFilterSort();
+            }
+        })();
+    </script>
+}

@@ -1,0 +1,156 @@
+@model ContractPeriodPageDto
+
+@{
+    ViewData["Title"] = "مدیریت دوره های تعرفه";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+    int i = 1;
+}
+
+<div class="col-lg-12">
+    <div class="card">
+        <div class="card-header pb-0">
+            <div class="d-flex justify-content-between mb-3">
+                <h3 class="title">
+                    مدیریت دوره های تعرفه
+                </h3>
+
+                <a class="btn btn-success d-md-block d-none" style="border-radius:5px; margin:0px 10px" onclick="showCreatePeriodModal()">
+                    <i class="icon-plus align-middle"></i>
+                    دوره جدید
+                </a>
+            </div>
+
+            <form asp-action="List" method="get" class="row g-2">
+                <div class="col-md-4">
+                    <input type="text" name="filter.Search" value="@Model.Filter?.Search" class="form-control" placeholder="جستجو عنوان" />
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary">اعمال</button>
+                </div>
+            </form>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive vh-100">
+                <table class="table table-bordered table-hover table-striped">
+                    <thead class="bg-primary text-white">
+                    <tr>
+                        <th>ردیف</th>
+                        <th>عنوان</th>
+                        <th>تاریخ شروع</th>
+                        <th>تاریخ پایان</th>
+                        <th>اقدامات</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var item in Model.Data)
+                    {
+                        <tr>
+                            <td>@(i++)</td>
+                            <td>@item.Title</td>
+                            <td>@item.StartDateFa</td>
+                            <td>@item.EndDateFa</td>
+                            <td>
+                                <a class="btn btn-warning px-2 btn-sm btn-icon curve" onclick="editPeriod('@item.Id');"><i class="icon-pencil align-middle fs-7"></i></a>
+
+                                <a class="btn btn-info px-2 btn-sm btn-icon curve" onclick="showCopyModal('@item.Id');"><i class="fa fa-copy align-middle fs-7"></i></a>
+
+                                <a id="DeletePeriod@(i)" onclick="showDeleteModal('@item.Id');"
+                                   class="btn btn-danger btn-sm btn-icon px-2 ms-1">
+                                    <i class="icon-trash fs-6 align-middle fa-flip-horizontal"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div id="contractPeriodModal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered ">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">مدیریت دوره</h4>
+                <button type="button" class="close btn-close rounded border" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <partial name="_CreateContractPeriod" model="@Model.Create" />
+            </div>
+            <div class="modal-footer mt-4 px-3" id="createModalFooter">
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">بستن</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Copy Modal -->
+<div id="copyContractPeriodModal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">کپی دوره تعرفه</h4>
+                <button type="button" class="close btn-close rounded border" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="copyModalBody">
+                
+            </div>
+            <div class="modal-footer" id="copyModalFooter">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">بستن</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Modal -->
+<div id="deleteContractPeriodModal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered ">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">حذف دوره تعرفه</h4>
+                <button type="button" class="close btn-close rounded border" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="deleteModalBody">
+
+            </div>
+        </div>
+    </div>
+</div>
+
+@section script {
+    <script>
+        function showCreatePeriodModal() {
+            $.post("@Url.Action("GetById", "ContractPeriod")", { contractPeriodId: "00000000-0000-0000-0000-000000000000" })
+                .done(function (res) {
+                    $("#modalBody").html(res);
+                    $("#contractPeriodModal").modal('show');
+                });
+        }
+
+        function editPeriod(id) {
+            $.post("@Url.Action("GetById", "ContractPeriod")", { contractPeriodId: id })
+                .done(function (res) {
+                    $("#modalBody").html(res);
+                    $("#contractPeriodModal").modal('show');
+                });
+        }
+
+        function showCopyModal(id) {
+            $.get("@Url.Action("GetCopyPeriod", "ContractPeriod")", { originalContractPeriodId: id })
+                .done(function (res) {
+                    $("#copyModalBody").html(res);
+                    $("#copyContractPeriodModal").modal('show');
+                });
+        }
+
+        function showDeleteModal(id) {
+            $.get("@Url.Action("GetDeleteInfo", "ContractPeriod")", { contractPeriodId: id })
+                .done(function (res) {
+                    $("#deleteModalBody").html(res);
+                    $("#deleteContractPeriodModal").modal('show');
+                });
+        }
+    </script>
+}

@@ -1,0 +1,157 @@
+﻿@model AllocationOfEquServicePageDto
+@{
+    int j = 1;
+}
+
+
+<div id="listEqupmentService">
+    <div class="card">
+
+        <div class="card-header">
+            <div class="d-flex justify-content-between">
+                <h3 class="title">
+                    <i class="icon-frane"></i> لیست سرویس/خدمات این درخواست
+                </h3>
+            </div>
+            <div class="d-flex justify-content-between align-items-end mt-3">
+                @if (Model?.CanChangeService == true)
+                {
+                    <form asp-action="SaveCreditorPrice" asp-controller="AllocationOfEquipment" method="post">
+                        <input asp-for="AllocationOfEquId" hidden />
+                        <div class="d-flex align-items-center">
+                            <p dir="rtl" class="m-0 pe-2">بستانکاری صاحب کالا (ريال) </p>
+                            <div class="d-flex">
+                                <input name="RedirectPage" type="number" value="1" hidden />
+                                <price-input asp-for="CreditorPrice" placeholder="به ریال"></price-input>
+                                <button class="btn btn-primary rounded px-2 mx-2 w-50" type="submit"> ثبت </button>
+                            </div>
+                        </div>
+
+                    </form>
+                }
+                else
+                {
+                    <p class="m-0 pe-2 ms-1">  بستانکاری صاحب کالا: <span class="fw-bold mx-2 text-success">@Model.CreditorPriceTitle  ریال</span> </p>
+                }
+
+                <div class="">
+                    @if (Model?.CanChangeService == true)
+                    {
+                        <a class="btn btn-success mx-1 rounded-3" onclick="AddEquipment();">
+                            <i class="icon-plus"></i>
+                            ثبت سرویس/خدمات
+                        </a>
+                    }
+
+                    @if (Model?.CanChangeService == true && Model?.List?.Any() == true)
+                    {
+                        <a id="EndAllocationId" class="btn btn-warning mx-1 rounded-3" onclick="EndAllocation(event, '@Model.AllocationOfEquId');"><i class="fas fa-check align-middle me-2"></i>اتمام تخصیص و صدور صورتحساب   </a>
+                    }
+                    else if (Model?.CanChangeService == false && Model?.List?.Any() == true
+                    && Model.State == AllocationEquipmentState.Finish)
+                    {
+                        <a id="GoBackToCompletingEndStateId" style="border-radius:5px; margin:0px 10px" class="btn btn-success" onclick="GoBackToCompletingEndState(event, '@Model.AllocationOfEquId');"> ویرایش صورتحساب  </a>
+                    }
+                </div>
+            </div>
+
+            <!-- /.portlet-title -->
+            <div class="buttons-box">
+
+                <i class="icon-size-fullscreen"></i>
+                <div class="paper-ripple">
+                    <div class="paper-ripple__background"></div>
+                    <div class="paper-ripple__waves"></div>
+                </div>
+            </div>
+            <!-- /.buttons-box -->
+            <!-- /.portlet-heading -->
+        </div>
+
+
+
+        <div class="card-body pt-0">
+            <div class="table-responsive">
+                <table class="table table-sm table-bordered table-hover table-striped" id="data-table">
+                    <thead class="bg-primary">
+                        <tr>
+                            <td style="width: 5%">ردیف</td>
+
+                            <th class="align-middle px-2 text-center">شرح کالا/خدمات</th>
+                            <th class="align-middle px-2 text-center">ضریب</th>
+                            <th class="align-middle px-2 text-center">تعداد/مقدار</th>
+                            <th class="align-middle px-2 text-center">تناژ/حجم</th>
+                            <th class="align-middle px-2 text-center">قیمت واحد-ريال</th>
+                            <th class="align-middle px-2 text-center">قیمت کل</th>
+                            <th class="align-middle px-2 text-center">درصد سهم شرکت</th>
+
+                            <th class="align-middle px-2 text-center">مبلغ شرکت</th>
+                            <th class="align-middle px-2 text-center">مبلغ سازمان</th>
+                            <th>جمع تعرفه مشارکت</th>
+
+                            <td>عملیات</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model?.List?.Any() == true)
+                        {
+                            foreach (var item in Model?.List)
+                            {
+                                <tr>
+                                    <td class="align-middle px-2 text-center">@(j++)</td>
+                                    <td class="align-middle px-2 text-center">@item.Description </td>
+                                    <td class="align-middle px-2 text-center">@item.Zarib</td>
+                                    <td class="align-middle px-2 text-center">@item.Count.ToPrice()</td>
+                                    <td class="align-middle px-2 text-center">@item.LargerWeightOrVolume.ToPrice()</td>
+
+                                    <td class="align-middle px-2 text-center">@item.PriceOne.ToPrice()</td>
+                                    <td class="align-middle px-2 text-center">@item.SumPrice.ToPrice()</td>
+                                    <td class="align-middle px-2 text-center">@item.PercentCompany</td>
+
+
+                                    <td class="align-middle px-2 text-center">@item.TotalPriceCompany.ToPrice()</td>
+                                    <td class="align-middle px-2 text-center">@item.TotalPriceOrg.ToPrice()</td>
+                                    <td class="align-middle px-2 text-center">@item.TotalPriceMosharekat.ToPrice()</td>
+
+
+                                    <td class="align-middle px-2 text-center">
+                                        @if (Model.CanChangeService)
+                                        {
+                                            <a class="btn btn-warning px-2 btn-sm btn-icon curve" onclick="editEquipment('@item.Id');"><i class="icon-pencil align-middle fs-6"></i></a>
+
+                                            <a onclick="DeleteEquService(event, '@item.Id');" class="btn btn-danger btn-sm btn-icon curve px-2 btn-questions">
+                                                <i class="icon-trash fs-6 align-middle fa-flip-horizontal"></i>
+                                            </a>
+                                        }
+
+                                    </td>
+                                </tr>
+                            }
+                        }
+
+
+
+
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+    </div>
+
+
+    @if (Model.State != AllocationEquipmentState.CompletingEnd)
+    {
+        <p class="m-b-10">
+            <span class="label fw-bold rounded px-2 py-1 label-warning">وضعیت تخصیص اجازه ویرایش سرویس ها را نمی دهد. وضعیت فعلی : @Model.StateTitle</span>
+        </p>
+    }
+
+
+</div>
+
+
+
+
+
+

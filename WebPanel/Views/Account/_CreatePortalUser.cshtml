@@ -1,0 +1,171 @@
+﻿@model CreatePanelUserPageDto
+
+
+
+<form asp-action="CreatePortalUser" enctype="multipart/form-data" method="post" id="UserForm">
+    <input asp-for="CreateUser.Id" type="hidden" />
+    <div class="card-body pt-0">
+
+        <div class="form-body">
+            <div class="col-md-12 ">
+                <div class="row gy-4">
+
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>نام </label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" asp-for="CreateUser.FirstName">
+                                <span asp-validation-for="CreateUser.FirstName" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>نام خانوادگی </label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" asp-for="CreateUser.LastName">
+                                <span asp-validation-for="CreateUser.LastName" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>شماره موبایل </label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" asp-for="CreateUser.Phone">
+                                <span asp-validation-for="CreateUser.Phone" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="UsernameInput" class="col-md-6">
+                        <div class="form-group">
+                            <label>نام کاربری </label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" asp-for="CreateUser.UserName">
+                                <span asp-validation-for="CreateUser.UserName" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div id="passwordInput" class="col-md-12">
+                        <div class="form-group">
+                            <label>رمز عبور </label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" asp-for="CreateUser.Password">
+                                <div style="text-align:left !important ; direction:ltr !important">
+                                    <span asp-validation-for="CreateUser.Password" class="text-danger"></span>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-12">
+                        <div class=" form-group">
+                            <label> بندر  </label>
+                            <div class="input-group">
+                                <select style="width:500px !important" class="form-control  select2" asp-for="CreateUser.PortDefaultId"
+                                        asp-items="@Model.Ports">
+                                </select>
+                                <span asp-validation-for="CreateUser.PortDefaultId" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+
+
+                    <div id="isActiveInput" class="col-md-6">
+                        <div class="input-group activeor">
+                            <label>
+                                <input type="checkbox" asp-for="CreateUser.IsActive" class="normal">
+                                فعال/غیرفعال
+                            </label>
+                        </div>
+                    </div>
+
+
+                </div>
+            </div>
+
+
+            <div class="col-sm-12">
+                <h4>مجوزهای دسترسی</h4>
+                <hr />
+                <div class="row">
+                    @foreach (var item in Model.Roles)
+                    {
+
+                        <div class="col-md-6 col-sm-12">
+
+                            <div class="form-check form-check-flat form-check-primary">
+                                <label class="form-check-label">
+                                    <input type="checkbox"
+                                           name="CreateUser.SelectedRole"
+                                           value="@item.Name"
+                                           class="form-check-input"
+                                           checked="@(Model.CreateUser.SelectedRole?.Contains(item.Name) == true ?true :false)">
+                                    @item.Title
+                                    <i class="input-frame"></i>
+                                </label>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="modal-footer px-0">
+                <a href="#" onclick="saveForm(event);" class="btn btn-success btn-round">ذخیره</a>
+                <button type="button" class="btn btn-danger btn-round" data-bs-dismiss="modal">بازگشت</button>
+            </div>
+        </div>
+
+    </div>
+
+</form>
+
+
+  <script src="~/assets/js/validation/jquery.validate.min.js"></script>
+ <script src="~/assets/js/validation/jquery.validate.unobtrusive.min.js"></script>
+
+
+
+<script src="~/assets/plugins/select2/dist/js/select2.full.min.js"></script>
+<script src="~/assets/plugins/select2/dist/js/i18n/fa.js"></script>
+<script src="~/assets/js/pages/select2.js"></script>
+
+
+<script>
+    $(document).ready(function () {
+        $('.select2').select2();
+        $("#CreateUser_PortDefaultId").select2({
+            dropdownParent: $('#generalmodal')
+        });
+
+        $("#CreateUser_PortDefaultId").trigger('change');
+
+
+    });
+
+    function saveForm(event) {
+        console.log(event);
+        event.preventDefault(); // غیرفعال کردن عملکرد پیشفرض href
+
+        var len = $("input:checkbox[name='CreateUser.SelectedRole']:checked").length;
+        console.log(len);
+        if (len <= 0 || len == undefined) {
+
+            showAlert2('حداقل یک مجوز دسترسی را انتخاب کنید',1);
+        }
+        else {
+
+            $("#UserForm").submit();
+        }
+
+    }
+
+
+
+</script>

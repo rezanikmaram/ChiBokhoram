@@ -1,0 +1,42 @@
+@model WarehouseReceiptOutboundLoadingLicensePageDto
+
+<div class="d-flex justify-content-between mb-3">
+    <h5>لیست مجوزهای بارگیری</h5>
+    <button class="btn btn-success rounded" onclick="showAddLoadingLicenseModal()">
+        <i class="fa-solid fa-plus"></i> ثبت مجوز بارگیری
+    </button>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-sm table-bordered table-hover table-striped" id="loading-licenses-table">
+        <thead class="bg-primary">
+            <tr>
+                <th style="width: 5%">#</th>
+                <th>شماره فاکتور</th>
+                <th>تاریخ اعتبار</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model?.List?.Any() == true)
+            {
+                int counter = 1;
+                foreach (var item in Model.List)
+                {
+                    <tr>
+                        <td class="align-middle px-2 text-center">@(counter++)</td>
+                        <td class="align-middle px-2 text-center">
+                            <a href="/SeoFactor/Details?factorId=@item.SeoFactorId" target="_blank">@item.SeoFactorNumberFactor</a>
+                        </td>
+                        <td class="align-middle px-2 text-center">@item.ExpiryDateFa</td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="3" class="text-center">هیچ مجوز بارگیری ثبت نشده است</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

@@ -1,0 +1,114 @@
+﻿@model TaliGroupByDayPageDto
+@{
+    ViewData["Title"] = "تالی ها به تفکیک روز";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+    int i = 1;
+}
+
+<div class="col-md-12">
+    <div class="p-3 rounded-3 bg-white shadow-sm">
+        <div class="d-flex justify-content-between">
+            <div>
+                <span class="fs-6">
+                    <i class="icon-frane"></i>
+                    <a asp-controller="Voyage" asp-action="VoyageSeo" asp-route-VoyageId="@Model.VoyageInfo.Id"><i class="fa-solid fa-right-to-bracket me-2"></i></a>
+                     تالی ها به تفکیک روز
+                </span>
+                <span class="label p-2 mx-2 rounded label-primary">@($"{Model.VoyageInfo.ShipShipName} - {Model.VoyageInfo.PmoNumber}")</span>
+                <span class="label p-2 mx-2 rounded label-info">@Model.VoyageInfo.TransportTypeTitle</span>
+            </div>
+
+            <div class="d-flex align-items-center">
+                @DateTimeOffset.Now.ToLongPersianDateString()
+                <i class="icon-calendar"></i>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="mt-3">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card rounded-3 min-height-600">
+                <div class="card-header pb-0">
+                    <div class="d-flex justify-content-between">
+                        <h3 class="title m-0">
+                            <i class="icon-speech"></i>
+
+                        </h3>
+                    </div>
+                    @* <form id="formFilter" asp-action="TruckManage" asp-route-VoyageId="@Model.FilterDto.VoyageId" method="post">
+                        <input asp-for="FilterDto.VoyageId" type="hidden" />
+                        <div class="form-body mb-4">
+
+                            <div class="row gy-4">
+                                <div class="form-group col-lg-5 ">
+                                    <label>جستجو</label>
+                                    <div class="input-group">
+                                        <input asp-for="FilterDto.Search" type="text" placeholder="نام/شناسه کامیون" class="form-control">
+                                    </div>
+                                </div>
+
+                                <div class="form-group col-lg-4 ">
+                                    <label>شرکت</label>
+                                    <div class="input-group">
+                                        <select class="form-control select2"
+                                                asp-for="FilterDto.CompanyId" asp-items="Model.Companies">
+                                            <option value="">همه شرکت ها</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-3 align-content-end ">
+                                    <button class="alert-icon btn w-100 btn-success label rounded mb-0" type="submit"><p class="mb-0">فیلتر</p></button>
+                                </div>
+                            </div>
+
+                        </div>
+                    </form> *@
+
+
+                </div>
+                <div class="card-body pt-0">
+                    <table id="TableUnSelected" class="table table-bordered ">
+                        <thead class="bg-primary">
+                            <tr>
+                                <th>ردیف</th>
+                                <th>شماره بارنامه </th>
+                                <th> صاحب کالا   </th>
+                                <th>تاریخ</th>
+                                <th>نوع انبار</th>
+                                <th>تعداد</th>
+                                <th>وزن</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+
+                            @foreach (var item in Model.TaliGroupByDay)
+                            {
+                                <tr>
+                                    <td>@(i++)</td>
+                                    <td>@item.BillOfLadingNumber</td>
+                                    <td>@item.OwnerCompanyName</td>
+                                    <td>@item.DateFa</td>
+                                      <td>@item.WarehouseStorageTypeTitle</td>
+                                    <td>@item.Count.ToPrice()</td>
+                                    <td>@item.Weight.ToPrice()</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+
+                    <!-- /.tab-content -->
+
+                </div><!-- /.portlet-body -->
+            </div>
+        </div>
+
+     </div>
+</div>
+ @section script {
+    <script>
+         
+
+    </script>
+}

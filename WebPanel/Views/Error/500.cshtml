@@ -1,0 +1,11 @@
+﻿@model System.Exception
+
+@{
+    ViewData["Title"] = "خطای سرور";
+}
+<div class="container py-5 text-center">
+    <h1 class="display-4">۵۰۰</h1>
+    <p class="lead">خطای غیرمنتظره‌ای رخ داده است. لطفاً بعداً دوباره تلاش کنید.</p>
+    <p class="d-none"> @(Model?.GetAllMessages()) </p>
+    <a class="btn btn-primary mt-3" href="/">بازگشت به صفحه اصلی</a>
+</div>

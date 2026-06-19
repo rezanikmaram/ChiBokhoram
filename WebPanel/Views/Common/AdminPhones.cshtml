@@ -1,0 +1,175 @@
+﻿@model List<CreateSeoReciveInfoDto>
+@{
+    ViewData["Title"] = "شماره تلفن ادمین ها";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+    int i = 1;
+}
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="col-lg-12">
+            <div class="card h-100 m-0">
+                <div class="card-header ">
+                    <div class="d-flex justify-content-between">
+                        
+                            <h3 class="title">
+                                <i class="icon-phone"></i>  شماره تلفن ادمین ها
+                            </h3>
+                        
+                            <div>
+                            <a class="alert-icon btn btn-primary round" onclick="createAdminPhone()"><i class="fa-solid fa-plus me-2"></i>تلفن جدید</a>
+                            <div class="buttons-box">
+
+                                <i class="icon-size-fullscreen"></i>
+                                <div class="paper-ripple">
+                                    <div class="paper-ripple__background"></div>
+                                    <div class="paper-ripple__waves"></div>
+                                </div>
+                            </div>
+                            </div>
+                    </div>
+                </div>
+                <div class="card-body pt-0">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover table-striped table-sm" id="data-table">
+                            <thead class="bg-primary">
+                                <tr>
+                                    <th class="p-3 text-center">#</th>
+                                    <th class="p-3 text-center">نام و نام خانوادگی</th>
+                                    <th class="p-3 text-center">شماره تلفن</th>
+                                    <th class="p-3 text-center">وضعیت</th>
+                                                       
+                                    <td class="p-3 text-center">عملیات</td>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model)
+                                {
+                                    <tr>
+                                        <td class="align-middle p-3 text-center">@(i++)</td>
+                                        <td class="align-middle p-3 text-center">@item.FullName</td>
+                                        <td class="align-middle p-3 text-center">@item.Phone</td>
+                                        <td class="align-middle p-3 text-center">
+                                            <a id="ActivationAdminPhone@(i)" onclick="ShowQAlert(event,'ActivationAdminPhone@(i)');"
+                                               asp-action="ActivationAdminPhone"
+                                               asp-route-adminPhoneId="@item.Id">
+                                                <span class="label rounded p-1 px-2 label-@(item.IsActive?"success":"danger")">
+                                                    @(item.IsActive ? "فعال" : "غیر فعال")
+                                                </span>
+                                            </a>
+                                        </td>
+
+
+                                        <td class="align-middle p-3 text-center"> 
+                                            <a class="btn btn-warning btn-sm btn-icon curve px-2 my-1" onclick="editAdminPhone('@item.Id');">
+                                                <i class="icon-pencil fs-6 align-middle"></i>
+                                            </a>
+
+                                            <a id="DeletePhone@(i)" onclick="ShowQAlert(event,'DeletePhone@(i)');"
+                                               class="btn btn-danger px-2 btn-sm btn-icon curve btn-questions my-1"
+                                               asp-action="RemoveAdminPhone" asp-route-adminPhoneId="@item.Id">
+                                                <i class="icon-trash fs-6 align-middle fa-flip-horizontal"></i>
+                                            </a>
+
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card h-100 m-0">
+            <div class="card-header pb-0">
+                <div class="d-flex justify-content-between">
+                    <h3 class="title">
+                        <i class="icon-phone"></i>  تلفن
+                    </h3>
+                </div>
+            </div>
+            <form asp-action="SendMessage" method="post">
+                <div class="card-body pt-0 pb-3">
+
+                    <div class="form-body">
+                        <ul class="d-flex col-md-12">
+                            <li class="col-md-12">
+                                <div class="form-group mt-4">
+                                    <label>متن پیام</label>
+                                    <div class="input-group">
+                                        <textarea name="message" class="form-control" rows="3"></textarea>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+               <div class="card-footer border-0 px-0 ">
+                    <div class="form-actions text-end">
+                        <button type="submit" class="btn btn-info btn-round mx-4">
+                            <i class="icon-check align-middle"></i>
+                            ارسال
+                            <div class="paper-ripple"><div class="paper-ripple__background"></div><div class="paper-ripple__waves"></div></div>
+                        </button>
+                    </div>
+               </div>
+                <section class="fix"></section>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+
+<div id="generalmodal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">ثبت  شماره تلفن</h4>
+                <button type="button" class="close btn-close rounded border" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="modalbody">
+
+                <partial name="_CreateAdminPhone" model="new CreateSeoReciveInfoDto{ IsActive = true}" />
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section script {
+
+
+
+    <script>
+        $(document).ready(function () {
+
+
+        });
+
+
+        function createAdminPhone() {
+            $("#FullName").val('');
+            $("#Phone").val('');
+            $("#Id").val('');
+            $("#IsActive").prop('checked', true);
+            $("#generalmodal").modal('show');
+
+        }
+
+        function editAdminPhone(id) {
+
+            $.post("@Url.Action("GetAdminPhoneById","Common")", { adminPhoneId: id })
+                .done(function (res) {
+                    $("#modalbody").html(res);
+                    $("#generalmodal").modal('show');
+                });
+        }
+
+
+
+    </script>
+}

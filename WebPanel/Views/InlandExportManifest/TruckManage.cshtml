@@ -1,0 +1,217 @@
+﻿@model TruckExportManageDto
+@{
+    ViewData["Title"] = "مدیریت کامیون ها";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+    int i = 1;
+}
+
+<div class="col-md-12">
+    <div class="p-3 rounded-3 bg-white shadow-sm">
+        <div class="d-flex justify-content-between">
+            <div>
+                <span class="fs-6">
+                    <i class="icon-frane"></i>
+                    <a asp-controller="InlandExportManifest" asp-action="Details" asp-route-Id="@Model.Info.Id"><i class="fa-solid fa-right-to-bracket me-2"></i></a>
+                    مدیریت کامیون ها
+                </span>
+                <span class="label p-2 mx-2 rounded label-primary">@($"{Model.Info.ManifestNumber} {Model.Info.Seo?.OwnerName}")</span>
+                <span class="label p-2 mx-2 rounded label-info">@Model.Info.Seo?.ProductName (@Model.Info.Seo?.Count.ToPrice() @Model.Info.Seo?.ProductPackingName)</span>
+            </div>
+
+            <div class="d-flex align-items-center">
+                @DateTimeOffset.Now.ToLongPersianDateString()
+                <i class="icon-calendar"></i>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="mt-3">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card rounded-3 min-height-600">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between">
+                        <h3 class="title m-0">
+                            <i class="icon-speech"></i>
+                            انتخاب کامیون
+                        </h3>
+                        <a class="btn float-end btn-success rounded fw-bold label text-white " onclick="setTruckForExport();">+ اضافه کردن انتخاب شده ها</a>
+                    </div>
+                </div>
+                <div class="card-body pt-0">
+                    <form id="formFilter" asp-action="TruckManage" asp-route-exportId="@Model.FilterDto.ExportId" method="post">
+                        <input asp-for="FilterDto.ExportId" type="hidden" />
+                        <div class="form-body mb-4">
+
+                            <div class="row gy-4">
+                                <div class="form-group col-lg-5 ">
+                                    <label>جستجو</label>
+                                    <div class="input-group">
+                                        <input asp-for="FilterDto.Search" type="text" placeholder="نام/شناسه کامیون" class="form-control">
+                                    </div>
+                                </div>
+
+                                <div class="form-group col-lg-4 ">
+                                    <label>شرکت</label>
+                                    <div class="input-group">
+                                        <select class="form-control select2"
+                                                asp-for="FilterDto.CompanyId" asp-items="Model.Companies">
+                                            <option value="">همه شرکت ها</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-3 align-content-end ">
+                                    <button class="alert-icon btn w-100 btn-success label rounded" type="submit"><p class="">فیلتر</p></button>
+                                </div>
+                            </div>
+
+                        </div>
+                    </form>
+
+                    <form asp-action="SetTruckForExport" method="post" id="postTruck">
+                        <input id="selectTruckId" name="ids" type="hidden" />
+                        <input asp-for="FilterDto.ExportId" name="ExportId" type="hidden" />
+                    </form>
+
+                    <table id="TableUnSelected" class="table table-bordered ">
+                        <thead class="bg-primary">
+                            <tr>
+                                <th><input type="checkbox" id="selectAllTableUnSelected" /></th>
+                                <th>کامیون</th>
+                                <td> شرکت  </td>
+                                <td> شناسه</td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                           
+                            @foreach (var item in Model.Trucks)
+                            {
+                                <tr>
+                                    <td style="width:30px;"><input type="checkbox" value="@item.Id" name="truckId" class="row-selector" /></td>
+                                    <td>@item.TruckName</td>
+                                    <td>@item.CompanyCompanyName</td>
+                                    <td>@item.TruckNumberId</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+
+                    <!-- /.tab-content -->
+
+                </div><!-- /.portlet-body -->
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card rounded">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between">
+                        <h3 class="title m-0">
+                            <i class="icon-speech "></i>
+                            کامیون های انتخاب شده
+                        </h3>
+                        <form asp-action="RemoveTruckFromExport" method="post" id="deleteTruck">
+
+                            <a class="btn btn-danger text-white rounded label" onclick="deleteProduct();"> <i class="fa fa-trash me-2"></i> حذف انتخاب شده ها </a>
+                            <input id="removeIds" name="ids" type="hidden" />
+                            <input asp-for="FilterDto.ExportId" name="ExportId" type="hidden" />
+
+                        </form>
+                    </div><!-- /.portlet-title -->
+                    <!-- /.buttons-box -->
+                </div><!-- /.portlet-heading -->
+                <div class="card-body pt-0">
+                    <div class="table-responsive">
+                        <table id="TableSelected" class="table table-bordered ">
+                            <thead class="bg-primary">
+                                <tr>
+                                    <th><input type="checkbox" id="selectAllTableSelected" /></th>
+                                    <th>کامیون</th>
+                                    <td> شرکت  </td>
+                                    <td> شناسه</td>
+                                    <td> وضعیت</td>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.SelectedTruck)
+                                {
+                                    <tr>
+                                        <td style="width:30px;"><input type="checkbox" value="@item.Id" name="selectedtruckId" class="row-selector" /></td>
+                                        <td>@item.TruckName</td>
+                                        <td>@item.CompanyCompanyName</td>
+                                        <td>@item.TruckNumberId</td>
+                                        <td><a id="activeTruck@(i)" onclick="ShowQAlert(event,'activeTruck@(i)');" asp-action="ActivationTruck" asp-route-exportId="@Model.FilterDto.ExportId" asp-route-truckId="@item.Id"><span class="label px-2 py-1 rounded label-@(item.IsActive ? "success" : "danger")">@(item.IsActive ? "فعال" : "غیر فعال")</span></a></td>
+                                    </tr>
+                                    i++;
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- /.tab-content -->
+
+                </div><!-- /.portlet-body -->
+            </div>
+        </div>
+    </div>
+</div>
+@section script {
+    <script>
+        function setTruckForExport() {
+            var ids = "";
+            $("#selectTruckId").val('');
+            $("input:checkbox[name=truckId]:checked").each(function () {
+                if (ids) {
+                    ids += ',' + $(this).val();
+                }
+                else {
+                    ids = $(this).val();
+                }
+            });
+            $("#selectTruckId").val(ids);
+            if (ids) {
+                $("#postTruck").submit();
+            }
+            else {
+                showAlert2('کامیونی انتخاب نشده است', 1);
+                return;
+            }
+        }
+        function deleteProduct() {
+            var ids = "";
+            $("#removeIds").val('');
+            $("input:checkbox[name=selectedtruckId]:checked").each(function () {
+                if (ids) {
+                    ids += ',' + $(this).val();
+                }
+                else {
+                    ids = $(this).val();
+                }
+            });
+            $("#removeIds").val(ids);
+            if (ids) {
+                $("#deleteTruck").submit();
+            }
+            else {
+                showAlert2('کامیونی انتخاب نشده است', 1);
+                return;
+            }
+        }
+
+        $(document).ready(function () {
+
+            $('#selectAllTableUnSelected').click(function (e) {
+                    var isChecked = this.checked;
+                // Only select/deselect visible checkboxes
+                $('#TableUnSelected tbody tr:visible').find('td input:checkbox.row-selector').prop('checked', isChecked);
+            });
+
+
+            $('#selectAllTableSelected').click(function (e) {
+                    var isChecked = this.checked;
+                // Only select/deselect visible checkboxes
+                $('#TableSelected tbody tr:visible').find('td input:checkbox.row-selector').prop('checked', isChecked);
+            });
+        });
+    </script>
+}

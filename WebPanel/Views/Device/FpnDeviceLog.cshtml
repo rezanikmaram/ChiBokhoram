@@ -1,0 +1,153 @@
+﻿@model PageResult<Entities.DTOs.Web.Hirman.FpnDeviceDto>
+@{
+    ViewData["Title"] = "تگ خوان FPN";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+    int i = ((Model.PageNumber - 1) * Model.PageSize) + 1;
+
+
+}
+
+
+@section style{
+    
+}
+
+<div class="col-lg-12">
+    <div class="card">
+        <div class="card-header">
+            <div class="d-flex">
+                <div class="d-flex justify-content-between">
+                    <h3 class="title">
+                        <i class="icon-frane"></i> تگ خوان FPN
+                    </h3>
+                </div>
+                @* <a class="alert-icon btn btn-success round" asp-controller="Company" asp-action="CreateCompany">شرکت جدید</a>*@
+
+
+                <!-- /.portlet-title -->
+                <div class="buttons-box">
+                    
+                        <i class="icon-size-fullscreen"></i>
+                        <div class="paper-ripple">
+                            <div class="paper-ripple__background"></div>
+                            <div class="paper-ripple__waves"></div>
+                        </div>
+                </div>
+                <!-- /.buttons-box -->
+            </div>
+            <!-- /.portlet-heading -->
+
+        </div>
+
+        <div class="card-body pt-0">
+            <div class="table-responsive">
+
+                <div id="data-table_filter" class="dataTables_filter">
+                </div>
+
+                <table class="table table-bordered table-hover table-striped" id="data-table">
+                    <thead class="bg-primary">
+                        <tr>
+                            <th>#</th>
+                            <th>سریال</th>
+
+                            <td>تاریخ</td>
+                            <td>سریال</td>
+                            <td>دیتا</td>
+                            <td>کامیون</td>
+                            <td>نوع</td>
+                            <td>p1</td>
+                            <td>p2</td>
+                            <td>p3</td>
+                            <td>p4</td>
+
+                        </tr>
+                    </thead>
+                    <tbody>
+
+
+                        @foreach (var item in Model.Data)
+                        {
+                            <tr>
+                                <td>@(i++)</td>
+                                <td>@item.Sn</td>
+
+                                <td style="direction:ltr">@item.DateFa</td>
+                                <td>@item.Serial</td>
+                                <td>@item.Data</td>
+                                <td>@item.TruckName</td>
+                                <td>@item.Type</td>
+                                <td>@item.P1</td>
+                                <td>@item.P2</td>
+                                <td>@item.P3</td>
+                                <td>@item.P4</td>
+                            </tr>
+
+                        }
+                    </tbody>
+                </table>
+                <div>
+                    <cs-pager cs-paging-pagesize="@Model.PageSize"
+                              cs-paging-pagenumber="@Model.PageNumber"
+                              cs-paging-totalitems="@Model.TotalItems"
+                               cs-paging-maxpageritems="20"
+                              cs-pagenumber-param="p"
+                              cs-show-first-last="true"
+                              cs-suppress-empty-nextprev="true"
+                              cs-suppress-inactive-firstlast="true"
+                              cs-show-numbered="true"
+                              cs-first-page-text="ابتدا"
+                              cs-last-page-text="انتها"
+                              cs-next-page-title="بعدی"
+                              cs-previous-page-title="قبلی"
+                              cs-first-page-title="ابتدا"
+                              cs-last-page-title="انتها"
+                              cs-next-page-text="بعدی"
+                              cs-previous-page-text="قبلی"
+                              cs-pager-li-current-class="page-item active"
+                              cs-pager-li-other-class="page-item"
+                              cs-pager-li-non-active-class="page-item disabled"
+                              cs-pager-link-current-class="page-link"
+                              cs-pager-link-other-class="page-link"
+                              asp-controller="Device"
+                              asp-action="FpnDeviceLog">
+                    </cs-pager>
+                </div>
+
+            </div>
+            <!-- /.table-responsive -->
+        </div>
+        <!-- /.portlet-body -->
+        <!-- /.portlet -->
+    </div>
+</div>
+
+
+
+@section script{
+   
+
+    <script>
+        $(document).ready(function () {
+            $('.clockpicker').clockpicker({
+                placement: 'bottom',
+                align: 'left',
+                donetext: 'تایید'
+            });
+ 
+
+            kamaDatepicker('FilterDto_FromDate', customOptions);
+            kamaDatepicker('FilterDto_ToDate', customOptions);
+
+             
+            $(".page-link").click(function (event) {
+                event.preventDefault(); // غیرفعال کردن عملکرد پیشفرض href
+
+                $("#pageNumber").val($(this).text());
+                $("#formFilter").submit();
+            });
+
+        });
+         
+    </script>
+}

@@ -1,0 +1,313 @@
+﻿@model OtherFactorDocPageDto
+@{
+	ViewData["Title"] = "اسناد مرتبط";
+	Layout = "~/Views/Shared/AdminLayout.cshtml";
+	int counter = 1;
+}
+
+@section style {
+	<!-- Add any custom styles here -->
+	<style>
+		.price-cell {
+			text-align: left;
+			direction: ltr;
+			display: inline-block;
+		}
+	</style>
+}
+
+<div class="card">
+
+	<div class="card-body pt-0 px-2">
+		<div class="bg-primary rounded-3 mt-4 p-3">
+			<div class="row gy-3 align-items-center">
+				<div class="col-1">
+					<img src="~/assets/images/rial.png" alt="" class="img-fluid">
+				</div>
+				<div class="col-3">
+					<p class="fs-6 fw-bold">شماره فاکتور : @(Model.SeoFactor.NumberFactor ?? "---") </p>
+					<p class="fs-6 fw-bold">تاریخ : @Model.SeoFactor.DateFa</p>
+				</div>
+				<div class="col-3">
+					<p class="fs-6 fw-bold">طرف حساب: @Model.SeoFactor.InvoiceRecipientCompanyName</p>
+					<p class="fs-6 fw-bold">وضعیت: @Model.SeoFactor.State.ToDisplay()</p>
+				</div>
+
+
+				@* white devider start *@
+				<div class="col-12 border-top border-white"></div>
+				@* white divider end *@
+
+
+				@* @if (User.IsInRole("admin") || User.IsInRole("adminOnePort")) *@
+
+
+
+			</div>
+		</div>
+	</div>
+
+</div>
+
+<div class="card">
+	<div class="card-header">
+		<div class="d-flex justify-content-between">
+			<h3 class="title">
+				<a asp-action="Details"
+				   asp-route-factorId="@Model.SeoFactor.Id">
+					<i class="fa-solid fa-right-to-bracket me-2 align-middle"></i>
+				</a>
+				اسناد فاکتور
+			</h3>
+
+			<div>
+				<button class="btn btn-success rounded" onclick="showAddDocumentModal()">
+					<i class="fa-solid fa-plus"></i> ایجاد سند جدید
+				</button>
+
+				<div class="buttons-box">
+					<i class="icon-size-fullscreen"></i>
+					<div class="paper-ripple">
+						<div class="paper-ripple__background"></div>
+						<div class="paper-ripple__waves"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="card-body pt-0">
+		<div class="table-responsive">
+			<table class="table table-sm table-bordered table-hover table-striped" id="documents-table">
+				<thead class="bg-primary">
+					<tr>
+						<th style="width: 5%">#</th>
+						<th>نوع سند</th>
+						<th>توضیحات</th>
+						<th>تاریخ</th>
+						<th>مبلغ</th>
+						<th>عملیات</th>
+					</tr>
+				</thead>
+				<tbody>
+					@if (Model?.List?.Any() == true)
+					{
+						foreach (var item in Model.List)
+						{
+							<tr>
+								<td class="align-middle px-2 text-center">@(counter++)</td>
+								<td class="align-middle px-2 text-center">@item.Type.ToDisplay(DisplayProperty.Name)</td>
+								<td class="align-middle px-2 text-center">@item.Description</td>
+								<td class="align-middle px-2 text-center">@item.DateFa</td>
+								<td class="align-middle px-2 text-center">@item.Price.ToPrice()</td>
+
+								<td class="align-middle px-2 text-center">
+									@if (item.Document != null)
+									{
+										<a class="btn btn-primary px-2 my-2 rounded"
+										   data-bs-toggle="tooltip" data-bs-placement="top" title="@item.Document?.OriginalFileName"
+										   onclick="DownloadDocFile(event, '@item.Document.Id')">
+											<i class="fa-solid fa-download"></i>
+										</a>
+
+
+									}
+
+									@if ((int)item.Type >= 100 && (int)item.Type < 200)
+									{
+										<a class="btn btn-primary px-2 my-2 rounded"
+										   data-bs-toggle="tooltip" data-bs-placement="top" title="حذف"
+										   onclick="RemoveDocFile(event, '@item.Id', '@item.SeoFactorId')">
+											<i class="fa-solid fa-remove"></i>
+										</a>
+									}
+
+
+
+
+								</td>
+							</tr>
+						}
+					}
+					else
+					{
+						<tr>
+							<td colspan="8" class="text-center">هیچ سندی بارگذاری نشده است</td>
+						</tr>
+					}
+				</tbody>
+			</table>
+		</div>
+	</div>
+
+
+</div>
+
+<div class="card">
+	<div class="card-header">
+		<div class="d-flex justify-content-between">
+
+			<div class="title d-flex">
+				<div>
+					<i class="icon-frane"></i> <h3>وضعیت واریزی ها</h3>
+				</div>
+			</div>
+
+			<div>
+
+
+				<!-- /.portlet-title -->
+				<div class="buttons-box">
+
+					<i class="icon-size-fullscreen"></i>
+					<div class="paper-ripple">
+						<div class="paper-ripple__background"></div>
+						<div class="paper-ripple__waves"></div>
+					</div>
+				</div>
+			</div>
+
+
+			<!-- /.buttons-box -->
+		</div>
+		<!-- /.portlet-heading -->
+	</div>
+	<div class="card-body pt-0">
+		<div class="table-responsive">
+			<table class="table table-sm table-bordered table-hover table-striped" id="data-table">
+				<thead class="bg-primary">
+					<tr>
+
+						<th>بخش</th>
+						<th>جمع کل</th>
+						<th>جمع واریزی ها</th>
+						<td>باقی مانده</td>
+
+					</tr>
+				</thead>
+				<tbody>
+
+					@foreach (var item in Model?.FactorPriceRemainings)
+					{
+						<tr>
+							<td class="align-middle">@item.Name</td>
+							<td class="align-middle">@item.PriceTitle</td>
+							<td class="align-middle">@item.SumPayedTitle </td>
+							<td class="align-middle">@item.RemainderPriceTitle </td>
+
+						</tr>
+					}
+
+
+				</tbody>
+			</table>
+
+		</div>
+
+
+	</div>
+</div>
+
+
+
+<form asp-action="GetSeoFactorDocFileById" asp-controller="SeoFactor"
+	  method="post" id="FormForDownloadFileId">
+	<input type="hidden" id="docIdForDownload" name="docId" />
+
+</form>
+
+<form asp-action="RemoveOtherFactorDocFileById" asp-controller="OtherFactor"
+	  method="post" id="FormForRemoveFileId">
+	<input type="hidden" id="docIdForRemove" name="docId" />
+	<input type="hidden" id="factorIdRemove" name="factorId" />
+</form>
+
+<!-- Add Document Modal -->
+<div id="addDocumentModal" class="modal fade" tabindex="-1" role="dialog">
+	<div class="modal-dialog modal-dialog-centered" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title">ایجاد سند جدید</h5>
+				<button type="button" class="close btn-close rounded border" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				<form asp-action="UploadFactorDoc" method="post" enctype="multipart/form-data">
+					<input type="hidden" asp-for="CreateDto.SeoFactorId" value="@Model.FactorId" />
+
+					<div class="form-group">
+						<label>نوع سند</label>
+						<select class="form-control" asp-for="CreateDto.Type"
+								asp-items="Model.FileTypes" required>
+							<option value="">-- انتخاب نوع سند --</option>
+						</select>
+						<span asp-validation-for="CreateDto.Type" class="text-danger"></span>
+					</div>
+
+					<div class="form-group my-3">
+						<label>انتخاب مستند سند</label>
+						<input type="file" asp-for="CreateDto.FormFile" class="form-control rounded" required>
+						<span asp-validation-for="CreateDto.FormFile" class="text-danger"></span>
+					</div>
+
+					<div class="form-group">
+						<label>توضیحات</label>
+						<input type="text" class="form-control" asp-for="CreateDto.Description"
+							   maxlength="300" />
+						<span asp-validation-for="CreateDto.Description" class="text-danger"></span>
+					</div>
+
+					<div class="form-group my-3">
+						<label>مبلغ</label>
+						<input type="number" class="form-control" asp-for="CreateDto.Price"
+							   min="0" />
+						<span asp-validation-for="CreateDto.Price" class="text-danger"></span>
+					</div>
+
+					<div class="form-group">
+						<label>تاریخ سند</label>
+						<input type="text" class="form-control" asp-for="CreateDto.DateFa"
+							   id="documentDate" autocomplete="off" required />
+						<span asp-validation-for="CreateDto.DateFa" class="text-danger"></span>
+					</div>
+
+					<div class="modal-footer px-0">
+						<button type="button" class="btn btn-danger" data-bs-dismiss="modal">انصراف</button>
+						<button type="submit" class="btn btn-success">افزودن</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+@section script {
+	<script>
+		   function showAddDocumentModal() {
+			   $('#addDocumentModal').modal('show');
+		   }
+
+		   function DownloadDocFile(event, docId) {
+			   event.preventDefault();
+
+			   $("#docIdForDownload").val(docId);
+			   $("#FormForDownloadFileId").submit();
+		   }
+
+		async function RemoveDocFile(event, id, factorId) {
+			   let result = await ShowQAlert2(event);
+
+			   if (result === true) {
+				   $("#docIdForRemove").val(id);
+				   $('#factorIdRemove').val(factorId);
+				   $("#FormForRemoveFileId").submit();
+			   }
+		   }
+
+		   $(document).ready(function () {
+			   // Initialize date picker
+			   kamaDatepicker('documentDate', customOptions);
+
+			   // Initialize DataTable if needed
+			   // $('#documents-table').DataTable();
+		   });
+	</script>
+}

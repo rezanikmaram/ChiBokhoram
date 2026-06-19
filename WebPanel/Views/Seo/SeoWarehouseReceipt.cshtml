@@ -1,0 +1,1761 @@
+@model SeoWarehouseReceiptPageDto
+
+@{
+    ViewData["Title"] = "قبض انبار";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+    int i = 1;
+    bool isContainer = Model.SeoMinInfo.TrafficType == TrafficType.Container;
+    string colSize = isContainer ? "col-md-3" : "col-md-6";
+    int row = 1;
+    int swrRow = 1;
+}
+
+<div class="mt-1 cu-table">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card rounded-3 min-height-600 mb-2">
+                <div class="card-header py-3 px-3">
+                    <div class="d-flex justify-content-between mb-3 align-items-center">
+                        <h3 class="title m-0 fs-6">
+                            <a asp-action="seoAccessPage" asp-route-seoId="@Model.SeoMinInfo.Id"><i class="fa-solid fa-right-to-bracket me-2 fs-5 align-middle"></i></a>
+                            مشخصات بارنامه
+                        </h3>
+                        <div class="d-flex justify-content-between">
+                            <p class="m-0 px-2">شماره بارنامه : @Model.SeoMinInfo.BillOfLadingNumber</p>
+                            <p class="m-0 px-2">   @Model.SeoMinInfo.ProductProductName (@Model.SeoMinInfo.ProductCategoryName)  <span class="mx-3"> وزن: @Model.SeoMinInfo.ShipTonnage.ToPrice() </span>  <span class="mx-3"> تعداد:@Model.SeoMinInfo.Count (@Model.SeoMinInfo.ProductPacking?.Name) </span>   <span class="mx-3"> حجم: @Model.SeoMinInfo.Volume </span>  </p>
+                            <p class="m-0 px-2">@Model.SeoMinInfo.ProductCompanyName</p>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h3 class="title m-0">
+                            <i class="fa-solid fa-boxes-packing text-primary align-middle me-2"></i>
+                            تالی های بارنامه - تعداد @(Model.SeoProductAndTaliInfos?.Count.ToPrice() ?? "0") (@(ServiceUnLoadType.UnloadToWarehouse.ToDisplay()))
+                        </h3>
+                        <div>
+                            @if (Model.SeoProductAndTaliInfos?.Any() == true)
+                            {
+                                <a onclick="addSelectedToWarehouseReceipt()"
+                                   style="border-radius:5px; margin:0px 10px" class="btn btn-primary btn-sm">
+                                    افزودن انتخاب شده ها به قبض انبار
+                                </a>
+                            }
+                            @if (Model.SeoMinInfo.VoyageId != null)
+                            {
+                                <a asp-controller="Voyage" asp-action="CompactTali" asp-route-voyageId="@Model.SeoMinInfo.VoyageId"
+                                   asp-route-seoId="@Model.SeoMinInfo.Id" asp-route-returnPage="100"
+                                   style="border-radius:5px; margin:0px 10px" class="btn btn-success btn-sm">
+                                    خلاصه تالی
+                                </a>
+
+                                <a asp-controller="Voyage" asp-action="DetailTali"
+                                   asp-route-seoId="@Model.SeoMinInfo.Id" asp-route-returnPage="100"
+                                   asp-route-voyageId="@Model.SeoMinInfo.VoyageId"
+                                   style="border-radius:5px; margin:0px 10px" class="btn btn-success btn-sm">
+                                    ریزجزئیات تالی
+                                </a>
+                            }
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body pt-0 px-3">
+                    <div class="table-responsive" style="max-height: 20rem">
+                        <table class="table table-sm table-bordered table-hover table-striped cu-table" id="tali-table">
+                            <thead class="bg-primary">
+                                <tr>
+                                    <th><input type="checkbox" id="selectAllTali" /></th>
+                                    <th>ردیف</th>
+                                    <th>کالا</th>
+                                    <th>تاریخ اولین تخلیه</th>
+                                    <th>شمارش اسکله</th>
+                                    <th>شمارش صفاف</th>
+                                    <th>وزن میانگین  </th>
+                                    <th>وزن باسکول  </th>
+                                    <th>انبار</th>
+                                    <th>عملیات</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.SeoProductAndTaliInfos != null)
+                                {
+                                    foreach (var item in Model.SeoProductAndTaliInfos)
+                                    {
+                                        <tr>
+                                            <td class="align-middle bg-light" style="width:30px;"><input type="checkbox" value="@item.IdJsonData" class="tali-checkbox" /></td>
+                                            <td class="align-middle bg-light">@(i)</td>
+                                            <td class="align-middle bg-light"> @item.FullProductName </td>
+                                            <td class="align-middle bg-light"> @item.FirstUnloadDate </td>
+                                            <td class="align-middle bg-light">@item.TaliCount1.ToPrice()</td>
+                                            <td class="align-middle bg-light">@item.TaliCount2.ToPrice()  </td>
+                                            <td class="align-middle bg-light">@item.WeightAverage.ToPrice()  </td>
+                                            <td class="align-middle bg-light">@item.WeightBaskol.ToPrice()  </td>
+                                            <td class="align-middle bg-light">@item.WarehouseTitle</td>
+                                            <td class="d-none">
+                                                <div class="d-none">
+                                                    <input hidden id="@($"{i}-taliData")" value="@JsonConvert.SerializeObject(item)" />
+                                                </div>
+                                            </td>
+                                            <td class="align-middle bg-light px-2 text-center">
+                                                <a class="btn btn-sm btn-info px-2" onclick="showModalAddProduct('@($"{i}-taliData")')">  <i class="fa-solid fa-warehouse text-white align-middle me-2"></i> + </a>
+                                            </td>
+                                        </tr>
+                                        i++;
+                                    }
+                                }
+                            </tbody>
+                        </table>
+
+                    </div>
+
+                </div><!-- /.portlet-body -->
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+<div class="mt-1">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card rounded-3 min-height-600 mb-2">
+                <div class="card-header py-3 px-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h3 class="title m-0">
+                            <i class="fa-solid fa-warehouse text-primary align-middle me-2"></i>
+                            صدور قبض انبار
+                        </h3>
+                        <div>
+                            <a style="border-radius:5px; margin:0px 10px" class="btn btn-primary btn-sm" onclick="showModalAddProduct('');">
+                                <i class="icon-plus"></i>
+                                افزودن کالا
+                            </a>
+
+                            <a style="border-radius:5px; margin:0px 10px" class="btn btn-primary btn-sm" onclick="showModalMultiProduct();">
+                                <i class="icon-plus"></i>
+                                افزودن چند کالا
+                            </a>
+
+                            @if (Model.PreviewProducts?.Any() == true)
+                            {
+                                <a onclick="ShowModalDescription(event)"
+                                   id="descriptionButton"
+                                   style="border-radius:5px; margin:0px 10px"
+                                   class="btn btn-info btn-sm mx-2"> مشخصات</a>
+
+                                <a onclick="PreviewWarehouseReciept(event)"
+                                   id="previewButton"
+                                   style="border-radius:5px; margin:0px 10px"
+                                   class="btn btn-warning btn-sm mx-2">پیش نمایش</a>
+
+                                <a onclick="FinalWarehouserReciept(event,'@Model.SeoMinInfo.Id')"
+                                   id="finalizeButton"
+                                   style="border-radius:5px; margin:0px 10px"
+                                   class="btn btn-success btn-sm mx-2">نهایی کردن قبض انبار</a>
+                            }
+                            else
+                            {
+                                <a onclick="ShowModalDescription(event)"
+                                   id="descriptionButton"
+                                   style="border-radius:5px; margin:0px 10px; display: none"
+                                   class="btn btn-info btn-sm mx-2"> مشخصات</a>
+
+                                <a onclick="PreviewWarehouseReciept(event)"
+                                   id="previewButton"
+                                   style="border-radius:5px; margin:0px 10px; display: none"
+                                   class="btn btn-warning btn-sm mx-2">پیش نمایش</a>
+
+                                <a onclick="FinalWarehouserReciept(event,'@Model.SeoMinInfo.Id')"
+                                   id="finalizeButton"
+                                   style="border-radius:5px; margin:0px 10px; display: none"
+                                   class="btn btn-success btn-sm mx-2">نهایی کردن قبض انبار</a>
+
+                            }
+
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body pt-0 px-3">
+                    <div id="PreviewProductsId">
+                        <partial name="_SeoWarehouseReceiptListProduct" model="Model.PreviewProducts" />
+                    </div>
+
+
+                </div><!-- /.portlet-body -->
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+<div class="mt-1">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card rounded-3 min-height-600">
+                <div class="card-header py-3 px-3">
+                    <div class="d-flex justify-content-between">
+                        <h3 class="title m-0">
+                            <i class="fa-solid fa-receipt text-primary align-middle me-2"></i>
+                            قبض انبار ها  (تعداد @(Model.SeoWarehouseReceipts?.Count.ToPrice() ?? "0"))
+                        </h3>
+                    </div>
+                </div>
+            @if (Model.SeoWarehouseReceipts != null)
+            {
+                <div class="accordion pt-2 px-3" id="accordionExample">
+                @foreach (var item in Model.SeoWarehouseReceipts)
+                {
+                    <div class="accordion-item mb-1">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed @(row % 2 == 0 ? "bg-white" : "bg-light")" type="button" data-bs-toggle="collapse" data-bs-target="#collapse@(row)" aria-expanded="false" aria-controls="collapse@(row)">
+                                <div class="align-middle bg-info p-1 px-2 rounded-circle text-info text-white">
+                                    <span>
+                                        @(swrRow++) 
+                                    </span>
+                                </div>
+                                <div class="responsive-accordion-btn">
+                                    <div class="d-flex justify-content-between gap-4 align-items-center px-3">
+                                        <div class="text-dark">
+                                            <span class="text-secondary"> شماره قبض: </span> @item.Number
+                                        </div>
+                                        <div class="text-dark">
+                                            <span class="text-secondary"> شماره بارنامه/مجوز: </span>
+                                            @if (item.EntryRouteType == EntryRouteType.EntryFromSea)
+                                            {
+                                                <a target="_blank" asp-action="seoAccessPage" asp-controller="Seo" class="text-dark px-2 "
+                                                   asp-route-seoId="@item.SeoId">
+                                                    @item.BillOfLadingNumber
+                                                </a>
+                                            }
+                                            else
+                                            {
+                                                <a target="_blank" asp-action="Details" asp-controller="InlandExportManifest" class="text-dark px-2 "
+                                                   asp-route-Id="@item.InlandExportManifestId">
+                                                    @item.BillOfLadingNumber
+                                                </a>
+                                            }
+                                        </div>
+                                        <div class="text-dark">
+                                            <span class="text-secondary"> کشتی: </span> @item.SeoShipShipName
+                                        </div>
+                                        <div class="text-dark">
+                                            <span class="text-secondary"> تعداد کالا: </span> @(item.Products?.Count ?? 0)
+                                        </div>
+                                    </div>
+                                    <div class="d-flex justify-content-between gap-4 align-items-center px-3 responsive-mt3 mt-3">
+                                        <div class="text-dark">
+                                            <span class="text-secondary"> نوع ورود: </span> @item.EntryRouteTypeTitle
+                                        </div>
+                                        <div class="text-dark">
+                                            <span class="text-secondary"> صاحب کالا: </span> @item.CompanyOwnerCompanyName
+                                        </div>
+                                        <div class="text-dark">
+                                            <span class="text-secondary"> تاریخ صدور: </span> @item.CreatedDateFa
+                                        </div>
+                                    </div>
+                                </div>
+                            </button>
+                        </h2>
+                        <div id="collapse@(row++)" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
+                            <div class="accordion-body p-1">
+                                <div class="table-responsive" style="max-height: 35rem; min-height: 25rem">
+                                    <table class="table table-sm table-bordered table-hover cu-table" id="data-table">
+                                        <thead class="bg-primary">
+                                        <tr>
+                                            <th class="align-middle">کالا</th>
+                                            <th class="px-0"><div class="px-3">تعداد</div> <hr class="my-1" /> <div class="px-3">باقیمانده</div></th>
+                                            <th class="px-0"><div class="px-3"> وزن ناخالص </div> <hr class="my-1" /> <div class="px-3">باقیمانده</div></th>
+                                            <th class="px-0"><div class="px-3"> وزن خالص </div> <hr class="my-1" /> <div class="px-3">باقیمانده</div></th>
+                                            <th class="px-0"><div class="px-3"> حجم </div> <hr class="my-1" /> <div class="px-3">باقیمانده</div></th>
+                                            <th class="align-middle">انبار</th>
+
+                                            <th class="align-middle">تعداد روز در انبار</th>
+                                            <th class="align-middle">عملیات</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        @if (item.Products != null && item.Products.Any())
+                                        {
+                                            <tr>
+                                                <td class="align-middle"><a class="btn btn-outline-info px-2" onclick="ShowModalSwrProductFullInfo('@item.Products[0].Id')"> @item.Products[0].ProductFullTitle</a></td>
+                                                <td class="align-middle px-0 py-4">
+                                                    <div class="mb-1 px-3">@item.Products[0].Count.ToPrice()</div>
+                                                    <hr class="my-1" />
+                                                    <div class="px-3">@item.Products[0].RemainingCount.ToPrice()</div>
+                                                </td>
+                                                <td class="align-middle px-0 py-4">
+                                                    <div class="mb-1 px-3">@item.Products[0].WeightGross.ToPrice()</div>
+                                                    <hr class="my-1" />
+                                                    <div class="px-3">@item.Products[0].RemainingWeightGross.ToPrice()</div>
+                                                </td>
+                                                <td class="align-middle px-0 py-4">
+                                                    <div class="mb-1 px-3">@item.Products[0].WeightNet.ToPrice()</div>
+                                                    <hr class="my-1" />
+                                                    <div class="px-3">@item.Products[0].RemainingWeightNet.ToPrice()</div>
+                                                </td>
+                                                <td class="align-middle px-0 py-4">
+                                                    <div class="mb-1 px-3">@item.Products[0].Volume.ToPrice()</div>
+                                                    <hr class="my-1" />
+                                                    <div class="px-3">@item.Products[0].RemainingVolume.ToPrice()</div>
+                                                </td>
+                                                <td class="align-middle">
+                                                    <div class="px-3">
+                                                        <span class="text-dark">@item.Products[0].Warehouse?.Name</span> - <span class="text-dark">@item.Products[0].WarehouseSegment?.Name</span>
+                                                    </div>
+                                                </td>
+                                                <td class="align-text-top" rowspan="@item.Products.Count">
+                                                    <div class="px-3">
+                                                        <span class="text-dark">@item.StockDayInWarehouse</span>
+                                                    </div>
+                                                </td>
+                                                <td rowspan="@item.Products.Count" class="align-text-top">
+                                                    <div class="dropdown w-100">
+                                                        <button class="dropbtn w-100 btn btn-info rounded" type="submit">
+                                                            <div class="d-flex align-items-center">
+                                                                <span> منو </span><i class="icofont icofont-arrow-down align-middle"></i>
+                                                            </div>
+                                                        </button>
+                                                        <div class="dropdown-content">
+                                                            <ul>
+                                                                <li>
+                                                                    <a class="dropdown-item" onclick="showWarehouseReceiptOutbounds('@item.Id')"> <i class="fa-solid fa-receipt"></i>  نمایش پروانه ها </a>
+                                                                </li>
+                                                                <li>
+                                                                    <a target="_blank" class="dropdown-item"
+                                                                       asp-action="GetFileWarehouseReceiptById" asp-controller="Seo"
+                                                                       asp-route-seoWarehouseReceiptId="@item.Id">
+                                                                        <i class="fa-solid fa-download"></i> دانلود
+                                                                    </a>
+                                                                </li>
+                                                                @if (item.Products.Any(x => x.RemainingCount > 1))
+                                                                {
+                                                                    <li>
+                                                                        <a asp-controller="WarehouseReceipt" asp-action="Split" class="dropdown-item"
+                                                                           asp-route-seoWarehouseReceiptId="@item.Id" asp-route-seoId="@Model.SeoMinInfo.Id">
+                                                                            <i class="fa-solid fa-adjust"></i> تفکیک
+                                                                        </a>
+                                                                    </li>
+                                                                }
+                                                                @if (item.Products.Any(x => x.RemainingCount > 0))
+                                                                {
+                                                                    <li>
+                                                                        <a asp-controller="WarehouseReceipt" asp-action="Merge" class="dropdown-item"
+                                                                           asp-route-seoWarehouseReceiptId="@item.Id" asp-route-seoId="@Model.SeoMinInfo.Id">
+                                                                            <i class="fa-solid fa-bag-seedling"></i> تجمیع
+                                                                        </a>
+                                                                    </li>
+                                                                }
+                                                                @if (item.Products.Any(x => x.RemainingCount > 0))
+                                                                {
+                                                                    <li>
+                                                                        <a asp-controller="WarehouseReceipt" asp-action="ChangeOwnership" class="dropdown-item"
+                                                                           asp-route-seoWarehouseReceiptId="@item.Id" asp-route-seoId="@Model.SeoMinInfo.Id">
+                                                                            <i class="fa-solid fa-bag-seedling"></i> تغییر مالکیت
+                                                                        </a>
+                                                                    </li>
+                                                                }
+                                                                @if (item.HasFullContainerForStrip)
+                                                                {
+                                                                    <li>
+                                                                        <a asp-controller="WarehouseReceipt" asp-action="StripContainerList" class="dropdown-item"
+                                                                           asp-route-swrId="@item.Id" asp-route-seoId="@Model.SeoMinInfo.Id">
+                                                                            <i class="fa-solid fa-bag-seedling"></i> استریپ کانتینر
+                                                                        </a>
+                                                                    </li>
+                                                                }
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            @for (int p = 1; p < item.Products.Count; p++)
+                                            {
+                                                <tr>
+                                                    <td class="align-middle"><a class="btn btn-outline-info px-2" onclick="ShowModalSwrProductFullInfo('@item.Products[p].Id')"> @item.Products[p].ProductFullTitle </a></td>
+                                                    <td class="align-middle px-0 py-4">
+                                                        <div class="px-3">@item.Products[p].Count.ToPrice()</div>
+                                                        <hr class="my-1" />
+                                                        <div class="px-3">@item.Products[p].RemainingCount.ToPrice()</div>
+                                                    </td>
+                                                    <td class="align-middle px-0 py-4">
+                                                        <div class="px-3">@item.Products[p].WeightGross.ToPrice()</div>
+                                                        <hr class="my-1" />
+                                                        <div class="px-3">@item.Products[p].RemainingWeightGross.ToPrice()</div>
+                                                    </td>
+                                                    <td class="align-middle px-0 py-4">
+                                                        <div class="px-3">@item.Products[p].WeightNet.ToPrice()</div>
+                                                        <hr class="my-1" />
+                                                        <div class="px-3">@item.Products[p].RemainingWeightNet.ToPrice()</div>
+                                                    </td>
+                                                    <td class="align-middle px-0 py-4">
+                                                        <div class="px-3">@item.Products[p].Volume.ToPrice()</div>
+                                                        <hr class="my-1" />
+                                                        <div class="px-3">@item.Products[p].RemainingVolume.ToPrice()</div>
+                                                    </td>
+                                                    <td class="align-middle px-0 py-4">
+                                                        <div class="px-3">@item.Products[p].Warehouse?.Name - @item.Products[p].WarehouseSegment?.Name</div>
+                                                    </td>
+                                                </tr>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <tr>
+                                                <td class="text-center text-muted py-4" colspan="8">کالایی در این قبض انبار ثبت نشده است</td>
+                                            </tr>
+                                        }
+                                        </tbody>
+                                    </table>
+                                </div>
+                                
+                            </div>
+                        </div>
+                    </div>
+                    }
+                </div>
+                }
+               
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+<div id="generalmodal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">مشخصات کالا در قبض انبار</h4>
+                <button type="button" class="close btn-close rounded border" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="modalbody">
+
+                <input asp-for="DateFirstTaliFa" type="hidden" />
+                <form asp-action="AddOrUpdateProductToWarehouseReceipt" id="AddProductInWarehouseRecieptId" method="post">
+                    <input asp-for="AddWarehouseReceiptProduct.Id" type="hidden" />
+                    <input asp-for="AddWarehouseReceiptProduct.SeoWarehouseReceiptId" type="hidden" />
+                    <input asp-for="AddWarehouseReceiptProduct.SeoId" value="@Model.SeoMinInfo.Id" type="hidden" />
+
+                    <div class="card-body py-0">
+
+                        <div class="form-body">
+                            <div class="row gy-4">
+
+                                <div class="col-md-6">
+                                    <div class=" form-group">
+                                        <span class="d-flex justify-content-start">
+                                            <label> کالا</label>
+                                            @*  <div class="form-check form-switch ms-3">
+                                                <input type="checkbox" class="form-check-input" id="ProductSwitch" role="switch" checked />
+                                                <label class="form-check-label text-success ms-2">  فقط کالا های بارنامه </label>
+                                            </div> *@
+                                        </span>
+                                        <div class="input-group">
+                                            @* <partial name="_SeoWRProduct" model="@Model.SeoProducts" /> *@
+                                            <select class="form-control  select2 generalmodal"
+                                                    asp-for="AddWarehouseReceiptProduct.SeoProductId">
+                                                @if (Model.SeoProducts?.Any() == true)
+                                                {
+                                                    foreach (var item in Model.SeoProducts)
+                                                    {
+                                                        <option value="@item.Id">@item.Title</option>
+                                                    }
+                                                }
+                                            </select>
+                                            <span asp-validation-for="AddWarehouseReceiptProduct.SeoProductId" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                                <div class="col-md-6">
+                                    <div class=" form-group">
+                                        <label>HS Code</label>
+                                        <div class="input-group">
+                                            <input asp-for="AddWarehouseReceiptProduct.HSCode" type="text" class=" form-control rounded">
+                                            <span asp-validation-for="AddWarehouseReceiptProduct.HSCode" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                @if (isContainer)
+                                {
+                                    <div class="@(colSize)">
+                                        <div class="form-group">
+                                            <label>پر/خالی بودن</label>
+                                            <div class="input-group">
+                                                <select class="form-control select2 generalmodal" asp-for="AddWarehouseReceiptProduct.IsFreeContainer">
+                                                    <option value="true">کانتینر خالی</option>
+                                                    <option value="false">کانتینر پر</option>
+                                                </select>
+                                                <span asp-validation-for="AddWarehouseReceiptProduct.IsFreeContainer" class="text-danger"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+
+                                <div class="@(colSize)">
+                                    <div class=" form-group">
+                                        <label> انبار</label>
+                                        <div class="input-group">
+                                            <select class="form-control  select2 generalmodal"
+                                                    asp-for="AddWarehouseReceiptProduct.SeoWarehouseAndSegmentDtoJson"
+                                                    asp-items="@Model.Warehouses">
+                                            </select>
+                                            <span asp-validation-for="AddWarehouseReceiptProduct.SeoWarehouseAndSegmentDtoJson" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                @if (isContainer)
+                                {
+                                    <div class="col-md-6">
+                                        <div class=" form-group">
+                                            <label> وضعیت تخلیه و بارگیری</label>
+                                            <div class="input-group">
+                                                <select class="form-control  select2 generalmodal"
+                                                        asp-for="AddWarehouseReceiptProduct.ContainerFreightProductTariffId"
+                                                        asp-items="@Model.ContainerFreightProductTariff">
+                                                </select>
+                                                <span asp-validation-for="AddWarehouseReceiptProduct.ContainerFreightProductTariffId" class="text-danger"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class=" form-group">
+                                            <label> نوع کالای انبار شده</label>
+                                            <div class="input-group">
+                                                <select class="form-control  select2 generalmodal"
+                                                        asp-for="AddWarehouseReceiptProduct.ContainerWarehouseProductTariffId"
+                                                        asp-items="@Model.ContainerWarehouseProductTariff">
+                                                </select>
+                                                <span asp-validation-for="AddWarehouseReceiptProduct.ContainerWarehouseProductTariffId" class="text-danger"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class=" form-group">
+                                            <label> وضعیت کانتینر استریپ شده</label>
+                                            <div class="input-group">
+                                                <select class="form-control  select2 generalmodal"
+                                                        asp-for="AddWarehouseReceiptProduct.ContainerStripProductTariffId"
+                                                        asp-items="@Model.ContainerStripProductTariff">
+                                                    <option value="">بدون استریپ</option>
+                                                </select>
+                                                <span asp-validation-for="AddWarehouseReceiptProduct.ContainerStripProductTariffId" class="text-danger"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                                else
+                                {
+                                    @* <div class="col-md-6">
+                                        <div class=" form-group">
+                                            <label> وضعیت تخلیه و بارگیری</label>
+                                            <div class="input-group">
+                                                <select class="form-control  select2 generalmodal"
+                                                        asp-for="AddWarehouseReceiptProduct.GeneralCargoProductTariffId"
+                                                        asp-items="@Model.GeneralCargoProductTariff">
+                                                </select>
+                                                <span asp-validation-for="AddWarehouseReceiptProduct.GeneralCargoProductTariffId" class="text-danger"></span>
+                                            </div>
+                                        </div>
+                                    </div> *@
+
+                                    @* <div class="col-md-6">
+                                        <div class=" form-group">
+                                            <label> نوع کالای انبار شده</label>
+                                            <div class="input-group">
+                                                <select class="form-control  select2 generalmodal"
+                                                        asp-for="AddWarehouseReceiptProduct.NonContainerWarehouseProductTariffId"
+                                                        asp-items="@Model.TariffWarehouse">
+                                                </select>
+                                                <span asp-validation-for="AddWarehouseReceiptProduct.NonContainerWarehouseProductTariffId" class="text-danger"></span>
+                                            </div>
+                                        </div>
+                                    </div> *@
+                                }
+
+
+                                <div class="col-md-3">
+                                    <div class=" form-group">
+                                        <label> بسته بندی</label>
+                                        <div class="input-group">
+                                            <select class="form-control  select2 generalmodal"
+                                                    asp-for="AddWarehouseReceiptProduct.ProductPackingId"
+                                                    asp-items="@Model.ProductPacking">
+                                            </select>
+                                            <span asp-validation-for="AddWarehouseReceiptProduct.ProductPackingId" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-3 col-sm-12">
+                                    <div class="form-group">
+                                        <label>تاریخ اولین تخلیه</label>
+                                        <div class="input-group">
+                                            <input asp-for="AddWarehouseReceiptProduct.FirstUnloadDateFa" type="text" class=" form-control rounded" autocomplete="off">
+                                            <span asp-validation-for="AddWarehouseReceiptProduct.FirstUnloadDateFa" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-3 col-sm-12">
+                                    <div class="form-group">
+                                        <label>تعداد</label>
+                                        <div class="input-group">
+                                            <price-input asp-for="AddWarehouseReceiptProduct.Count" min="1"></price-input>
+                                            <span asp-validation-for="AddWarehouseReceiptProduct.Count" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-3 col-sm-12">
+                                    <div class="form-group">
+                                        <label>وزن ناخالص</label>
+                                        <div class="input-group">
+                                            <input type="number" min="0" asp-for="AddWarehouseReceiptProduct.WeightGross" class="form-control">
+                                        </div>
+                                        <span asp-validation-for="AddWarehouseReceiptProduct.WeightGross" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 col-sm-12">
+                                    <div class="form-group">
+                                        <label>وزن خالص</label>
+                                        <div class="input-group">
+                                            <input type="number" min="0" asp-for="AddWarehouseReceiptProduct.WeightNet" class="form-control">
+                                        </div>
+                                        <span asp-validation-for="AddWarehouseReceiptProduct.WeightNet" class="text-danger"></span>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-3 col-sm-12">
+                                    <div class="form-group">
+                                        <label>حجم</label>
+                                        <div class="input-group">
+                                            <input type="number" min="0" asp-for="AddWarehouseReceiptProduct.Volume" class="form-control">
+                                        </div>
+                                        <span asp-validation-for="AddWarehouseReceiptProduct.Volume" class="text-danger"></span>
+                                    </div>
+                                </div>
+
+
+                                <div class="d-flex justify-content-between">
+                                    <div class="">
+                                        <div class="form-check form-switch">
+                                            <input type="checkbox" asp-for="AddWarehouseReceiptProduct.IsDangerous" class="form-check-input" role="switch" />
+                                            <label class="form-check-label ms-2">کالا خطرناک است؟ </label>
+                                            <span asp-validation-for="AddWarehouseReceiptProduct.IsDangerous" class="text-danger"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="">
+                                        <div class="form-check form-switch">
+                                            <input type="checkbox" asp-for="AddWarehouseReceiptProduct.IsBigVolume" class="form-check-input" role="switch" />
+                                            <label class="form-check-label ms-2">کالا حجیم است؟ </label>
+                                            <span asp-validation-for="AddWarehouseReceiptProduct.IsBigVolume" class="text-danger"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="">
+                                        <div class="form-check form-switch">
+                                            <input type="checkbox" asp-for="AddWarehouseReceiptProduct.IsUnusual" class="form-check-input" role="switch" />
+                                            <label class="form-check-label ms-2">کالا نامتعارف است؟ </label>
+                                            <span asp-validation-for="AddWarehouseReceiptProduct.IsUnusual" class="text-danger"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="">
+                                        <div class="form-check form-switch">
+                                            <input type="checkbox" asp-for="AddWarehouseReceiptProduct.IsRawMaterials" class="form-check-input" role="switch" />
+                                            <label class="form-check-label ms-2">کالا مواد اولیه است؟ </label>
+                                            <span asp-validation-for="AddWarehouseReceiptProduct.IsRawMaterials" class="text-danger"></span>
+                                        </div>
+                                    </div>
+
+                                   
+                                    
+                                </div>
+
+                                <div class="d-flex justify-content-between">
+                                    <div class="">
+                                        <div class="form-check form-switch">
+                                            <input type="checkbox" asp-for="AddWarehouseReceiptProduct.IsSelfTransported" class="form-check-input" role="switch" />
+                                            <label class="form-check-label ms-2">کالا خودران است؟ برای جابجایی نیاز به کامیون ندارد</label>
+                                            <span asp-validation-for="AddWarehouseReceiptProduct.IsSelfTransported" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                               </div>
+
+                                <div class="modal-footer px-2 pt-4 border-0 px-0">
+                                    <button type="submit" class="btn btn-success btn-round">ذخیره</button>
+                                    <button type="button" class="btn btn-danger btn-round" data-bs-dismiss="modal">بازگشت</button>
+                                </div>
+                            </div>
+
+
+                        </div>
+                    </div>
+
+
+                </form>
+
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="generalModal2" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">پروانه ها</h4>
+                <button type="button" class="close btn-close rounded border" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="generalModalBodyId">
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="modalSwrFullInfo">
+</div>
+
+<div id="modalDescription">
+</div>
+
+<div id="addAllModal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">افزودن تالی‌های انتخاب شده به قبض انبار</h4>
+                <button type="button" class="close btn-close rounded border" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addAllToWarehouseReceiptForm">
+                    <div class="row gy-4">
+                         <div class="col-md-12">
+                            <div class="form-group">
+                                <label>انبار پیش فرض - درصورت مشخص نبودن انبار در تالی از این انبار استفاده میشود</label>
+                                <select class="form-control select2" id="addAllWarehouse"
+                                        asp-items="@Model.Warehouses">
+                                        <option value="">نامشخص</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        @if (isContainer)
+                        {
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label>وضعیت تخلیه و بارگیری</label>
+                                    <select class="form-control select2" id="addAllContainerFreight"
+                                            asp-items="@Model.ContainerFreightProductTariff">
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label>نوع کالای انبار شده</label>
+                                    <select class="form-control select2" id="addAllContainerWarehouse"
+                                            asp-items="@Model.ContainerWarehouseProductTariff">
+                                    </select>
+                                </div>
+                            </div>
+                        }
+                        @* else
+                        {
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label>وضعیت تخلیه و بارگیری</label>
+                                    <select class="form-control select2" id="addAllGeneralCargo"
+                                            asp-items="@Model.GeneralCargoProductTariff">
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label>نوع کالای انبار شده</label>
+                                    <select class="form-control select2" id="addAllNonContainerWarehouse"
+                                            asp-items="@Model.TariffWarehouse">
+                                    </select>
+                                </div>
+                            </div>
+                        } *@
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success btn-round" onclick="submitAddAllToWarehouseReceipt()">ذخیره</button>
+                <button type="button" class="btn btn-danger btn-round" data-bs-dismiss="modal">بازگشت</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="multiProductModal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" tabindex="-1">
+    <div class="modal-dialog modal-fullscreen modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">افزودن چند کالا به قبض انبار</h4>
+                <button type="button" class="close btn-close rounded border" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row gy-4">
+
+                    @if (isContainer)
+                    {
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>وضعیت تخلیه و بارگیری</label>
+                                <select class="form-control select2 multiProductModal" id="multiProductContainerFreight"
+                                        asp-items="@Model.ContainerFreightProductTariff">
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>نوع کالای انبار شده</label>
+                                <select class="form-control select2 multiProductModal" id="multiProductContainerWarehouse"
+                                        asp-items="@Model.ContainerWarehouseProductTariff">
+                                </select>
+                            </div>
+                        </div>
+                    }
+                    @* else
+                    {
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>وضعیت تخلیه و بارگیری</label>
+                                <select class="form-control select2 multiProductModal" id="multiProductGeneralCargo"
+                                        asp-items="@Model.GeneralCargoProductTariff">
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>نوع کالای انبار شده</label>
+                                <select class="form-control select2 multiProductModal" id="multiProductNonContainerWarehouse"
+                                        asp-items="@Model.TariffWarehouse">
+                                </select>
+                            </div>
+                        </div>
+                    } *@
+
+                    <div class="table-responsive">
+                        <table class="table table-sm table-bordered table-hover table-striped cu-table" id="multiProduct-table">
+                            <thead class="bg-primary">
+                                <tr>
+                                    <th><input type="checkbox" id="selectAllmultiProduct" /></th>
+                                    <th>ردیف</th>
+                                    <th>نام</th>
+                                    <th>HS Code</th>
+                                    @if (isContainer)
+                                    {
+                                        <th>کانتینر</th>
+                                    }
+                                    else
+                                    {
+                                        <th>شماره شاسی</th>
+                                    }
+                                    <th>تعداد</th>
+                                    <th>وزن ناخالص</th>
+                                    <th>وزن خالص</th>
+                                    <th>حجم</th>
+
+                                    <th>خطرناک</th>
+                                </tr>
+                            </thead>
+                            <tbody id="multiProductModalContent">
+                            </tbody>
+                        </table>
+
+                    </div>
+                     
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success btn-round" onclick="submitMultiProductToWarehouseReceipt()">ذخیره</button>
+                <button type="button" class="btn btn-danger btn-round" data-bs-dismiss="modal">بازگشت</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section script {
+    <script>
+        $(document).ready(function () {
+            $('.select2').select2();
+
+            $('select[class*="generalmodal"].select2').select2({
+                dropdownParent: $('#generalmodal')
+            });
+
+            $('select[id^="addAll"]').select2({
+                dropdownParent: $('#addAllModal')
+            });
+
+            $('select[class*="multiProductModal"].select2').select2({
+                dropdownParent: $('#multiProductModal')
+            });
+
+            kamaDatepicker('AddWarehouseReceiptProduct_FirstUnloadDateFa', customOptions);
+            resetModalToDefaults();
+
+            $('#selectAllTali').click(function (e) {
+                var isChecked = this.checked;
+                $('#tali-table tbody tr:visible').find('td input:checkbox.tali-checkbox').prop('checked', isChecked);
+            });
+
+             $('#selectAllmultiProduct').click(function (e) {
+                var isChecked = this.checked;
+                $('#multiProduct-table tbody tr:visible').find('td input:checkbox.multiProduct-checkbox').prop('checked', isChecked);
+            });
+
+        });
+
+        function showModalMultiProduct() {
+            var seoId = '@Model.SeoMinInfo.Id';
+            $.ajax({
+                url: '@Url.Action("GetSeoProductToSwrModal")',
+                type: 'GET',
+                data: { seoId: seoId },
+                success: function (result) {
+                    $('#multiProductModalContent').html(result);
+                    $('#multiProductModal').modal('show');
+                },
+                error: function () {
+                    showAlert2('خطا در بارگذاری اطلاعات', 1);
+                }
+            });
+        }
+
+        function ShowGeneralCargoProductTitle(id)
+        {
+            $.post("@Url.Action("GetGeneralCargoProductTitle", "GeneralCargoProduct")",
+                {
+                    generalCargoProductTariffId: id
+                })
+                .done(function (res) {
+                    showAlert(res, 0);
+                })
+                .fail(function (xhr, status, error) {
+                    showAlert("خطا  ");
+                });
+        }
+
+        function ShowNonContainerWarehouseProductTitle(id)
+        {
+            $.post("@Url.Action("GetNonContainerWarehouseProductTitle", "NonContainerWarehouseProduct")",
+                {
+                    nonContainerWarehouseProductTariffId: id
+                })
+                .done(function (res) {
+                    showAlert(res, 0);
+                })
+                .fail(function (xhr, status, error) {
+                    showAlert("خطا  ");
+                });
+        }
+
+        $(document).ready(function () {
+            $('#AddProductInWarehouseRecieptId').submit(function (e) {
+                e.preventDefault();
+
+                if (!$(this).valid()) {
+                    return;
+                }
+
+                var count = parseInt($('#AddWarehouseReceiptProduct_Count').val()) || 0;
+
+                if (count < 1) {
+                    showAlert("تعداد را درست وارد کنید");
+                    return;
+                }
+
+                $.ajax({
+                    url: $(this).attr('action'),
+                    type: 'POST',
+                    data: $(this).serialize(),
+                    success: function (response) {
+                        $("#generalmodal").modal('hide');
+                        $('#PreviewProductsId').html(response);
+                        CheckBtnFinalShow();
+                    },
+                    error: function (xhr) {
+                        location.reload();
+                    }
+                });
+            });
+        });
+
+        async function editProduct(row) {
+            let seoProductId = $('#seoProductId' + row).val();
+            let productId = $('#productId' + row).val();
+            if (!seoProductId)
+            {
+                seoProductId = productId;
+                $('#ProductSwitch').prop('checked', false) ;
+                await loadAllProducts();
+            }
+            else{
+                $('#ProductSwitch').prop('checked', true).trigger('change') ;
+            }
+
+
+            // console.log('seoProductId: ' + seoProductId);
+            // console.log('productId: ' + productId);
+
+            let seoRecieptProductId = $('#seoRecieptProductId' + row).text();
+            let seoWarehouseReceiptId = $('#seoWarehouseReceiptId' + row).text();
+            let count = $('#count' + row).text();
+            let weightGross = $('#weightGross' + row).text();
+            let weightNet = $('#weightNet' + row).text();
+            let volume = $('#volume' + row).text();
+            let seoWarehouseAndSegmentDtoJson = $('#seoWarehouseAndSegmentDtoJson' + row).text();
+            let firstUnloadDateFa = $('#firstUnloadDateFa' + row).text();
+
+            let isDangerous = $('#isDangerousId' + row).val() === '1';
+            let isBigVolume = $('#isBigVolumeId' + row).val() === '1';
+            let isUnusual = $('#isUnusualId' + row).val() === '1';
+            let isRawMaterials = $('#isRawMaterialsId' + row).val() === '1';
+            let isSelfTransported = $('#isSelfTransported' + row).val() === '1';
+
+            let generalCargoProductTariffId = $('#generalCargoProductTariffId' + row).val();
+            let nonContainerWarehouseProductTariffId = $('#nonContainerWarehouseProductTariffId' + row).val();
+            let productPackingId = $('#productPackingId' + row).val();
+            // let productHSCodeId = $('#productHSCodeId' + row).val();
+            let hsCode = $('#hsCode' + row).val();
+
+            let isFreeContainer = $('#isFreeContainerId' + row).val();
+            let containerFreightProductTariffId = $('#containerFreightProductTariffId' + row).val();
+            let containerWarehouseProductTariffId = $('#containerWarehouseProductTariffId' + row).val();
+            let containerStripProductTariffId = $('#containerStripProductTariffId' + row).val();
+
+            $('#AddWarehouseReceiptProduct_Id').val(seoRecieptProductId);
+            $('#AddWarehouseReceiptProduct_SeoWarehouseReceiptId').val(seoWarehouseReceiptId);
+            // $('#AddWarehouseReceiptProduct_SeoProductId').val(seoProductId.trim());
+
+            // کمی تاخیر برای اطمینان از لود کامل
+            setTimeout(() => {
+                if (seoProductId) {
+                    $('#AddWarehouseReceiptProduct_SeoProductId')
+                        .val(seoProductId.trim())
+                        .trigger('change');
+                }
+            }, 100);
+
+            SetNumber(Number(count), 'AddWarehouseReceiptProduct_Count');
+            $('#AddWarehouseReceiptProduct_WeightGross').val(Number(weightGross));
+            $('#AddWarehouseReceiptProduct_WeightNet').val(Number(weightNet));
+            $('#AddWarehouseReceiptProduct_Volume').val(Number(volume));
+            $('#AddWarehouseReceiptProduct_SeoWarehouseAndSegmentDtoJson').val(seoWarehouseAndSegmentDtoJson);
+            $('#AddWarehouseReceiptProduct_FirstUnloadDateFa').val(firstUnloadDateFa);
+
+            $('#AddWarehouseReceiptProduct_IsDangerous').prop('checked', isDangerous);
+            $('#AddWarehouseReceiptProduct_IsBigVolume').prop('checked', isBigVolume);
+            $('#AddWarehouseReceiptProduct_IsUnusual').prop('checked', isUnusual);
+            $('#AddWarehouseReceiptProduct_IsRawMaterials').prop('checked', isRawMaterials);
+            $('#AddWarehouseReceiptProduct_IsSelfTransported').prop('checked', isSelfTransported);
+
+            $('#AddWarehouseReceiptProduct_SeoWarehouseAndSegmentDtoJson').trigger('change');
+
+            $("#AddWarehouseReceiptProduct_GeneralCargoProductTariffId").val(generalCargoProductTariffId);
+            $("#AddWarehouseReceiptProduct_GeneralCargoProductTariffId").trigger('change');
+
+            $("#AddWarehouseReceiptProduct_NonContainerWarehouseProductTariffId").val(nonContainerWarehouseProductTariffId);
+            $("#AddWarehouseReceiptProduct_NonContainerWarehouseProductTariffId").trigger('change');
+
+            $("#AddWarehouseReceiptProduct_ProductPackingId").val(productPackingId);
+            $("#AddWarehouseReceiptProduct_ProductPackingId").trigger('change');
+            $("#AddWarehouseReceiptProduct_HSCode").val(hsCode);
+            // $("#AddWarehouseReceiptProduct_ProductHSCodeId").trigger('change');
+
+            $("#AddWarehouseReceiptProduct_ContainerFreightProductTariffId").val(containerFreightProductTariffId);
+            $("#AddWarehouseReceiptProduct_ContainerFreightProductTariffId").trigger('change');
+
+            $("#AddWarehouseReceiptProduct_ContainerWarehouseProductTariffId").val(containerWarehouseProductTariffId);
+            $("#AddWarehouseReceiptProduct_ContainerWarehouseProductTariffId").trigger('change');
+
+            $("#AddWarehouseReceiptProduct_ContainerStripProductTariffId").val(containerStripProductTariffId);
+            $("#AddWarehouseReceiptProduct_ContainerStripProductTariffId").trigger('change');
+
+            if(isFreeContainer){
+                $("#AddWarehouseReceiptProduct_IsFreeContainer").val(isFreeContainer.toString());
+                $("#AddWarehouseReceiptProduct_IsFreeContainer").trigger('change');
+            }
+            else{
+                $("#AddWarehouseReceiptProduct_IsFreeContainer").val('');
+                $("#AddWarehouseReceiptProduct_IsFreeContainer").trigger('change');
+            }
+
+            $('select[class*="generalmodal"].select2').select2({
+                dropdownParent: $('#generalmodal')
+            });
+
+            $("#generalmodal").modal('show');
+        }
+
+        function showModalAddProduct(taliDataId) {
+
+            if (taliDataId) {
+                var jsonData = $('#' + taliDataId).val();
+
+                if (jsonData) {
+                    try {
+                        var taliData = JSON.parse(jsonData);
+                        fillModalWithTaliData(taliData);
+                    } catch (e) {
+                        console.error('Error parsing JSON data:', e);
+
+                        resetModalToDefaults();
+                    }
+                }
+            } else {
+
+                resetModalToDefaults();
+            }
+
+
+            $("#generalmodal").modal('show');
+        }
+
+        function addSelectedToWarehouseReceipt() {
+            var selectedIds = [];
+            $("input:checkbox.tali-checkbox:checked").each(function () {
+                selectedIds.push($(this).val());
+            });
+
+            if (!selectedIds || selectedIds.length === 0) {
+                showAlert("هیچ تالی انتخاب نشده است");
+                return;
+            }
+
+            $('#addAllModal').modal('show');
+        }
+
+        function submitAddAllToWarehouseReceipt() {
+            var selectedIds = [];
+            $("input:checkbox.tali-checkbox:checked").each(function () {
+                selectedIds.push($(this).val());
+            });
+
+            if (!selectedIds || selectedIds.length === 0) {
+                showAlert("هیچ تالی انتخاب نشده است");
+                return;
+            }
+
+            var seoId = "@Model.SeoMinInfo.Id";
+            var isContainer = @isContainer.ToString().ToLower();
+
+            var warehouse = $('#addAllWarehouse').val();
+            // var tariffId = isContainer ? $('#addAllContainerFreight').val() : $('#addAllGeneralCargo').val();
+            // var warehouseTariffId = isContainer ? $('#addAllContainerWarehouse').val() : $('#addAllNonContainerWarehouse').val();
+
+            $.post("@Url.Action("AddSelectedTaliToWarehouseReceipt", "Seo")",
+                {
+                    seoId: seoId,
+                    selectedTaliIds: selectedIds,
+                    warehouseId: warehouse,
+                    // tariffId: tariffId,
+                    // warehouseTariffId: warehouseTariffId
+                })
+                .done(function (res) {
+                    $("#addAllModal").modal('hide');
+                    $("#PreviewProductsId").html(res);
+                    CheckBtnFinalShow();
+                    showAlert("تالی‌های انتخاب شده با موفقیت به قبض انبار اضافه شدند", 0);
+                })
+                .fail(function (xhr, status, error) {
+                    showAlert("خطا در افزودن تالی‌ها به قبض انبار");
+                });
+        }
+
+        function submitMultiProductToWarehouseReceipt() {
+            var selectedIds = [];
+            $("#multiProductModalContent input:checkbox.multiProduct-checkbox:checked").each(function () {
+                selectedIds.push($(this).val());
+            });
+
+            if (!selectedIds || selectedIds.length === 0) {
+                showAlert("هیچ کالایی انتخاب نشده است");
+                return;
+            }
+
+            var seoId = "@Model.SeoMinInfo.Id";
+            var isContainer = @isContainer.ToString().ToLower();
+
+            // var freightTariffId = isContainer ? $('#multiProductContainerFreight').val() : $('#multiProductGeneralCargo').val();
+            //var warehouseTariffId = isContainer ? $('#multiProductContainerWarehouse').val() : $('#multiProductNonContainerWarehouse').val();
+
+            // if (!freightTariffId) {
+            //     showAlert("لطفا تعرفه باربری را انتخاب کنید");
+            //     return;
+            // }
+
+            // if (!warehouseTariffId) {
+            //     showAlert("لطفا تعرفه انبارداری را انتخاب کنید");
+            //     return;
+            // }
+
+            $.post("@Url.Action("AddMultiProductToWarehouseReceipt", "Seo")",
+                {
+                    seoId: seoId,
+                    productIds: selectedIds,
+                    // freightTariffId: freightTariffId,
+                    //warehouseTariffId: warehouseTariffId
+                })
+                .done(function (res) {
+                    $("#multiProductModal").modal('hide');
+                    $("#PreviewProductsId").html(res);
+                    CheckBtnFinalShow();
+                    showAlert("کالاهای انتخاب شده با موفقیت به قبض انبار اضافه شدند", 0);
+                })
+                .fail(function (xhr, status, error) {
+                    showAlert("خطا در افزودن کالاها به قبض انبار");
+                });
+        }
+
+
+        function fillModalWithTaliData(taliData) {
+            resetModalToDefaults();
+            if (taliData.SeoProductId) {
+                $('#AddWarehouseReceiptProduct_SeoProductId').val(taliData.SeoProductId).trigger('change');
+            }
+
+            if (taliData.FirstUnloadDate) {
+                $('#AddWarehouseReceiptProduct_FirstUnloadDateFa').val(taliData.FirstUnloadDate);
+            }
+
+            if (taliData.WarehouseJsonId) {
+                $('#AddWarehouseReceiptProduct_SeoWarehouseAndSegmentDtoJson').val(taliData.WarehouseJsonId).trigger('change');
+            }
+            else{
+                $('#AddWarehouseReceiptProduct_SeoWarehouseAndSegmentDtoJson').val('').trigger('change');
+            }
+
+            var count = taliData.TaliCount2;
+            SetNumber(count, 'AddWarehouseReceiptProduct_Count');
+
+            if(taliData.WeightBaskol > 0 )
+            {
+                $('#AddWarehouseReceiptProduct_WeightGross').val(taliData.WeightBaskol);
+                $('#AddWarehouseReceiptProduct_WeightNet').val(taliData.WeightBaskol);
+            }
+            else
+            {
+                $('#AddWarehouseReceiptProduct_WeightGross').val(taliData.WeightAverage);
+                $('#AddWarehouseReceiptProduct_WeightNet').val(taliData.WeightAverage);
+            }
+
+
+            $('#AddWarehouseReceiptProduct_IsDangerous').prop('checked', taliData.IsDangerous);
+            $('#AddWarehouseReceiptProduct_IsBigVolume').prop('checked', taliData.IsBigVolume);
+            $('#AddWarehouseReceiptProduct_IsUnusual').prop('checked', taliData.IsUnusual);
+            $('#AddWarehouseReceiptProduct_IsRawMaterials').prop('checked', taliData.IsRawMaterials);
+            $('#AddWarehouseReceiptProduct_IsSelfTransported').prop('checked', taliData.DockTaliSeoProductIsSelfTransported);
+
+            $('#AddWarehouseReceiptProduct_Id').val('');
+
+            $('#AddWarehouseReceiptProduct_Volume').val(taliData.Volume);
+
+        }
+
+
+        function resetModalToDefaults() {
+            $('#AddWarehouseReceiptProduct_Id').val('');
+            $('#AddWarehouseReceiptProduct_SeoWarehouseReceiptId').val('');
+            SetNumber(1, 'AddWarehouseReceiptProduct_Count');
+            $('#AddWarehouseReceiptProduct_WeightGross').val('0');
+            $('#AddWarehouseReceiptProduct_WeightNet').val('0');
+            $('#AddWarehouseReceiptProduct_Volume').val('0');
+
+            var dateFirstTaliFa = $('#DateFirstTaliFa').val();
+            $('#AddWarehouseReceiptProduct_FirstUnloadDateFa').val(dateFirstTaliFa);
+
+            $("#AddWarehouseReceiptProduct_IsDangerous").prop('checked', false);
+            $("#AddWarehouseReceiptProduct_IsBigVolume").prop('checked', false);
+            $("#AddWarehouseReceiptProduct_IsUnusual").prop('checked', false);
+            $("#AddWarehouseReceiptProduct_IsRawMaterials").prop('checked', false);
+
+            resetSelectsToDefault();
+
+             if (productSwitchConfig.$switch) {
+                productSwitchConfig.$switch.prop('checked', true).trigger('change');
+            }
+        }
+
+
+        function resetSelectsToDefault() {
+            $("#AddWarehouseReceiptProduct_GeneralCargoProductTariffId").val('').trigger('change');
+            $("#AddWarehouseReceiptProduct_NonContainerWarehouseProductTariffId").val('').trigger('change');
+            $("#AddWarehouseReceiptProduct_ContainerFreightProductTariffId").val('').trigger('change');
+            $("#AddWarehouseReceiptProduct_ContainerWarehouseProductTariffId").val('').trigger('change');
+            $("#AddWarehouseReceiptProduct_ContainerStripProductTariffId").val('').trigger('change');
+            $("#AddWarehouseReceiptProduct_ProductPackingId").val('').trigger('change');
+            $("#AddWarehouseReceiptProduct_HSCode").val('');
+            $("#AddWarehouseReceiptProduct_IsFreeContainer").val('').trigger('change');
+            $("#AddWarehouseReceiptProduct_SeoProductId").val('').trigger('change');
+            $("#AddWarehouseReceiptProduct_SeoWarehouseAndSegmentDtoJson").val('').trigger('change');
+        }
+
+
+        async function DeleteProduct(event, seoWarehouseReceiptProductId) {
+            event.preventDefault();
+            let result = await ShowQAlert2(event);
+
+            if (result === true) {
+                $.post("@Url.Action("DeleteWarehouseReceiptProduct", "Seo")",
+                    {
+                        seoWarehouseReceiptProductId
+                    })
+                    .done(function (res) {
+
+                        $("#PreviewProductsId").html(res);
+                        CheckBtnFinalShow();
+                    })
+                    .fail(function (xhr, status, error) {
+                        location.reload();
+                    });
+            }
+
+        }
+
+
+
+        function CheckBtnFinalShow() {
+            var hasProducts = $("td[id^='seoRecieptProductId']").length > 0;
+
+            const finalizeButton = document.getElementById('finalizeButton');
+            const descriptionButton = document.getElementById('descriptionButton');
+            const previewButton = document.getElementById('previewButton');
+
+            if (finalizeButton) {
+                finalizeButton.style.display = (hasProducts ) ? 'inline-block' : 'none';
+            }
+
+            if (descriptionButton) {
+                descriptionButton.style.display = (hasProducts ) ? 'inline-block' : 'none';
+            }
+
+            if (previewButton) {
+                previewButton.style.display = (hasProducts ) ? 'inline-block' : 'none';
+            }
+        }
+
+        async function FinalWarehouserReciept(event, seoId) {
+            event.preventDefault();
+            let result = await ShowQAlert2(event, 'بعد از تایید نهایی امکان ویرایش وجود ندارد', 'تایید نهایی');
+
+            if (result === true) {
+                document.getElementById("finalizeButton").classList.add("disabled");
+
+                $.post("@Url.Action("GenerateWarehouseReceipt", "Seo")", {
+                    seoId
+                }).done(function (res) {
+                    location.reload();
+                }).fail(function (xhr, status, error) {
+                    location.reload();
+                });
+            }
+        }
+
+        function PreviewWarehouseReciept(event) {
+            event.preventDefault();
+            var swrId = document.getElementById('seoWarehouseReceiptId1')?.textContent?.trim();
+            if (swrId) {
+                window.open("@Url.Action("GetPreviewWarehouseReceipt", "Seo")" + "?seoWarehouseReceiptId=" + swrId, '_blank');
+            }
+        }
+
+        async function ShowModalDescription(event) {
+            event.preventDefault();
+
+             let seoWarehouseReceiptId = $('#seoWarehouseReceiptId' + 1).text();
+                $.post("@Url.Action("GetSwrDescription", "WarehouseReceipt")",
+                {
+                    seoWarehouseReceiptId
+                })
+                .done(function (res) {
+                    $("#modalDescription").html(res);
+                    $("#descriptionModal").modal('show');
+                })
+                .fail(function (xhr, status, error) {
+                    location.reload();
+                });
+        }
+
+        function SaveSwrDesciption(e) {
+            e.preventDefault();
+
+            let $form = $("#SetSwrDescriptionId");
+            let formData = $form.serialize();
+
+            $.post("@Url.Action("SaveSwrDesciption", "WarehouseReceipt")", formData)
+                .done(function (res) {
+                    $("#descriptionModal").modal('hide');
+                    showAlert("با موفقیت ذخیره شد", 0);
+                })
+                .fail(function () {
+                    location.reload();
+                });
+        }
+
+
+        function ShowModalSwrProductFullInfo(swrProductId)
+        {
+            $.post("@Url.Action("GetswrProductFullInfo", "WarehouseReceipt")",
+                {
+                    swrProductId
+                })
+                .done(function (res) {
+                    $("#modalSwrFullInfo").html(res);
+                    $("#swrProductFullInfoModal").modal('show');
+                })
+                .fail(function (xhr, status, error) {
+                    location.reload();
+                });
+        }
+
+        function showWarehouseReceiptOutbounds(warehouseReceiptId) {
+            console.log("warehouseReceiptId")
+            $.post("@Url.Action("GetReceiptOutboundsByWarehouseReceiptId", "WarehouseReceipt")", { warehouseReceiptId: warehouseReceiptId })
+                .done(function (res) {
+                    $("#generalModalBodyId").html(res);
+                    $("#generalModal2").modal('show');
+                });
+        }
+
+
+
+
+         var productSwitchConfig = {
+            $switch: null,
+            $productSelect: null,
+            cache: {
+                seoProducts: @Html.Raw(Json.Serialize(Model.SeoProducts)),
+                allProducts: null,
+                loading: false
+            },
+            urls: {
+                seoProducts: '@Url.Action("GetSeoProducts", "Seo")',
+                allProducts: '@Url.Action("GetAllProducts", "Seo")'
+            },
+            selectors: {
+                switch: '#ProductSwitch',
+                productSelect: '#AddWarehouseReceiptProduct_SeoProductId',
+                modal: '#generalmodal'
+            }
+        };
+
+        // ==================== INITIALIZATION ====================
+        $(document).ready(function () {
+             initializeProductSwitch();
+        });
+
+        // ==================== INITIALIZATION FUNCTION ====================
+        async function initializeProductSwitch() {
+            // 1. پیدا کردن المنت‌ها
+            productSwitchConfig.$switch = $(productSwitchConfig.selectors.switch);
+            productSwitchConfig.$productSelect = $(productSwitchConfig.selectors.productSelect);
+
+            // 2. بررسی وجود المنت‌ها
+            if (!productSwitchConfig.$switch.length) {
+                console.error('سوئیچ با ID ProductSwitch پیدا نشد!');
+                return;
+            }
+
+            if (!productSwitchConfig.$productSelect.length) {
+                console.error('سلکت با ID AddWarehouseReceiptProduct_SeoProductId پیدا نشد!');
+                return;
+            }
+
+            // 3. تنظیم event listener برای سوئیچ
+            productSwitchConfig.$switch.on('change', async function() {
+                var isSeoProductsOnly = $(this).is(':checked');
+                //console.log('سوئیچ تغییر کرد به:', isSeoProductsOnly);
+                await handleProductSwitchChange(isSeoProductsOnly);
+            });
+
+            // 4. مقداردهی اولیه
+            var initialState = productSwitchConfig.$switch.is(':checked');
+            //console.log('وضعیت اولیه سوئیچ:', initialState);
+
+            // 5. بارگذاری اولیه بر اساس وضعیت فعلی
+            if (initialState && productSwitchConfig.cache.seoProducts) {
+                updateProductSelect(productSwitchConfig.cache.seoProducts);
+            }
+
+            // 6. تست دستی - حذف این بعد از تست
+            // console.log('سوئیچ مقداردهی شد:', productSwitchConfig.$switch.val());
+            // console.log('محصولات کش شده:', productSwitchConfig.cache.seoProducts);
+        }
+
+         // ==================== HANDLE SWITCH CHANGE ====================
+          async function handleProductSwitchChange(isSeoProductsOnly) {
+            showLoading(true);
+
+            try {
+                if (isSeoProductsOnly) {
+                    await loadSeoProducts();
+                } else {
+                    await loadAllProducts();
+                }
+            } catch (error) {
+                console.error('خطا در تغییر لیست کالاها:', error);
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // ==================== LOAD SEO PRODUCTS ====================
+        async function loadSeoProducts() {
+            // اگر قبلا کش شده
+            if (productSwitchConfig.cache.seoProducts &&
+                productSwitchConfig.cache.seoProducts.length > 0) {
+                //console.log('استفاده از کالاهای کش شده بارنامه');
+                updateProductSelect(productSwitchConfig.cache.seoProducts);
+                showLoading(false);
+                return;
+            }
+
+            // اگر کش نشده، از سرور بگیر
+            await fetchProducts(true);
+        }
+
+        // ==================== LOAD ALL PRODUCTS ====================
+        async function loadAllProducts() {
+            // اگر قبلا کش شده
+            if (productSwitchConfig.cache.allProducts &&
+                productSwitchConfig.cache.allProducts.length > 0) {
+                //console.log('استفاده از همه کالاهای کش شده');
+                updateProductSelect(productSwitchConfig.cache.allProducts);
+                showLoading(false);
+                return;
+            }
+
+            // اگر کش نشده، از سرور بگیر
+            await fetchProducts(false);
+        }
+
+        // ==================== FETCH PRODUCTS FROM SERVER ====================
+        async function fetchProducts(isSeoProductsOnly) {
+            // جلوگیری از درخواست‌های تکراری
+            if (productSwitchConfig.cache.loading) {
+                //console.log('درخواست در حال انجام است...');
+                return;
+            }
+
+            productSwitchConfig.cache.loading = true;
+
+            var url = isSeoProductsOnly
+                ? productSwitchConfig.urls.seoProducts
+                : productSwitchConfig.urls.allProducts;
+
+            var params = isSeoProductsOnly
+                ? { seoId: '@Model.SeoMinInfo.Id' }
+                : {};
+
+            //console.log('دریافت کالاها از سرور:', url, params);
+
+
+            try {
+                const response = await $.ajax({
+                    url: url,
+                    type: 'GET',
+                    data: params,
+                    dataType: 'json'
+                });
+
+                //console.log('داده‌های دریافتی:', response);
+
+                // ذخیره در کش
+                if (isSeoProductsOnly) {
+                    productSwitchConfig.cache.seoProducts = response;
+                } else {
+                    productSwitchConfig.cache.allProducts = response;
+                }
+
+                // بروزرسانی select
+                updateProductSelect(response);
+
+                // ریست وضعیت
+                productSwitchConfig.cache.loading = false;
+                showLoading(false);
+
+                // نمایش پیام موفقیت
+                showSuccessMessage('لیست کالاها با موفقیت بارگذاری شد');
+
+            } catch ( error) {
+                    console.error('خطا در دریافت کالاها:', error);
+
+                // ریست وضعیت
+                productSwitchConfig.cache.loading = false;
+                showLoading(false);
+
+                // نمایش پیام خطا
+                showErrorMessage('خطا در دریافت لیست کالاها');
+
+                // fallback به لیست پیش‌فرض
+                if (!isSeoProductsOnly) {
+                    // برگرداندن چک‌باکس به حالت روشن (کالاهای بارنامه)
+                    $('#ProductSwitch').prop('checked', true);
+
+                    // نمایش لیست قبلی (کالاهای بارنامه)
+                    if (productSwitchConfig.cache.seoProducts) {
+                        updateProductSelect(productSwitchConfig.cache.seoProducts);
+                    }
+                }
+
+                throw error;
+            } finally {
+                productSwitchConfig.cache.loading = false;
+            }
+
+        }
+
+        // ==================== UPDATE PRODUCT SELECT ====================
+        function updateProductSelect(products) {
+            if (!products || !Array.isArray(products)) {
+                let message = 'داده‌های محصول نامعتبر است:';
+                console.error(message, products);
+
+                Toast.fire({
+                    icon: 'error',
+                    title: message
+                });
+                return;
+            }
+
+            // حفظ مقدار انتخاب شده فعلی
+            var currentValue = productSwitchConfig.$productSelect.val();
+            //console.log('مقدار فعلی سلکت:', currentValue);
+
+            // پاک کردن options فعلی
+            productSwitchConfig.$productSelect.empty();
+
+            // اضافه کردن محصولات
+            var item = '';
+            $.each(products, function(index, product) {
+                if (product == null) {
+                        productSwitchConfig.$productSelect.empty();
+                }
+                else {
+                        item += "<option value='" + product.id + "'>" + product.title + "</option>";
+                }
+            });
+            productSwitchConfig.$productSelect.html(item);
+
+            // ریفرش select2 با تنظیمات درست
+            refreshSelect2();
+
+            // تعداد آیتم‌های اضافه شده
+            var optionCount = productSwitchConfig.$productSelect.find('option').length - 1;
+            //console.log('تعداد کالاهای اضافه شده:', optionCount);
+
+            // اعتبارسنجی
+            if (productSwitchConfig.$productSelect.valid) {
+                productSwitchConfig.$productSelect.valid();
+            }
+        }
+
+        // ==================== REFRESH SELECT2 ====================
+        function refreshSelect2() {
+            // از بین بردن select2 فعلی
+            if (productSwitchConfig.$productSelect.hasClass('select2-hidden-accessible')) {
+                productSwitchConfig.$productSelect.select2('destroy');
+            }
+
+            // ایجاد مجدد select2 با والد درست
+            productSwitchConfig.$productSelect.select2({
+                dropdownParent: $(productSwitchConfig.selectors.modal),
+                placeholder: "کالا را انتخاب کنید",
+                allowClear: false,
+                width: '100%',
+                dir: 'rtl'
+            }).trigger('change');
+        }
+
+        // ==================== SHOW/HIDE LOADING ====================
+        function showLoading(show) {
+            if (show) {
+                // اضافه کردن کلاس loading
+                productSwitchConfig.$productSelect.addClass('loading');
+                productSwitchConfig.$productSelect.prop('disabled', true);
+
+                // اگر spinner وجود ندارد، اضافه کن
+                if (!productSwitchConfig.$productSelect.parent().find('.select2-loading').length) {
+                    productSwitchConfig.$productSelect.parent().append(
+                        '<div class="select2-loading"><i class="fas fa-spinner fa-spin me-2"></i>در حال بارگذاری...</div>'
+                    );
+                }
+            } else {
+                // حذف کلاس loading
+                productSwitchConfig.$productSelect.removeClass('loading');
+                productSwitchConfig.$productSelect.prop('disabled', false);
+
+                // حذف spinner
+                productSwitchConfig.$productSelect.parent().find('.select2-loading').remove();
+            }
+        }
+
+        // ==================== MESSAGE FUNCTIONS ====================
+        function showSuccessMessage(message) {
+            //console.log('Success:', message);
+
+        }
+
+        function showErrorMessage(message) {
+            console.error('Error:', message);
+
+            Toast.fire({
+                icon: 'error',
+                title: message
+            });
+        }
+
+
+
+        // ==================== STYLES ====================
+        function addCustomStyles() {
+            if (!$('#product-switch-styles').length) {
+                $('head').append(`
+                    <style id="product-switch-styles">
+                        .select2-loading {
+                            position: absolute;
+                            left: 10px;
+                            top: 50%;
+                            transform: translateY(-50%);
+                            background: rgba(255,255,255,0.9);
+                            padding: 5px 10px;
+                            border-radius: 4px;
+                            font-size: 12px;
+                            z-index: 9999;
+                            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+                        }
+                        select.loading {
+                            opacity: 0.6;
+                            background-color: #f8f9fa;
+                        }
+                    </style>
+                `);
+            }
+        }
+
+        // اضافه کردن استایل‌ها
+        addCustomStyles();
+
+
+
+    </script>
+}

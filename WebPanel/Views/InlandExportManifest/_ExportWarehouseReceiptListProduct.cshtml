@@ -1,0 +1,107 @@
+﻿@model List<SeoWarehouseReceiptProductDto>
+@{
+	int p = 1;
+}
+<div class="table-responsive">
+	<table class="table table-sm table-bordered table-hover table-striped" id="data-table">
+		<thead class="bg-primary">
+			<tr>
+				<th>ردیف</th>
+				<th>کالا</th>
+				<th>تاریخ اولین تخلیه</th>
+				<th>تعداد   </th>
+				<th>وزن ناخالص</th>
+				<th>وزن خالص</th>
+				<th>حجم</th>
+				<th>کد کالا</th>
+				<th>علامت کالا  </th>
+				<th>انبار</th>
+				<th>بخش انبار</th>
+				<th>تعرفه</th>
+				<th>عملیات</th>
+			</tr>
+		</thead>
+		<tbody>
+			@if (Model != null)
+			{
+				foreach (var item in Model)
+				{
+					<tr>
+						<td class="align-middle">@(p)</td>
+						<td class="align-middle" style="display:none" id="seoRecieptProductId@(p)">@item.Id </td>
+						<td class="align-middle" style="display:none" id="seoWarehouseReceiptId@(p)">@item.SeoWarehouseReceiptId </td>
+						<td class="align-middle" style="display:none" id="seoWarehouseAndSegmentDtoJson@(p)">@item.SeoWarehouseAndSegmentDtoJson</td>
+
+						<td style="display:none">
+							<input type="hidden" id="isDangerousId@(p)" value="@(item.IsDangerous ? 1 : 0)" />
+							<input type="hidden" id="isBigVolumeId@(p)" value="@(item.IsBigVolume ? 1 : 0)" />
+							<input type="hidden" id="isUnusualId@(p)" value="@(item.IsUnusual ? 1 : 0)" />
+							<input type="hidden" id="isRawMaterialsId@(p)" value="@(item.IsRawMaterials ? 1 : 0)" />
+							<input type="hidden" id="isSelfTransported@(p)" value="@(item.IsSelfTransported ? 1 : 0)" />
+
+							<input type="hidden" id="generalCargoProductTariffId@(p)" value="@item.GeneralCargoProductTariffId" />
+							<input type="hidden" id="nonContainerWarehouseProductTariffId@(p)" value="@item.NonContainerWarehouseProductTariffId" />
+
+							<input type="hidden" id="seoProductId@(p)" value="@item.SeoProductId" />
+							<input type="hidden" id="productPackingId@(p)" value="@item.ProductPackingId" />
+							@* <input type="hidden" id="productHSCodeId@(p)" value="@item.ProductHSCodeId" /> *@
+							<input type="hidden" id="hsCode@(p)" value="@item.HSCode" />
+							<input type="hidden" id="productId@(p)" value="@item.ProductId" />
+							
+							<input type="hidden" id="isFreeContainerId@(p)" value="@item.IsFreeContainer?.ToString().ToLower()" />
+							<input type="hidden" id="containerFreightProductTariffId@(p)" value="@item.ContainerFreightProductTariffId" />
+							<input type="hidden" id="containerWarehouseProductTariffId@(p)" value="@item.ContainerWarehouseProductTariffId" />
+							<input type="hidden" id="containerStripProductTariffId@(p)" value="@item.ContainerStripProductTariffId" />
+						</td>
+						
+
+
+						<td class="align-middle"> @item.ProductFullTitle </td>
+
+
+						<td class="align-middle" id="firstUnloadDateFa@(p)">@item.FirstUnloadDateFa  </td>
+
+						<td class="align-middle" style="display:none" id="count@(p)">@item.Count</td>
+						<td class="align-middle">@item.Count.ToPrice()</td>
+
+						<td class="align-middle" style="display:none" id="weightGross@(p)">@item.WeightGross  </td>
+						<td class="align-middle">@item.WeightGross.ToPrice()  </td>
+
+						<td class="align-middle" style="display:none" id="weightNet@(p)">@item.WeightNet  </td>
+						<td class="align-middle">@item.WeightNet.ToPrice()  </td>
+
+						<td class="align-middle" style="display:none" id="volume@(p)">@item.Volume  </td>
+						<td class="align-middle">@item.Volume.ToPrice()  </td>
+
+						<td class="align-middle">@item.ProductHSCodeTitle  </td>
+						<td class="align-middle">@item.Marks  </td>
+
+						<td class="align-middle">@item.Warehouse?.Name  </td>
+
+						<td class="align-middle">@item.WarehouseSegment?.Name  </td>
+
+						<td class="align-middle" style="white-space:nowrap">
+							<a class="btn btn-sm btn-info px-2" title="باربری" onclick="ShowGeneralCargoProductTitle('@item.GeneralCargoProductTariffId')"><i class="fa-solid fa-truck"></i></a>
+							<a class="btn btn-sm btn-info px-2" title="انبارداری" onclick="ShowNonContainerWarehouseProductTitle('@item.NonContainerWarehouseProductTariffId')"><i class="fa-solid fa-warehouse"></i></a>
+						</td>
+
+						<td class="align-middle px-2 text-center">
+							<a class="btn btn-warning px-2 btn-sm btn-icon curve" onclick="editProduct('@p');"><i class="icon-pencil fs-6 align-middle"></i></a>
+
+							<a onclick="DeleteProduct(event, '@item.Id');" class="btn btn-danger px-2 btn-sm btn-icon curve btn-questions">
+								<i class="icon-trash fs-6 align-middle fa-flip-horizontal"></i>
+							</a>
+						</td>
+						@{
+							p++;
+						}
+					</tr>
+
+				}
+			}
+
+
+		</tbody>
+	</table>
+
+</div>

@@ -1,0 +1,262 @@
+@model TaliCompactPageDto
+@{
+    ViewData["Title"] = "خلاصه تالی ها";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+    int i = 1;
+}
+
+@* <div class="card p-2 mb-4"> *@
+@*     <div class="row"> *@
+@*         <div class="col-md-1 align-middle align-content-center px-4"> *@
+@*             <i class="fa-solid fa-circle-info fs-4 align-middle"></i> *@
+@*         </div> *@
+@*         <div class="col-md-11 px-5"> *@
+@*             <div class="d-flex justify-content-between align-items-center"> *@
+@*                 <div class="glass-bg px-2 py-1"> *@
+@*                     <p class="fs-6 m-0"> @Model.VogageInfo?.ShipShipName </p>    *@
+@*                 </div> *@
+@*                 <div> *@
+@*                     <p class="fs-6 m-0"> @Model.VogageInfo?.CompanyShippingCompanyName </p> *@
+@*                 </div> *@
+@*                 <div> *@
+@*                     <p class="fs-6 m-0">@Model.VogageInfo?.TransportTypeTitle</p> *@
+@*                 </div> *@
+@*                 <div> *@
+@*                     <p class="fs-6 m-0">شماره سفر: @Model.VogageInfo?.VoyageNumber</p> *@
+@*                 </div> *@
+@*                 <div> *@
+@*                     <p class="fs-6 m-0">شماره دریایی: @Model.VogageInfo?.PmoNumber</p> *@
+@*                 </div> *@
+@*             </div> *@
+@*         </div> *@
+@*     </div> *@
+@* </div> *@
+
+<div class="col-lg-12">
+    <div class="card">
+        <div class="card-header pb-0">
+            <div class="row gy-4">
+                <div class="col-md-4 d-flex align-items-center">
+                    <h3 class="title">
+                        @if ((int)ViewBag.returnPage == 100 && Model.Filter.SeoId != null)
+                        {
+                            <a asp-controller="Seo" asp-action="SeoWarehouseReceipt" asp-route-seoId="@Model.Filter.SeoId">
+                                <i class="fa-solid fa-right-to-bracket me-2"></i>
+                            </a>
+                        }
+                        else
+                        {
+                            <a asp-controller="Voyage" asp-action="VoyageSeo" asp-route-VoyageId="@Model.VogageInfo?.Id"><i class="fa-solid fa-right-to-bracket me-2"></i></a>
+                        }
+
+                        <i class="icon-frane"></i> خلاصه تالی های @(Model.Filter.SeoId == null ? "سفر" : "بارنامه") - @Model.VogageInfo.ShipShipName
+                    </h3>
+                </div>
+                <div class="d-block d-lg-flex col-md-8 col-12 justify-content-end">
+                    <div class="buttons-box">
+                        <i class="icon-size-fullscreen"></i>
+                        <div class="paper-ripple">
+                            <div class="paper-ripple__background"></div>
+                            <div class="paper-ripple__waves"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-body pt-0">
+
+            <form id="formFilter" asp-action="CompactTali" asp-route-p="" asp-route-voyageId="@Model.VogageInfo.Id"
+                  asp-route-seoId="@Model.Filter?.SeoId" asp-route-returnPage="@ViewBag?.returnPage" method="post">
+                <input name="p" id="pageNumber" hidden />
+                <input asp-for="VogageInfo.Id" name="filter.VoyageId" hidden />
+                <input name="filter.SeoId" value="@Model.Filter?.SeoId" hidden />
+                <div class="form-body ">
+
+                    <div class="row gy-4">
+
+                        <div class="col-md-3 col-sm-12">
+                            <div class="form-group">
+                                <label>  جستجو:</label>
+                                <div class="input-group">
+                                    <input asp-for="Filter.Search" type="text" class="rounded form-control" placeholder="نام کالا">
+                                    <span asp-validation-for="Filter.Search" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group col-md-2 ">
+                            <button style="border-radius:5px; margin-top:30px" class="alert-icon px-3 btn btn-success "
+                                    type="submit">
+                                فیلتر
+                            </button>
+                        </div>
+
+                    </div>
+
+                </div>
+            </form>
+
+            <div class="table-responsive mt-3">
+                <table class="table table-sm table-bordered table-hover table-striped" id="data-table">
+                    <thead class="bg-primary">
+                        <tr>
+                            <th class="px-1 text-center">#</th>
+                            <th class="px-1 text-center">بارنامه</th>
+                            <th class="px-1 text-center">کالا</th>
+                            <th class="px-1 text-center">تعداد کل</th>
+                            <th class="px-1 text-center">شمارش اسکله</th>
+                            <th class="px-1 text-center">باقیمانده اسکله</th>
+                            <th class="px-1 text-center">شمارش محوطه</th>
+                            <th class="px-1 text-center">باقیمانده محوطه</th>
+                            <th class="px-1 text-center">عملیات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                        @foreach (var item in Model.List)
+                        {
+                            <tr>
+                                <td class="align-middle px-2 text-center">@(i++)</td>
+                                <td class="align-middle px-2 text-center">
+                                    @if (item.Seo == null)
+                                    {
+                                        <text>نامشخص</text>
+                                    }
+                                    else
+                                    {
+                                        <a onclick="ShowModalSeoInfo('@item.Seo?.Id')" class="btn btn-outline-primary px-1">
+                                            @(item.Seo.BillOfLadingNumber)
+                                        </a>
+                                    }
+                                </td>
+
+                                <td class="align-middle px-2 text-center">
+                                    @if (item.Seo == null)
+                                    {
+                                        <text>@item.ProductTitle </text>
+                                    }
+                                    else
+                                    {
+                                        <a onclick="ShowModalSeoProductInfo('@item.SeoProductId')" class="btn btn-outline-primary">
+                                            @item.ProductTitle
+                                        </a>
+                                    }
+                                </td>
+
+                                <td class="align-middle px-2 text-center">@item.Count.ToPrice() @item.Seo?.ProductPacking?.Name </td>
+                                <td class="align-middle px-2 text-center"> <a onclick="ShowModalTaliList('@item.SeoProductId', true)" class="btn btn-outline-primary px-2">@item.TaliCount1.ToPrice()  </a></td>
+                                <td class="align-middle px-2 text-center">@item.RemainingTaliCount1.ToPrice()  </td>
+
+                                <td class="align-middle px-2 text-center"> <a onclick="ShowModalTaliList('@item.SeoProductId', false)" class="btn btn-outline-primary px-2">@item.TaliCount2.ToPrice()  </a></td>
+                                <td class="align-middle px-2 text-center">@item.RemainingTaliCount2.ToPrice()  </td>
+
+                                <td class="align-middle px-2 text-center">
+                                    @if (item.SeoProductId != null)
+                                    {
+                                        <a class="btn btn-sm btn-outline-primary me-1" onclick="ShowModalTaliGearList('@item.SeoProductId', true)">
+                                            <i class="fa-solid fa-wrench me-1"></i> تجهیزات اسکله
+                                        </a>
+                                        <a class="btn btn-sm btn-outline-info-2x" onclick="ShowModalTaliGearList('@item.SeoProductId', false)">
+                                            <i class="fa-solid fa-screwdriver-wrench me-1"></i> تجهیزات محوطه
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </td>
+
+                            </tr>
+                        }
+
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<div id="TaliListBody"></div>
+<div id="SeoInfoModalId"></div>
+<div id="SeoProductInfoModalId"></div>
+<div id="WeightTaliListModalId"></div>
+<div id="TaliGearListModalContainer"></div>
+
+@section script {
+
+    <script>
+        $(document).ready(function () {
+            // $('.select2').select2();
+        });
+
+        function ShowModalTaliList(seoProductId, step) {
+            let voyageId = '@Model.VogageInfo.Id';
+            $.post("@Url.Action("GetListTaliOneProduct", "Voyage")", { voyageId, seoProductId: seoProductId, step: step })
+                .done(function (res) {
+                    $("#TaliListBody").html(res);
+                    $("#taliListModal").modal('show');
+                });
+        }
+
+        function ShowModalWeightTaliList(taliId) {
+            $.post("@Url.Action("GetWeightTaliList", "Voyage")", { taliId: taliId })
+                .done(function (res) {
+                    $("#WeightTaliListModalId").html(res);
+                    $("#WeightTaliListModal").modal('show');
+                });
+        }
+
+        function ShowModalSeoInfo(seoId) {
+            if (seoId == null) return;
+
+            $.post("@Url.Action("GetSeoInfo", "Voyage")", { seoId: seoId })
+                .done(function (res) {
+                    $("#SeoInfoModalId").html(res);
+                    $("#SeoInfoModal").modal('show');
+                }).fail(function (xhr) {
+                    var err = JSON.parse(xhr.responseText)
+                    console.error("Error:", JSON.stringify(err));
+                });
+        }
+
+        function ShowModalSeoProductInfo(seoProductId) {
+            if (seoProductId == null) return;
+
+            $.post("@Url.Action("GetSeoProductInfo", "Voyage")", { seoProductId: seoProductId })
+                .done(function (res) {
+                    $("#SeoProductInfoModalId").html(res);
+                    $("#SeoProductInfoModal").modal('show');
+                }).fail(function (xhr) {
+                    var err = JSON.parse(xhr.responseText)
+                    console.error("Error:", JSON.stringify(err));
+                });
+        }
+
+        function ShowModalTaliGearList(seoProductId, step) {
+            if (seoProductId == null) return;
+            var voyageId = '@Model.VogageInfo.Id';
+            $.post("@Url.Action("GetTaliGearList", "Voyage")", { voyageId: voyageId, seoProductId: seoProductId, step: step })
+                .done(function (res) {
+                    $("#TaliGearListModalContainer").html(res);
+                    $("#taliGearListModal").modal('show');
+                }).fail(function (xhr) {
+                    try {
+                        var err = JSON.parse(xhr.responseText);
+                        console.error("Error:", JSON.stringify(err));
+                    } catch (e) {
+                        console.error("Error loading gear list modal", xhr.responseText);
+                    }
+                });
+        }
+
+        $(".page-link").click(function (event) {
+            event.preventDefault(); // غیرفعال کردن عملکرد پیشفرض href
+
+            var hrefValue = $(this).attr("href");
+            $("#pageNumber").val(hrefValue.split("p=")[1]);
+            $("#formFilter").submit();
+        });
+    </script>
+}
